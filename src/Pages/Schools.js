@@ -1,11 +1,11 @@
 import React from 'react';
 
-function Home(props) {
+function Schools(props) {
     return (
         <div>
-            Home
+            Schools
         </div>
     );
 }
 
-export default Home;
+export default Schools;
