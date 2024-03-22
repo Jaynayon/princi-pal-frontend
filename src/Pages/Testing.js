@@ -1,4 +1,4 @@
-import '../App.css';
+import '../App.css'
 import React from 'react';
 import Paper from '@mui/material/Paper';
 import RecordsTable from '../Components/Table/RecordsTable';

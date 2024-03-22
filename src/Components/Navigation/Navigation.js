@@ -12,12 +12,12 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Link from '@mui/material/Link';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems, secondaryListItems } from './listItems';
+import SearchIcon from '@mui/icons-material/Search';
+import { mainListItems, secondaryListItems, profileTab } from './listItems';
+
 
 const drawerWidth = 240;
 
@@ -78,10 +78,18 @@ export default function Navigation({ children }) {
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{ display: 'flex' }}>
                 <CssBaseline />
-                <AppBar position="absolute" open={open}>
+                <AppBar position="absolute" open={open}
+                    sx={{
+                        boxShadow: 'none',
+                        backgroundColor: 'transparent'
+                    }}>
                     <Toolbar
                         sx={{
                             pr: '24px', // keep right padding when drawer closed
+                            "& .MuiToolbar-root": {
+                                backgroundColor: 'green',
+                                //display: 'none'
+                            }
                         }}
                     >
                         <IconButton
@@ -101,34 +109,53 @@ export default function Navigation({ children }) {
                             variant="h6"
                             color="inherit"
                             noWrap
-                            sx={{ flexGrow: 1, textAlign: 'left' }}//s
-                        >
+                            sx={{
+                                flexGrow: 1,
+                                textAlign: 'left',
+                                color: '#252733',
+                                fontFamily: 'Mulish-Bold'
+                            }}>
                             Dashboard
                         </Typography>
-                        <IconButton color="inherit">
+                        <IconButton color="inherit" sx={{ color: '#C5C7CD' }}>
+                            <SearchIcon />
+                        </IconButton>
+                        <IconButton color="inherit" sx={{ color: '#C5C7CD' }}>
                             <Badge badgeContent={4} color="secondary">
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>
                     </Toolbar>
                 </AppBar>
-                <Drawer variant="permanent" open={open}>
+                <Drawer variant="permanent"
+                    open={open}
+                    sx={{
+                        "& .MuiDrawer-paper": {
+                            backgroundColor: '#4A99D3',
+                            boxShadow: 'none',
+                            borderRight: 'none'
+                        }
+                    }}>
                     <Toolbar
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'flex-end',
+                            justifyContent: 'space-between',
                             px: [1],
+                            ...(!open && { visibility: 'hidden' }),
                         }}
                     >
-                        Profile tab
-                        <IconButton onClick={toggleDrawer}>
-                            <ChevronLeftIcon />
+                        {profileTab}
+                        <IconButton
+                            onClick={toggleDrawer}
+                            sx={{ justifyContent: 'flex-end' }}
+                        >
+                            <ChevronLeftIcon sx={{ color: 'white' }} />
                         </IconButton>
                     </Toolbar>
                     <List component="nav">
                         {mainListItems}
-                        <Divider sx={{ my: 1 }} />
+                        <Divider sx={{ my: 1, bgcolor: 'white', marginRight: '20px', marginLeft: '20px' }} />
                         {secondaryListItems}
                     </List>
                 </Drawer>

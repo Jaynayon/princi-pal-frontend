@@ -2,7 +2,7 @@ import React from 'react';
 
 function Dashboard(props) {
     return (
-        <div>
+        <div style={{ fontFamily: 'Mulish-Regular' }}>
             Dashboard
         </div>
     );
