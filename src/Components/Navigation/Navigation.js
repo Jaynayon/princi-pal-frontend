@@ -19,7 +19,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import { mainListItems, secondaryListItems, profileTab } from './listItems';
 
 
-const drawerWidth = 240;
+const User = {
+    name: 'Jay Nayon',
+    email: 'jay.nayonjr@cit.edu'
+}
+
+const drawerWidth = 220;
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -56,9 +61,9 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
                     easing: theme.transitions.easing.sharp,
                     duration: theme.transitions.duration.leavingScreen,
                 }),
-                width: theme.spacing(7),
+                width: theme.spacing(7.7),
                 [theme.breakpoints.up('sm')]: {
-                    width: theme.spacing(9),
+                    width: theme.spacing(7.7),
                 },
             }),
         },
@@ -81,7 +86,8 @@ export default function Navigation({ children }) {
                 <AppBar position="absolute" open={open}
                     sx={{
                         boxShadow: 'none',
-                        backgroundColor: 'transparent'
+                        backgroundColor: 'transparent',
+                        paddingTop: '10px'
                     }}>
                     <Toolbar
                         sx={{
@@ -142,10 +148,11 @@ export default function Navigation({ children }) {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             px: [1],
+                            paddingTop: '10px',
                             ...(!open && { visibility: 'hidden' }),
                         }}
                     >
-                        {profileTab}
+                        {profileTab(User)}
                         <IconButton
                             onClick={toggleDrawer}
                             sx={{ justifyContent: 'flex-end' }}
@@ -155,7 +162,7 @@ export default function Navigation({ children }) {
                     </Toolbar>
                     <List component="nav">
                         {mainListItems}
-                        <Divider sx={{ my: 1, bgcolor: 'white', marginRight: '20px', marginLeft: '20px' }} />
+                        <Divider sx={{ my: 1, bgcolor: 'white', marginRight: '15px', marginLeft: '15px' }} />
                         {secondaryListItems}
                     </List>
                 </Drawer>

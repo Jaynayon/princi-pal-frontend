@@ -16,7 +16,6 @@ const styles = {
         color: 'white',
         fontSize: '19px',
         width: '50%',
-        //backgroundColor: 'white'
     },
     typography: {
         fontFamily: 'Mulish-Regular',
@@ -24,6 +23,19 @@ const styles = {
     },
     primary: {
         fontFamily: 'Mulish-Bold'
+    },
+    button: {
+        "&.Mui-selected": {
+            backgroundColor: 'rgba(255, 255, 255, 0.2)', // Change to desired highlight color
+            borderRadius: '10px',
+        },
+        "& .MuiTouchRipple-root": {
+            color: 'white'
+        },
+        marginRight: '5px',
+        marginLeft: '5px',
+        paddingTop: '5px',
+        marginTop: '5px',
     }
 }
 
@@ -31,16 +43,9 @@ function iterateItems() {
     const list = ['dashboard', 'schools', 'people', 'settings', 'testing'];
 
     return list.map((item, index) => (
-        <ListItemButton key={index} component={Link} to={`/${item}`}
-            sx={{
-                /*"&.Mui-selected": {
-                    backgroundColor: 'green', // Change to desired highlight color
-                },*/
-                "& .MuiTouchRipple-root": {
-                    color: 'white'
-                },
-            }}>
-            <ListItemIcon>
+        <ListItemButton key={index} component={Link} to={`/${item}`} selected={true}
+            sx={styles.button}>
+            <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
                 {index === 0 ? <DashboardIcon sx={styles.icon} /> :
                     index === 1 ? <SchoolIcon sx={styles.icon} /> :
                         index === 2 ? <PeopleIcon sx={styles.icon} /> :
@@ -48,10 +53,11 @@ function iterateItems() {
                                 <BarChartIcon sx={styles.icon} />}
             </ListItemIcon>
             <ListItemText
-                //sx={{ backgroundColor: 'green' }}
-                primary={item.charAt(0).toUpperCase() + item.slice(1)} // Capitalize first letter
+                primary={item.charAt(0).toUpperCase() + item.slice(1)}
                 primaryTypographyProps={styles.typography}
             />
+
+
         </ListItemButton>
     ));
 }
@@ -63,8 +69,8 @@ export const mainListItems = (
 
 export const secondaryListItems = (
     <React.Fragment>
-        <ListItemButton>
-            <ListItemIcon>
+        <ListItemButton sx={styles.button} selected={true}>
+            <ListItemIcon sx={{ minWidth: '40px' }}>
                 <LogoutIcon sx={styles.icon} />
             </ListItemIcon>
             <ListItemText primary="Logout"
@@ -73,15 +79,32 @@ export const secondaryListItems = (
     </React.Fragment>
 );
 
-export const profileTab = (
-    <React.Fragment>
-        <ListItemButton sx={{ marginLeft: '-8px' }}>
-            <ListItemIcon>
-                <AccountCircleIcon sx={{ fontSize: 40 }} />
-            </ListItemIcon>
-            <ListItemText primary="Jay Nayon" secondary='jay.nayonjr@cit'
-                primaryTypographyProps={{ fontFamily: 'Mulish-Bold', color: 'white' }}
-                secondaryTypographyProps={{ ...styles.typography, fontSize: 12 }} />
-        </ListItemButton>
-    </React.Fragment>
-)
+export const profileTab = ({ name, email }) => {
+    const adjustSecondaryTypography = () => {
+        // Define a threshold length for email after which font size will be reduced
+        const thresholdLength = 15;
+
+        // Check if email length exceeds the threshold
+        if (email.length > thresholdLength) {
+            return { ...styles.typography, fontSize: 10 }; // Adjust font size if email is too long
+        }
+
+        return { ...styles.typography, fontSize: 12 }; // Use default font size
+    };
+
+    return (
+        <React.Fragment>
+            <ListItemButton sx={{ marginLeft: '-8px' }}>
+                <ListItemIcon>
+                    <AccountCircleIcon sx={{ fontSize: 40 }} />
+                </ListItemIcon>
+                <ListItemText
+                    primary={name}
+                    secondary={email}
+                    primaryTypographyProps={{ fontFamily: 'Mulish-Bold', color: 'white' }}
+                    secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
+                />
+            </ListItemButton>
+        </React.Fragment>
+    );
+};
