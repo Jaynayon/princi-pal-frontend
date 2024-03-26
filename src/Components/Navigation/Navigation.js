@@ -16,7 +16,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SearchIcon from '@mui/icons-material/Search';
-import { mainListItems, secondaryListItems, profileTab } from './listItems';
+import { DisplayItems, ProfileTab } from './ListItems';
 
 
 const User = {
@@ -75,10 +75,10 @@ const defaultTheme = createTheme();
 
 export default function Navigation({ children }) {
     const [open, setOpen] = React.useState(true);
+    //const [select, selectTab] = React.useState(null);
     const toggleDrawer = () => {
         setOpen(!open);
     };
-
     return (
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{ display: 'flex' }}>
@@ -94,7 +94,6 @@ export default function Navigation({ children }) {
                             pr: '24px', // keep right padding when drawer closed
                             "& .MuiToolbar-root": {
                                 backgroundColor: 'green',
-                                //display: 'none'
                             }
                         }}
                     >
@@ -144,15 +143,15 @@ export default function Navigation({ children }) {
                     }}>
                     <Toolbar
                         sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            px: [1],
+                            //display: 'flex',
+                            //alignItems: 'center',
+                            //justifyContent: 'space-between',
+                            px: [0.5],
                             paddingTop: '10px',
                             ...(!open && { visibility: 'hidden' }),
                         }}
                     >
-                        {profileTab(User)}
+                        <ProfileTab user={User} />
                         <IconButton
                             onClick={toggleDrawer}
                             sx={{ justifyContent: 'flex-end' }}
@@ -161,9 +160,7 @@ export default function Navigation({ children }) {
                         </IconButton>
                     </Toolbar>
                     <List component="nav">
-                        {mainListItems}
-                        <Divider sx={{ my: 1, bgcolor: 'white', marginRight: '15px', marginLeft: '15px' }} />
-                        {secondaryListItems}
+                        <DisplayItems />
                     </List>
                 </Drawer>
                 <Box

@@ -19,7 +19,7 @@ export function DisplayItems({ secondary }) {
 
     useEffect(() => {
         console.log(selected);
-    }, [selected]);
+    }, [selected]); // useEffect will trigger whenever selected state changes
 
     function displayPrimary() {
         return list.map((item, index) => (
@@ -29,7 +29,7 @@ export function DisplayItems({ secondary }) {
                     : <></>}
                 <ListItemButton key={index}
                     component={Link}
-                    to={index < 4 ? `/${item}` : '/'} //Logout route has not yet been implemented
+                    to={`/${item}`}
                     selected={selected === item}
                     value={item}
                     onClick={() => { setSelected(item) }}
@@ -60,7 +60,6 @@ export function DisplayItems({ secondary }) {
 }
 
 export const ProfileTab = ({ user }) => {
-    const [selected, setSelected] = useState(false);
     const adjustSecondaryTypography = () => {
         // Define a threshold length for email after which font size will be reduced
         const thresholdLength = 10;
@@ -83,8 +82,7 @@ export const ProfileTab = ({ user }) => {
                 "& .MuiTouchRipple-root": {
                     color: 'white'
                 }, padding: '5px'
-            }} selected={selected}
-                onClick={() => setSelected(!selected)}>
+            }} selected={true}>
                 <ListItemIcon sx={{ minWidth: '40px', width: '50px' }}>
                     <AccountCircleIcon sx={{
                         color: 'white',
