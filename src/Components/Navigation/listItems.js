@@ -21,15 +21,15 @@ export function DisplayItems({ secondary }) {
         console.log(selected);
     }, [selected]);
 
-    function displayPrimary() {
-        return list.map((item, index) => (
+    return (
+        list.map((item, index) => (
             <React.Fragment>
                 {index > 4 ?
                     <Divider sx={styles.divider} />
                     : <></>}
                 <ListItemButton key={index}
                     component={Link}
-                    to={index < 4 ? `/${item}` : '/'} //Logout route has not yet been implemented
+                    to={index < 5 ? `/${item}` : '/'} //Logout route has not yet been implemented
                     selected={selected === item}
                     value={item}
                     onClick={() => { setSelected(item) }}
@@ -49,13 +49,8 @@ export function DisplayItems({ secondary }) {
                     />
                 </ListItemButton>
             </React.Fragment>
-        ));
-    }
+        ))
 
-    return (
-        <React.Fragment>
-            {displayPrimary()}
-        </React.Fragment>
     )
 }
 

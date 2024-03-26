@@ -150,7 +150,6 @@ function RecordsTable(props) {
 
 const styles = {
   container: {
-    width: '70%',
     overflow: 'hidden',
     padding: "10px",
     paddingTop: "20px"
