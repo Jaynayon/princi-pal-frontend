@@ -153,9 +153,5 @@ export const styles = {
             backgroundColor: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '10px',
         },
-        marginRight: '5px',
-        marginLeft: '5px',
-        paddingTop: '5px',
-        marginTop: '5px',
     }
 }

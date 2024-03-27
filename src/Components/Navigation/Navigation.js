@@ -158,7 +158,12 @@ export default function Navigation({ children }) {
                             <ChevronLeftIcon sx={{ color: 'white' }} />
                         </IconButton>
                     </Toolbar>
-                    <List component="nav" >
+                    <List component="nav" sx={{
+                        marginRight: '5px',
+                        marginLeft: '5px',
+                        paddingTop: '5px',
+                        marginTop: '5px',
+                    }} >
                         <DisplayItems />
                     </List>
                 </Drawer>

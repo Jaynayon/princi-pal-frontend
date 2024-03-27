@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -8,37 +8,49 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import List from '@mui/material/List';
 import { styles, VerticalLine } from './ListItems'
+import { useNavigationContext } from '../../Context/NavigationProvider'
+
+const User = {
+    name: 'Jay Nayon',
+    email: 'jay.nayonjr@cit.edu',
+    schools: [
+        'Jaclupan ES',
+        'Talisay ES'
+    ]
+}
 
 export default function DisplaySchools({ selected, setSelected }) {
-    const User = {
-        name: 'Jay Nayon',
-        email: 'jay.nayonjr@cit.edu',
-        schools: [
-            'Jaclupan ES',
-            'Talisay ES'
-        ]
-    }
+    const { open } = useNavigationContext();
+    const [openSub, setOpenSub] = useState(false);
 
-    const [open, setOpen] = useState(false);
+    useEffect(() => {
+        if (!open) {
+            setOpenSub(false)
+        }
+    }, [open])
 
     const handleClick = () => {
-        setOpen(!open);
+        setOpenSub(!openSub);
     };
     return (
         <React.Fragment>
             <ListItemButton sx={styles.button} onClick={handleClick} >
-                <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
+                <ListItemIcon
+                    sx={{
+                        width: 'auto',
+                        minWidth: '40px'
+                    }}>
                     <SchoolIcon sx={styles.icon} />
                 </ListItemIcon>
                 <ListItemText
                     primary={"School"}
-                    primaryTypographyProps={open ? styles.typography.school : styles.typography}
+                    primaryTypographyProps={openSub ? styles.typography.school : styles.typography}
                 />
-                {open ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
+                {openSub ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
             </ListItemButton>
-            <Collapse in={open} timeout="auto" unmountOnExit >
+            <Collapse in={openSub} timeout="auto" unmountOnExit >
                 <div style={{ display: 'flex' }}>
-                    <VerticalLine width='60px' color='white' />
+                    <VerticalLine width='50px' color='white' />
                     <List component="div" disablePadding>
                         {User.schools.map((item, index) => {
                             return (
