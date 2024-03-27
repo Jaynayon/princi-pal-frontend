@@ -21,7 +21,7 @@ const User = {
 }
 
 export default function DisplaySchools({ selected, setSelected }) {
-    const { open } = useNavigationContext();
+    const { open, toggleDrawer, prevOpen } = useNavigationContext();
     const [openSub, setOpenSub] = useState(false);
 
     useEffect(() => {
@@ -32,6 +32,10 @@ export default function DisplaySchools({ selected, setSelected }) {
 
     const handleClick = () => {
         setOpenSub(!openSub);
+        if (prevOpen && User.schools.length > 1) { //This feature only applies to users with multiple schools
+            toggleDrawer(true)
+        }
+
     };
     return (
         User.schools.length > 1 ? //Check if user has multiple schools
