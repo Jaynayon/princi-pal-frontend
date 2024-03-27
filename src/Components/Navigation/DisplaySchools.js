@@ -62,8 +62,8 @@ export default function DisplaySchools({ selected, setSelected }) {
                                 return (
                                     <ListItemButton
                                         key={index}
-                                        //component={Link}
-                                        //to={index < 5 ? `/${item}` : '/'}
+                                        component={Link}
+                                        to={'/schools'}
                                         sx={styles.button}
                                         value={item}
                                         selected={selected === item}
