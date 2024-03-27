@@ -4,7 +4,6 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
-import BarChartIcon from '@mui/icons-material/BarChart';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -28,7 +27,7 @@ export function DisplayItems() {
                     index === 1 ? <DisplaySchools selected={selected} setSelected={setSelected} /> :
                         <ListItemButton key={index}
                             component={Link}
-                            to={index < 5 ? `/${item}` : '/'} //Logout route has not yet been implemented
+                            to={index < 4 ? `/${item}` : '/'} //Logout route has not yet been implemented
                             selected={selected === item}
                             value={item}
                             onClick={() => { setSelected(item) }}
