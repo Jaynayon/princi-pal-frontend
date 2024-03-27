@@ -17,7 +17,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SearchIcon from '@mui/icons-material/Search';
 import { DisplayItems, ProfileTab } from './ListItems';
-
+import { NavigationContext, useNavigationContext } from '../../Context/NavigationProvider'
 
 const User = {
     name: 'Jay Nayon',
@@ -74,11 +74,11 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const defaultTheme = createTheme();
 
 export default function Navigation({ children }) {
-    const [open, setOpen] = React.useState(true);
-    //const [select, selectTab] = React.useState(null);
+    const { open, toggleDrawer } = useNavigationContext();
+    /*const [open, setOpen] = React.useState(true);
     const toggleDrawer = () => {
         setOpen(!open);
-    };
+    };*/
     return (
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{ display: 'flex' }}>
@@ -159,7 +159,7 @@ export default function Navigation({ children }) {
                             <ChevronLeftIcon sx={{ color: 'white' }} />
                         </IconButton>
                     </Toolbar>
-                    <List component="nav">
+                    <List component="nav" >
                         <DisplayItems />
                     </List>
                 </Drawer>

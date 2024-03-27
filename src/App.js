@@ -8,6 +8,7 @@ import People from './Pages/People.js'
 import Settings from './Pages/Settings.js'
 import Login from './Pages/Login.js'
 import './App.css';
+import { NavigationProvider } from './Context/NavigationProvider.js';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -35,9 +36,11 @@ function App() {
 //This is where the Navigation bar and Header is called
 const Root = () => {
   return (
-    <Navigation>
-      <Outlet />
-    </Navigation>
+    <NavigationProvider>
+      <Navigation>
+        <Outlet />
+      </Navigation>
+    </NavigationProvider>
   )
 }
 

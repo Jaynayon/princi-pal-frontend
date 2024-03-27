@@ -11,12 +11,14 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Divider from '@mui/material/Divider';
 import Collapse from "@mui/material/Collapse";
+import ListItem from "@mui/material/ListItem";
+import StarBorder from "@mui/icons-material/StarBorder";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import List from '@mui/material/List';
 import { Link } from 'react-router-dom';
 
-function DisplaySchools({ selected, setSelected }) {
+function DisplaySchools() {
     const User = {
         name: 'Jay Nayon',
         email: 'jay.nayonjr@cit.edu',
@@ -33,7 +35,10 @@ function DisplaySchools({ selected, setSelected }) {
     };
     return (
         <React.Fragment>
-            <ListItemButton sx={styles.button} onClick={handleClick} >
+            <ListItemButton
+                sx={styles.button}
+                onClick={handleClick}
+            >
                 <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
                     <SchoolIcon sx={styles.icon} />
                 </ListItemIcon>
@@ -43,21 +48,26 @@ function DisplaySchools({ selected, setSelected }) {
                 />
                 {open ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
             </ListItemButton>
-            <Collapse in={open} timeout="auto" unmountOnExit >
+            <Collapse in={open} timeout="auto" unmountOnExit>
                 <div style={{ display: 'flex' }}>
-                    <VerticalLine width='60px' color='white' />
+                    {/* Vertical line */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        width: '60px'
+                    }}>
+                        <div style={styles.divider.vertical} />
+                    </div>
+                    {/* List */}
                     <List component="div" disablePadding>
                         {User.schools.map((item, index) => {
                             return (
                                 <ListItemButton
                                     key={index}
-                                    //component={Link}
-                                    //to={index < 5 ? `/${item}` : '/'}
                                     sx={styles.button}
-                                    value={item}
-                                    selected={selected === item}
-                                    onClick={() => { setSelected(item) }}
+                                //selected={true}
                                 >
+                                    {/* Add your ListItemIcon here if needed */}
                                     <ListItemText
                                         primary={item}
                                         primaryTypographyProps={styles.typography} />
@@ -68,6 +78,7 @@ function DisplaySchools({ selected, setSelected }) {
                 </div>
             </Collapse>
         </React.Fragment>
+
     )
 }
 
@@ -79,39 +90,37 @@ export function DisplayItems() {
         console.log(selected);
     }, [selected]);
 
-    return (
+    /*return (
         list.map((item, index) => (
             <React.Fragment>
-                {index > 4 ? //Render divider after the Testing tab
+                {index > 4 ?
                     <Divider sx={styles.divider.horizontal} />
                     : <></>}
-                {
-                    index === 1 ? <DisplaySchools selected={selected} setSelected={setSelected} /> :
-                        <ListItemButton key={index}
-                            component={Link}
-                            to={index < 5 ? `/${item}` : '/'} //Logout route has not yet been implemented
-                            selected={selected === item}
-                            value={item}
-                            onClick={() => { setSelected(item) }}
-                            sx={styles.button}
-                        >
-                            <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
-                                {index === 0 ? <DashboardIcon sx={styles.icon} /> :
-                                    index === 2 ? <PeopleIcon sx={styles.icon} /> :
-                                        index === 3 ? <SettingsIcon sx={styles.icon} /> :
-                                            index === 4 ? <BarChartIcon sx={styles.icon} /> :
-                                                index === 5 ? <LogoutIcon sx={styles.icon} /> :
-                                                    null}
-                            </ListItemIcon>
-                            <ListItemText
-                                primary={item.charAt(0).toUpperCase() + item.slice(1)}
-                                primaryTypographyProps={styles.typography}
-                            />
-                        </ListItemButton>
-                }
+                <ListItemButton key={index}
+                    component={Link}
+                    to={index < 5 ? `/${item}` : '/'} //Logout route has not yet been implemented
+                    selected={selected === item}
+                    value={item}
+                    onClick={() => { setSelected(item) }}
+                    sx={styles.button}
+                >
+                    <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
+                        {index === 0 ? <DashboardIcon sx={styles.icon} /> :
+                            index === 1 ? <SchoolIcon sx={styles.icon} /> :
+                                index === 2 ? <PeopleIcon sx={styles.icon} /> :
+                                    index === 3 ? <SettingsIcon sx={styles.icon} /> :
+                                        index === 4 ? <BarChartIcon sx={styles.icon} /> :
+                                            <LogoutIcon sx={styles.icon} />}
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={item.charAt(0).toUpperCase() + item.slice(1)}
+                        primaryTypographyProps={styles.typography}
+                    />
+                </ListItemButton>
             </React.Fragment>
         ))
-    )
+    )*/
+    return (<DisplaySchools />);
 }
 
 export const ProfileTab = ({ user }) => {
@@ -158,23 +167,6 @@ export const ProfileTab = ({ user }) => {
     );
 };
 
-function VerticalLine({ width, color = 'black' }) {
-    return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            width: width
-        }}>
-            <div style={{
-                height: '100%',
-                width: '1px',
-                backgroundColor: color,
-                margin: '0 auto'
-            }} />
-        </div>
-    );
-}
-
 const styles = {
     icon: {
         color: 'white',
@@ -198,7 +190,13 @@ const styles = {
             bgcolor: 'white',
             marginRight: '15px',
             marginLeft: '15px'
-        }
+        },
+        vertical: {
+            height: '100%', // Set a specific height for the vertical line
+            width: '1px',
+            backgroundColor: 'white', // Changed the background color for better visibility,
+            margin: '0 auto' // C
+        },
     },
     button: {
         "&.Mui-selected": {
