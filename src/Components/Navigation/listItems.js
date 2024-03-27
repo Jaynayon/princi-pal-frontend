@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom';
 import DisplaySchools from './DisplaySchools';
 
 export function DisplayItems() {
-    const list = ['dashboard', 'schools', 'people', 'settings', 'testing', 'logout'];
+    const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Testing', 'Logout'];
     const [selected, setSelected] = useState('dashboard');
 
     useEffect(() => {
@@ -23,9 +23,7 @@ export function DisplayItems() {
     return (
         list.map((item, index) => (
             <React.Fragment>
-                {index > 4 ? //Render divider after the Testing tab
-                    <Divider sx={styles.divider.horizontal} />
-                    : <></>}
+                {index > 4 && <Divider sx={styles.divider.horizontal} /> /*Render divider after the Testing tab*/}
                 {
                     index === 1 ? <DisplaySchools selected={selected} setSelected={setSelected} /> :
                         <ListItemButton key={index}
@@ -36,7 +34,11 @@ export function DisplayItems() {
                             onClick={() => { setSelected(item) }}
                             sx={styles.button}
                         >
-                            <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
+                            <ListItemIcon
+                                sx={{
+                                    width: 'auto',
+                                    minWidth: '40px'
+                                }}>
                                 {index === 0 ? <DashboardIcon sx={styles.icon} /> :
                                     index === 2 ? <PeopleIcon sx={styles.icon} /> :
                                         index === 3 ? <SettingsIcon sx={styles.icon} /> :
@@ -45,7 +47,7 @@ export function DisplayItems() {
                                                     null}
                             </ListItemIcon>
                             <ListItemText
-                                primary={item.charAt(0).toUpperCase() + item.slice(1)}
+                                primary={item}
                                 primaryTypographyProps={styles.typography}
                             />
                         </ListItemButton>
