@@ -50,7 +50,11 @@ export default function DisplaySchools({ selected, setSelected }) {
                     </ListItemIcon>
                     <ListItemText
                         primary={"School"}
-                        primaryTypographyProps={openSub ? styles.typography.school : styles.typography}
+                        primaryTypographyProps={
+                            openSub ?
+                                { ...styles.typography, fontWeight: 'bold' } :
+                                styles.typography
+                        }
                     />
                     {openSub ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
                 </ListItemButton>

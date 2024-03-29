@@ -56,7 +56,11 @@ export function DisplayItems() {
                             </ListItemIcon>
                             <ListItemText
                                 primary={item.charAt(0).toUpperCase() + item.slice(1)}
-                                primaryTypographyProps={styles.typography}
+                                primaryTypographyProps={
+                                    selected === item ?
+                                        { ...styles.typography, fontWeight: 'bold' } :
+                                        styles.typography
+                                }
                             />
                         </ListItemButton>
                 }
@@ -139,10 +143,6 @@ export const styles = {
         fontSize: '19px',
     },
     typography: {
-        school: {
-            fontWeight: 'bold',
-            color: 'white'
-        },
         color: 'white'
     },
     divider: {
