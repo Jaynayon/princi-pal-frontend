@@ -15,11 +15,13 @@ function Schools(props) {
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} lg={12}>
                     <Paper
-                        sx={[styles.header, {
-                            p: 2,
-                            display: 'flex',
-                            flexDirection: 'row',
-                        }]}
+                        sx={[
+                            styles.header, {
+                                p: 2,
+                                display: 'flex',
+                                flexDirection: 'row',
+                            }
+                        ]}
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>

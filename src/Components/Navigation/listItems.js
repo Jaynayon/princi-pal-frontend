@@ -1,15 +1,23 @@
+// React imports
 import React, { useState, useEffect } from 'react';
+
+// Material-UI imports
+import { Link } from 'react-router-dom';
+import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+
+// Material-UI icons imports
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
-import SettingsIcon from '@mui/icons-material/Settings'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Divider from '@mui/material/Divider';
-import { Link } from 'react-router-dom';
+import SettingsIcon from '@mui/icons-material/Settings';
+
+// Custom component import
 import DisplaySchools from './DisplaySchools';
+
 
 export function DisplayItems() {
     const list = ['dashboard', 'schools', 'people', 'settings', 'logout'];
@@ -25,7 +33,8 @@ export function DisplayItems() {
                 {index > 3 && <Divider sx={styles.divider.horizontal} /> /*Render divider after the Testing tab*/}
                 {
                     index === 1 ? <DisplaySchools selected={selected} setSelected={setSelected} /> :
-                        <ListItemButton key={index}
+                        <ListItemButton
+                            key={index}
                             component={Link}
                             to={index < 4 ? `/${item}` : '/'} //Logout route has not yet been implemented
                             selected={selected === item}
@@ -37,7 +46,8 @@ export function DisplayItems() {
                                 sx={{
                                     width: 'auto',
                                     minWidth: '40px'
-                                }}>
+                                }}
+                            >
                                 {index === 0 ? <DashboardIcon sx={styles.icon} /> :
                                     index === 2 ? <PeopleIcon sx={styles.icon} /> :
                                         index === 3 ? <SettingsIcon sx={styles.icon} /> :
@@ -71,27 +81,31 @@ export const ProfileTab = ({ user }) => {
 
     return (
         <React.Fragment>
-            <ListItemButton sx={{
-                "&.Mui-selected": {
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Change to desired highlight color
-                    borderRadius: '10px',
-                },
-                "& .MuiTouchRipple-root": {
-                    color: 'white'
-                }, padding: '5px'
-            }} selected={selected}
+            <ListItemButton
+                sx={{
+                    ...styles.button,
+                    padding: '5px'
+                }}
+                selected={selected}
                 onClick={() => setSelected(!selected)}>
-                <ListItemIcon sx={{ minWidth: '40px', width: '50px' }}>
-                    <AccountCircleIcon sx={{
-                        color: 'white',
-                        fontSize: '35px',
-                        width: '100%',
-                    }} />
+                <ListItemIcon
+                    sx={{
+                        minWidth: '40px',
+                        width: '50px'
+                    }}
+                >
+                    <AccountCircleIcon
+                        sx={{
+                            color: 'white',
+                            fontSize: '35px',
+                            width: '100%',
+                        }}
+                    />
                 </ListItemIcon>
                 <ListItemText
                     primary={user.name}
                     secondary={user.email}
-                    primaryTypographyProps={{ fontFamily: 'Mulish-Bold', color: 'white' }}
+                    primaryTypographyProps={{ fontWeight: 'bold', color: 'white' }}
                     secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
                 />
             </ListItemButton>
@@ -101,17 +115,20 @@ export const ProfileTab = ({ user }) => {
 
 export function VerticalLine({ width, color = 'black' }) {
     return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            width: width
-        }}>
-            <div style={{
-                height: '100%',
-                width: '1px',
-                backgroundColor: color,
-                margin: '0 auto'
-            }} />
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+                width: width
+            }}
+        >
+            <div
+                style={{
+                    height: '100%',
+                    width: '1px',
+                    backgroundColor: color,
+                    margin: '0 auto'
+                }} />
         </div>
     );
 }
@@ -120,18 +137,13 @@ export const styles = {
     icon: {
         color: 'white',
         fontSize: '19px',
-        width: '50%',
     },
     typography: {
         school: {
-            fontFamily: 'Mulish-Bold',
+            fontWeight: 'bold',
             color: 'white'
         },
-        fontFamily: 'Mulish-Regular',
         color: 'white'
-    },
-    primary: {
-        fontFamily: 'Mulish-Bold'
     },
     divider: {
         horizontal: {

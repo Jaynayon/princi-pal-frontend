@@ -70,7 +70,14 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 // TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+const defaultTheme = createTheme({
+    palette: {
+        mode: 'light' //light default
+    },
+    typography: {
+        fontFamily: 'Mulish'
+    }
+});
 
 export default function Navigation({ children }) {
     const { open, toggleDrawer } = useNavigationContext();
@@ -82,7 +89,9 @@ export default function Navigation({ children }) {
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{ display: 'flex' }}>
                 <CssBaseline />
-                <AppBar position="absolute" open={open}
+                <AppBar
+                    position="absolute"
+                    open={open}
                     sx={{
                         boxShadow: 'none',
                         backgroundColor: 'transparent',
@@ -91,17 +100,15 @@ export default function Navigation({ children }) {
                     <Toolbar
                         sx={{
                             pr: '24px', // keep right padding when drawer closed
-                            "& .MuiToolbar-root": {
-                                backgroundColor: 'green',
-                            }
+                            color: '#C5C7CD'//gets inherited
                         }}
                     >
                         <IconButton
                             edge="start"
-                            color="inherit"
                             aria-label="open drawer"
                             onClick={toggleDrawer}
                             sx={{
+                                color: 'white',
                                 marginRight: '36px',
                                 ...(open && { display: 'none' }),
                             }}
@@ -117,14 +124,14 @@ export default function Navigation({ children }) {
                                 flexGrow: 1,
                                 textAlign: 'left',
                                 color: '#252733',
-                                fontFamily: 'Mulish-Bold'
+                                fontWeight: 'bold'
                             }}>
                             Dashboard
                         </Typography>
-                        <IconButton color="inherit" sx={{ color: '#C5C7CD' }}>
+                        <IconButton color="inherit" >
                             <SearchIcon />
                         </IconButton>
-                        <IconButton color="inherit" sx={{ color: '#C5C7CD' }}>
+                        <IconButton color="inherit" >
                             <Badge badgeContent={4} color="secondary">
                                 <NotificationsIcon />
                             </Badge>
@@ -133,9 +140,10 @@ export default function Navigation({ children }) {
                 </AppBar>
                 <Drawer variant="permanent"
                     open={open}
+
                     sx={{
                         "& .MuiDrawer-paper": {
-                            backgroundColor: '#4A99D3',
+                            backgroundColor: styles.drawer.color,
                             boxShadow: 'none',
                             borderRight: 'none'
                         }
@@ -153,17 +161,23 @@ export default function Navigation({ children }) {
                         <ProfileTab user={User} />
                         <IconButton
                             onClick={toggleDrawer}
-                            sx={{ justifyContent: 'flex-end' }}
+                            sx={{
+                                justifyContent: 'flex-end',
+                                color: 'white'
+                            }}
                         >
-                            <ChevronLeftIcon sx={{ color: 'white' }} />
+                            <ChevronLeftIcon color='inherit' />
                         </IconButton>
                     </Toolbar>
-                    <List component="nav" sx={{
-                        marginRight: '5px',
-                        marginLeft: '5px',
-                        paddingTop: '5px',
-                        marginTop: '5px',
-                    }} >
+                    <List
+                        component="nav"
+                        sx={{
+                            marginRight: '5px',
+                            marginLeft: '5px',
+                            paddingTop: '5px',
+                            marginTop: '5px',
+                        }}
+                    >
                         <DisplayItems />
                     </List>
                 </Drawer>
@@ -189,4 +203,10 @@ export default function Navigation({ children }) {
             </Box>
         </ThemeProvider>
     );
+}
+
+const styles = {
+    drawer: {
+        color: '#4A99D3'
+    }
 }
