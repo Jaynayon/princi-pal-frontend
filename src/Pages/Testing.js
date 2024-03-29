@@ -4,7 +4,7 @@ import Paper from '@mui/material/Paper';
 import RecordsTable from '../Components/Table/RecordsTable';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import DateFilter from '../Components/Filters/DateFilter';
+import { DateFilter } from '../Components/Filters/Filters';
 
 //this includes the button lists
 //pero separate kada component

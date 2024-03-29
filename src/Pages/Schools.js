@@ -4,20 +4,29 @@ import Paper from '@mui/material/Paper';
 import RecordsTable from '../Components/Table/RecordsTable';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import DateFilter from '../Components/Filters/DateFilter';
+import Box from '@mui/material/Box';
+import { DateFilter, FieldsFilter, SearchFilter } from '../Components/Filters/Filters'
 
 //xs, sm, md sizes are important
 
 function Schools(props) {
     return (
         <Container maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
-            <Grid container spacing={3}>
+            <Grid container spacing={2}>
                 <Grid item xs={12} md={12} lg={12}>
                     <Paper
-                        sx={[styles.header, { p: 2, display: 'flex', flexDirection: 'row' }]}
+                        sx={[styles.header, {
+                            p: 2,
+                            display: 'flex',
+                            flexDirection: 'row',
+                        }]}
                         elevation={0}
                         variant='outlined'>
-                        <DateFilter />
+                        <Box style={styles.header.buttons}>
+                            <DateFilter />
+                            <FieldsFilter />
+                            <SearchFilter />
+                        </Box>
                     </Paper>
                 </Grid>
                 <Grid item xs={12} md={12} lg={12}>
@@ -55,7 +64,13 @@ function Schools(props) {
 const styles = {
     header: {
         overflowWrap: "break-word",
-        fontFamily: 'Mulish-Regular'
+        fontFamily: 'Mulish-Regular',
+        buttons: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '650px' //adjust the container
+        }
     },
 }
 
