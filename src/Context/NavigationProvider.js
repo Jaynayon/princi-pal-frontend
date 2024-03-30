@@ -5,8 +5,10 @@ const NavigationContext = createContext();
 export const useNavigationContext = () => useContext(NavigationContext);
 
 export const NavigationProvider = ({ children }) => {
+    const list = ['dashboard', 'schools', 'people', 'settings', 'logout'];
+    const [selected, setSelected] = useState('dashboard');
     const [open, setOpen] = useState(true);
-    const prevOpenRef = useRef(open);
+    const prevOpenRef = useRef(false);
     const toggleDrawer = () => {
         setOpen(prevOpen => {
             prevOpenRef.current = prevOpen;
@@ -15,7 +17,9 @@ export const NavigationProvider = ({ children }) => {
     };
 
     return (
-        <NavigationContext.Provider value={{ open, toggleDrawer, prevOpen: prevOpenRef.current }}>
+        <NavigationContext.Provider value={{
+            open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected
+        }}>
             {children}
         </NavigationContext.Provider>
     );

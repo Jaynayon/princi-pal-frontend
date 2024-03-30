@@ -1,4 +1,7 @@
+// React imports
 import * as React from 'react';
+
+// Material-UI imports
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
@@ -15,9 +18,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SearchIcon from '@mui/icons-material/Search';
-import { DisplayItems, ProfileTab } from './ListItems';
-import { useNavigationContext } from '../../Context/NavigationProvider'
 
+// Custom imports
+import { DisplayItems, ProfileTab } from './ListItems';
+import { useNavigationContext } from '../../Context/NavigationProvider';
+
+//Static object testing
 const User = {
     name: 'Jay Nayon',
     email: 'jay.nayonjr@cit.edu'
@@ -71,9 +77,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme({
-    palette: {
-        mode: 'light' //light default
-    },
     typography: {
         fontFamily: 'Mulish'
     }
@@ -81,10 +84,7 @@ const defaultTheme = createTheme({
 
 export default function Navigation({ children }) {
     const { open, toggleDrawer } = useNavigationContext();
-    /*const [open, setOpen] = React.useState(true);
-    const toggleDrawer = () => {
-        setOpen(!open);
-    };*/
+
     return (
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{ display: 'flex' }}>
@@ -96,7 +96,8 @@ export default function Navigation({ children }) {
                         boxShadow: 'none',
                         backgroundColor: 'transparent',
                         paddingTop: '10px'
-                    }}>
+                    }}
+                >
                     <Toolbar
                         sx={{
                             pr: '24px', // keep right padding when drawer closed
@@ -125,7 +126,8 @@ export default function Navigation({ children }) {
                                 textAlign: 'left',
                                 color: '#252733',
                                 fontWeight: 'bold'
-                            }}>
+                            }}
+                        >
                             Dashboard
                         </Typography>
                         <IconButton color="inherit" >
@@ -140,7 +142,6 @@ export default function Navigation({ children }) {
                 </AppBar>
                 <Drawer variant="permanent"
                     open={open}
-
                     sx={{
                         "& .MuiDrawer-paper": {
                             backgroundColor: styles.drawer.color,
@@ -150,9 +151,6 @@ export default function Navigation({ children }) {
                     }}>
                     <Toolbar
                         sx={{
-                            //display: 'flex',
-                            //alignItems: 'center',
-                            //justifyContent: 'space-between',
                             px: [0.5],
                             paddingTop: '10px',
                             ...(!open && { visibility: 'hidden' }),

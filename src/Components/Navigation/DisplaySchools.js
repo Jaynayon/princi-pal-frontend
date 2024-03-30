@@ -1,16 +1,23 @@
+// React imports
 import React, { useState, useEffect } from 'react';
+
+// Material-UI imports
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import SchoolIcon from '@mui/icons-material/School';
 import Collapse from "@mui/material/Collapse";
+import SchoolIcon from '@mui/icons-material/School';
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import List from '@mui/material/List';
-import { styles, VerticalLine } from './ListItems'
-import { useNavigationContext } from '../../Context/NavigationProvider'
 import { Link } from 'react-router-dom';
 
+// Custom imports
+import { styles, VerticalLine } from './ListItems';
+import { useNavigationContext } from '../../Context/NavigationProvider';
+
+//Static object testing
 const User = {
     name: 'Jay Nayon',
     email: 'jay.nayonjr@cit.edu',
@@ -20,8 +27,8 @@ const User = {
     ]
 }
 
-export default function DisplaySchools({ selected, setSelected }) {
-    const { open, toggleDrawer, prevOpen } = useNavigationContext();
+export default function DisplaySchools() {
+    const { open, toggleDrawer, prevOpen, selected, setSelected } = useNavigationContext();
     const [openSub, setOpenSub] = useState(false);
 
     useEffect(() => {
@@ -40,12 +47,16 @@ export default function DisplaySchools({ selected, setSelected }) {
     return (
         User.schools.length > 1 ? //Check if user has multiple schools
             <React.Fragment>
-                <ListItemButton sx={styles.button} onClick={handleClick} >
+                <ListItemButton
+                    sx={styles.button}
+                    onClick={handleClick}
+                >
                     <ListItemIcon
                         sx={{
                             width: 'auto',
                             minWidth: '40px'
-                        }}>
+                        }}
+                    >
                         <SchoolIcon sx={styles.icon} />
                     </ListItemIcon>
                     <ListItemText
@@ -58,9 +69,16 @@ export default function DisplaySchools({ selected, setSelected }) {
                     />
                     {openSub ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
                 </ListItemButton>
-                <Collapse in={openSub} timeout="auto" unmountOnExit >
-                    <div style={{ display: 'flex' }}>
-                        <VerticalLine width='50px' color='white' />
+                <Collapse
+                    in={openSub}
+                    timeout="auto"
+                    unmountOnExit
+                >
+                    <Box style={{ display: 'flex' }}>
+                        <VerticalLine
+                            width='50px'
+                            color='white'
+                        />
                         <List component="div" disablePadding>
                             {User.schools.map((item, index) => {
                                 return (
@@ -68,19 +86,23 @@ export default function DisplaySchools({ selected, setSelected }) {
                                         key={index}
                                         component={Link}
                                         to={'/schools'}
-                                        sx={styles.button}
-                                        value={item}
                                         selected={selected === item}
                                         onClick={() => { setSelected(item) }}
+                                        sx={styles.button}
                                     >
                                         <ListItemText
                                             primary={item}
-                                            primaryTypographyProps={styles.typography} />
+                                            primaryTypographyProps={
+                                                selected === item ?
+                                                    { ...styles.typography, fontWeight: 'bold' } :
+                                                    styles.typography
+                                            }
+                                        />
                                     </ListItemButton>
                                 )
                             })}
                         </List>
-                    </div>
+                    </Box>
                 </Collapse>
             </React.Fragment> : //If user has only one school
             <React.Fragment>
@@ -95,7 +117,8 @@ export default function DisplaySchools({ selected, setSelected }) {
                         sx={{
                             width: 'auto',
                             minWidth: '40px'
-                        }}>
+                        }}
+                    >
                         <SchoolIcon sx={styles.icon} />
                     </ListItemIcon>
                     <ListItemText

@@ -17,11 +17,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 
 // Custom component import
 import DisplaySchools from './DisplaySchools';
-
+import { useNavigationContext } from '../../Context/NavigationProvider';
 
 export function DisplayItems() {
-    const list = ['dashboard', 'schools', 'people', 'settings', 'logout'];
-    const [selected, setSelected] = useState('dashboard');
+    const { list, selected, setSelected } = useNavigationContext();
+    //const list = ['dashboard', 'schools', 'people', 'settings', 'logout'];
+    //const [selected, setSelected] = useState('dashboard');
 
     useEffect(() => {
         console.log(selected);
@@ -29,40 +30,39 @@ export function DisplayItems() {
 
     return (
         list.map((item, index) => (
-            <React.Fragment>
+            <React.Fragment key={index}>
                 {index > 3 && <Divider sx={styles.divider.horizontal} /> /*Render divider after the Testing tab*/}
-                {
-                    index === 1 ? <DisplaySchools selected={selected} setSelected={setSelected} /> :
-                        <ListItemButton
-                            key={index}
-                            component={Link}
-                            to={index < 4 ? `/${item}` : '/'} //Logout route has not yet been implemented
-                            selected={selected === item}
-                            value={item}
-                            onClick={() => { setSelected(item) }}
-                            sx={styles.button}
+                {index === 1 ? <DisplaySchools /> :
+                    <ListItemButton
+                        key={index}
+                        component={Link}
+                        to={index < 4 ? `/${item}` : '/'} //Logout route has not yet been implemented
+                        selected={selected === item}
+                        value={item}
+                        onClick={() => { setSelected(item) }}
+                        sx={styles.button}
+                    >
+                        <ListItemIcon
+                            sx={{
+                                width: 'auto',
+                                minWidth: '40px'
+                            }}
                         >
-                            <ListItemIcon
-                                sx={{
-                                    width: 'auto',
-                                    minWidth: '40px'
-                                }}
-                            >
-                                {index === 0 ? <DashboardIcon sx={styles.icon} /> :
-                                    index === 2 ? <PeopleIcon sx={styles.icon} /> :
-                                        index === 3 ? <SettingsIcon sx={styles.icon} /> :
-                                            index === 4 ? <LogoutIcon sx={styles.icon} /> :
-                                                null}
-                            </ListItemIcon>
-                            <ListItemText
-                                primary={item.charAt(0).toUpperCase() + item.slice(1)}
-                                primaryTypographyProps={
-                                    selected === item ?
-                                        { ...styles.typography, fontWeight: 'bold' } :
-                                        styles.typography
-                                }
-                            />
-                        </ListItemButton>
+                            {index === 0 ? <DashboardIcon sx={styles.icon} /> :
+                                index === 2 ? <PeopleIcon sx={styles.icon} /> :
+                                    index === 3 ? <SettingsIcon sx={styles.icon} /> :
+                                        index === 4 ? <LogoutIcon sx={styles.icon} /> :
+                                            null}
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={item.charAt(0).toUpperCase() + item.slice(1)}
+                            primaryTypographyProps={
+                                selected === item ?
+                                    { ...styles.typography, fontWeight: 'bold' } :
+                                    styles.typography
+                            }
+                        />
+                    </ListItemButton>
                 }
             </React.Fragment>
         ))
