@@ -23,6 +23,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { styling } from './styling';
 import { DisplayItems, ProfileTab } from './ListItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import CustomizedSwitches from './CustomizedSwitches';
 
 //Static object testing
 const User = {
@@ -89,16 +90,17 @@ const displayTitle = (selected) => {
     );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme({
-    typography: {
-        fontFamily: 'Mulish'
-    },
-    navStyle: styling['default'] //default or light
-});
+
 
 export default function Navigation({ children }) {
-    const { open, toggleDrawer, selected } = useNavigationContext();
+    const { open, toggleDrawer, selected, navStyle } = useNavigationContext();
+
+    const defaultTheme = createTheme({
+        typography: {
+            fontFamily: 'Mulish'
+        },
+        navStyle: styling[navStyle] //default or light
+    });
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -193,6 +195,16 @@ export default function Navigation({ children }) {
                     >
                         <DisplayItems />
                     </List>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end', // Align items at the bottom
+                        height: '100%',
+                        marginBottom: '20px'
+                    }}>
+                        <CustomizedSwitches />
+                    </Box>
+
                 </Drawer>
                 <Box
                     component="main"

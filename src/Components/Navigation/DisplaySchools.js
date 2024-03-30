@@ -23,8 +23,7 @@ const User = {
     name: 'Jay Nayon',
     email: 'jay.nayonjr@cit.edu',
     schools: [
-        'Jaclupan ES',
-        'Talisay ES'
+        'Jaclupan ES', 'Talisay ES'
     ]
 }
 
@@ -77,7 +76,12 @@ export default function DisplaySchools() {
                             minWidth: '40px'
                         }}
                     >
-                        <SchoolIcon sx={selectSchool() ? styles.iconSelected : styles.icon} />
+                        <SchoolIcon
+                            sx={{
+                                ...styles.icon,
+                                color: selectSchool() ? theme.navStyle.bold : theme.navStyle.color
+                            }}
+                        />
                     </ListItemIcon>
                     <ListItemText
                         primary={"School"}
@@ -138,14 +142,19 @@ export default function DisplaySchools() {
                             minWidth: '40px'
                         }}
                     >
-                        <SchoolIcon sx={styles.icon} />
+                        <SchoolIcon sx={{
+                            ...styles.icon,
+                            color: selected === User.schools[0] ? theme.navStyle.bold : theme.navStyle.color
+                        }}
+                        />
                     </ListItemIcon>
                     <ListItemText
                         primary={"School"}
-                        primaryTypographyProps={{
-                            color: theme.navStyle.color,
-                            ...(selected === User.schools[0] && { fontWeight: 'bold' })
-                        }}
+                        primaryTypographyProps={
+                            selected === User.schools[0]
+                                ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                : { color: theme.navStyle.color }
+                        }
                     />
                 </ListItemButton>
             </React.Fragment>

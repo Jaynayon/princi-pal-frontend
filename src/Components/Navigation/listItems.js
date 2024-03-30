@@ -30,11 +30,6 @@ export function DisplayItems() {
 
     const styles = {
         icon: {
-            color: theme.navStyle.color,
-            fontSize: '19px',
-        },
-        iconSelected: {
-            color: theme.navStyle.bold,
             fontSize: '19px',
         },
         divider: {
@@ -58,7 +53,10 @@ export function DisplayItems() {
             return (
                 <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
                     {React.cloneElement(icon, {
-                        sx: selected === item ? styles.iconSelected : styles.icon
+                        sx: {
+                            ...styles.icon,
+                            color: selected === item ? theme.navStyle.bold : theme.navStyle.color
+                        }
                     })}
                 </ListItemIcon>
             );
@@ -70,7 +68,10 @@ export function DisplayItems() {
         list.map((item, index) => (
             <React.Fragment key={index}>
                 {index > 3 && <Divider sx={styles.divider} /> /*Render divider after the Testing tab*/}
-                {index === 1 ? <DisplaySchools /> :
+
+                {index === 1 ? (
+                    <DisplaySchools />
+                ) : (
                     <ListItemButton
                         key={index}
                         component={Link}
@@ -80,24 +81,19 @@ export function DisplayItems() {
                         onClick={() => { setSelected(item) }}
                         sx={theme.navStyle.button}
                     >
-                        <ListItemIcon
-                            sx={{
-                                width: 'auto',
-                                minWidth: '40px'
-                            }}
-                        >
+                        <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
                             {renderIcon(index, selected, item)}
                         </ListItemIcon>
                         <ListItemText
                             primary={item}
                             primaryTypographyProps={
-                                selected === item ?
-                                    { color: theme.navStyle.bold, fontWeight: 'bold' } :
-                                    { color: theme.navStyle.color }
+                                selected === item
+                                    ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                    : { color: theme.navStyle.color }
                             }
                         />
                     </ListItemButton>
-                }
+                )}
             </React.Fragment>
         ))
     )
