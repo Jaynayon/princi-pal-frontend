@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 // Material-UI imports
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
+import { useTheme } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -14,7 +15,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import { Link } from 'react-router-dom';
 
 // Custom imports
-import { styles, VerticalLine } from './ListItems';
+import { VerticalLine } from './ListItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 
 //Static object testing
@@ -28,6 +29,7 @@ const User = {
 }
 
 export default function DisplaySchools() {
+    const theme = useTheme();
     const { open, toggleDrawer, prevOpen, selected, setSelected } = useNavigationContext();
     const [openSub, setOpenSub] = useState(false);
 
@@ -42,14 +44,32 @@ export default function DisplaySchools() {
         if (prevOpen && User.schools.length > 1) { //This feature only applies to users with multiple schools
             toggleDrawer(true)
         }
-
     };
+
+    //If school is selected, return true
+    const selectSchool = () => {
+        return !(selected === 'Dashboard' || selected === 'Settings'
+            || selected === 'People' || selected === 'Logout');
+    }
+
+    const styles = {
+        icon: {
+            color: theme.navStyle.color,
+            fontSize: '19px',
+        },
+        iconSelected: {
+            color: theme.navStyle.bold,
+            fontSize: '19px',
+        },
+    }
+
     return (
         User.schools.length > 1 ? //Check if user has multiple schools
             <React.Fragment>
                 <ListItemButton
-                    sx={styles.button}
+                    sx={theme.navStyle.button}
                     onClick={handleClick}
+                    selected={!open ? selectSchool() : false} //button is only selected if the drawer is closed
                 >
                     <ListItemIcon
                         sx={{
@@ -57,17 +77,16 @@ export default function DisplaySchools() {
                             minWidth: '40px'
                         }}
                     >
-                        <SchoolIcon sx={styles.icon} />
+                        <SchoolIcon sx={selectSchool() ? styles.iconSelected : styles.icon} />
                     </ListItemIcon>
                     <ListItemText
                         primary={"School"}
                         primaryTypographyProps={
-                            openSub ?
-                                { ...styles.typography, fontWeight: 'bold' } :
-                                styles.typography
-                        }
+                            selectSchool() ?
+                                { color: theme.navStyle.bold, fontWeight: 'bold' } :
+                                { color: theme.navStyle.color }}
                     />
-                    {openSub ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
+                    {openSub ? <ExpandLess sx={{ color: theme.navStyle.color }} /> : <ExpandMore sx={{ color: theme.navStyle.color }} />}
                 </ListItemButton>
                 <Collapse
                     in={openSub}
@@ -77,7 +96,7 @@ export default function DisplaySchools() {
                     <Box style={{ display: 'flex' }}>
                         <VerticalLine
                             width='50px'
-                            color='white'
+                            color={theme.navStyle.color}
                         />
                         <List component="div" disablePadding>
                             {User.schools.map((item, index) => {
@@ -88,14 +107,14 @@ export default function DisplaySchools() {
                                         to={'/schools'}
                                         selected={selected === item}
                                         onClick={() => { setSelected(item) }}
-                                        sx={styles.button}
+                                        sx={theme.navStyle.button}
                                     >
                                         <ListItemText
                                             primary={item}
                                             primaryTypographyProps={
                                                 selected === item ?
-                                                    { ...styles.typography, fontWeight: 'bold' } :
-                                                    styles.typography
+                                                    { color: theme.navStyle.bold, fontWeight: 'bold' } :
+                                                    { color: theme.navStyle.color }
                                             }
                                         />
                                     </ListItemButton>
@@ -109,7 +128,7 @@ export default function DisplaySchools() {
                 <ListItemButton
                     component={Link}
                     to={'/schools'}
-                    sx={styles.button}
+                    sx={theme.navStyle.button}
                     selected={selected === User.schools[0]}
                     onClick={() => { setSelected(User.schools[0]) }}
                 >
@@ -123,11 +142,10 @@ export default function DisplaySchools() {
                     </ListItemIcon>
                     <ListItemText
                         primary={"School"}
-                        primaryTypographyProps={
-                            selected === User.schools[0] ?
-                                { ...styles.typography, fontWeight: 'bold' } :
-                                styles.typography
-                        }
+                        primaryTypographyProps={{
+                            color: theme.navStyle.color,
+                            ...(selected === User.schools[0] && { fontWeight: 'bold' })
+                        }}
                     />
                 </ListItemButton>
             </React.Fragment>

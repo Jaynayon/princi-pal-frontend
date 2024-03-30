@@ -20,6 +20,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import SearchIcon from '@mui/icons-material/Search';
 
 // Custom imports
+import { styling } from './styling';
 import { DisplayItems, ProfileTab } from './ListItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 
@@ -75,13 +76,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme({
-    typography: {
-        fontFamily: 'Mulish'
-    }
-});
-
 const displayTitle = (selected) => {
     if (selected === 'Dashboard' || selected === 'Settings' || selected === 'People' || selected === 'Logout') {
         return selected; // Return selected if it matches any of the specified values
@@ -95,6 +89,13 @@ const displayTitle = (selected) => {
     );
 }
 
+// TODO remove, this demo shouldn't need to reset the theme.
+const defaultTheme = createTheme({
+    typography: {
+        fontFamily: 'Mulish'
+    },
+    navStyle: styling['default'] //default or light
+});
 
 export default function Navigation({ children }) {
     const { open, toggleDrawer, selected } = useNavigationContext();
@@ -123,7 +124,7 @@ export default function Navigation({ children }) {
                             aria-label="open drawer"
                             onClick={toggleDrawer}
                             sx={{
-                                color: 'white',
+                                color: (theme) => theme.navStyle.color,
                                 marginRight: '36px',
                                 ...(open && { display: 'none' }),
                             }}
@@ -158,7 +159,7 @@ export default function Navigation({ children }) {
                     open={open}
                     sx={{
                         "& .MuiDrawer-paper": {
-                            backgroundColor: styles.drawer.color,
+                            backgroundColor: (theme) => theme.navStyle.base,
                             boxShadow: 'none',
                             borderRight: 'none'
                         }
@@ -175,7 +176,7 @@ export default function Navigation({ children }) {
                             onClick={toggleDrawer}
                             sx={{
                                 justifyContent: 'flex-end',
-                                color: 'white'
+                                color: (theme) => theme.navStyle.color
                             }}
                         >
                             <ChevronLeftIcon color='inherit' />
@@ -215,10 +216,4 @@ export default function Navigation({ children }) {
             </Box>
         </ThemeProvider>
     );
-}
-
-const styles = {
-    drawer: {
-        color: '#4A99D3'
-    }
 }

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 // Material-UI imports
 import { Link } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
 import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -20,16 +21,55 @@ import DisplaySchools from './DisplaySchools';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 
 export function DisplayItems() {
+    const theme = useTheme();
     const { list, selected, setSelected } = useNavigationContext();
 
     useEffect(() => {
         console.log(selected);
     }, [selected]);
 
+    const styles = {
+        icon: {
+            color: theme.navStyle.color,
+            fontSize: '19px',
+        },
+        iconSelected: {
+            color: theme.navStyle.bold,
+            fontSize: '19px',
+        },
+        divider: {
+            my: 1,
+            bgcolor: theme.navStyle.color,
+            marginRight: '15px',
+            marginLeft: '15px'
+        },
+    }
+
+    const renderIcon = (index, selected, item) => {
+        const iconMap = {
+            0: <DashboardIcon />,
+            2: <PeopleIcon />,
+            3: <SettingsIcon />,
+            4: <LogoutIcon />
+        };
+
+        const icon = iconMap[index];
+        if (icon) {
+            return (
+                <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
+                    {React.cloneElement(icon, {
+                        sx: selected === item ? styles.iconSelected : styles.icon
+                    })}
+                </ListItemIcon>
+            );
+        }
+        return null;
+    };
+
     return (
         list.map((item, index) => (
             <React.Fragment key={index}>
-                {index > 3 && <Divider sx={styles.divider.horizontal} /> /*Render divider after the Testing tab*/}
+                {index > 3 && <Divider sx={styles.divider} /> /*Render divider after the Testing tab*/}
                 {index === 1 ? <DisplaySchools /> :
                     <ListItemButton
                         key={index}
@@ -38,7 +78,7 @@ export function DisplayItems() {
                         selected={selected === item}
                         value={item}
                         onClick={() => { setSelected(item) }}
-                        sx={styles.button}
+                        sx={theme.navStyle.button}
                     >
                         <ListItemIcon
                             sx={{
@@ -46,18 +86,14 @@ export function DisplayItems() {
                                 minWidth: '40px'
                             }}
                         >
-                            {index === 0 ? <DashboardIcon sx={styles.icon} /> :
-                                index === 2 ? <PeopleIcon sx={styles.icon} /> :
-                                    index === 3 ? <SettingsIcon sx={styles.icon} /> :
-                                        index === 4 ? <LogoutIcon sx={styles.icon} /> :
-                                            null}
+                            {renderIcon(index, selected, item)}
                         </ListItemIcon>
                         <ListItemText
                             primary={item}
                             primaryTypographyProps={
                                 selected === item ?
-                                    { ...styles.typography, fontWeight: 'bold' } :
-                                    styles.typography
+                                    { color: theme.navStyle.bold, fontWeight: 'bold' } :
+                                    { color: theme.navStyle.color }
                             }
                         />
                     </ListItemButton>
@@ -68,6 +104,7 @@ export function DisplayItems() {
 }
 
 export const ProfileTab = ({ user }) => {
+    const theme = useTheme();
     const [selected, setSelected] = useState(false);
     const adjustSecondaryTypography = () => {
         // Define a threshold length for email after which font size will be reduced
@@ -75,17 +112,17 @@ export const ProfileTab = ({ user }) => {
 
         // Check if email length exceeds the threshold
         if (user.email.length > thresholdLength) {
-            return { ...styles.typography, fontSize: 10 }; // Adjust font size if email is too long
+            return { color: theme.navStyle.color, fontSize: 10 }; // Adjust font size if email is too long
         }
 
-        return { ...styles.typography, fontSize: 12 }; // Use default font size
+        return { color: theme.navStyle.color, fontSize: 12 }; // Use default font size
     };
 
     return (
         <React.Fragment>
             <ListItemButton
                 sx={{
-                    ...styles.button,
+                    ...theme.navStyle.button,
                     padding: '5px'
                 }}
                 selected={selected}
@@ -98,7 +135,7 @@ export const ProfileTab = ({ user }) => {
                 >
                     <AccountCircleIcon
                         sx={{
-                            color: 'white',
+                            color: theme.navStyle.color,
                             fontSize: '35px',
                             width: '100%',
                         }}
@@ -107,7 +144,7 @@ export const ProfileTab = ({ user }) => {
                 <ListItemText
                     primary={user.name}
                     secondary={user.email}
-                    primaryTypographyProps={{ fontWeight: 'bold', color: 'white' }}
+                    primaryTypographyProps={{ fontWeight: 'bold', color: theme.navStyle.color }}
                     secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
                 />
             </ListItemButton>
@@ -133,35 +170,4 @@ export function VerticalLine({ width, color = 'black' }) {
                 }} />
         </div>
     );
-}
-
-export const styles = {
-    icon: {
-        color: 'white',
-        fontSize: '19px',
-    },
-    typography: {
-        color: 'white'
-    },
-    divider: {
-        horizontal: {
-            my: 1,
-            bgcolor: 'white',
-            marginRight: '15px',
-            marginLeft: '15px'
-        }
-    },
-    button: {
-        "&.Mui-selected": {
-            backgroundColor: 'rgba(255, 255, 255, 0.10)', // Change to desired highlight color
-            borderRadius: '10px',
-        },
-        "& .MuiTouchRipple-root": {
-            color: 'white'
-        },
-        '&:hover, &.Mui-focusVisible': {
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '10px',
-        },
-    }
 }
