@@ -110,8 +110,8 @@ export default function DisplaySchools() {
                     component={Link}
                     to={'/schools'}
                     sx={styles.button}
-                    selected={selected === 'School'}
-                    onClick={() => { setSelected('School') }}
+                    selected={selected === User.schools[0]}
+                    onClick={() => { setSelected(User.schools[0]) }}
                 >
                     <ListItemIcon
                         sx={{
@@ -123,7 +123,11 @@ export default function DisplaySchools() {
                     </ListItemIcon>
                     <ListItemText
                         primary={"School"}
-                        primaryTypographyProps={openSub ? styles.typography.school : styles.typography}
+                        primaryTypographyProps={
+                            selected === User.schools[0] ?
+                                { ...styles.typography, fontWeight: 'bold' } :
+                                styles.typography
+                        }
                     />
                 </ListItemButton>
             </React.Fragment>

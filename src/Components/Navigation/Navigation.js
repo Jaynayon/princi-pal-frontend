@@ -82,8 +82,22 @@ const defaultTheme = createTheme({
     }
 });
 
+const displayTitle = (selected) => {
+    if (selected === 'Dashboard' || selected === 'Settings' || selected === 'People' || selected === 'Logout') {
+        return selected; // Return selected if it matches any of the specified values
+    }
+
+    return (
+        <>
+            <span>School </span>
+            <span style={{ color: 'grey' }}>({selected})</span>
+        </>
+    );
+}
+
+
 export default function Navigation({ children }) {
-    const { open, toggleDrawer } = useNavigationContext();
+    const { open, toggleDrawer, selected } = useNavigationContext();
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -128,7 +142,7 @@ export default function Navigation({ children }) {
                                 fontWeight: 'bold'
                             }}
                         >
-                            Dashboard
+                            {displayTitle(selected)}
                         </Typography>
                         <IconButton color="inherit" >
                             <SearchIcon />

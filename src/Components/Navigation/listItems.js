@@ -21,8 +21,6 @@ import { useNavigationContext } from '../../Context/NavigationProvider';
 
 export function DisplayItems() {
     const { list, selected, setSelected } = useNavigationContext();
-    //const list = ['dashboard', 'schools', 'people', 'settings', 'logout'];
-    //const [selected, setSelected] = useState('dashboard');
 
     useEffect(() => {
         console.log(selected);
@@ -36,7 +34,7 @@ export function DisplayItems() {
                     <ListItemButton
                         key={index}
                         component={Link}
-                        to={index < 4 ? `/${item}` : '/'} //Logout route has not yet been implemented
+                        to={index < 4 ? `/${item.toLowerCase()}` : '/'} //Logout route has not yet been implemented
                         selected={selected === item}
                         value={item}
                         onClick={() => { setSelected(item) }}
@@ -55,7 +53,7 @@ export function DisplayItems() {
                                             null}
                         </ListItemIcon>
                         <ListItemText
-                            primary={item.charAt(0).toUpperCase() + item.slice(1)}
+                            primary={item}
                             primaryTypographyProps={
                                 selected === item ?
                                     { ...styles.typography, fontWeight: 'bold' } :
