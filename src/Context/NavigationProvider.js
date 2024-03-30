@@ -6,7 +6,7 @@ export const useNavigationContext = () => useContext(NavigationContext);
 
 export const NavigationProvider = ({ children }) => {
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
-    const [selected, setSelected] = useState('dashboard');
+    const [selected, setSelected] = useState('Dashboard');
     const [open, setOpen] = useState(true);
     const prevOpenRef = useRef(false);
 
