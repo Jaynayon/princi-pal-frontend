@@ -56,6 +56,9 @@ export default function DisplaySchools() {
             color: theme.navStyle.color,
             fontSize: '19px',
         },
+        text: {
+            fontSize: '15px'
+        },
         iconSelected: {
             color: theme.navStyle.bold,
             fontSize: '19px',
@@ -85,10 +88,13 @@ export default function DisplaySchools() {
                     </ListItemIcon>
                     <ListItemText
                         primary={"School"}
-                        primaryTypographyProps={
-                            selectSchool() ?
-                                { color: theme.navStyle.bold, fontWeight: 'bold' } :
-                                { color: theme.navStyle.color }}
+                        primaryTypographyProps={{
+                            ...styles.text,
+                            ...(selectSchool()
+                                ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                : { color: theme.navStyle.color }
+                            )
+                        }}
                     />
                     {openSub ? <ExpandLess sx={{ color: theme.navStyle.color }} /> : <ExpandMore sx={{ color: theme.navStyle.color }} />}
                 </ListItemButton>
@@ -115,11 +121,13 @@ export default function DisplaySchools() {
                                     >
                                         <ListItemText
                                             primary={item}
-                                            primaryTypographyProps={
-                                                selected === item ?
-                                                    { color: theme.navStyle.bold, fontWeight: 'bold' } :
-                                                    { color: theme.navStyle.color }
-                                            }
+                                            primaryTypographyProps={{
+                                                ...styles.text,
+                                                ...(selected === item
+                                                    ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                                    : { color: theme.navStyle.color }
+                                                )
+                                            }}
                                         />
                                     </ListItemButton>
                                 )

@@ -32,6 +32,9 @@ export function DisplayItems() {
         icon: {
             fontSize: '19px',
         },
+        text: {
+            fontSize: '15px'
+        },
         divider: {
             my: 1,
             bgcolor: theme.navStyle.color,
@@ -86,11 +89,13 @@ export function DisplayItems() {
                         </ListItemIcon>
                         <ListItemText
                             primary={item}
-                            primaryTypographyProps={
-                                selected === item
+                            primaryTypographyProps={{
+                                ...styles.text,
+                                ...(selected === item
                                     ? { color: theme.navStyle.bold, fontWeight: 'bold' }
                                     : { color: theme.navStyle.color }
-                            }
+                                )
+                            }}
                         />
                     </ListItemButton>
                 )}
