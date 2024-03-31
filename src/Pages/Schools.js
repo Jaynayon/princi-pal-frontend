@@ -65,6 +65,7 @@ function Schools(props) {
 
 const styles = {
     header: {
+        overflow: 'auto', //if overflow, hide it
         overflowWrap: "break-word",
         fontFamily: 'Mulish-Regular',
         buttons: {
