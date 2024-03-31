@@ -100,30 +100,15 @@ function RecordsRow(props) {
             </>
         );
     }
-
-    const displayRow = (props) => {
-        if (props.colId === "name")
-            return (conditionRow(props.id, props.value, props.lastUpdated));
-        else if (props.colId === "details")
-            return (<div style={{ maxWidth: 230 }}>{props.value}</div>)
-        else if (props.colId === "date")
-            return (
-                <>
-                    {props.value}
-                    <div style={{ color: "#808080" }}>{props.hours}</div>
-                </>
-            );
-        else
-            return (props.value);
-    }
-
+    //tedt
     return (
         <>
             {rows
                 .slice(props.page * props.rowsPerPage, props.page * props.rowsPerPage + props.rowsPerPage)
-                .map((row) => {
+                .map((row, index) => {
+                    const uniqueKey = `row_${row.id}_${index}`;
                     return (
-                        <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                        <TableRow hover role="checkbox" tabIndex={-1} key={uniqueKey}>
                             {props.columns.map((column) => {
                                 let value = row[column.id];
                                 return (
@@ -163,6 +148,7 @@ function RecordsRow(props) {
                         </TableRow >
                     );
                 })}
+
         </>
     );
 }
