@@ -32,24 +32,26 @@ const User = {
 }
 
 const drawerWidth = 220;
+const initialWidth = 70;
 
-const AppBar = styled(MuiAppBar, {
-    shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-    }),
-    ...(open && {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
-        transition: theme.transitions.create(['width', 'margin'], {
+const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open' })(
+    ({ theme, open }) => ({
+        transition: theme.transitions.create(['width', 'margin', 'padding'], {
             easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        paddingLeft: initialWidth, //starts with an initial padding instead of 0
+        ...(open && {
+            marginLeft: drawerWidth,
+            paddingLeft: 0, //removes the space and adjust to the drawer
+            width: `calc(100% - ${drawerWidth}px)`,
+            transition: theme.transitions.create(['width', 'margin', 'padding'], {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+            }),
         }),
     }),
-}));
+);
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme, open }) => ({
@@ -112,27 +114,15 @@ export default function Navigation({ children }) {
                     sx={{
                         boxShadow: 'none',
                         backgroundColor: 'transparent',
-                        paddingTop: '10px'
+                        paddingTop: '5px',
                     }}
                 >
                     <Toolbar
                         sx={{
                             pr: '24px', // keep right padding when drawer closed
-                            color: '#C5C7CD'//gets inherited
+                            color: '#C5C7CD',//gets inherited
                         }}
                     >
-                        <IconButton
-                            edge="start"
-                            aria-label="open drawer"
-                            onClick={toggleDrawer}
-                            sx={{
-                                color: (theme) => theme.navStyle.color,
-                                marginRight: '36px',
-                                ...(open && { display: 'none' }),
-                            }}
-                        >
-                            <MenuIcon />
-                        </IconButton>
                         <Typography
                             component="h1"
                             variant="h6"
@@ -166,24 +156,52 @@ export default function Navigation({ children }) {
                             borderRight: 'none'
                         }
                     }}>
-                    <Toolbar
+                    <Box
                         sx={{
-                            px: [0.5],
-                            paddingTop: '10px',
-                            ...(!open && { visibility: 'hidden' }),
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center', // Center items vertically
                         }}
                     >
-                        <ProfileTab user={User} />
-                        <IconButton
-                            onClick={toggleDrawer}
+                        <Box
                             sx={{
-                                justifyContent: 'flex-end',
-                                color: (theme) => theme.navStyle.color
+                                height: '75px',
+                                display: 'flex',
+                                alignItems: 'center', // Center items vertically
                             }}
                         >
-                            <ChevronLeftIcon color='inherit' />
-                        </IconButton>
-                    </Toolbar>
+                            <IconButton
+                                aria-label="open drawer"
+                                onClick={toggleDrawer}
+                                sx={{
+                                    color: (theme) => theme.navStyle.color,
+                                    ...(open && { display: 'none' }),
+                                }}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                        </Box>
+
+                        <Toolbar
+                            sx={{
+                                px: [0.5],
+                                width: '100%',
+                                display: 'flex',
+                                ...(!open && { display: 'none' }),
+                            }}
+                        >
+                            <ProfileTab user={User} />
+                            <IconButton
+                                onClick={toggleDrawer}
+                                sx={{
+                                    //justifyContent: 'flex-end',
+                                    color: (theme) => theme.navStyle.color
+                                }}
+                            >
+                                <ChevronLeftIcon color='inherit' />
+                            </IconButton>
+                        </Toolbar>
+                    </Box>
                     <List
                         component="nav"
                         sx={{

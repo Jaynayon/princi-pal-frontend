@@ -124,7 +124,7 @@ export const ProfileTab = ({ user }) => {
             <ListItemButton
                 sx={{
                     ...theme.navStyle.button,
-                    padding: '5px'
+                    padding: '5px',
                 }}
                 selected={selected}
                 onClick={() => setSelected(!selected)}>
