@@ -5,8 +5,12 @@ const NavigationContext = createContext();
 export const useNavigationContext = () => useContext(NavigationContext);
 
 export const NavigationProvider = ({ children }) => {
+    const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
+    const [selected, setSelected] = useState('Dashboard');
     const [open, setOpen] = useState(true);
-    const prevOpenRef = useRef(open);
+    const [navStyle, setNavStyle] = React.useState('light'); // Initial theme
+    const prevOpenRef = useRef(false);
+
     const toggleDrawer = () => {
         setOpen(prevOpen => {
             prevOpenRef.current = prevOpen;
@@ -15,7 +19,10 @@ export const NavigationProvider = ({ children }) => {
     };
 
     return (
-        <NavigationContext.Provider value={{ open, toggleDrawer, prevOpen: prevOpenRef.current }}>
+        <NavigationContext.Provider value={{
+            open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
+            navStyle, setNavStyle
+        }}>
             {children}
         </NavigationContext.Provider>
     );

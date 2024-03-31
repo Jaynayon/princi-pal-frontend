@@ -174,9 +174,8 @@ const styles = {
         height: "35px",
     },
     inputStyling: {
-        fontFamily: "Mulish-Regular",
-        fontWeight: "bold",
-        fontSize: "15px",
+        fontFamily: "Mulish-SemiBold",
+        fontSize: "14px",
         background: "transparent",
         outline: "none",
         border: 'none',

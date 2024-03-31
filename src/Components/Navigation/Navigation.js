@@ -1,4 +1,7 @@
+// React imports
 import * as React from 'react';
+
+// Material-UI imports
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
@@ -15,33 +18,40 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SearchIcon from '@mui/icons-material/Search';
-import { DisplayItems, ProfileTab } from './ListItems';
-import { useNavigationContext } from '../../Context/NavigationProvider'
 
+// Custom imports
+import { styling } from './styling';
+import { DisplayItems, ProfileTab } from './ListItems';
+import { useNavigationContext } from '../../Context/NavigationProvider';
+import CustomizedSwitches from './CustomizedSwitches';
+
+//Static object testing
 const User = {
     name: 'Jay Nayon',
     email: 'jay.nayonjr@cit.edu'
 }
 
 const drawerWidth = 220;
+const initialWidth = 70;
 
-const AppBar = styled(MuiAppBar, {
-    shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-    }),
-    ...(open && {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
-        transition: theme.transitions.create(['width', 'margin'], {
+const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open' })(
+    ({ theme, open }) => ({
+        transition: theme.transitions.create(['width', 'margin', 'padding'], {
             easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        paddingLeft: initialWidth, //starts with an initial padding instead of 0
+        ...(open && {
+            marginLeft: drawerWidth,
+            paddingLeft: 0, //removes the space and adjust to the drawer
+            width: `calc(100% - ${drawerWidth}px)`,
+            transition: theme.transitions.create(['width', 'margin', 'padding'], {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+            }),
         }),
     }),
-}));
+);
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme, open }) => ({
@@ -69,45 +79,50 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+const displayTitle = (selected) => {
+    if (selected === 'Dashboard' || selected === 'Settings' || selected === 'People' || selected === 'Logout') {
+        return selected; // Return selected if it matches any of the specified values
+    }
+
+    return (
+        <>
+            <span>School </span>
+            <span style={{ color: 'grey' }}>({selected})</span>
+        </>
+    );
+}
+
+
 
 export default function Navigation({ children }) {
-    const { open, toggleDrawer } = useNavigationContext();
-    /*const [open, setOpen] = React.useState(true);
-    const toggleDrawer = () => {
-        setOpen(!open);
-    };*/
+    const { open, toggleDrawer, selected, navStyle } = useNavigationContext();
+
+    const defaultTheme = createTheme({
+        typography: {
+            fontFamily: 'Mulish'
+        },
+        navStyle: styling[navStyle] //default or light
+    });
+
     return (
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{ display: 'flex' }}>
                 <CssBaseline />
-                <AppBar position="absolute" open={open}
+                <AppBar
+                    position="absolute"
+                    open={open}
                     sx={{
                         boxShadow: 'none',
                         backgroundColor: 'transparent',
-                        paddingTop: '10px'
-                    }}>
+                        paddingTop: '5px',
+                    }}
+                >
                     <Toolbar
                         sx={{
                             pr: '24px', // keep right padding when drawer closed
-                            "& .MuiToolbar-root": {
-                                backgroundColor: 'green',
-                            }
+                            color: '#C5C7CD',//gets inherited
                         }}
                     >
-                        <IconButton
-                            edge="start"
-                            color="inherit"
-                            aria-label="open drawer"
-                            onClick={toggleDrawer}
-                            sx={{
-                                marginRight: '36px',
-                                ...(open && { display: 'none' }),
-                            }}
-                        >
-                            <MenuIcon />
-                        </IconButton>
                         <Typography
                             component="h1"
                             variant="h6"
@@ -117,14 +132,15 @@ export default function Navigation({ children }) {
                                 flexGrow: 1,
                                 textAlign: 'left',
                                 color: '#252733',
-                                fontFamily: 'Mulish-Bold'
-                            }}>
-                            Dashboard
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            {displayTitle(selected)}
                         </Typography>
-                        <IconButton color="inherit" sx={{ color: '#C5C7CD' }}>
+                        <IconButton color="inherit" >
                             <SearchIcon />
                         </IconButton>
-                        <IconButton color="inherit" sx={{ color: '#C5C7CD' }}>
+                        <IconButton color="inherit" >
                             <Badge badgeContent={4} color="secondary">
                                 <NotificationsIcon />
                             </Badge>
@@ -135,37 +151,78 @@ export default function Navigation({ children }) {
                     open={open}
                     sx={{
                         "& .MuiDrawer-paper": {
-                            backgroundColor: '#4A99D3',
+                            backgroundColor: (theme) => theme.navStyle.base,
                             boxShadow: 'none',
                             borderRight: 'none'
                         }
                     }}>
-                    <Toolbar
+                    <Box
                         sx={{
-                            //display: 'flex',
-                            //alignItems: 'center',
-                            //justifyContent: 'space-between',
-                            px: [0.5],
-                            paddingTop: '10px',
-                            ...(!open && { visibility: 'hidden' }),
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center', // Center items vertically
                         }}
                     >
-                        <ProfileTab user={User} />
-                        <IconButton
-                            onClick={toggleDrawer}
-                            sx={{ justifyContent: 'flex-end' }}
+                        <Box
+                            sx={{
+                                height: '75px',
+                                display: 'flex',
+                                alignItems: 'center', // Center items vertically
+                            }}
                         >
-                            <ChevronLeftIcon sx={{ color: 'white' }} />
-                        </IconButton>
-                    </Toolbar>
-                    <List component="nav" sx={{
-                        marginRight: '5px',
-                        marginLeft: '5px',
-                        paddingTop: '5px',
-                        marginTop: '5px',
-                    }} >
+                            <IconButton
+                                aria-label="open drawer"
+                                onClick={toggleDrawer}
+                                sx={{
+                                    color: (theme) => theme.navStyle.color,
+                                    ...(open && { display: 'none' }),
+                                }}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                        </Box>
+
+                        <Toolbar
+                            sx={{
+                                px: [0.5],
+                                width: '100%',
+                                display: 'flex',
+                                ...(!open && { display: 'none' }),
+                            }}
+                        >
+                            <ProfileTab user={User} />
+                            <IconButton
+                                onClick={toggleDrawer}
+                                sx={{
+                                    //justifyContent: 'flex-end',
+                                    color: (theme) => theme.navStyle.color
+                                }}
+                            >
+                                <ChevronLeftIcon color='inherit' />
+                            </IconButton>
+                        </Toolbar>
+                    </Box>
+                    <List
+                        component="nav"
+                        sx={{
+                            marginRight: '5px',
+                            marginLeft: '5px',
+                            paddingTop: '5px',
+                            marginTop: '5px',
+                        }}
+                    >
                         <DisplayItems />
                     </List>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end', // Align items at the bottom
+                        height: '100%',
+                        marginBottom: '20px'
+                    }}>
+                        <CustomizedSwitches />
+                    </Box>
+
                 </Drawer>
                 <Box
                     component="main"
