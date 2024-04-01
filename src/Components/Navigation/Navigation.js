@@ -80,19 +80,17 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 const displayTitle = (selected) => {
-    if (selected === 'Dashboard' || selected === 'Settings' || selected === 'People' || selected === 'Logout') {
+    if (selected === 'Dashboard' || selected === 'Settings'
+        || selected === 'People' || selected === 'Logout') {
         return selected; // Return selected if it matches any of the specified values
     }
-
     return (
-        <>
+        <React.Fragment>
             <span>School </span>
             <span style={{ color: 'grey' }}>({selected})</span>
-        </>
+        </React.Fragment>
     );
 }
-
-
 
 export default function Navigation({ children }) {
     const { open, toggleDrawer, selected, navStyle } = useNavigationContext();
@@ -108,32 +106,17 @@ export default function Navigation({ children }) {
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{ display: 'flex' }}>
                 <CssBaseline />
-                <AppBar
-                    position="absolute"
-                    open={open}
-                    sx={{
-                        boxShadow: 'none',
-                        backgroundColor: 'transparent',
-                        paddingTop: '5px',
-                    }}
-                >
+                <AppBar open={open} position="absolute"
+                    sx={{ boxShadow: 'none', backgroundColor: 'transparent', paddingTop: '5px', }}>
                     <Toolbar
-                        sx={{
-                            pr: '24px', // keep right padding when drawer closed
-                            color: '#C5C7CD',//gets inherited
-                        }}
+                        sx={{ pr: '24px', color: '#C5C7CD', /*keep right padding when drawer closed*/ }}
                     >
                         <Typography
                             component="h1"
                             variant="h6"
                             color="inherit"
                             noWrap
-                            sx={{
-                                flexGrow: 1,
-                                textAlign: 'left',
-                                color: '#252733',
-                                fontWeight: 'bold'
-                            }}
+                            sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
                         >
                             {displayTitle(selected)}
                         </Typography>
@@ -147,7 +130,8 @@ export default function Navigation({ children }) {
                         </IconButton>
                     </Toolbar>
                 </AppBar>
-                <Drawer variant="permanent"
+                <Drawer
+                    variant="permanent"
                     open={open}
                     sx={{
                         "& .MuiDrawer-paper": {
@@ -156,20 +140,8 @@ export default function Navigation({ children }) {
                             borderRight: 'none'
                         }
                     }}>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center', // Center items vertically
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                height: '75px',
-                                display: 'flex',
-                                alignItems: 'center', // Center items vertically
-                            }}
-                        >
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', }}>
+                        <Box sx={{ height: '75px', display: 'flex', alignItems: 'center', }}>
                             <IconButton
                                 aria-label="open drawer"
                                 onClick={toggleDrawer}
@@ -181,7 +153,6 @@ export default function Navigation({ children }) {
                                 <MenuIcon />
                             </IconButton>
                         </Box>
-
                         <Toolbar
                             sx={{
                                 px: [0.5],
@@ -222,7 +193,6 @@ export default function Navigation({ children }) {
                     }}>
                         <CustomizedSwitches />
                     </Box>
-
                 </Drawer>
                 <Box
                     component="main"
@@ -238,7 +208,7 @@ export default function Navigation({ children }) {
                 >
                     <Toolbar />
                     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-                        <Grid container spacing={3}>
+                        <Grid container spacing={3} >
                             {children}
                         </Grid>
                     </Container>

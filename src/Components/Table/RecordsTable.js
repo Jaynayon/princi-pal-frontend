@@ -137,8 +137,8 @@ function RecordsTable(props) {
         <TablePagination
           rowsPerPageOptions={[4, 10, 25, 100]}
           component="div"
-          count={1} //to edit
-          rowsPerPage={1}
+          count={5}
+          rowsPerPage={4}
           page={0}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}

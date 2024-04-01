@@ -1,63 +1,65 @@
-import '../App.css'
-import React from 'react';
-import Paper from '@mui/material/Paper';
-import RecordsTable from '../Components/Table/RecordsTable';
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import CssBaseline from '@mui/material/CssBaseline';
+import useScrollTrigger from '@mui/material/useScrollTrigger';
+import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import { DateFilter } from '../Components/Filters/Filters';
+import Slide from '@mui/material/Slide';
 
-//this includes the button lists
-//pero separate kada component
+function HideOnScroll(props) {
+    const { children, window } = props;
+    // Note that you normally won't need to set the window ref as useScrollTrigger
+    // will default to window.
+    // This is only being set here because the demo is in an iframe.
+    const trigger = useScrollTrigger({
+        target: window ? window() : undefined,
+    });
 
-function Testing() {
     return (
-        <Container maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={12} lg={12}>
-                    <Paper
-                        sx={[styles.header, { p: 2, display: 'flex', flexDirection: 'row' }]}
-                        elevation={0}
-                        variant='outlined'>
-                        <DateFilter />
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={12} lg={12}>
-                    <RecordsTable />
-                </Grid>
-                <Grid item xs={12} md={8} lg={9}>
-                    <Paper
-                        sx={{
-                            p: 2,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: 240,
-                        }}
-                    >
-                        Content
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={4} lg={3}>
-                    <Paper
-                        sx={{
-                            p: 2,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: 240,
-                        }}
-                    >
-                        Content
-                    </Paper>
-                </Grid>
-            </Grid>
-        </Container>
+        <Slide appear={false} direction="down" in={!trigger}>
+            {children}
+        </Slide>
     );
 }
 
-const styles = {
-    header: {
-        overflowWrap: "break-word",
-        fontFamily: 'Mulish-Regular'
-    },
-}
+HideOnScroll.propTypes = {
+    children: PropTypes.element.isRequired,
+    /**
+     * Injected by the documentation to work in an iframe.
+     * You won't need it on your project.
+     */
+    window: PropTypes.func,
+};
 
-export default Testing;
+export default function HideAppBar(props) {
+    return (
+        <React.Fragment>
+            <CssBaseline />
+            <HideOnScroll {...props}>
+                <AppBar>
+                    <Toolbar>
+                        <Typography variant="h6" component="div">
+                            Scroll to hide App bar
+                        </Typography>
+                    </Toolbar>
+                </AppBar>
+            </HideOnScroll>
+            <Toolbar />
+            <Container>
+                <Box sx={{ my: 2 }}>
+                    {[...new Array(12)]
+                        .map(
+                            () => `Cras mattis consectetur purus sit amet fermentum.
+Cras justo odio, dapibus ac facilisis in, egestas eget quam.
+Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`,
+                        )
+                        .join('\n')}
+                </Box>
+            </Container>
+        </React.Fragment>
+    );
+}
