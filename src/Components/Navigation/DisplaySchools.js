@@ -15,7 +15,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import { Link } from 'react-router-dom';
 
 // Custom imports
-import { VerticalLine } from './ListItems';
+import { VerticalLine } from './listItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 
 //Static object testing
