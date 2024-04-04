@@ -1,11 +1,11 @@
 import React from 'react';
 
-function Home(props) {
+function Settings(props) {
     return (
         <div>
-            Home
+            Setting
         </div>
     );
 }
 
-export default Home;
+export default Settings;
