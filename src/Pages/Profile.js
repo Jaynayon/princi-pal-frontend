@@ -1,11 +1,23 @@
 import React from 'react';
+import Paper from '@mui/material/Paper';
 
-function Dashboard(props) {
+function Profile() {
     return (
-        <div style={{ fontFamily: 'Mulish-Regular' }}>
-            Dashboard
+        <div className="App">
+            <header className="App-header">
+                <Paper style={styles.paper} elevation={3}>
+                    This is a Paper component with some content.asdasdasdasdasasdasdasdasdasdasdasdasdasdasdasasdasdasdasdasdasd
+                </Paper>
+            </header>
         </div>
     );
 }
 
-export default Dashboard;
+const styles = {
+    paper: {
+        width: "20%",
+        padding: "5%",
+        overflowWrap: "break-word"
+    },
+}
+export default Profile;
