@@ -1,5 +1,5 @@
 import { useState } from "react";
-import MenuIcon from '@mui/icons-material/Menu';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 import {
     TextField,
@@ -73,7 +73,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
                                 onClick={handleShowPasswordClick} // Toggle the showPassword state
                                 aria-label="toggle password visibility"
                             >
-                                <MenuIcon onClick={() => showPassword ? "visibility" : "visibility_off"} />
+                                <VisibilityOffIcon onClick={() => showPassword ? "visibility" : "visibility_off"} />
                             </IconButton>
                         </InputAdornment>
                     ),

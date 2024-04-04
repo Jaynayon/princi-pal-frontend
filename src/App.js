@@ -9,6 +9,7 @@ import Settings from './Pages/Settings.js'
 import Login from './Pages/Login.js'
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
+import WelcomePage from './WelcomePage.js';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,14 +22,24 @@ function App() {
         <Route path="/schools" element={<Schools />} />
         <Route path="/people" element={<People />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/welcome" element={<WelcomePage />} />
         {/*<Route path="/testing" element={<Testing />} />*/}
+      </Route>
+    )
+  )
+
+  const welcomeRouter = createBrowserRouter(
+    createRoutesFromElements(
+      <Route>
+        <Route path="/welcome" element={<WelcomePage />} />
+        <Route path="/login" element={<Login />} />
       </Route>
     )
   )
 
   return (
     <div className='App'>
-      <RouterProvider router={innerModuleRouter} />
+      <RouterProvider router={welcomeRouter} />
     </div>
   );
 }
