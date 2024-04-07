@@ -21,7 +21,7 @@ import SearchIcon from '@mui/icons-material/Search';
 
 // Custom imports
 import { styling } from './styling';
-import { DisplayItems, ProfileTab } from './listItems';
+import { DisplayItems, ProfileTab } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 import CustomizedSwitches from './CustomizedSwitches';
 
