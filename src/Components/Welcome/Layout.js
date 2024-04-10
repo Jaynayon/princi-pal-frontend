@@ -22,9 +22,9 @@ const Layout = () => {
      <img
         style={{
           position: "absolute",
-          top: "90px", // Adjusted top position to avoid overlap
-          left: "50%", // Center the image horizontally
-          transform: "translateX(-50%)", // Center the image horizontally
+          top: "90px",
+          left: "50%",
+          transform: "translateX(-50%)",
           width: "243px",
           height: "185px",
           objectFit: "cover",
@@ -73,7 +73,6 @@ const Layout = () => {
             borderRadius: '100px',
             width: '100%',
             padding: '9px 16px',
-            boxSizing: 'border-box',
             fontWeight: 'bold',
             marginBottom: '16px',
             backgroundColor: 'rgba(12, 120, 181, 0.89)',
@@ -90,10 +89,9 @@ const Layout = () => {
             borderRadius: '100px',
             width: '100%',
             padding: '9px 16px',
-            boxSizing: 'border-box',
             fontWeight: 'bold',
             backgroundColor: '#dadada',
-            color: '#000',
+            color: '#31363F',
           }}
           disableElevation
           color="primary"
