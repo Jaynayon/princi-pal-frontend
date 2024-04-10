@@ -7,10 +7,10 @@ const LoginPage = ({ setIsLoggedIn }) => {
 
     const handleShowPasswordClick = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
-    };
+    };  
 
     return (
-        <Container maxWidth="xl" style={{ backgroundColor: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff", height: "100vh", overflow: "hidden", textAlign: "left", fontSize: "15px", color: "#000", fontFamily: "Inter", position: "relative", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Container maxWidth="xl" style={{ backgroundColor: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff", height: "100vh", overflow: "hidden", textAlign: "left", fontSize: "15px", color: "#000", fontFamily: "Mulish", position: "relative", display: "flex", justifyContent: "center", alignItems: "center" }}>
             <Paper elevation={0} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1, opacity: 0.2, background: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff" }} />
             <TextField color="primary" label="Enter your email id" variant="outlined" sx={{ "& .MuiInputBase-root": { height: "47px" }, width: "445px", position: "absolute", top: "442px", left: "159px" }} />
             <Typography variant="subtitle1" sx={{ position: "absolute", top: "393px", left: "159px", fontSize: "18px", fontWeight: "600" }}>Email</Typography>
