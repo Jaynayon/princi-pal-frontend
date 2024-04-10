@@ -7,7 +7,6 @@ import Schools from './Pages/Schools.js'
 import People from './Pages/People.js'
 import Settings from './Pages/Settings.js'
 import Login from './Pages/Login.js'
-import Profile from './Pages/Profile.js'
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
 
@@ -22,7 +21,6 @@ function App() {
         <Route path="/schools" element={<Schools />} />
         <Route path="/people" element={<People />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/profile" element={<Profile />} />
         {/*<Route path="/testing" element={<Testing />} />*/}
       </Route>
     )
