@@ -10,6 +10,7 @@ import Login from './Pages/Login.js'
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
 import WelcomePage from './WelcomePage.js';
+import { School } from '@mui/icons-material';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

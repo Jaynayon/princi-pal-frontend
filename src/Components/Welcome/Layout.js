@@ -80,7 +80,7 @@ const Layout = () => {
           disableElevation
           color="primary"
           variant="contained"
-          href="/22-registration-page"
+          href="/Registration"
         >
           Register
         </Button>
