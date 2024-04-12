@@ -9,6 +9,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
+import Typography from '@mui/material/Typography';
 
 const ApexChart = () => {
     const [options] = useState({
@@ -109,129 +110,166 @@ function Dashboard(props) {
     };
 
     const renderEditableCard = (title) => (
-        <Grid item xs={12} md={4} lg={4}>
-            <Paper
-                sx={{
-                    position: 'relative',
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: 160,
-                    width: 345,
-                    textAlign: 'left',
-                    paddingLeft: (title === 'Monthly Budget' || title === 'Budget Limit' || title === 'Total Balance') ? '30px' : '0',
-                }}
+        <Paper
+            sx={{
+                position: 'relative',
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 160,
+                textAlign: 'left',
+                paddingLeft: (title === 'Monthly Budget' || title === 'Budget Limit' || title === 'Total Balance') ? '30px' : '0',
+            }}
+        >
+            {title}
+            <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{editableAmounts[title].currency} {editableAmounts[title].amount}</p>
+            <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
+                <EditIcon sx={{ width: '30px', height: '30px' }} />
+            </Button>
+            <Modal
+                open={open && clickedButton === title}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
             >
-                {title}
-                <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{editableAmounts[title].currency} {editableAmounts[title].amount}</p>
-                <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                    <EditIcon sx={{ width: '30px', height: '30px' }} />
-                </Button>
-                <Modal
-                    open={open && clickedButton === title}
-                    onClose={handleClose}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                >
-                    <Box sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        bgcolor: 'background.paper',
-                        boxShadow: 24,
-                        p: 4,
-                        width: 400,
-                        borderRadius: '15px',
-                        textAlign: 'center',
-                    }}>
-                        <Button onClick={handleClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
-                        <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Edit {title}</h2>
-                        <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-                            <TextField
-                                type="text"
-                                value={editableAmounts[title].amount}
-                                onChange={handleChange}
-                                label="Input New Amount"
-                            />
-                        </form>
-                        <div style={{ marginBottom: '20px' }}>
-                            <Button onClick={handleSubmit} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Save</Button>
-                        </div>
-                    </Box>
-                </Modal>
-            </Paper>
-        </Grid>
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    p: 4,
+                    width: 400,
+                    borderRadius: '15px',
+                    textAlign: 'center',
+                }}>
+                    <Button onClick={handleClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
+                    <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Edit {title}</h2>
+                    <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+                        <TextField
+                            type="text"
+                            value={editableAmounts[title].amount}
+                            onChange={handleChange}
+                            label="Input New Amount"
+                        />
+                    </form>
+                    <div style={{ marginBottom: '20px' }}>
+                        <Button onClick={handleSubmit} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Save</Button>
+                    </div>
+                </Box>
+            </Modal>
+        </Paper>
     );
 
     const renderSummaryCard = () => (
-        <Grid item xs={12} md={4} lg={4}>
-            <Paper
-                sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: 380,
-                    width: 340,
-                    textAlign: 'left',
-                }}
-            >
-                <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
-                <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{getCurrentMonthYear()}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget: {editableAmounts['Monthly Budget'].currency} {editableAmounts['Monthly Budget'].amount}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget Limit: {editableAmounts['Budget Limit'].currency} {editableAmounts['Budget Limit'].amount}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Balance: {editableAmounts['Total Balance'].currency} {editableAmounts['Total Balance'].amount}</p>
-            </Paper>
-        </Grid>
+        <Paper
+            sx={{
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 380,
+                textAlign: 'left',
+            }}
+        >
+            <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
+            <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{getCurrentMonthYear()}</p>
+            <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget: {editableAmounts['Monthly Budget'].currency} {editableAmounts['Monthly Budget'].amount}</p>
+            <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget Limit: {editableAmounts['Budget Limit'].currency} {editableAmounts['Budget Limit'].amount}</p>
+            <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Balance: {editableAmounts['Total Balance'].currency} {editableAmounts['Total Balance'].amount}</p>
+        </Paper>
     );
 
     return (
-        <div style={{ fontFamily: 'Mulish-Regular' }}>
-            <Container className="test" maxWidth="lg" sx={{ mb: 4, display: 'flex', justifyContent: 'flex-end' }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Box style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                            <h1>Analytics</h1>
-                            <p>{getCurrentMonthYear()}</p>
-                        </Box>
-                        <Paper
-                            sx={[
-                                styles.header, {
-                                    p: 2,
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                }
-                            ]}
-                            elevation={0}
-                            variant='outlined'>
-                            <Box style={styles.header.buttons}>
-                                <DateFilter /> { }
-                            </Box>
-                        </Paper>
-                    </Grid>
-                    {renderEditableCard('Monthly Budget')}
-                    {renderEditableCard('Budget Limit')}
-                    {renderEditableCard('Total Balance')}
-
-                    <Grid item xs={12} md={8} lg={8}>
-                        <Paper
-                            sx={{
+        <Container className="test" maxWidth="lg">
+            <Grid container spacing={2}>
+                <Grid item xs={12} md={12} lg={12}>
+                    <Paper
+                        sx={[
+                            styles.header, {
                                 p: 2,
                                 display: 'flex',
-                                flexDirection: 'column',
-                                height: 380,
-                                width: 'calc(100% - 10px)',
-                                marginRight: '10px',
-                            }}
-                        >
-                            <ApexChart />
-                        </Paper>
-                    </Grid>
-                    {renderSummaryCard()}
-
+                                flexDirection: 'row',
+                            }
+                        ]}
+                        elevation={0}
+                        variant='outlined'>
+                        <Box style={styles.header.buttons}>
+                            <DateFilter /> { }
+                        </Box>
+                    </Paper>
                 </Grid>
-            </Container>
-        </div>
+
+                <Grid item xs={12} md={12} lg={12}>
+                    <Box style={{
+                        display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
+                        marginLeft: '10px', marginRight: '10px' //margin Analytics title and Date
+                    }}>
+                        <Typography
+                            component="h1"
+                            variant="h6"
+                            color="inherit"
+                            noWrap
+                            sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
+                        >
+                            Analytics
+                        </Typography>
+                        <Typography
+                            component="h1"
+                            variant="h6"
+                            color="inherit"
+                            noWrap
+                        //sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
+                        >
+                            {getCurrentMonthYear()}
+                        </Typography>
+                    </Box>
+                </Grid>
+                {/* Horizontal layout for editable cards */}
+                <Grid item xs={12} md={12} lg={12}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginTop: "-15px",
+                    }}>
+                    <Grid item xs={4} md={4} lg={4} sx={{ padding: '5px' }}>
+                        {renderEditableCard('Monthly Budget')}
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4} sx={{ padding: '5px' }}>
+                        {renderEditableCard('Budget Limit')}
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4} sx={{ padding: '5px' }}>
+                        {renderEditableCard('Total Balance')}
+                    </Grid>
+                </Grid>
+                <Grid item xs={12} md={12} lg={12}>
+                    <Grid container >
+                        <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
+                            <Paper
+                                sx={{
+                                    p: 2,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    height: 380,
+                                }}
+                            >
+                                <ApexChart />
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+
+                            {renderSummaryCard()}
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+
+
+
+
+
+            </Grid>
+        </Container>
     );
 }
 

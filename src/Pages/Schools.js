@@ -16,7 +16,7 @@ function Schools(props) {
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
             <Grid container spacing={2}>
-                <Grid item xs={12} md={12} lg={12}>
+                <Grid item xs={12} md={12} lg={12} >
                     <Paper
                         sx={[
                             styles.header, {
