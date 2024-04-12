@@ -63,10 +63,26 @@ function People(props) {
                     </FormControl>
                     <Button sx={{ margin: '5px', marginTop: '-5px' }} variant="contained" className="inviteButton">Invite</Button>
                 </Grid>
-                <Grid item xs={5} md={5} lg={5} sx={{ display: 'flex', }}>
-                    <TextField sx={{ margin: '5px', marginTop: '-5px', marginBottom: '-5px' }} id="schoolFilter" label="School Filter" variant="outlined" className="schoolFilter" />
+                <Grid item xs={5} md={5} lg={5} sx={{ display: 'flex', margin: '5px', marginTop: '-5px' }}>
+                    <FormControl sx={{ m: 1, minWidth: 150 }} >
+                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+                        <Select
+                            labelId="demo-select-small-label"
+                            id="demo-select-small"
+                            value={member}
+                            label="Member"
+                            onChange={handleChange}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            <MenuItem>CIT</MenuItem>
+                            <MenuItem>ACT</MenuItem>
+                            <MenuItem>SM CITY</MenuItem>
+                        </Select>
+                    </FormControl>
                 </Grid>
-                <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px' }}>
+                <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px', marginTop: '-5px' }}>
                     <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
                         <Table md={{ display: 'flex', height: '100%', width: '100%' }} aria-label="simple table">
                             <TableHead>
