@@ -69,7 +69,23 @@ function People(props) {
                     <Button variant="contained" className="inviteButton">Invite</Button>
                 </Grid>
                 <Grid item>
-                    <TextField id="schoolFilter" label="School Filter" variant="outlined" className="schoolFilter" />
+                    <FormControl sx={{ m: 1, minWidth: 150 }} size="60px">
+                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+                        <Select
+                            labelId="demo-select-small-label"
+                            id="demo-select-small"
+                            value={member}
+                            label="Member"
+                            onChange={handleChange}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            <MenuItem>CIT</MenuItem>
+                            <MenuItem>ACT</MenuItem>
+                            <MenuItem>SM CITY</MenuItem>
+                        </Select>
+                    </FormControl>
                 </Grid>
             </Grid>
             <Container maxWidth="lg" sx={{ mt: 3, mb: 3 }}>
