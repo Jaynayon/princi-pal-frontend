@@ -10,6 +10,7 @@ import Login from './Pages/Login.js'
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
 import WelcomePage from './WelcomePage.js';
+import Registration from './Pages/Registration.js';
 import { School } from '@mui/icons-material';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
       <Route>
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Registration />} />
       </Route>
     )
   )
