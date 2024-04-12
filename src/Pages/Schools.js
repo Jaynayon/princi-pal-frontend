@@ -15,7 +15,7 @@ function Schools(props) {
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} sx={{ position: 'relative' }}> {/*relative to allow date component to float*/}
                 <Grid item xs={12} md={12} lg={12}>
                     <Paper
                         sx={[
@@ -28,7 +28,13 @@ function Schools(props) {
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
-                            <DateFilter />
+
+                            <Box sx={{}} >
+                                <DateFilter />
+                                <Paper sx={{ width: "25%", height: "10%", position: 'absolute' }} >
+
+                                </Paper>
+                            </Box>
                             <FieldsFilter />
                             <SearchFilter />
                         </Box>
@@ -62,7 +68,7 @@ function Schools(props) {
                     </Paper>
                 </Grid>
             </Grid>
-        </Container>
+        </Container >
     );
 }
 
@@ -75,7 +81,8 @@ const styles = {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            width: '650px' //adjust the container
+            width: '650px', //adjust the container
+            //position: 'relative'
         }
     },
 }
