@@ -26,30 +26,27 @@ function People(props) {
     };
 
     const rows = [
-        {name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2'},
-        {name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member',lastActivity: 'Dec 3' },
-        {name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
-        {name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
-        {name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
+        { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
+        { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
+        { name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
+        { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
+        { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
     ];
 
     return (
-        <Box
-            component="form"
-            noValidate
-            autoComplete="off"
-        >
-            <Grid container spacing={2} alignItems="center">
-                <Grid item>
-                    <TextField id="search" label="Search by name or email" variant="outlined" className="searchTextField" />
-                </Grid>
-                <Grid item>
-                    <TextField id="invite" label="Invite by email" variant="outlined" className="inviteTextField" />
-                </Grid>
-                <Grid item>
-                    <FormControl sx={{ m: 1, minWidth: 120 }} size="53px">
-                        <InputLabel id="demo-select-small-label">Member</InputLabel>
+        <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
+            <Grid container spacing={2}>
+                <Grid item xs={12} md={12} lg={12}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                    }}>
+                    <TextField sx={{ margin: '5px', marginTop: '-5px' }} id="search" label="Search by name or email" variant="outlined" className="searchTextField" />
+                    <TextField sx={{ margin: '5px', marginTop: '-5px' }} id="invite" label="Invite by email" variant="outlined" className="inviteTextField" />
+                    <FormControl sx={{ minWidth: 120 }} size="53px">
+                        <InputLabel sx={{ margin: '5px', marginTop: '-5px' }} id="demo-select-small-label">Member</InputLabel>
                         <Select
+                            sx={{ margin: '5px', marginTop: '-5px' }}
                             labelId="demo-select-small-label"
                             id="demo-select-small"
                             value={member}
@@ -64,52 +61,44 @@ function People(props) {
                             <MenuItem>Admin</MenuItem>
                         </Select>
                     </FormControl>
+                    <Button sx={{ margin: '5px', marginTop: '-5px' }} variant="contained" className="inviteButton">Invite</Button>
                 </Grid>
-                <Grid item>
-                    <Button variant="contained" className="inviteButton">Invite</Button>
+                <Grid item xs={5} md={5} lg={5} sx={{ display: 'flex', }}>
+                    <TextField sx={{ margin: '5px', marginTop: '-5px', marginBottom: '-5px' }} id="schoolFilter" label="School Filter" variant="outlined" className="schoolFilter" />
                 </Grid>
-                <Grid item>
-                    <TextField id="schoolFilter" label="School Filter" variant="outlined" className="schoolFilter" />
+                <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px' }}>
+                    <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
+                        <Table md={{ display: 'flex', height: '100%', width: '100%' }} aria-label="simple table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Name</TableCell>
+                                    <TableCell>Email</TableCell>
+                                    <TableCell>Role</TableCell>
+                                    <TableCell>Last Activity</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell>
+                                            <Grid container alignItems="center" spacing={1}>
+                                                <Grid item>
+                                                    <Avatar sx={{ bgcolor: blue[900] }}>{row.name.charAt(0)}</Avatar>
+                                                </Grid>
+                                                <Grid item>{row.name}</Grid>
+                                            </Grid>
+                                        </TableCell>
+                                        <TableCell>{row.email}</TableCell>
+                                        <TableCell>{row.role}</TableCell>
+                                        <TableCell>{row.lastActivity}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </Grid>
             </Grid>
-            <Container maxWidth="lg" sx={{ mt: 3, mb: 3 }}>
-                <Grid container spacing={10}>
-                    <Grid item md={12} md={8} lg={9}>
-                    <TableContainer component={Paper} sx={{ width: 1099, height: 500}}>
-                            <Table md={{ width  : 500, height: 600}} aria-label="simple table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Name</TableCell>
-                                        <TableCell>Email</TableCell>
-                                        <TableCell>Role</TableCell>
-                                        <TableCell>Last Activity</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {rows.map((row) => (
-                                        <TableRow key={row.id}>
-                                            <TableCell>
-                                                <Grid container alignItems="center" spacing={1}>
-                                                    <Grid item>
-                                                        <Avatar sx={{ bgcolor: blue[900] }}>{row.name.charAt(0)}</Avatar>
-                                                    </Grid>
-                                                        <Grid item>{row.name}</Grid>
-                                                    </Grid>
-                                            </TableCell>
-                                            <TableCell>{row.email}</TableCell>
-                                            <TableCell>{row.role}</TableCell>
-                                            <TableCell>{row.lastActivity}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Grid>
-                    <Grid item xs={12} md={4} lg={3}>
-                    </Grid>
-                </Grid>
-            </Container>
-        </Box>
+        </Container>
     );
 }
 
