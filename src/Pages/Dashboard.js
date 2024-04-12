@@ -232,14 +232,16 @@ function Dashboard(props) {
                         justifyContent: 'space-between',
                         marginTop: "-15px",
                     }}>
-                    <Grid item xs={4} md={4} lg={4} sx={{ padding: '5px' }}>
-                        {renderEditableCard('Monthly Budget')}
-                    </Grid>
-                    <Grid item xs={4} md={4} lg={4} sx={{ padding: '5px' }}>
-                        {renderEditableCard('Budget Limit')}
-                    </Grid>
-                    <Grid item xs={4} md={4} lg={4} sx={{ padding: '5px' }}>
-                        {renderEditableCard('Total Balance')}
+                    <Grid container >
+                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                            {renderEditableCard('Monthly Budget')}
+                        </Grid>
+                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                            {renderEditableCard('Budget Limit')}
+                        </Grid>
+                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                            {renderEditableCard('Total Balance')}
+                        </Grid>
                     </Grid>
                 </Grid>
                 <Grid item xs={12} md={12} lg={12}>
