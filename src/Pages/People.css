@@ -2,7 +2,7 @@
     /* Add styles for the search TextField here */
     /* For example: */
     width: 500px;
-    padding-left: 19px;
+    padding-left: 10px;
     text-align: center;
 
 }
@@ -11,12 +11,15 @@
     /* For example: */
     width: 300px;
     border-radius: 0px;
-    padding-left: 19px;
+    padding-left: 10px;
 }
 .inviteButton {
     width: 120px;
     height: 53px;
     border-radius: 0px;
+}
+.schoolFilter {
+    padding-left: 10px;
 }
 
   

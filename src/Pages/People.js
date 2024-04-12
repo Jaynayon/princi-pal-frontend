@@ -15,6 +15,8 @@ import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
+import Avatar from '@mui/material/Avatar';
+import { blue } from '@mui/material/colors';
 import './People.css';
 
 function People(props) {
@@ -24,11 +26,11 @@ function People(props) {
     };
 
     const rows = [
-        { id: 1, name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2'},
-        { id: 2, name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member',lastActivity: 'Dec 3' },
-        { id: 3, name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
-        { id: 4, name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
-        { id: 5, name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
+        {name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2'},
+        {name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member',lastActivity: 'Dec 3' },
+        {name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
+        {name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
+        {name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
     ];
 
     return (
@@ -66,6 +68,9 @@ function People(props) {
                 <Grid item>
                     <Button variant="contained" className="inviteButton">Invite</Button>
                 </Grid>
+                <Grid item>
+                    <TextField id="schoolFilter" label="School Filter" variant="outlined" className="schoolFilter" />
+                </Grid>
             </Grid>
             <Container maxWidth="lg" sx={{ mt: 3, mb: 3 }}>
                 <Grid container spacing={10}>
@@ -74,7 +79,6 @@ function People(props) {
                             <Table md={{ width  : 500, height: 600}} aria-label="simple table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>ID</TableCell>
                                         <TableCell>Name</TableCell>
                                         <TableCell>Email</TableCell>
                                         <TableCell>Role</TableCell>
@@ -84,8 +88,14 @@ function People(props) {
                                 <TableBody>
                                     {rows.map((row) => (
                                         <TableRow key={row.id}>
-                                            <TableCell>{row.id}</TableCell>
-                                            <TableCell>{row.name}</TableCell>
+                                            <TableCell>
+                                                <Grid container alignItems="center" spacing={1}>
+                                                    <Grid item>
+                                                        <Avatar sx={{ bgcolor: blue[900] }}>{row.name.charAt(0)}</Avatar>
+                                                    </Grid>
+                                                        <Grid item>{row.name}</Grid>
+                                                    </Grid>
+                                            </TableCell>
                                             <TableCell>{row.email}</TableCell>
                                             <TableCell>{row.role}</TableCell>
                                             <TableCell>{row.lastActivity}</TableCell>
