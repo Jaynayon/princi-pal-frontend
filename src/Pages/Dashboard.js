@@ -8,6 +8,7 @@ import Modal from '@mui/material/Modal';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
+import EditIcon from '@mui/icons-material/Edit';
 
 const ApexChart = () => {
     const [options] = useState({
@@ -99,7 +100,7 @@ function Dashboard(props) {
             setError('Please enter a valid number.');
         }
     };
-    
+
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -124,7 +125,7 @@ function Dashboard(props) {
                 {title}
                 <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{editableAmounts[title].currency} {editableAmounts[title].amount}</p>
                 <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                    <img src={require('../Assets/Images/editbtn.png')} alt="Edit" style={{ width: '30px', height: '30px' }} />
+                    <EditIcon sx={{ width: '30px', height: '30px' }} />
                 </Button>
                 <Modal
                     open={open && clickedButton === title}
@@ -145,7 +146,7 @@ function Dashboard(props) {
                         textAlign: 'center',
                     }}>
                         <Button onClick={handleClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
-                        <h2 id="modal-modal-title" style={{ fontSize: '30px',marginBottom: '20px' }}>Edit {title}</h2>
+                        <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Edit {title}</h2>
                         <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
                             <TextField
                                 type="text"
@@ -204,14 +205,14 @@ function Dashboard(props) {
                             elevation={0}
                             variant='outlined'>
                             <Box style={styles.header.buttons}>
-                                <DateFilter /> {}
+                                <DateFilter /> { }
                             </Box>
                         </Paper>
                     </Grid>
                     {renderEditableCard('Monthly Budget')}
                     {renderEditableCard('Budget Limit')}
                     {renderEditableCard('Total Balance')}
-                    
+
                     <Grid item xs={12} md={8} lg={8}>
                         <Paper
                             sx={{
@@ -227,7 +228,7 @@ function Dashboard(props) {
                         </Paper>
                     </Grid>
                     {renderSummaryCard()}
-                    
+
                 </Grid>
             </Container>
         </div>
