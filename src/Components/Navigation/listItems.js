@@ -117,13 +117,14 @@ export const ProfileTab = ({ user }) => {
     const [selected, setSelected] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
 
-        
+
     const handleDialogOpen = () => {
         setDialogOpen(true);
     };
 
     const handleDialogClose = () => {
         setDialogOpen(false);
+        setSelected(false)
     };
     const adjustSecondaryTypography = () => {
         // Define a threshold length for email after which font size will be reduced
@@ -150,14 +151,14 @@ export const ProfileTab = ({ user }) => {
                     handleDialogOpen();
                 }}
             >
-                
+
                 <ListItemIcon
                     sx={{
                         minWidth: '40px',
                         width: '50px'
                     }}
                 >
-                
+
                     <AccountCircleIcon
                         sx={{
                             color: theme.navStyle.color,
@@ -165,30 +166,30 @@ export const ProfileTab = ({ user }) => {
                             width: '100%',
                         }}
                     />
-                    
+
                 </ListItemIcon>
-                
+
                 <ListItemText
                     primary={user.name}
                     secondary={user.email}
                     primaryTypographyProps={{ fontWeight: 'bold', color: theme.navStyle.color }}
                     secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
                 />
-               
+
             </ListItemButton>
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
                 <DialogTitle>My Profile</DialogTitle>
                 <DialogContent>
-                <Stack spacing={2} margin={2} direction="row" alignItems="center">
+                    <Stack spacing={2} margin={2} direction="row" alignItems="center">
                         <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 100 }} alt="User Avatar" />
-                    <Stack spacing={2}>
-                    <TextField disabled id="outlined-disabled" label="Name" defaultValue={user.name} margin="dense"/>
-                    <TextField disabled id="outlined-disabled" label="Email" defaultValue={user.email} margin="normal"/>
-                    <TextField disabled id="outlined-disabled" label="Role" defaultValue="ADAS" margin="normal"/>
-                    <TextField disabled id="outlined-disabled" label="Number" defaultValue="0935 256 2584" margin="normal"/>
-                    <TextField disabled id="outlined-disabled" label="Location" defaultValue="Tisa Labangon" margin="normal"/>
+                        <Stack spacing={2}>
+                            <TextField disabled id="outlined-disabled" label="Name" defaultValue={user.name} margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Email" defaultValue={user.email} margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Role" defaultValue="ADAS" margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Number" defaultValue="0935 256 2584" margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Location" defaultValue="Tisa Labangon" margin="normal" />
+                        </Stack>
                     </Stack>
-                </Stack>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose}>Close</Button>
