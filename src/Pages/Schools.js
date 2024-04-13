@@ -31,9 +31,7 @@ function Schools(props) {
 
                             <Box sx={{}} >
                                 <DateFilter />
-                                <Paper sx={{ width: "25%", height: "10%", position: 'absolute' }} >
 
-                                </Paper>
                             </Box>
                             <FieldsFilter />
                             <SearchFilter />
