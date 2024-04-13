@@ -51,21 +51,23 @@ const WelcomePage = () => {
                 variant="h4"
                 sx={{
                   lineHeight: '26px',
-                  width: '384px',
+                  width: '354px',
                   height: '23px',
                   fontWeight: 500,
-                  color: 'white'
+                  color: 'white',
+                  fontSize: 'calc(0.4 * 4.5rem)' // Font size calculation based on h4 font size and scale factor of 1.5
                 }}
               >
                 Welcome to PrinciPal
               </Typography>
               <Typography
-                variant="body1"
+                variant="h5"
                 sx={{
                   fontSize: '14px',
                   lineHeight: '26px',
-                  width: '340px',
-                  color: 'white'
+                  width: '330px',
+                  color: 'white',
+                  letterSpacing: '-0.4px', // Adjust the letter spacing as needed
                 }}
               >
                 Navigate School Management Effortlessly
@@ -147,6 +149,8 @@ const WelcomePage = () => {
               alignItems: 'center',
               padding: '20px',
               color: "#4a99d3",
+              backgroundImage: 'url("/bg.png")', // Add the URL of the background image here
+              backgroundSize: 'cover',
             }}
           >
             <Container maxWidth="md">
