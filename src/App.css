@@ -28,26 +28,10 @@
   color: #61dafb;
 }
 
-@font-face {
-  font-family: 'Mulish-Regular';
-  src: url('./Assets/Fonts/Mulish-Regular.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Mulish-Bold';
-  src: url('./Assets/Fonts/Mulish-Bold.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Mulish-SemiBold';
-  src: url('./Assets/Fonts/Mulish-SemiBold.ttf') format('truetype');
-}
-
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }
