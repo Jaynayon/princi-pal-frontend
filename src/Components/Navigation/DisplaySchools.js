@@ -15,7 +15,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import { Link } from 'react-router-dom';
 
 // Custom imports
-import { VerticalLine } from './ListItems';
+import { VerticalLine } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 
 //Static object testing
@@ -66,106 +66,111 @@ export default function DisplaySchools() {
     }
 
     return (
-        User.schools.length > 1 ? //Check if user has multiple schools
-            <React.Fragment>
-                <ListItemButton
-                    sx={theme.navStyle.button}
-                    onClick={handleClick}
-                    selected={!open ? selectSchool() : false} //button is only selected if the drawer is closed
-                >
-                    <ListItemIcon
-                        sx={{
-                            width: 'auto',
-                            minWidth: '40px'
-                        }}
+        User.schools.length > 0 ? //Check if user has schools assigned
+            (User.schools.length > 1 ? //Check if user has multiple schools
+                <React.Fragment>
+                    <ListItemButton
+                        sx={theme.navStyle.button}
+                        onClick={handleClick}
+                        selected={User.schools.length > 1 ?
+                            !open ? selectSchool() : false
+                            : selected === User.schools[0]
+                        } //button is only selected if the drawer is closed
                     >
-                        <SchoolIcon
+                        <ListItemIcon
                             sx={{
-                                ...styles.icon,
-                                color: selectSchool() ? theme.navStyle.bold : theme.navStyle.color
+                                width: 'auto',
+                                minWidth: '40px'
+                            }}
+                        >
+                            <SchoolIcon
+                                sx={{
+                                    ...styles.icon,
+                                    color: selectSchool() ? theme.navStyle.bold : theme.navStyle.color
+                                }}
+                            />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={"School"}
+                            primaryTypographyProps={{
+                                ...styles.text,
+                                ...(selectSchool()
+                                    ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                    : { color: theme.navStyle.color }
+                                )
                             }}
                         />
-                    </ListItemIcon>
-                    <ListItemText
-                        primary={"School"}
-                        primaryTypographyProps={{
-                            ...styles.text,
-                            ...(selectSchool()
-                                ? { color: theme.navStyle.bold, fontWeight: 'bold' }
-                                : { color: theme.navStyle.color }
-                            )
-                        }}
-                    />
-                    {openSub ? <ExpandLess sx={{ color: theme.navStyle.color }} /> : <ExpandMore sx={{ color: theme.navStyle.color }} />}
-                </ListItemButton>
-                <Collapse
-                    in={openSub}
-                    timeout="auto"
-                    unmountOnExit
-                >
-                    <Box style={{ display: 'flex' }}>
-                        <VerticalLine
-                            width='50px'
-                            color={theme.navStyle.color}
-                        />
-                        <List component="div" disablePadding>
-                            {User.schools.map((item, index) => {
-                                return (
-                                    <ListItemButton
-                                        key={index}
-                                        component={Link}
-                                        to={'/schools'}
-                                        selected={selected === item}
-                                        onClick={() => { setSelected(item) }}
-                                        sx={theme.navStyle.button}
-                                    >
-                                        <ListItemText
-                                            primary={item}
-                                            primaryTypographyProps={{
-                                                ...styles.text,
-                                                ...(selected === item
-                                                    ? { color: theme.navStyle.bold, fontWeight: 'bold' }
-                                                    : { color: theme.navStyle.color }
-                                                )
-                                            }}
-                                        />
-                                    </ListItemButton>
-                                )
-                            })}
-                        </List>
-                    </Box>
-                </Collapse>
-            </React.Fragment> : //If user has only one school
-            <React.Fragment>
-                <ListItemButton
-                    component={Link}
-                    to={'/schools'}
-                    sx={theme.navStyle.button}
-                    selected={selected === User.schools[0]}
-                    onClick={() => { setSelected(User.schools[0]) }}
-                >
-                    <ListItemIcon
-                        sx={{
-                            width: 'auto',
-                            minWidth: '40px'
-                        }}
+                        {openSub ? <ExpandLess sx={{ color: theme.navStyle.color }} /> : <ExpandMore sx={{ color: theme.navStyle.color }} />}
+                    </ListItemButton>
+                    <Collapse
+                        in={openSub}
+                        timeout="auto"
+                        unmountOnExit
                     >
-                        <SchoolIcon sx={{
-                            ...styles.icon,
-                            color: selected === User.schools[0] ? theme.navStyle.bold : theme.navStyle.color
-                        }}
+                        <Box style={{ display: 'flex' }}>
+                            <VerticalLine
+                                width='50px'
+                                color={theme.navStyle.color}
+                            />
+                            <List component="div" disablePadding>
+                                {User.schools.map((item, index) => {
+                                    return (
+                                        <ListItemButton
+                                            key={index}
+                                            component={Link}
+                                            to={'/schools'}
+                                            selected={selected === item}
+                                            onClick={() => { setSelected(item) }}
+                                            sx={theme.navStyle.button}
+                                        >
+                                            <ListItemText
+                                                primary={item}
+                                                primaryTypographyProps={{
+                                                    ...styles.text,
+                                                    ...(selected === item
+                                                        ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                                        : { color: theme.navStyle.color }
+                                                    )
+                                                }}
+                                            />
+                                        </ListItemButton>
+                                    )
+                                })}
+                            </List>
+                        </Box>
+                    </Collapse>
+                </React.Fragment> : //If user has only one school
+                <React.Fragment>
+                    <ListItemButton
+                        component={Link}
+                        to={'/schools'}
+                        sx={theme.navStyle.button}
+                        selected={selected === User.schools[0]}
+                        onClick={() => { setSelected(User.schools[0]) }}
+                    >
+                        <ListItemIcon
+                            sx={{
+                                width: 'auto',
+                                minWidth: '40px'
+                            }}
+                        >
+                            <SchoolIcon sx={{
+                                ...styles.icon,
+                                color: selected === User.schools[0] ? theme.navStyle.bold : theme.navStyle.color
+                            }}
+                            />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={"School"}
+                            primaryTypographyProps={
+                                selected === User.schools[0]
+                                    ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                    : { color: theme.navStyle.color }
+                            }
                         />
-                    </ListItemIcon>
-                    <ListItemText
-                        primary={"School"}
-                        primaryTypographyProps={
-                            selected === User.schools[0]
-                                ? { color: theme.navStyle.bold, fontWeight: 'bold' }
-                                : { color: theme.navStyle.color }
-                        }
-                    />
-                </ListItemButton>
-            </React.Fragment>
+                    </ListItemButton>
+                </React.Fragment>
+            ) : null //return nothing, or skip if no schools assigned to user
     )
 }
 
