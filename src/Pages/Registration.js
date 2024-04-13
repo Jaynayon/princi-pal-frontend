@@ -18,7 +18,7 @@ const RegistrationPage = () => {
       width: "100vw", 
       height: "100vh", 
       position: "relative", 
-      overflow: "hidden",
+      overflow: "auto",
       backgroundImage: `url(/bg.png)`, // Use the url() function to specify the background image
       backgroundSize: 'cover', // Adjust background image size
       backgroundPosition: 'center', // Adjust background image position

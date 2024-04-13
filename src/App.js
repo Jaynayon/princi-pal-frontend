@@ -9,7 +9,7 @@ import Settings from './Pages/Settings.js'
 import Login from './Pages/Login.js'
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
-import WelcomePage from './WelcomePage.js';
+import WelcomePage from './Pages/WelcomePage.js';
 import Registration from './Pages/Registration.js';
 import { School } from '@mui/icons-material';
 
