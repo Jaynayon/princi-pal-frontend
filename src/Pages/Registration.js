@@ -14,9 +14,36 @@ const RegistrationPage = () => {
   };
 
   return (
-    <Container maxWidth={false} style={{ width: "100vw", height: "100vh", position: "relative", backgroundColor: "#fff" }}>
-      <div style={{ position: "absolute", top: "0", left: "0", width: "100%", height: "100%", background: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff", boxShadow: "0px 4px 16px rgba(75, 0, 129, 0.26)", transform: "rotate(-180deg)", transformOrigin: "0 0", opacity: "0.2" }} />
-      <Container maxWidth="sm" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+    <Container maxWidth={false} style={{ 
+      width: "100vw", 
+      height: "100vh", 
+      position: "relative", 
+      overflow: "hidden",
+      backgroundImage: `url(/bg.png)`, // Use the url() function to specify the background image
+      backgroundSize: 'cover', // Adjust background image size
+      backgroundPosition: 'center', // Adjust background image position
+    }}>
+      <div style={{ 
+        position: "absolute", 
+        top: "0", 
+        left: "0", 
+        width: "100%", 
+        height: "100%", 
+        background: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff", 
+        boxShadow: "0px 4px 16px rgba(75, 0, 129, 0.26)", 
+        transform: "rotate(-180deg)", 
+        transformOrigin: "0 0", 
+        opacity: "0.2" 
+      }} />
+      <Container maxWidth="sm" style={{ 
+        minHeight: "100vh", 
+        display: "flex", 
+        flexDirection: "column", 
+        justifyContent: "center", 
+        alignItems: "center", 
+        position: "relative", 
+        zIndex: 1 
+      }}>
         <div style={{ marginBottom: "1rem" }}>
           <b style={{ fontSize: "2rem", fontFamily: "Mulish", color: "#000" }}>Create a new account</b>
         </div>
@@ -38,10 +65,10 @@ const RegistrationPage = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ backgroundColor: "#fff" }}
+            sx={{ backgroundColor: "#DBF0FD" }}
           />
         ))}
-        <FormControl variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left" }}>
+        <FormControl variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD" }}> {/* Add backgroundColor style */}
           <InputLabel color="primary">Position</InputLabel>
           <Select color="primary" label="Position" displayEmpty>
             <MenuItem value="" disabled>Choose your position</MenuItem>
