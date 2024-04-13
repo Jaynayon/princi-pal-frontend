@@ -28,10 +28,11 @@ function Schools(props) {
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
-
                             <Box sx={{}} >
                                 <DateFilter />
+                                <Paper sx={{ position: 'absolute', width: '300px', height: '100px' }}>
 
+                                </Paper>
                             </Box>
                             <FieldsFilter />
                             <SearchFilter />
