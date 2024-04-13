@@ -1,4 +1,3 @@
-// React imports
 import React, { useState, useEffect } from 'react';
 
 // Material-UI imports
@@ -19,6 +18,15 @@ import SettingsIcon from '@mui/icons-material/Settings';
 // Custom component import
 import DisplaySchools from './DisplaySchools';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import { blue } from '@mui/material/colors';
 
 export function DisplayItems() {
     const theme = useTheme();
@@ -107,6 +115,17 @@ export function DisplayItems() {
 export const ProfileTab = ({ user }) => {
     const theme = useTheme();
     const [selected, setSelected] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
+
+
+    const handleDialogOpen = () => {
+        setDialogOpen(true);
+    };
+
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+        setSelected(false)
+    };
     const adjustSecondaryTypography = () => {
         // Define a threshold length for email after which font size will be reduced
         const thresholdLength = 10;
@@ -127,13 +146,19 @@ export const ProfileTab = ({ user }) => {
                     padding: '5px',
                 }}
                 selected={selected}
-                onClick={() => setSelected(!selected)}>
+                onClick={() => {
+                    setSelected(!selected);
+                    handleDialogOpen();
+                }}
+            >
+
                 <ListItemIcon
                     sx={{
                         minWidth: '40px',
                         width: '50px'
                     }}
                 >
+
                     <AccountCircleIcon
                         sx={{
                             color: theme.navStyle.color,
@@ -141,14 +166,35 @@ export const ProfileTab = ({ user }) => {
                             width: '100%',
                         }}
                     />
+
                 </ListItemIcon>
+
                 <ListItemText
                     primary={user.name}
                     secondary={user.email}
                     primaryTypographyProps={{ fontWeight: 'bold', color: theme.navStyle.color }}
                     secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
                 />
+
             </ListItemButton>
+            <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                <DialogTitle>My Profile</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={2} margin={2} direction="row" alignItems="center">
+                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 100 }} alt="User Avatar" />
+                        <Stack spacing={2}>
+                            <TextField disabled id="outlined-disabled" label="Name" defaultValue={user.name} margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Email" defaultValue={user.email} margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Role" defaultValue="ADAS" margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Number" defaultValue="0935 256 2584" margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Location" defaultValue="Tisa Labangon" margin="normal" />
+                        </Stack>
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </React.Fragment>
     );
 };
