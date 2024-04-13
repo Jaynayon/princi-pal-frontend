@@ -36,6 +36,7 @@ function App() {
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registration />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Route>
     )
   )
