@@ -5,10 +5,11 @@ import { Typography, Container, Box } from "@mui/material";
 const WelcomePage = () => {
   return (
     <Container
+    maxWidth="false"
       sx={{
-        position: "relative",
+        position: "relative", 
         backgroundColor: "#fff",
-        minHeight: "100vh",
+        Height: "100vh",
         textAlign: "left",
         fontSize: "24px",
         color: "#4a99d3",
