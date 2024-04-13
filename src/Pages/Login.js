@@ -4,7 +4,7 @@ function Login({ setIsLoggedIn }) {
     return (
         <>
             <div>
-                Login
+                Logins
             </div>
             <button onClick={() => setIsLoggedIn(true)}>
                 Click to Login
