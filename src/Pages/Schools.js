@@ -6,13 +6,12 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { DateFilter, FieldsFilter, SearchFilter } from '../Components/Filters/Filters'
-import { useState } from 'react';
-import { useEffect } from 'react';
+//import { useState } from 'react';
+//import { useEffect } from 'react';
 
 //xs, sm, md sizes are important
 
 function Schools(props) {
-
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
             <Grid container spacing={2} sx={{ position: 'relative' }}> {/*relative to allow date component to float*/}
@@ -30,7 +29,7 @@ function Schools(props) {
                         <Box style={styles.header.buttons}>
                             <Box sx={{}} >
                                 <DateFilter />
-                                <Paper sx={{ position: 'absolute', width: '300px', height: '100px' }}>
+                                <Paper sx={{ display: 'flex', position: 'absolute', width: '300px', height: '15%' }}>
 
                                 </Paper>
                             </Box>
