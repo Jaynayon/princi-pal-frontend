@@ -30,7 +30,7 @@ const WelcomePage = () => {
               alignItems: 'center',
               padding: '20px',
             }}
-          >
+          > 
             <Box sx={{
               display: 'flex',
               flexDirection: 'column',
