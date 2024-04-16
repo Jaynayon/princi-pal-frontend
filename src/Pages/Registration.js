@@ -123,8 +123,14 @@ const RegistrationPage = () => {
             type={index >= 3 ? (showPassword ? "text" : "password") : "text"}
             value={item.value}
             onChange={item.onChange}
-            error={item.error && index === 0} // Show error for email field only
-            helperText={item.error && index === 0 ? "Invalid email address" : (index === 3 && passwordError ? "Password must contain at least 8 characters and one special character" : (index === 4 && confirmPasswordError ? "Passwords don't match" : ""))}
+            error={item.error && index === 3} // Show error for password field and confirm password field
+            helperText={item.error && index === 3 ? 
+              <span style={{ color: 'red' }}>Password must contain at least 8 characters and one special character</span> : 
+              (index === 4 && confirmPasswordError ? 
+                <span style={{ color: 'red' }}>Passwords don't match</span> : 
+                ""
+              )
+            }
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
               endAdornment: index >= 3 && (
