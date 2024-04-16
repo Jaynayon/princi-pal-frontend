@@ -8,9 +8,69 @@ import EmailIcon from '@mui/icons-material/Email';
 
 const RegistrationPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [fullname, setFullname] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
+  };
+
+  const validateEmail = (input) => {
+    // Regular expression for email validation
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(input);
+  };
+
+  const validatePassword = (input) => {
+    // Password must contain at least 8 characters including one letter, one number, and one special character
+    const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(input);
+  };
+
+  const handleEmailChange = (event) => {
+    const { value } = event.target;
+    setEmail(value);
+    setEmailError(!validateEmail(value));
+  };
+
+  const handlePasswordChange = (event) => {
+    const { value } = event.target;
+    setPassword(value);
+    setPasswordError(!validatePassword(value));
+    // Check if confirm password matches password
+    if (confirmPassword && value !== confirmPassword) {
+      setConfirmPasswordError(true);
+    } else {
+      setConfirmPasswordError(false);
+    }
+  };
+
+  const handleConfirmPasswordChange = (event) => {
+    const { value } = event.target;
+    setConfirmPassword(value);
+    // Check if confirm password matches password
+    if (password && value !== password) {
+      setConfirmPasswordError(true);
+    } else {
+      setConfirmPasswordError(false);
+    }
+  };
+
+  const handleSubmit = () => {
+    // Handle form submission
+    if (!emailError && !passwordError && !confirmPasswordError) {
+      // Form is valid, proceed with submission
+      console.log("Form submitted successfully");
+    } else {
+      // Form contains errors, display validation messages or prevent submission
+      console.log("Form contains errors");
+    }
   };
 
   return (
@@ -47,7 +107,13 @@ const RegistrationPage = () => {
         <div style={{ marginBottom: "1rem" }}>
           <b style={{ fontSize: "2rem", fontFamily: "Mulish", color: "#000" }}>Create a new account</b>
         </div>
-        {[{ label: "Email", icon: <EmailIcon /> }, { label: "Username", icon: <PersonIcon /> }, { label: "Fullname", icon: <PersonIcon /> }, { label: "Password", icon: <LockIcon /> }, { label: "Confirm Password", icon: <LockIcon /> }].map((item, index) => (
+        {[
+          { label: "Email", icon: <EmailIcon />, value: email, error: emailError, onChange: handleEmailChange },
+          { label: "Username", icon: <PersonIcon />, value: username, error: false, onChange: (e) => setUsername(e.target.value) },
+          { label: "Fullname", icon: <PersonIcon />, value: fullname, error: false, onChange: (e) => setFullname(e.target.value) },
+          { label: "Password", icon: <LockIcon />, value: password, error: passwordError, onChange: handlePasswordChange },
+          { label: "Confirm Password", icon: <LockIcon />, value: confirmPassword, error: confirmPasswordError, onChange: handleConfirmPasswordChange },
+        ].map((item, index) => (
           <TextField
             key={index}
             style={{ marginBottom: "1rem", width: "100%" }}
@@ -55,6 +121,10 @@ const RegistrationPage = () => {
             label={item.label}
             variant="outlined"
             type={index >= 3 ? (showPassword ? "text" : "password") : "text"}
+            value={item.value}
+            onChange={item.onChange}
+            error={item.error && index === 3 ? passwordError : item.error}
+            helperText={item.error && index === 3 ? "Password must contain at least 8 characters and one special character" : (index === 4 && confirmPasswordError ? "Passwords don't match" : "")}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
               endAdornment: index >= 3 && (
@@ -68,7 +138,7 @@ const RegistrationPage = () => {
             sx={{ backgroundColor: "#DBF0FD" }}
           />
         ))}
-        <FormControl variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD" }}> {/* Add backgroundColor style */}
+        <FormControl variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD" }}>
           <InputLabel color="primary">Position</InputLabel>
           <Select color="primary" label="Position" displayEmpty>
             <MenuItem value="" disabled>Choose your position</MenuItem>
@@ -77,7 +147,12 @@ const RegistrationPage = () => {
             <MenuItem value="guest">ADOF</MenuItem>
           </Select>
         </FormControl>
-        <Button style={{ backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem" }} disableElevation variant="contained">
+        <Button
+          style={{ backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem" }}
+          disableElevation
+          variant="contained"
+          onClick={handleSubmit} // Call handleSubmit function on button click
+        >
           Create Account
         </Button>
         <Link to="/Login" className="signInLink" style={{ textDecoration: "none", color: "#3048c1" }}>
