@@ -21,7 +21,6 @@ const RegistrationPage = () => {
   const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [position, setPosition] = useState('');
-  const { createUser } = require('../Services/RestService')
 
   const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
