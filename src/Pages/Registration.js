@@ -5,6 +5,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
+import RestService from "../Services/RestService";
 
 const RegistrationPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +21,7 @@ const RegistrationPage = () => {
   const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [position, setPosition] = useState('');
+  const { createUser } = require('../Services/RestService')
 
   const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
@@ -69,27 +71,13 @@ const RegistrationPage = () => {
   const handleSubmit = async () => {
     if (!emailError && !passwordError && !confirmPasswordError) {
       try {
-        const response = await fetch('http://localhost:4000/users', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            fname: firstName,
-            mname: middleName,
-            lname: lastName,
-            username: username,
-            email: email,
-            password: password,
-            position: position,
-          }),
-        });
-        if (response.ok) {
+        const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, 'ADAS')//dapat position ta ni diri
+        if (response) {
           console.log("Registration successful");
           // Redirect to login page or display a success message
         } else {
-          const data = await response.json();
-          setRegistrationError(data.error || "Registration failed");
+          //const data = await response.json();
+          //setRegistrationError(data.error || "Registration failed");
         }
       } catch (error) {
         console.error("Error:", error);
@@ -101,35 +89,35 @@ const RegistrationPage = () => {
   };
 
   return (
-    <Container maxWidth={false} style={{ 
-      width: "100vw", 
-      height: "100vh", 
-      position: "relative", 
+    <Container maxWidth={false} style={{
+      width: "100vw",
+      height: "100vh",
+      position: "relative",
       overflow: "auto",
       backgroundImage: `url(/bg.png)`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}>
-      <div style={{ 
-        position: "absolute", 
-        top: "0", 
-        left: "0", 
-        width: "100%", 
-        height: "100%", 
-        background: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff", 
-        boxShadow: "0px 4px 16px rgba(75, 0, 129, 0.26)", 
-        transform: "rotate(-180deg)", 
-        transformOrigin: "0 0", 
-        opacity: "0.2" 
+      <div style={{
+        position: "absolute",
+        top: "0",
+        left: "0",
+        width: "100%",
+        height: "100%",
+        background: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff",
+        boxShadow: "0px 4px 16px rgba(75, 0, 129, 0.26)",
+        transform: "rotate(-180deg)",
+        transformOrigin: "0 0",
+        opacity: "0.2"
       }} />
-      <Container maxWidth="sm" style={{ 
-        minHeight: "100vh", 
-        display: "flex", 
-        flexDirection: "column", 
-        justifyContent: "center", 
-        alignItems: "center", 
-        position: "relative", 
-        zIndex: 1 
+      <Container maxWidth="sm" style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+        zIndex: 1
       }}>
         <div style={{ marginBottom: "1rem" }}>
           <b style={{ fontSize: "2rem", fontFamily: "Mulish", color: "#000" }}>Create a new account</b>
@@ -152,7 +140,7 @@ const RegistrationPage = () => {
             type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={item.value}
             onChange={item.onChange}
-            error={item.error && index === 0} 
+            error={item.error && index === 0}
             helperText={item.error && index === 0 ? "Invalid email address" : (index === 5 && passwordError ? "Password must contain at least 8 characters and one special character" : (index === 6 && confirmPasswordError ? "Passwords don't match" : ""))}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
@@ -183,7 +171,7 @@ const RegistrationPage = () => {
           style={{ backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem" }}
           disableElevation
           variant="contained"
-          onClick={handleSubmit} 
+          onClick={handleSubmit}
         >
           Create Account
         </Button>
