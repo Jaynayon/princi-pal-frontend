@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import { Link } from "react-router-dom";
 import { Container, TextField, InputAdornment, IconButton, Button, Select, InputLabel, MenuItem, FormControl } from "@mui/material";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -12,6 +11,7 @@ const RegistrationPage = () => {
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+  const [registrationError, setRegistrationError] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -19,19 +19,18 @@ const RegistrationPage = () => {
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [position, setPosition] = useState('');
 
   const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
   };
 
   const validateEmail = (input) => {
-    // Regular expression for email validation
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(input);
   };
 
   const validatePassword = (input) => {
-    // Password must contain at least 8 characters including one letter, one number, and one special character
     const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(input);
   };
@@ -46,7 +45,6 @@ const RegistrationPage = () => {
     const { value } = event.target;
     setPassword(value);
     setPasswordError(!validatePassword(value));
-    // Check if confirm password matches password
     if (confirmPassword && value !== confirmPassword) {
       setConfirmPasswordError(true);
     } else {
@@ -57,7 +55,6 @@ const RegistrationPage = () => {
   const handleConfirmPasswordChange = (event) => {
     const { value } = event.target;
     setConfirmPassword(value);
-    // Check if confirm password matches password
     if (password && value !== password) {
       setConfirmPasswordError(true);
     } else {
@@ -65,13 +62,40 @@ const RegistrationPage = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Handle form submission
+  const handlePositionChange = (event) => {
+    setPosition(event.target.value);
+  };
+
+  const handleSubmit = async () => {
     if (!emailError && !passwordError && !confirmPasswordError) {
-      // Form is valid, proceed with submission
-      console.log("Form submitted successfully");
+      try {
+        const response = await fetch('http://localhost:4000/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fname: firstName,
+            mname: middleName,
+            lname: lastName,
+            username: username,
+            email: email,
+            password: password,
+            position: position,
+          }),
+        });
+        if (response.ok) {
+          console.log("Registration successful");
+          // Redirect to login page or display a success message
+        } else {
+          const data = await response.json();
+          setRegistrationError(data.error || "Registration failed");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        setRegistrationError("Registration failed");
+      }
     } else {
-      // Form contains errors, display validation messages or prevent submission
       console.log("Form contains errors");
     }
   };
@@ -82,9 +106,9 @@ const RegistrationPage = () => {
       height: "100vh", 
       position: "relative", 
       overflow: "auto",
-      backgroundImage: `url(/bg.png)`, // Use the url() function to specify the background image
-      backgroundSize: 'cover', // Adjust background image size
-      backgroundPosition: 'center', // Adjust background image position
+      backgroundImage: `url(/bg.png)`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
     }}>
       <div style={{ 
         position: "absolute", 
@@ -128,7 +152,7 @@ const RegistrationPage = () => {
             type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={item.value}
             onChange={item.onChange}
-            error={item.error && index === 0} // Show error for email field only
+            error={item.error && index === 0} 
             helperText={item.error && index === 0 ? "Invalid email address" : (index === 5 && passwordError ? "Password must contain at least 8 characters and one special character" : (index === 6 && confirmPasswordError ? "Passwords don't match" : ""))}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
@@ -145,18 +169,21 @@ const RegistrationPage = () => {
         ))}
         <FormControl variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD" }}>
           <InputLabel color="primary">Position</InputLabel>
-          <Select color="primary" label="Position" displayEmpty>
+          <Select color="primary" label="Position" displayEmpty value={position} onChange={handlePositionChange}>
             <MenuItem value="" disabled>Choose your position</MenuItem>
             <MenuItem value="administrator">ADAS</MenuItem>
             <MenuItem value="principal">Principal</MenuItem>
             <MenuItem value="guest">ADOF</MenuItem>
           </Select>
         </FormControl>
+        {registrationError && (
+          <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
+        )}
         <Button
           style={{ backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem" }}
           disableElevation
           variant="contained"
-          onClick={handleSubmit} // Call handleSubmit function on button click
+          onClick={handleSubmit} 
         >
           Create Account
         </Button>
