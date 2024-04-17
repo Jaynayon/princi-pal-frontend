@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { Link } from "react-router-dom";
 import { Container, TextField, InputAdornment, IconButton, Button, Select, InputLabel, MenuItem, FormControl } from "@mui/material";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -14,7 +15,9 @@ const RegistrationPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [fullname, setFullname] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleShowPasswordClick = () => {
@@ -110,7 +113,9 @@ const RegistrationPage = () => {
         {[
           { label: "Email", icon: <EmailIcon />, value: email, error: emailError, onChange: handleEmailChange },
           { label: "Username", icon: <PersonIcon />, value: username, error: false, onChange: (e) => setUsername(e.target.value) },
-          { label: "Fullname", icon: <PersonIcon />, value: fullname, error: false, onChange: (e) => setFullname(e.target.value) },
+          { label: "First Name", icon: <PersonIcon />, value: firstName, error: false, onChange: (e) => setFirstName(e.target.value) },
+          { label: "Middle Name", icon: <PersonIcon />, value: middleName, error: false, onChange: (e) => setMiddleName(e.target.value) },
+          { label: "Last Name", icon: <PersonIcon />, value: lastName, error: false, onChange: (e) => setLastName(e.target.value) },
           { label: "Password", icon: <LockIcon />, value: password, error: passwordError, onChange: handlePasswordChange },
           { label: "Confirm Password", icon: <LockIcon />, value: confirmPassword, error: confirmPasswordError, onChange: handleConfirmPasswordChange },
         ].map((item, index) => (
@@ -120,14 +125,14 @@ const RegistrationPage = () => {
             color="primary"
             label={item.label}
             variant="outlined"
-            type={index >= 3 ? (showPassword ? "text" : "password") : "text"}
+            type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={item.value}
             onChange={item.onChange}
             error={item.error && index === 0} // Show error for email field only
-            helperText={item.error && index === 0 ? "Invalid email address" : (index === 3 && passwordError ? "Password must contain at least 8 characters and one special character" : (index === 4 && confirmPasswordError ? "Passwords don't match" : ""))}
+            helperText={item.error && index === 0 ? "Invalid email address" : (index === 5 && passwordError ? "Password must contain at least 8 characters and one special character" : (index === 6 && confirmPasswordError ? "Passwords don't match" : ""))}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
-              endAdornment: index >= 3 && (
+              endAdornment: index >= 5 && (
                 <InputAdornment position="end">
                   <IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility">
                     <VisibilityOffIcon />
