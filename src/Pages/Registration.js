@@ -68,25 +68,37 @@ const RegistrationPage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!emailError && !passwordError && !confirmPasswordError) {
-      try {
-        const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, 'ADAS')//dapat position ta ni diri
-        if (response) {
-          console.log("Registration successful");
-          // Redirect to login page or display a success message
-        } else {
-          //const data = await response.json();
-          //setRegistrationError(data.error || "Registration failed");
-        }
-      } catch (error) {
-        console.error("Error:", error);
+  if (!emailError && !passwordError && !confirmPasswordError) {
+    try {
+      const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
+      if (response) {
+        console.log("Registration successful");
+        // Clear form fields after successful registration
+        setEmail('');
+        setPassword('');
+        setUsername('');
+        setFirstName('');
+        setMiddleName('');
+        setLastName('');
+        setConfirmPassword('');
+        setPosition('');
+        // Clear any registration error message
+        setRegistrationError('');
+        // Redirect to login page or display a success message
+      } else {
         setRegistrationError("Registration failed");
       }
-    } else {
-      console.log("Form contains errors");
+    } catch (error) {
+      console.error("Error:", error);
+      setRegistrationError("Registration failed");
     }
-  };
+  } else {
+    console.log("Form contains errors");
+  }
+};
 
+  
+  
   return (
     <Container maxWidth={false} style={{
       width: "100vw",
@@ -103,11 +115,6 @@ const RegistrationPage = () => {
         left: "0",
         width: "100%",
         height: "100%",
-        background: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff",
-        boxShadow: "0px 4px 16px rgba(75, 0, 129, 0.26)",
-        transform: "rotate(-180deg)",
-        transformOrigin: "0 0",
-        opacity: "0.2"
       }} />
       <Container maxWidth="sm" style={{
         minHeight: "100vh",
@@ -156,24 +163,35 @@ const RegistrationPage = () => {
         ))}
         <FormControl variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD" }}>
           <InputLabel color="primary">Position</InputLabel>
-          <Select color="primary" label="Position" displayEmpty value={position} onChange={handlePositionChange}>
-            <MenuItem value="" disabled>Choose your position</MenuItem>
-            <MenuItem value="administrator">ADAS</MenuItem>
-            <MenuItem value="principal">Principal</MenuItem>
-            <MenuItem value="guest">ADOF</MenuItem>
-          </Select>
+          <Select
+          color="primary"
+          label="Position"
+          displayEmpty
+          value={position}
+          onChange={handlePositionChange} // Update this line
+        >
+          <MenuItem value="" disabled>Choose your position</MenuItem>
+          <MenuItem value="ADAS">ADAS</MenuItem>
+          <MenuItem value="Principal">Principal</MenuItem>
+          <MenuItem value="ADOF">ADOF</MenuItem>
+        </Select>
+
         </FormControl>
         {registrationError && (
           <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
         )}
         <Button
-          style={{ backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem" }}
-          disableElevation
-          variant="contained"
-          onClick={handleSubmit}
-        >
-          Create Account
-        </Button>
+        style={{ backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem" }}
+        disableElevation
+        variant="contained"
+        onClick={() => {
+          handleSubmit(); // Call the submit function to handle registration
+          // Redirect to the dashboard after successful registration
+          window.location.href = "/dashboard"; // Change this to the correct URL if needed
+        }}
+      >
+        Create Account
+      </Button>
         <Link to="/Login" className="signInLink" style={{ textDecoration: "none", color: "#3048c1" }}>
           <span>{`Do you have an account? `}</span>
           <b>Sign in</b>

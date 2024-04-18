@@ -1,6 +1,7 @@
 import { useState } from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { TextField, InputAdornment, IconButton, Button, Typography, Paper, Container } from "@mui/material";
+import RestService from "../Services/RestService";
 
 const LoginPage = ({ setIsLoggedIn }) => {
     const [showPassword, setShowPassword] = useState(false);
@@ -12,36 +13,40 @@ const LoginPage = ({ setIsLoggedIn }) => {
         setShowPassword(prevShowPassword => !prevShowPassword);
     };
 
-    const handleLogin = () => {
-        // Basic email validation
-        if (!email) {
-            setLoginError('Please enter your email');
-            return;
-        }
-
-        // Basic password validation
-        if (!password) {
-            setLoginError('Please enter your password');
-            return;
-        }
-
-        // Here you would typically make a backend API call to verify the credentials
-        // For now, let's assume a hardcoded email and password for demonstration
-        const validEmail = 'user@example.com';
-        const validPassword = 'password';
-
-        if (email === validEmail && password === validPassword) {
-            // Credentials are valid, set isLoggedIn to true
-            setIsLoggedIn(true);
-        } else {
-            // Invalid credentials, display error message
-            setLoginError('Incorrect email or password');
+    const handleLogin = async () => {
+        try {
+            // Make a POST request to the backend to validate the credentials
+            const response = await RestService.authenticateUser(email,password)
+            console.log(response)
+    
+            if (response) {
+                // Credentials are valid, set isLoggedIn to true
+                setIsLoggedIn(true);
+                window.location.href = "http://localhost:3000/dashboard"
+            } else {
+                // Invalid credentials, display error message
+                setLoginError('Incorrect email or password');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (error.message.includes('404')) {
+                setLoginError('Endpoint not found. Please check the server configuration.');
+            } else {
+                setLoginError('An error occurred while logging in. Please try again later.');
+            }
         }
     };
-
+    
     return (
-        <Container maxWidth="false" style={{ backgroundColor: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff", height: "100vh", overflow: "auto", textAlign: "left", fontSize: "15px", color: "#000", fontFamily: "Mulish", position: "relative", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <Paper elevation={0} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1, opacity: 0.2, background: "linear-gradient(1.02deg, #4a99d3 7.81%, rgba(74, 153, 211, 0)), #fff" }} />
+        <Container maxWidth={false} style={{
+            width: "100vw",
+            height: "100vh",
+            position: "relative",
+            overflow: "auto",
+            backgroundImage: `url(/bg.png)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}>
             <TextField color="primary" label="Enter your email id" variant="outlined" value={email} onChange={(e) => setEmail(e.target.value)} sx={{ "& .MuiInputBase-root": { height: "47px" }, width: "445px", position: "absolute", top: "442px", left: "159px" }} />
             <Typography variant="subtitle1" sx={{ position: "absolute", top: "393px", left: "159px", fontSize: "18px", fontWeight: "600" }}>Email</Typography>
             <TextField color="primary" label="Enter your password" variant="outlined" type={showPassword ? "text" : "password"} InputProps={{ endAdornment: (<InputAdornment position="end"><IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility"><VisibilityOffIcon /></IconButton></InputAdornment>) }} value={password} onChange={(e) => setPassword(e.target.value)} sx={{ "& .MuiInputBase-root": { height: "47px" }, width: "445px", position: "absolute", top: "596px", left: "159px" }} />
