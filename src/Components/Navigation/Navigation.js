@@ -17,6 +17,7 @@ import Grid from "@mui/material/Grid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import SearchIcon from "@mui/icons-material/Search";
 
 // Custom imports
 import { styling } from "./styling";
@@ -99,6 +100,29 @@ const displayTitle = (selected) => {
 
 export default function Navigation({ children }) {
   const { open, toggleDrawer, selected, navStyle } = useNavigationContext();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const [options, setOptions] = React.useState([
+    "CIT-U is inviting you to be a part of the organization",
+    "Your application at CTU has been cancelled",
+    "Budget limit exceeded; urgent action required to align expenses with allocated funds",
+    "Congratulations, you have passed the first phase of the application process",
+    "CIM is inviting you to be a part of the organization",
+  ]);
+
+  const handleClearOptions = () => {
+    setOptions([]); // Clear options by setting it to an empty array
+  };
+
+  const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
     typography: {
