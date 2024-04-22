@@ -8,21 +8,32 @@ const LoginPage = ({ setIsLoggedIn }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
+    const handleEmailFieldClick = () => {
+    setLoginError('');
+};
 
+const handlePasswordFieldClick = () => {
+    setLoginError('');
+};
     const handleShowPasswordClick = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
     };
 
     const handleLogin = async () => {
         try {
+            if (!email.trim() || !password.trim()) {
+                setLoginError('Please input your email and password.');
+                return;
+            }
+    
             // Make a POST request to the backend to validate the credentials
-            const response = await RestService.authenticateUser(email,password)
-            console.log(response)
+            const response = await RestService.authenticateUser(email, password);
+            console.log(response);
     
             if (response) {
                 // Credentials are valid, set isLoggedIn to true
                 setIsLoggedIn(true);
-                window.location.href = "http://localhost:3000/dashboard"
+                window.location.href = "http://localhost:3000/dashboard";
             } else {
                 // Invalid credentials, display error message
                 setLoginError('Incorrect email or password');
@@ -36,6 +47,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
             }
         }
     };
+    
     
     return (
         <Container maxWidth={false} style={{
