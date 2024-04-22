@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import FormHelperText from '@mui/material/FormHelperText';
+
 import { Container, TextField, InputAdornment, IconButton, Button, Select, InputLabel, MenuItem, FormControl } from "@mui/material";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LockIcon from '@mui/icons-material/Lock';
@@ -161,22 +163,23 @@ const RegistrationPage = () => {
             sx={{ backgroundColor: "#DBF0FD" }}
           />
         ))}
-        <FormControl variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD" }}>
-          <InputLabel color="primary">Position</InputLabel>
+        <FormControl required sx={{ m: 1, minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD" }}>
+          <InputLabel id="position-select-label" color="primary">Position *</InputLabel>
           <Select
-          color="primary"
-          label="Position"
-          displayEmpty
-          value={position}
-          onChange={handlePositionChange} // Update this line
-        >
-          <MenuItem value="" disabled>Choose your position</MenuItem>
-          <MenuItem value="ADAS">ADAS</MenuItem>
-          <MenuItem value="Principal">Principal</MenuItem>
-          <MenuItem value="ADOF">ADOF</MenuItem>
-        </Select>
-
-        </FormControl>
+              labelId="position-select-label"
+              id="position-select"
+              value={position}
+              onChange={handlePositionChange}
+              label="Position *"
+          >
+              <MenuItem value="">
+                  <em>None</em>
+              </MenuItem>
+              <MenuItem value="ADAS">ADAS</MenuItem>
+              <MenuItem value="Principal">Principal</MenuItem>
+              <MenuItem value="ADOF">ADOF</MenuItem>
+          </Select>
+      </FormControl>
         {registrationError && (
           <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
         )}
