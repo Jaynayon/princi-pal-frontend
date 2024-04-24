@@ -17,24 +17,28 @@ import TableCell from '@mui/material/TableCell';
 import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Menu } from '@mui/material';
 
 function People(props) {
     const [member, setMember] = useState('');
-    const handleChange = (event) => {
-        setMember(event.target.value);
-    };
-
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
+    const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
 
-    const handleMenuOpen = (event, index) => {
-        setAnchorEl(event.currentTarget);
+    const handleDropdownOpen = (event, index) => {
+        setDropdownAnchorEl(event.currentTarget);
+        setSelectedIndex(index);
+    };
+
+    const handleDeleteOpen = (event, index) => {
+        setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
     };
 
     const handleMenuClose = () => {
-        setAnchorEl(null);
+        setDropdownAnchorEl(null);
+        setDeleteAnchorEl(null);
         setSelectedIndex(null);
     };
 
@@ -43,7 +47,14 @@ function People(props) {
         console.log("Delete button clicked for row at index:", selectedIndex);
         // Close the menu after delete
         handleMenuClose();
-    }
+    };
+
+    const handleRoleChange = (newRole) => {
+        // Implement role change functionality here
+        console.log(`Role changed to ${newRole} for row at index:`, selectedIndex);
+        // Close the menu after role change
+        handleMenuClose();
+    };
 
     const rows = [
         { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
@@ -82,7 +93,7 @@ function People(props) {
                             id="demo-select-small"
                             value={member}
                             label="Member"
-                            onChange={handleChange}
+                            onChange={(event) => setMember(event.target.value)}
                         >
                             <MenuItem value="">
                                 <em>None</em>
@@ -101,23 +112,13 @@ function People(props) {
                     </Button>
                 </Grid>
                 <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '-5px' }}>
-                    <FormControl sx={{ m: 1, minWidth: 150 }} >
-                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
-                        <Select
-                            labelId="demo-select-small-label"
-                            id="demo-select-small"
-                            value={member}
-                            label="Member"
-                            onChange={handleChange}
-                        >
-                            <MenuItem value="">
-                                <em>None</em>
-                            </MenuItem>
-                            <MenuItem>CIT</MenuItem>
-                            <MenuItem>ACT</MenuItem>
-                            <MenuItem>SM CITY</MenuItem>
-                        </Select>
-                    </FormControl>
+                <TextField
+                        sx={{ margin: '20px', marginTop: '-5px', marginLeft: '6px' , width: '30%' }}
+                        id="invite"
+                        label="School Filter"
+                        variant="outlined"
+                        className="schoolFilter"
+                    />
                 </Grid>
                 <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px', marginTop: '-5px' }}>
                     <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
@@ -142,20 +143,41 @@ function People(props) {
                                             </Grid>
                                         </TableCell>
                                         <TableCell>{row.email}</TableCell>
-                                        <TableCell>{row.role}</TableCell>
+                                        <TableCell>
+                                            {/* Role with dropdown arrow */}
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span>{row.role}</span>
+                                                <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />
+                                            </div>
+                                            {/* Dropdown menu for role options */}
+                                            <Menu
+                                                id={`menu-dropdown-${index}`}
+                                                anchorEl={dropdownAnchorEl}
+                                                open={Boolean(dropdownAnchorEl && selectedIndex === index)}
+                                                onClose={handleMenuClose}
+                                            >
+                                                {/* Role options */}
+                                                <MenuItem onClick={() => handleRoleChange("ADMIN")}>ADMIN</MenuItem>
+                                                <MenuItem onClick={() => handleRoleChange("OWNER")}>OWNER</MenuItem>
+                                                <MenuItem onClick={() => handleRoleChange("ADAS")}>ADAS</MenuItem>
+                                                <MenuItem onClick={() => handleRoleChange("ADOF")}>ADOF</MenuItem>
+                                            </Menu>
+                                        </TableCell>
                                         <TableCell>{row.lastActivity}</TableCell>
                                         <TableCell>
+                                            {/* Delete button */}
                                             <Button
-                                                aria-controls={'menu-${index}'}
+                                                aria-controls={`menu-delete-${index}`}
                                                 aria-haspopup="true"
-                                                onClick={(event) => handleMenuOpen(event, index)}
+                                                onClick={(event) => handleDeleteOpen(event, index)}
                                             >
                                                 <MoreHorizIcon />
                                             </Button>
+                                            {/* Delete menu */}
                                             <Menu
-                                                id={`menu-${index}`}
-                                                anchorEl={anchorEl}
-                                                open={Boolean(anchorEl && selectedIndex === index)}
+                                                id={`menu-delete-${index}`}
+                                                anchorEl={deleteAnchorEl}
+                                                open={Boolean(deleteAnchorEl && selectedIndex === index)}
                                                 onClose={handleMenuClose}
                                             >
                                                 <MenuItem onClick={handleDelete}>Delete</MenuItem>
