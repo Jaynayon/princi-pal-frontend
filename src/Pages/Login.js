@@ -3,18 +3,21 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { TextField, InputAdornment, IconButton, Button, Typography, Paper, Container } from "@mui/material";
 import RestService from "../Services/RestService";
 import { Link } from 'react-router-dom';
+
 const LoginPage = ({ setIsLoggedIn }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
-    const handleEmailFieldClick = () => {
-    setLoginError('');
-};
 
-const handlePasswordFieldClick = () => {
-    setLoginError('');
-};
+    const handleEmailFieldClick = () => {
+        setLoginError('');
+    };
+
+    const handlePasswordFieldClick = () => {
+        setLoginError('');
+    };
+
     const handleShowPasswordClick = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
     };
@@ -22,21 +25,36 @@ const handlePasswordFieldClick = () => {
     const handleLogin = async () => {
         try {
             if (!email.trim() || !password.trim()) {
-                setLoginError('Please input your email and password.');
+                if (!email.trim() && !password.trim()) {
+                    setLoginError('Email or password cannot be empty.');
+                } else if (!email.trim()) {
+                    setLoginError('Please enter your email.');
+                } else {
+                    setLoginError('Please enter your password.');
+                }
+                setTimeout(() => setLoginError(''), 800); // Clear error after 0.8 seconds
                 return;
             }
-    
+
+            // Email format validation
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email.trim())) {
+                setLoginError('Invalid Email.');
+                setTimeout(() => setLoginError(''), 2000); // Clear error after 2 seconds
+                return;
+            }
+
             // Make a POST request to the backend to validate the credentials
             const response = await RestService.authenticateUser(email, password);
-            console.log(response);
-    
+
             if (response) {
                 // Credentials are valid, set isLoggedIn to true
                 setIsLoggedIn(true);
                 window.location.href = "http://localhost:3000/dashboard";
             } else {
                 // Invalid credentials, display error message
-                setLoginError('Incorrect email or password');
+                setLoginError('Incorrect email or password.');
+                setTimeout(() => setLoginError(''), 2000); // Clear error after 2 seconds
             }
         } catch (error) {
             console.error('Error:', error);
@@ -45,10 +63,10 @@ const handlePasswordFieldClick = () => {
             } else {
                 setLoginError('An error occurred while logging in. Please try again later.');
             }
+            setTimeout(() => setLoginError(''), 800); // Clear error after 0.8 seconds
         }
     };
-    
-    
+
     return (
         <Container maxWidth={false} style={{
             width: "100vw",
@@ -59,9 +77,31 @@ const handlePasswordFieldClick = () => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}>
-            <TextField color="primary" label="Enter your email id" variant="outlined" value={email} onChange={(e) => setEmail(e.target.value)} sx={{ "& .MuiInputBase-root": { height: "47px" }, width: "445px", position: "absolute", top: "442px", left: "159px" }} />
+            <TextField 
+                color="primary" 
+                label="Enter your email id" 
+                variant="outlined" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                sx={{ "& .MuiInputBase-root": { height: "47px" }, width: "445px", position: "absolute", top: "442px", left: "159px" }} 
+            />
             <Typography variant="subtitle1" sx={{ position: "absolute", top: "393px", left: "159px", fontSize: "18px", fontWeight: "600" }}>Email</Typography>
-            <TextField color="primary" label="Enter your password" variant="outlined" type={showPassword ? "text" : "password"} InputProps={{ endAdornment: (<InputAdornment position="end"><IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility"><VisibilityOffIcon /></IconButton></InputAdornment>) }} value={password} onChange={(e) => setPassword(e.target.value)} sx={{ "& .MuiInputBase-root": { height: "47px" }, width: "445px", position: "absolute", top: "596px", left: "159px" }} />
+            <TextField 
+                color="primary" 
+                label="Enter your password" 
+                variant="outlined" 
+                type={showPassword ? "text" : "password"} 
+                InputProps={{ 
+                    endAdornment: (<InputAdornment position="end">
+                                        <IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility">
+                                            <VisibilityOffIcon />
+                                        </IconButton>
+                                    </InputAdornment>) 
+                }} 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                sx={{ "& .MuiInputBase-root": { height: "47px" }, width: "445px", position: "absolute", top: "596px", left: "159px" }} 
+            />
             <Typography variant="subtitle1" sx={{ position: "absolute", top: "547px", left: "155px", fontSize: "18px", fontWeight: "600" }}>Password</Typography>
             {loginError && <Typography color="error" sx={{ position: "absolute", top: "650px", left: "159px", fontSize: "14px" }}>{loginError}</Typography>}
             <Typography sx={{ position: "absolute", top: "698px", left: "161px", fontWeight: "500" }}>Remember Me</Typography>
@@ -80,3 +120,4 @@ const handlePasswordFieldClick = () => {
 };
 
 export default LoginPage;
+    
