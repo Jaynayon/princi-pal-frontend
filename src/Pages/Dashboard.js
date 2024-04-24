@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { DateFilter } from '../Components/Filters/Filters';
+import { DateRangePicker } from 'react-date-range';
+import 'react-date-range/dist/styles.css'; 
+import 'react-date-range/dist/theme/default.css'; 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -10,6 +12,7 @@ import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
+import { FieldsFilter } from '../Components/Filters/Filters';
 
 const ApexChart = () => {
     const [options] = useState({
@@ -61,6 +64,14 @@ const ApexChart = () => {
 };
 
 function Dashboard(props) {
+    const [openCalendar, setOpenCalendar] = useState(false);
+    const [calendarDates, setCalendarDates] = useState([
+        {
+            startDate: new Date(),
+            endDate: new Date(),
+            key: 'selection'
+        }
+    ]);
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({
         'Monthly Budget': { currency: 'Php', amount: '0.00' },
@@ -79,7 +90,19 @@ function Dashboard(props) {
         const year = currentDate.getFullYear();
         return `${month} ${year}`;
     };
+    const handleOpenCalendar = () => {
+        setOpenCalendar(true);
+    };
 
+    // Function to handle closing calendar modal
+    const handleCloseCalendar = () => {
+        setOpenCalendar(false);
+    };
+
+    // Function to handle selecting dates in calendar
+    const handleSelectCalendar = (ranges) => {
+        setCalendarDates([ranges.selection]);
+    };
     const handleOpen = (text) => {
         setOpen(true);
         setClickedButton(text);
@@ -91,16 +114,20 @@ function Dashboard(props) {
 
     const handleChange = (event) => {
         const newValue = event.target.value;
-        if (newValue.length <= 12 && (/^-?\d*\.?\d*$/.test(newValue) || newValue === '')) {
+        if (
+            newValue === '' ||                      // Allow empty value
+            (newValue >= 0 && newValue <= 999999)  // Allow values between 0 and 999999
+        ) {
             setEditableAmounts({
                 ...editableAmounts,
                 [clickedButton]: { ...editableAmounts[clickedButton], amount: newValue }
             });
             setError('');
         } else {
-            setError('Please enter a valid number.');
+            setError('Please enter a valid number between 0 and 999,999.');
         }
     };
+    
 
 
     const handleSubmit = (event) => {
@@ -123,9 +150,11 @@ function Dashboard(props) {
         >
             {title}
             <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{editableAmounts[title].currency} {editableAmounts[title].amount}</p>
-            <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                <EditIcon sx={{ width: '30px', height: '30px' }} />
-            </Button>
+            {title !== 'Total Balance' && (
+                <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
+                    <EditIcon sx={{ width: '30px', height: '30px' }} />
+                </Button>
+            )}
             <Modal
                 open={open && clickedButton === title}
                 onClose={handleClose}
@@ -161,7 +190,7 @@ function Dashboard(props) {
             </Modal>
         </Paper>
     );
-
+    
     const renderSummaryCard = () => (
         <Paper
             sx={{
@@ -195,7 +224,7 @@ function Dashboard(props) {
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
-                            <DateFilter /> { }
+                            <FieldsFilter onClick={handleOpenCalendar} /> { /* Pass handleOpenCalendar to FieldsFilter */}
                         </Box>
                     </Paper>
                 </Grid>
@@ -264,12 +293,37 @@ function Dashboard(props) {
                         </Grid>
                     </Grid>
                 </Grid>
-
-
-
-
-
-
+                <Modal
+                    open={openCalendar}
+                    onClose={handleCloseCalendar}
+                    aria-labelledby="modal-calendar-title"
+                    aria-describedby="modal-calendar-description"
+                >
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                        width: 400,
+                        borderRadius: '15px',
+                        textAlign: 'center',
+                    }}>
+                        <Button onClick={handleCloseCalendar} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
+                        <h2 id="modal-calendar-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Select Date Range</h2>
+                        <DateRangePicker
+                            onChange={handleSelectCalendar}
+                            months={1}
+                            ranges={calendarDates}
+                            direction="horizontal"
+                        />
+                        <div style={{ marginTop: '20px' }}>
+                            <Button onClick={handleCloseCalendar} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Apply</Button>
+                        </div>
+                    </Box>
+                </Modal>
             </Grid>
         </Container>
     );
