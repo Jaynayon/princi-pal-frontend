@@ -107,7 +107,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
             <Typography sx={{ position: "absolute", top: "698px", left: "161px", fontWeight: "500" }}>Remember Me</Typography>
             <Typography sx={{ position: "absolute", top: "697px", left: "451px", fontWeight: "600", color: "#474bca" }}>Forgot Password?</Typography>
             <Button onClick={handleLogin} variant="contained" sx={{ position: "absolute", top: "766px", left: "160px", width: "443px", height: "44px", borderRadius: "5px" }}>Log in</Button>
-            <Typography variant="subtitle1" sx={{ position: "absolute", top: "820px", left: "18%", fontWeight: "600" }}>
+            <Typography variant="subtitle1" sx={{ position: "absolute", top: "820px", left: "18%", fontWeight: "500" }}>
                 Go back to 
                 <Link to="/" style={{ color: '#474bca', textDecoration: 'none', marginLeft: '5px' }}>Welcome Page</Link>
             </Typography>
