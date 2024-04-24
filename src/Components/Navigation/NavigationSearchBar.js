@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 
 import Dialog from "@mui/material/Dialog";
@@ -66,7 +67,7 @@ const NavigationSearchBar = () => {
   );
   return (
     <div style={{ width: "400px", position: "relative" }}>
-      <Paper
+      <Box
         component="form"
         sx={{
           p: "2px 4px",
@@ -76,15 +77,16 @@ const NavigationSearchBar = () => {
         }}
       >
         <InputBase
-          sx={{ ml: 1, flex: 1 }}
+          sx={{ ml: 1, flex: 1, textAlign: "right" }}
           placeholder=""
           value={query}
           onChange={handleInputChange}
+          inputProps={{ style: { textAlign: "right" } }} // Align text inside input to the right
         />
         <IconButton color="inherit" type="button" sx={{ p: "10px" }}>
           <SearchIcon />
         </IconButton>
-      </Paper>
+      </Box>
       {query && (
         <ul
           style={{

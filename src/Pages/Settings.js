@@ -3,6 +3,16 @@ import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
+import { lightGreen } from '@mui/material/colors';
+import { red } from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
+import { blueGrey } from '@mui/material/colors';
+import { deepPurple } from '@mui/material/colors';
+import { brown } from '@mui/material/colors';
+import { deepOrange } from '@mui/material/colors';
+import { yellow } from '@mui/material/colors';
+import { indigo } from '@mui/material/colors';
+import { pink } from '@mui/material/colors';
 import Typography from '@mui/material/Typography';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
@@ -10,7 +20,9 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
+import Popover from '@mui/material/Popover';
+import Stack from '@mui/material/Stack';
+
 
 const DemoPaper = styled(Paper)(({ theme }) => ({
     //width: 1200, adjust automatically
@@ -66,6 +78,19 @@ const ButtonWrapper = styled('div')({
 });
 
 function Settings() {
+        const [anchorEl, setAnchorEl] = React.useState(null);
+
+        const handleClick = (event) => {
+            setAnchorEl(event.currentTarget);
+        };
+
+        const handleClose = () => {
+            setAnchorEl(null);
+        };
+
+        const open = Boolean(anchorEl);
+        const id = open ? 'simple-popover' : undefined;
+
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
             <DemoPaper square={false}>
@@ -75,7 +100,39 @@ function Settings() {
                             <Avatar sx={{ bgcolor: blue[500], width: 130, height: 130, marginBottom: '15px' }}>J</Avatar>
                             <FabWrapper>
                                 <Fab size="small" color="black" aria-label="add">
-                                    <AddIcon />
+                                <AddIcon aria-describedby={id} variant="contained" onClick={handleClick}/>
+                                <Popover
+                                    id={id}
+                                    open={open}
+                                    anchorEl={anchorEl}
+                                    onClose={handleClose}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    }}
+                                    PaperProps={{
+                                        style: {
+                                            width: '220px', // Adjust width as needed
+                                            maxHeight: '300px', // Adjust height as needed
+                                        },
+                                    }}
+                                >
+                                    <Typography sx={{ p: 2 }}>Avatar color</Typography>
+                                    <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+                                        <Avatar sx={{ bgcolor: lightGreen[500], width: 30, height: 30 }} > </Avatar>
+                                        <Avatar sx={{ bgcolor: red[500], width: 30, height: 30 }} > </Avatar>
+                                        <Avatar sx={{ bgcolor: grey[900], width: 30, height: 30 }} > </Avatar>
+                                        <Avatar sx={{ bgcolor: blueGrey[500], width: 30, height: 30 }} > </Avatar>
+                                        <Avatar sx={{ bgcolor: deepPurple[500], width: 30, height: 30 }} > </Avatar>
+                                    </Stack>
+                                    <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+                                        <Avatar sx={{ bgcolor: brown[500], width: 30, height: 30 }} > </Avatar>
+                                        <Avatar sx={{ bgcolor: deepOrange[500], width: 30, height: 30 }} > </Avatar>
+                                        <Avatar sx={{ bgcolor: yellow[500], width: 30, height: 30 }} > </Avatar>
+                                        <Avatar sx={{ bgcolor: indigo[500], width: 30, height: 30 }} > </Avatar>
+                                        <Avatar sx={{ bgcolor: pink[500], width: 30, height: 30 }} > </Avatar>
+                                    </Stack>
+                                </Popover>
                                 </Fab>
                             </FabWrapper>
                             <Typography variant="h6" fontWeight="bold">Jay Nayon Jr.</Typography>
