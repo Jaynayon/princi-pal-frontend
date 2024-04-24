@@ -72,17 +72,8 @@ function Dashboard(props) {
     const [selectedSchool, setSelectedSchool] = useState('');
     const handleSchoolChange = (event) => {
         setSelectedSchool(event.target.value);
-       
     };
     
-    const [openCalendar, setOpenCalendar] = useState(false);
-    const [calendarDates, setCalendarDates] = useState([
-        {
-            startDate: new Date(),
-            endDate: new Date(),
-            key: 'selection'
-        }
-    ]);
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({
         'Monthly Budget': { currency: 'Php', amount: '0.00' },
@@ -101,19 +92,7 @@ function Dashboard(props) {
         const year = currentDate.getFullYear();
         return `${month} ${year}`;
     };
-    const handleOpenCalendar = () => {
-        setOpenCalendar(true);
-    };
 
-    
-    const handleCloseCalendar = () => {
-        setOpenCalendar(false);
-    };
-
-    
-    const handleSelectCalendar = (ranges) => {
-        setCalendarDates([ranges.selection]);
-    };
     const handleOpen = (text) => {
         setOpen(true);
         setClickedButton(text);
@@ -138,8 +117,6 @@ function Dashboard(props) {
             setError('Please enter a valid number between 0 and 999,999.');
         }
     };
-    
-
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -223,40 +200,40 @@ function Dashboard(props) {
     return (
         <Container className="test" maxWidth="lg">
             <Grid container spacing={2}>
-    <Grid item xs={12} md={12} lg={12}>
-        <Paper
-            sx={[
-                styles.header, {
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'row',
-                }
-            ]}
-            elevation={0}
-            variant='outlined'>
-            <Box style={styles.header.buttons}>
-                <DateFilter onClick={handleOpenCalendar} /> { }
-                {/* School Filter moved here */}
-                <FormControl sx={{ m: 1, minWidth: 150 }}>
-                    <InputLabel id="school-filter-label">School Filter</InputLabel>
-                    <Select
-                        labelId="school-filter-label"
-                        id="school-filter"
-                        value={selectedSchool}
-                        onChange={handleSchoolChange}
-                        label="School"
-                    >
-                        <MenuItem value="">
-                            <em>None</em>
-                        </MenuItem>
-                        <MenuItem value="CIT">CIT</MenuItem>
-                        <MenuItem value="ACT">ACT</MenuItem>
-                        <MenuItem value="SM CITY">SM CITY</MenuItem>
-                    </Select>
-                </FormControl>
-            </Box>
-        </Paper>
-    </Grid>
+                <Grid item xs={12} md={12} lg={12}>
+                    <Paper
+                        sx={[
+                            styles.header, {
+                                p: 2,
+                                display: 'flex',
+                                flexDirection: 'row',
+                            }
+                        ]}
+                        elevation={0}
+                        variant='outlined'>
+                        <Box style={styles.header.buttons}>
+                            <DateFilter /> { }
+                            {/* School Filter moved here */}
+                            <FormControl sx={{ m: 1, minWidth: 150 }}>
+                                <InputLabel id="school-filter-label">School Filter</InputLabel>
+                                <Select
+                                    labelId="school-filter-label"
+                                    id="school-filter"
+                                    value={selectedSchool}
+                                    onChange={handleSchoolChange}
+                                    label="School"
+                                >
+                                    <MenuItem value="">
+                                        <em>None</em>
+                                    </MenuItem>
+                                    <MenuItem value="CIT">CIT</MenuItem>
+                                    <MenuItem value="ACT">ACT</MenuItem>
+                                    <MenuItem value="SM CITY">SM CITY</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+                    </Paper>
+                </Grid>
 
                 <Grid item xs={12} md={12} lg={12}>
                     <Box style={{
@@ -283,7 +260,7 @@ function Dashboard(props) {
                         </Typography>
                     </Box>
                 </Grid>
-                {}
+
                 <Grid item xs={12} md={12} lg={12}
                     sx={{
                         display: 'flex',
@@ -302,6 +279,7 @@ function Dashboard(props) {
                         </Grid>
                     </Grid>
                 </Grid>
+
                 <Grid item xs={12} md={12} lg={12}>
                     <Grid container >
                         <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
@@ -322,37 +300,7 @@ function Dashboard(props) {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Modal
-                    open={openCalendar}
-                    onClose={handleCloseCalendar}
-                    aria-labelledby="modal-calendar-title"
-                    aria-describedby="modal-calendar-description"
-                >
-                    <Box sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        bgcolor: 'background.paper',
-                        boxShadow: 24,
-                        p: 4,
-                        width: 400,
-                        borderRadius: '15px',
-                        textAlign: 'center',
-                    }}>
-                        <Button onClick={handleCloseCalendar} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
-                        <h2 id="modal-calendar-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Select Date Range</h2>
-                        <DateRangePicker
-                            onChange={handleSelectCalendar}
-                            months={1}
-                            ranges={calendarDates}
-                            direction="horizontal"
-                        />
-                        <div style={{ marginTop: '20px' }}>
-                            <Button onClick={handleCloseCalendar} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Apply</Button>
-                        </div>
-                    </Box>
-                </Modal>
+                
             </Grid>
         </Container>
     );
