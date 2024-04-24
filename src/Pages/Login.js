@@ -78,44 +78,45 @@ const LoginPage = ({ setIsLoggedIn }) => {
             backgroundPosition: 'center',
           }}>
             <Grid container spacing={4}>
-                {/* Left side: Login fields */}
-                <Grid item xs={12} md={5} sx={{ alignItems: 'flex-start', marginTop: '5%', textAlign: 'left', marginLeft: '5%' }}> {/* Updated marginLeft */}
-                    <Typography variant="h4" sx={{ fontSize: "48px", fontWeight: "bold", mt: 8 }}>Login to your account</Typography> {/* Updated marginTop */}
-                    <Typography variant="body1" sx={{ fontSize: "20px", mt: 6 }}>Hi, Welcome back 👋 </Typography> {/* Updated spacing */}
-                    <Typography variant="subtitle1" sx={{ marginTop: '3%', fontSize: "18px", fontWeight: "600", mt: 15 }}>Email</Typography> {/* Updated marginTop */}
-                    <TextField 
-                        color="primary" 
-                        label="Enter your email id" 
-                        variant="outlined" 
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)} 
-                        fullWidth
-                        onClick={handleEmailFieldClick}
-                        sx={{ mt: 2 }}
-                    />
-                    <Typography variant="subtitle1" sx={{ fontSize: "18px", fontWeight: "600", mt: 4 }}>Password</Typography> {/* Updated spacing */}
-                    <TextField 
-                        color="primary" 
-                        label="Enter your password" 
-                        variant="outlined" 
-                        type={showPassword ? "text" : "password"} 
-                        InputProps={{ 
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility">
-                                        <VisibilityOffIcon />
-                                    </IconButton>
-                                </InputAdornment>
-                            )
-                        }} 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        fullWidth
-                        sx={{ mt: 2 }}
-                        onClick={handlePasswordFieldClick}
-                    />
+    {/* Left side: Login fields */}
+    <Grid item xs={12} md={5} sx={{ alignItems: 'flex-start', marginTop: '5%', textAlign: 'left', marginLeft: '5%' }}> {/* Updated marginLeft */}
+        <Typography variant="h4" sx={{ fontSize: "48px", fontWeight: "bold", mt: 8 }}>Login to your account</Typography> {/* Updated marginTop */}
+        <Typography variant="body1" sx={{ fontSize: "20px", mt: 6 }}>Hi, Welcome back 👋 </Typography> {/* Updated spacing */}
+        <Typography variant="subtitle1" sx={{ marginTop: '3%', fontSize: "18px", fontWeight: "600", mt: 15 }}>Email</Typography> {/* Updated marginTop */}
+        <TextField 
+            color="primary" 
+            label="Enter your email id" 
+            variant="outlined" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            fullWidth
+            onClick={handleEmailFieldClick}
+            sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
+        />
+        <Typography variant="subtitle1" sx={{ fontSize: "18px", fontWeight: "600", mt: 4 }}>Password</Typography> {/* Updated spacing */}
+        <TextField 
+                color="primary" 
+                label="Enter your password" 
+                variant="outlined" 
+                type={showPassword ? "text" : "password"} 
+                InputProps={{ 
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility">
+                                <VisibilityOffIcon />
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                    sx: { borderColor: "#DBF0FD" } // Removed padding
+                }} 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                fullWidth
+                sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
+                onClick={handlePasswordFieldClick}
+            />
                     {loginError && <Typography color="error" sx={{ fontSize: "14px", mt: 2 }}>{loginError}</Typography>}
-                    <Button onClick={handleLogin} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px" }}>Log in</Button>
+                    <Button onClick={handleLogin} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
                     <Typography variant="body1" sx={{ mt: 2, marginLeft:'30%'}}>
                         Go back to <Link to="/" style={{ color: '#474bca', textDecoration: 'none', fontWeight: 'bold' }}>Welcome Page</Link>
                     </Typography>
