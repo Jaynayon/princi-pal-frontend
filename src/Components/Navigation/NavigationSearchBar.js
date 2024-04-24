@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
-import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 
@@ -14,7 +13,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Avatar from "@mui/material/Avatar";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import InputLabel from "@mui/material/InputLabel";
+import CloseIcon from "@mui/icons-material/Close";
 import MenuItem from "@mui/material/MenuItem";
 
 const SCHOOLS = [
@@ -36,6 +35,21 @@ const NavigationSearchBar = () => {
   const [selectedSchool, setSelectedSchool] = useState("");
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
   const [select, setSelect] = useState("");
+  const [appliedSchools, setAppliedSchools] = useState([]);
+
+  const handleApplySchool = () => {
+    if (selectedSchool && !appliedSchools.includes(selectedSchool)) {
+      setAppliedSchools([...appliedSchools, selectedSchool]);
+    }
+    setOpen(false);
+  };
+
+  const handleRemoveSchool = (schoolToRemove) => {
+    const updatedSchools = appliedSchools.filter(
+      (school) => school !== schoolToRemove
+    );
+    setAppliedSchools(updatedSchools);
+  };
 
   const handleChange = (event) => {
     setSelect(event.target.value);
@@ -119,54 +133,65 @@ const NavigationSearchBar = () => {
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
           >
-            <DialogTitle id="alert-dialog-title">
-              {"Application Inbox"}
-            </DialogTitle>
-            <DialogContent
-              sx={{
+            <div
+              style={{
                 display: "flex",
-                justifyContent: "spaceBetween",
                 alignItems: "center",
-                gap: "1rem",
+                justifyContent: "space-between",
+                padding: "0 25px 0 0",
               }}
             >
-              <Avatar>C</Avatar>
-              <DialogContentText id="alert-dialog-description">
-                <span style={{ fontWeight: "bold" }}>
-                  Cebu Institute of Technology - University
-                </span>
-                <br />
-                Your application is currently under review.
-              </DialogContentText>
-              <DialogActions>
-                <Button onClick={handleClickCloseApplicationInbox} autoFocus>
-                  Cancel
-                </Button>
-              </DialogActions>
-            </DialogContent>
-
-            <DialogContent
-              sx={{
-                display: "flex",
-                justifyContent: "spaceBetween",
-                alignItems: "center",
-                gap: "1rem",
-              }}
-            >
-              <Avatar>C</Avatar>
-              <DialogContentText id="alert-dialog-description">
-                <span style={{ fontWeight: "bold" }}>
-                  Cebu Institute of Medicine
-                </span>
-                <br />
-                Your application is currently under review.
-              </DialogContentText>
-              <DialogActions>
-                <Button onClick={handleClickCloseApplicationInbox} autoFocus>
-                  Cancel
-                </Button>
-              </DialogActions>
-            </DialogContent>
+              <DialogTitle id="alert-dialog-title">
+                {"Application Inbox"}
+              </DialogTitle>
+              <span
+                onClick={handleClickCloseApplicationInbox}
+                style={{ cursor: "pointer", paddingTop: "8px" }}
+              >
+                <CloseIcon />
+              </span>
+            </div>
+            {appliedSchools.length ? (
+              appliedSchools.map((school, index) => (
+                <DialogContent
+                  sx={{
+                    display: "flex",
+                    justifyContent: "spaceBetween",
+                    alignItems: "center",
+                    gap: "1rem",
+                  }}
+                  key={index}
+                >
+                  <Avatar>C</Avatar>
+                  <DialogContentText id="alert-dialog-description">
+                    <span style={{ fontWeight: "bold" }}>{school}</span>
+                    <br />
+                    Your application is currently under review.
+                  </DialogContentText>
+                  <DialogActions>
+                    <Button
+                      onClick={() => handleRemoveSchool(school)}
+                      autoFocus
+                    >
+                      Cancel
+                    </Button>
+                  </DialogActions>
+                </DialogContent>
+              ))
+            ) : (
+              <DialogContent
+                sx={{
+                  display: "flex",
+                  justifyContent: "spaceBetween",
+                  alignItems: "center",
+                  gap: "1rem",
+                }}
+              >
+                <DialogContentText id="alert-dialog-description">
+                  No applied schools
+                </DialogContentText>
+              </DialogContent>
+            )}
           </Dialog>
           {filteredSchools.map((school, index) => (
             <li
@@ -209,9 +234,6 @@ const NavigationSearchBar = () => {
             Provide information to request access to this organization.
           </DialogContentText>
           <FormControl sx={{ m: 1, minWidth: 80 }} size="small">
-            <InputLabel id="demo-simple-select-autowidth-label">
-              ADAS
-            </InputLabel>
             <Select
               labelId="demo-simple-select-autowidth-label"
               id="demo-simple-select-autowidth"
@@ -225,7 +247,7 @@ const NavigationSearchBar = () => {
             </Select>
           </FormControl>
           <DialogActions>
-            <Button onClick={handleClose} autoFocus>
+            <Button onClick={handleApplySchool} autoFocus>
               Apply
             </Button>
           </DialogActions>
