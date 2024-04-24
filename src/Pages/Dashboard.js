@@ -12,7 +12,7 @@ import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
-import { FieldsFilter } from '../Components/Filters/Filters';
+import { DateFilter } from '../Components/Filters/Filters';
 
 const ApexChart = () => {
     const [options] = useState({
@@ -94,12 +94,12 @@ function Dashboard(props) {
         setOpenCalendar(true);
     };
 
-    // Function to handle closing calendar modal
+    
     const handleCloseCalendar = () => {
         setOpenCalendar(false);
     };
 
-    // Function to handle selecting dates in calendar
+    
     const handleSelectCalendar = (ranges) => {
         setCalendarDates([ranges.selection]);
     };
@@ -115,8 +115,8 @@ function Dashboard(props) {
     const handleChange = (event) => {
         const newValue = event.target.value;
         if (
-            newValue === '' ||                      // Allow empty value
-            (newValue >= 0 && newValue <= 999999)  // Allow values between 0 and 999999
+            newValue === '' ||                      
+            (newValue >= 0 && newValue <= 999999)  
         ) {
             setEditableAmounts({
                 ...editableAmounts,
@@ -224,7 +224,7 @@ function Dashboard(props) {
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
-                            <FieldsFilter onClick={handleOpenCalendar} /> { /* Pass handleOpenCalendar to FieldsFilter */}
+                            <DateFilter onClick={handleOpenCalendar} /> { }
                         </Box>
                     </Paper>
                 </Grid>
@@ -232,7 +232,7 @@ function Dashboard(props) {
                 <Grid item xs={12} md={12} lg={12}>
                     <Box style={{
                         display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
-                        marginLeft: '10px', marginRight: '10px' //margin Analytics title and Date
+                        marginLeft: '10px', marginRight: '10px' 
                     }}>
                         <Typography
                             component="h1"
@@ -248,13 +248,13 @@ function Dashboard(props) {
                             variant="h6"
                             color="inherit"
                             noWrap
-                        //sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
+                        
                         >
                             {getCurrentMonthYear()}
                         </Typography>
                     </Box>
                 </Grid>
-                {/* Horizontal layout for editable cards */}
+                {}
                 <Grid item xs={12} md={12} lg={12}
                     sx={{
                         display: 'flex',
