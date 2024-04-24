@@ -13,6 +13,11 @@ import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
 import { DateFilter } from '../Components/Filters/Filters';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
 
 const ApexChart = () => {
     const [options] = useState({
@@ -64,6 +69,12 @@ const ApexChart = () => {
 };
 
 function Dashboard(props) {
+    const [selectedSchool, setSelectedSchool] = useState('');
+    const handleSchoolChange = (event) => {
+        setSelectedSchool(event.target.value);
+       
+    };
+    
     const [openCalendar, setOpenCalendar] = useState(false);
     const [calendarDates, setCalendarDates] = useState([
         {
@@ -212,22 +223,40 @@ function Dashboard(props) {
     return (
         <Container className="test" maxWidth="lg">
             <Grid container spacing={2}>
-                <Grid item xs={12} md={12} lg={12}>
-                    <Paper
-                        sx={[
-                            styles.header, {
-                                p: 2,
-                                display: 'flex',
-                                flexDirection: 'row',
-                            }
-                        ]}
-                        elevation={0}
-                        variant='outlined'>
-                        <Box style={styles.header.buttons}>
-                            <DateFilter onClick={handleOpenCalendar} /> { }
-                        </Box>
-                    </Paper>
-                </Grid>
+    <Grid item xs={12} md={12} lg={12}>
+        <Paper
+            sx={[
+                styles.header, {
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'row',
+                }
+            ]}
+            elevation={0}
+            variant='outlined'>
+            <Box style={styles.header.buttons}>
+                <DateFilter onClick={handleOpenCalendar} /> { }
+                {/* School Filter moved here */}
+                <FormControl sx={{ m: 1, minWidth: 150 }}>
+                    <InputLabel id="school-filter-label">School Filter</InputLabel>
+                    <Select
+                        labelId="school-filter-label"
+                        id="school-filter"
+                        value={selectedSchool}
+                        onChange={handleSchoolChange}
+                        label="School"
+                    >
+                        <MenuItem value="">
+                            <em>None</em>
+                        </MenuItem>
+                        <MenuItem value="CIT">CIT</MenuItem>
+                        <MenuItem value="ACT">ACT</MenuItem>
+                        <MenuItem value="SM CITY">SM CITY</MenuItem>
+                    </Select>
+                </FormControl>
+            </Box>
+        </Paper>
+    </Grid>
 
                 <Grid item xs={12} md={12} lg={12}>
                     <Box style={{
