@@ -199,7 +199,9 @@ function Dashboard(props) {
 
     return (
         <Container className="test" maxWidth="lg">
-            <Grid container spacing={2}>
+            <Box sx={{ position: 'relative' }}>
+                {}
+                <Grid container spacing={2}>
                 <Grid item xs={12} md={12} lg={12}>
                     <Paper
                         sx={[
@@ -213,7 +215,7 @@ function Dashboard(props) {
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
                             <DateFilter /> { }
-                            {/* School Filter moved here */}
+                            {}
                             <FormControl sx={{ m: 1, minWidth: 150 }}>
                                 <InputLabel id="school-filter-label">School Filter</InputLabel>
                                 <Select
@@ -301,7 +303,8 @@ function Dashboard(props) {
                     </Grid>
                 </Grid>
                 
-            </Grid>
+                </Grid>
+            </Box>
         </Container>
     );
 }
