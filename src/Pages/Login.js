@@ -2,7 +2,7 @@ import { useState } from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { TextField, InputAdornment, IconButton, Button, Typography, Paper, Container } from "@mui/material";
 import RestService from "../Services/RestService";
-
+import { Link } from 'react-router-dom';
 const LoginPage = ({ setIsLoggedIn }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
@@ -67,6 +67,10 @@ const handlePasswordFieldClick = () => {
             <Typography sx={{ position: "absolute", top: "698px", left: "161px", fontWeight: "500" }}>Remember Me</Typography>
             <Typography sx={{ position: "absolute", top: "697px", left: "451px", fontWeight: "600", color: "#474bca" }}>Forgot Password?</Typography>
             <Button onClick={handleLogin} variant="contained" sx={{ position: "absolute", top: "766px", left: "160px", width: "443px", height: "44px", borderRadius: "5px" }}>Log in</Button>
+            <Typography variant="subtitle1" sx={{ position: "absolute", top: "820px", left: "18%", fontWeight: "600" }}>
+                Go back to 
+                <Link to="/" style={{ color: '#474bca', textDecoration: 'none', marginLeft: '5px' }}>Welcome Page</Link>
+            </Typography>
             <Button variant="contained" href="/Register" sx={{ position: "absolute", top: "147px", left: "calc(50% + 409px)", width: "167px", height: "43px", borderRadius: "5px", backgroundColor: "#4a99d3" }}>Sign Up</Button>
             <Typography sx={{ position: "absolute", top: "242px", left: "154px", fontSize: "20px" }}>{`Hi, Welcome back 👋 `}</Typography>
             <Typography component="b" sx={{ position: "absolute", top: "147px", left: "154px", fontSize: "48px" }}>Login to your account</Typography>
