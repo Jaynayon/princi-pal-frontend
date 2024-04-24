@@ -112,13 +112,23 @@ function People(props) {
                     </Button>
                 </Grid>
                 <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '-5px' }}>
-                <TextField
-                        sx={{ margin: '20px', marginTop: '-5px', marginLeft: '6px' , width: '30%' }}
-                        id="invite"
-                        label="School Filter"
-                        variant="outlined"
-                        className="schoolFilter"
-                    />
+                    <FormControl sx={{ m: 1, minWidth: 150 }} >
+                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+                        <Select
+                            labelId="demo-select-small-label"
+                            id="demo-select-small"
+                            value={member}
+                            label="Member"
+                            onChange={(event) => setMember(event.target.value)}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            <MenuItem>CIT</MenuItem>
+                            <MenuItem>ACT</MenuItem>
+                            <MenuItem>SM CITY</MenuItem>
+                        </Select>
+                    </FormControl>
                 </Grid>
                 <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px', marginTop: '-5px' }}>
                     <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
@@ -129,6 +139,7 @@ function People(props) {
                                     <TableCell>Email</TableCell>
                                     <TableCell>Role</TableCell>
                                     <TableCell>Last Activity</TableCell>
+                                    <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -159,8 +170,6 @@ function People(props) {
                                                 {/* Role options */}
                                                 <MenuItem onClick={() => handleRoleChange("ADMIN")}>ADMIN</MenuItem>
                                                 <MenuItem onClick={() => handleRoleChange("OWNER")}>OWNER</MenuItem>
-                                                <MenuItem onClick={() => handleRoleChange("ADAS")}>ADAS</MenuItem>
-                                                <MenuItem onClick={() => handleRoleChange("ADOF")}>ADOF</MenuItem>
                                             </Menu>
                                         </TableCell>
                                         <TableCell>{row.lastActivity}</TableCell>
