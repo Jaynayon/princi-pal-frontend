@@ -32,9 +32,11 @@ export function FieldsFilter() {
 
 export function DateFilter() {
     const theme = useTheme();
+    const prevMonthRef = useRef(0);
+    const index = useRef(0);
     const [button, setButton] = React.useState(false);
-    const [date, setDate] = React.useState('January');
-    const [year, setYear] = React.useState('2023');
+    const [month, setMonth] = React.useState('January');
+    const [year, setYear] = React.useState('2021');
 
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -46,13 +48,13 @@ export function DateFilter() {
         },
     };
 
-    const dates = [
+    const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
     const years = [
-        '2023', '2024'
+        '2021', '2022', '2023', '2024'
     ];
 
     function getStyles(name, personName, theme) {
@@ -65,11 +67,26 @@ export function DateFilter() {
         };
     }
 
+    const handleNextMonth = (event) => {
+        prevMonthRef.current += 1;
+        if (prevMonthRef.current > months.length - 1)
+            prevMonthRef.current = 0;
+        setMonth(months[prevMonthRef.current]);
+    }
+
+    const handlePrevMonth = (event) => {
+        prevMonthRef.current -= 1;
+        if (prevMonthRef.current < 0)
+            prevMonthRef.current = months.length - 1;
+        setMonth(months[prevMonthRef.current]);
+    }
+
     const handleChangeMonth = (event) => {
         const {
             target: { value },
         } = event;
-        setDate(
+        prevMonthRef.current = months.indexOf(value)
+        setMonth(
             // On autofill we get a stringified value.
             typeof value === 'string' ? value.split(',') : value,
         );
@@ -117,7 +134,6 @@ export function DateFilter() {
                         position: 'absolute',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        //width: '340px',
                         height: '80px',
                         paddingLeft: '10px',
                         paddingRight: '10px',
@@ -128,7 +144,7 @@ export function DateFilter() {
                     }}
                 >
                     <IconButton
-                        onClick={() => console.log('test')}
+                        onClick={handlePrevMonth}
                         sx={{
                             //justifyContent: 'flex-end',
                             color: (theme) => theme.navStyle.color
@@ -148,18 +164,25 @@ export function DateFilter() {
                         <FormControl sx={{ m: 1, minWidth: 80, margin: 0 }}>
                             <Select
                                 displayEmpty
-                                value={date}
+                                value={month}
                                 onChange={handleChangeMonth}
                                 MenuProps={MenuProps}
-                                sx={{ height: '40px', fontWeight: '900' }}
+                                sx={{
+                                    "& .MuiSelect-select": {
+                                        padding: '10px', // Adjust input padding
+                                        backgroundColor: 'white', // Set input background color
+                                        fontWeight: '900', // Set input font weight
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': { border: 0 }
+                                }}
                                 inputProps={{ 'aria-label': 'Without label' }}
                             >
-                                {dates.map((name) => (
+                                {months.map((name) => (
                                     <MenuItem
                                         onBlur={() => console.log("menu blurred")}
                                         key={name}
                                         value={name}
-                                        style={getStyles(name, date, theme)}
+                                        style={getStyles(name, month, theme)}
                                     >
                                         {name}
                                     </MenuItem>
@@ -172,7 +195,14 @@ export function DateFilter() {
                                 value={year}
                                 onChange={handleChangeYear}
                                 MenuProps={MenuProps}
-                                sx={{ height: '40px', fontWeight: '900' }}
+                                sx={{
+                                    "& .MuiSelect-select": {
+                                        padding: '10px', // Adjust input padding
+                                        backgroundColor: 'white', // Set input background color
+                                        fontWeight: '900', // Set input font weight
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': { border: 0 }
+                                }}
                                 inputProps={{ 'aria-label': 'Without label' }}
                             >
                                 {years.map((name) => (
@@ -189,7 +219,7 @@ export function DateFilter() {
                         </FormControl>
                     </Box>
                     <IconButton
-                        onClick={() => console.log('test')}
+                        onClick={handleNextMonth}
                         sx={{
                             //justifyContent: 'flex-end',
                             color: (theme) => theme.navStyle.color

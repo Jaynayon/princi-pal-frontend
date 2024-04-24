@@ -21,7 +21,7 @@ function Schools(props) {
                             styles.header, {
                                 p: 2,
                                 display: 'flex',
-                                flexDirection: 'row',
+                                flexDirection: 'row'
                             }
                         ]}
                         elevation={0}
