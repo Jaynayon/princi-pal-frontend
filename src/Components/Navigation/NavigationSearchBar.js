@@ -34,7 +34,7 @@ const NavigationSearchBar = () => {
   const [open, setOpen] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState("");
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
-  const [select, setSelect] = useState("");
+  const [select, setSelect] = useState("ADAS");
   const [appliedSchools, setAppliedSchools] = useState([]);
 
   const handleApplySchool = () => {
