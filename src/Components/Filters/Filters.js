@@ -68,6 +68,17 @@ export function DateFilter() {
         };
     }
 
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
+
     const handleNextMonth = (event) => {
         prevMonthRef.current += 1;
         if (prevMonthRef.current > months.length - 1) {
@@ -103,17 +114,6 @@ export function DateFilter() {
             typeof value === 'string' ? value.split(',') : value,
         );
     };
-
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover' : undefined;
 
     const handleChangeYear = (event) => {
         const {
@@ -195,7 +195,6 @@ export function DateFilter() {
                                 >
                                     {months.map((name) => (
                                         <MenuItem
-                                            onBlur={() => console.log("menu blurred")}
                                             key={name}
                                             value={name}
                                             style={getStyles(name, month, theme)}
@@ -223,7 +222,6 @@ export function DateFilter() {
                                 >
                                     {years.map((name) => (
                                         <MenuItem
-                                            onBlur={() => console.log("menu blurred")}
                                             key={name}
                                             value={name}
                                             style={getStyles(name, year, theme)}

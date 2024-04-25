@@ -30,7 +30,7 @@ const WelcomePage = () => {
               alignItems: 'center',
               padding: '20px',
             }}
-          > 
+          >
             <Box sx={{
               display: 'flex',
               flexDirection: 'column',
@@ -122,7 +122,7 @@ const WelcomePage = () => {
                   disableElevation
                   color="primary"
                   variant="contained"
-                  href="/Login"
+                  href="/login"
                 >
                   Log in
                 </Button>

@@ -142,7 +142,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
 
                 {/* Right side: Sign-up button and image */}
                 <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', mt: 8, marginTop: '10%' }}> {/* Updated marginTop */}
-                    <Button variant="contained" href="/Register" sx={{ marginLeft: 'auto', width: "167px", height: "43px", borderRadius: "5px", backgroundColor: "#4a99d3" }}>Sign Up</Button> {/* Updated marginLeft */}
+                    <Button variant="contained" href="/register" sx={{ marginLeft: 'auto', width: "167px", height: "43px", borderRadius: "5px", backgroundColor: "#4a99d3" }}>Sign Up</Button> {/* Updated marginLeft */}
                     <img style={{ mt: 8, marginTop: '20%', marginLeft: 'auto', marginRight: 'auto', width: "100%", maxWidth: "450px", objectFit: "cover" }} alt="" src="/reshotillustrationwebsitedesignu3pzxdsevy-1@2x.png" /> {/* Updated marginLeft */}
                 </Grid>
             </Grid>
