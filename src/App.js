@@ -20,7 +20,7 @@ function App() {
         <Route index element={<WelcomePage setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/register" element={<Registration />} />
-        <Route path="/dashboard/*" element={<DashboardWithNavigation setIsLoggedIn={setIsLoggedIn} />} />
+        <Route path="/dashboard/*" element={<PageWithNavigation page={<Dashboard />} setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/schools/*" element={<PageWithNavigation page={<Schools />} setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/people/*" element={<PageWithNavigation page={<People />} setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/settings/*" element={<PageWithNavigation page={<Settings />} setIsLoggedIn={setIsLoggedIn} />} />
@@ -39,16 +39,6 @@ const Root = ({ setIsLoggedIn, isLoggedIn }) => {
   return (
     <NavigationProvider>
       <Outlet />
-    </NavigationProvider>
-  );
-};
-
-const DashboardWithNavigation = ({ setIsLoggedIn }) => {
-  return (
-    <NavigationProvider>
-      <Navigation setIsLoggedIn={setIsLoggedIn}>
-        <Dashboard />
-      </Navigation>
     </NavigationProvider>
   );
 };
