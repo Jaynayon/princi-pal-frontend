@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
@@ -17,12 +16,44 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
-import './People.css';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { Menu } from '@mui/material';
 
 function People(props) {
     const [member, setMember] = useState('');
-    const handleChange = (event) => {
-        setMember(event.target.value);
+    const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
+    const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
+    const [selectedIndex, setSelectedIndex] = useState(null);
+
+    const handleDropdownOpen = (event, index) => {
+        setDropdownAnchorEl(event.currentTarget);
+        setSelectedIndex(index);
+    };
+
+    const handleDeleteOpen = (event, index) => {
+        setDeleteAnchorEl(event.currentTarget);
+        setSelectedIndex(index);
+    };
+
+    const handleMenuClose = () => {
+        setDropdownAnchorEl(null);
+        setDeleteAnchorEl(null);
+        setSelectedIndex(null);
+    };
+
+    const handleDelete = () => {
+        // Implement delete functionality here
+        console.log("Delete button clicked for row at index:", selectedIndex);
+        // Close the menu after delete
+        handleMenuClose();
+    };
+
+    const handleRoleChange = (newRole) => {
+        // Implement role change functionality here
+        console.log(`Role changed to ${newRole} for row at index:`, selectedIndex);
+        // Close the menu after role change
+        handleMenuClose();
     };
 
     const rows = [
@@ -34,24 +65,35 @@ function People(props) {
     ];
 
     return (
-        <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
+        <Container className="test" maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} lg={12}
                     sx={{
                         display: 'flex',
-                        justifyContent: 'space-between',
                     }}>
-                    <TextField sx={{ margin: '5px', marginTop: '-5px' }} id="search" label="Search by name or email" variant="outlined" className="searchTextField" />
-                    <TextField sx={{ margin: '5px', marginTop: '-5px' }} id="invite" label="Invite by email" variant="outlined" className="inviteTextField" />
+                    <TextField
+                        sx={{ margin: '11px', marginTop: '-5px', height: '20px', width: '40%' }}
+                        id="search"
+                        label="Search by name or email"
+                        variant="outlined"
+                        className="searchTextField"
+                    />
+                    <TextField
+                        sx={{ margin: '5px', marginTop: '-5px', marginLeft: '50px' , width: '30%' }}
+                        id="invite"
+                        label="Invite by email"
+                        variant="outlined"
+                        className="inviteTextField"
+                    />
                     <FormControl sx={{ minWidth: 120 }} size="53px">
-                        <InputLabel sx={{ margin: '5px', marginTop: '-5px' }} id="demo-select-small-label">Member</InputLabel>
+                        <InputLabel sx={{ margin: '5px', marginTop: '-5px'}} id="demo-select-small-label">Member</InputLabel>
                         <Select
-                            sx={{ margin: '5px', marginTop: '-5px' }}
+                            sx={{ margin: '-5px', marginTop: '-5px' }}
                             labelId="demo-select-small-label"
                             id="demo-select-small"
                             value={member}
                             label="Member"
-                            onChange={handleChange}
+                            onChange={(event) => setMember(event.target.value)}
                         >
                             <MenuItem value="">
                                 <em>None</em>
@@ -61,9 +103,15 @@ function People(props) {
                             <MenuItem>Admin</MenuItem>
                         </Select>
                     </FormControl>
-                    <Button sx={{ margin: '5px', marginTop: '-5px' }} variant="contained" className="inviteButton">Invite</Button>
+                    <Button
+                        sx={{ margin: '5px', marginTop: '-5px', width: '10%'}}
+                        variant="contained"
+                        className="inviteButton"
+                    >
+                        Invite
+                    </Button>
                 </Grid>
-                <Grid item xs={5} md={5} lg={5} sx={{ display: 'flex', margin: '5px', marginTop: '-5px' }}>
+                <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '-5px' }}>
                     <FormControl sx={{ m: 1, minWidth: 150 }} >
                         <InputLabel id="demo-select-small-label">School Filter</InputLabel>
                         <Select
@@ -71,7 +119,7 @@ function People(props) {
                             id="demo-select-small"
                             value={member}
                             label="Member"
-                            onChange={handleChange}
+                            onChange={(event) => setMember(event.target.value)}
                         >
                             <MenuItem value="">
                                 <em>None</em>
@@ -91,11 +139,12 @@ function People(props) {
                                     <TableCell>Email</TableCell>
                                     <TableCell>Role</TableCell>
                                     <TableCell>Last Activity</TableCell>
+                                    <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {rows.map((row) => (
-                                    <TableRow key={row.id}>
+                                {rows.map((row, index) => (
+                                    <TableRow key={index}>
                                         <TableCell>
                                             <Grid container alignItems="center" spacing={1}>
                                                 <Grid item>
@@ -105,8 +154,44 @@ function People(props) {
                                             </Grid>
                                         </TableCell>
                                         <TableCell>{row.email}</TableCell>
-                                        <TableCell>{row.role}</TableCell>
+                                        <TableCell>
+                                            {/* Role with dropdown arrow */}
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span>{row.role}</span>
+                                                <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />
+                                            </div>
+                                            {/* Dropdown menu for role options */}
+                                            <Menu
+                                                id={`menu-dropdown-${index}`}
+                                                anchorEl={dropdownAnchorEl}
+                                                open={Boolean(dropdownAnchorEl && selectedIndex === index)}
+                                                onClose={handleMenuClose}
+                                            >
+                                                {/* Role options */}
+                                                <MenuItem onClick={() => handleRoleChange("ADMIN")}>ADMIN</MenuItem>
+                                                <MenuItem onClick={() => handleRoleChange("OWNER")}>OWNER</MenuItem>
+                                            </Menu>
+                                        </TableCell>
                                         <TableCell>{row.lastActivity}</TableCell>
+                                        <TableCell>
+                                            {/* Delete button */}
+                                            <Button
+                                                aria-controls={`menu-delete-${index}`}
+                                                aria-haspopup="true"
+                                                onClick={(event) => handleDeleteOpen(event, index)}
+                                            >
+                                                <MoreHorizIcon />
+                                            </Button>
+                                            {/* Delete menu */}
+                                            <Menu
+                                                id={`menu-delete-${index}`}
+                                                anchorEl={deleteAnchorEl}
+                                                open={Boolean(deleteAnchorEl && selectedIndex === index)}
+                                                onClose={handleMenuClose}
+                                            >
+                                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                                            </Menu>
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
