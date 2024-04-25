@@ -40,12 +40,12 @@ const LoginPage = ({ setIsLoggedIn }) => {
             }
 
             // Email format validation
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            /*const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailPattern.test(email.trim())) {
                 setLoginError('Invalid Email.');
                 setTimeout(() => setLoginError(''), 2000); // Clear error after 2 seconds
                 return;
-            }
+            }*/
 
             // Make a POST request to the backend to validate the credentials
             const response = await RestService.authenticateUser(email, password);
@@ -136,7 +136,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
                     <Button onClick={handleLogin} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
                     <Typography variant="body1" sx={{ mt: 2, marginLeft: '30%' }}>
                         Not registered yet? <span style={{ color: '#6C6FD5' }}>Create an account </span>
-                        <Link to="/Register" style={{ color: '#6EADDC', textDecoration: 'none', fontWeight: 'bold', borderBottom: '1px solid' }}>Signup</Link>
+                        <Link to="/register" style={{ color: '#6EADDC', textDecoration: 'none', fontWeight: 'bold', borderBottom: '1px solid' }}>Signup</Link>
                     </Typography>
                 </Grid>
 

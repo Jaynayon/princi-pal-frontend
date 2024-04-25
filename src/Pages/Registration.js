@@ -70,37 +70,37 @@ const RegistrationPage = () => {
   };
 
   const handleSubmit = async () => {
-  if (!emailError && !passwordError && !confirmPasswordError) {
-    try {
-      const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
-      if (response) {
-        console.log("Registration successful");
-        // Clear form fields after successful registration
-        setEmail('');
-        setPassword('');
-        setUsername('');
-        setFirstName('');
-        setMiddleName('');
-        setLastName('');
-        setConfirmPassword('');
-        setPosition('');
-        // Clear any registration error message
-        setRegistrationError('');
-        // Redirect to login page or display a success message
-      } else {
+    if (!emailError && !passwordError && !confirmPasswordError) {
+      try {
+        const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
+        if (response) {
+          console.log("Registration successful");
+          // Clear form fields after successful registration
+          setEmail('');
+          setPassword('');
+          setUsername('');
+          setFirstName('');
+          setMiddleName('');
+          setLastName('');
+          setConfirmPassword('');
+          setPosition('');
+          // Clear any registration error message
+          setRegistrationError('');
+          // Redirect to login page or display a success message
+        } else {
+          setRegistrationError("Registration failed");
+        }
+      } catch (error) {
+        console.error("Error:", error);
         setRegistrationError("Registration failed");
       }
-    } catch (error) {
-      console.error("Error:", error);
-      setRegistrationError("Registration failed");
+    } else {
+      console.log("Form contains errors");
     }
-  } else {
-    console.log("Form contains errors");
-  }
-};
+  };
 
-  
-  
+
+
   return (
     <Container maxWidth={false} style={{
       width: "100vw",
@@ -163,42 +163,40 @@ const RegistrationPage = () => {
             sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set background color and outline color
           />
         ))}
-        <FormControl required sx={{ m: 1, minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD",  }}>
+        <FormControl required sx={{ m: 1, minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
           <InputLabel id="position-select-label" color="primary">Position *</InputLabel>
           <Select
-              labelId="position-select-label"
-              id="position-select"
-              value={position}
-              onChange={handlePositionChange}
-              label="Position *"
-              sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set outline color
+            labelId="position-select-label"
+            id="position-select"
+            value={position}
+            onChange={handlePositionChange}
+            label="Position *"
+            sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set outline color
           >
-              <MenuItem value="">
-                  <em>None</em>
-              </MenuItem>
-              <MenuItem value="ADAS">ADAS</MenuItem>
-              <MenuItem value="Principal">Principal</MenuItem>
-              <MenuItem value="ADOF">ADOF</MenuItem>
+
+            <MenuItem value="ADAS">ADAS</MenuItem>
+
+            <MenuItem value="ADOF">ADOF</MenuItem>
           </Select>
-      </FormControl>
+        </FormControl>
         {registrationError && (
           <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
         )}
-       <Button
-  sx={{
-    backgroundColor: "#4a99d3",color: "#fff",textTransform: "none",width: "100%",marginBottom: "1rem",padding: "15px",borderRadius: "1.5px",cursor: "pointer",transition: "background-color 0.3s","&:hover": {backgroundColor: "#474bca",},
-  }}
-  disableElevation
-  variant="contained"
-  onClick={() => {
-    handleSubmit(); // Call the submit function to handle registration
-    // Redirect to the dashboard after successful registration
-    window.location.href = "/dashboard"; // Change this to the correct URL if needed
-  }}
->
-  Create Account
-</Button>
-        <Link to="/Login" className="signInLink" style={{ textDecoration: "none", color: "#3048c1" }}>
+        <Button
+          sx={{
+            backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem", padding: "15px", borderRadius: "1.5px", cursor: "pointer", transition: "background-color 0.3s", "&:hover": { backgroundColor: "#474bca", },
+          }}
+          disableElevation
+          variant="contained"
+          onClick={() => {
+            handleSubmit(); // Call the submit function to handle registration
+            // Redirect to the dashboard after successful registration
+            window.location.href = "/dashboard"; // Change this to the correct URL if needed
+          }}
+        >
+          Create Account
+        </Button>
+        <Link to="/login" className="signInLink" style={{ textDecoration: "none", color: "#3048c1" }}>
           <span>{`Do you have an account? `}</span>
           <b>Sign in</b>
         </Link>
