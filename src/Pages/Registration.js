@@ -204,7 +204,7 @@ const RegistrationPage = () => {
         ))}
 
 
-        <FormControl required sx={{ m: 1, minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
+        <FormControl required sx={{minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
           <InputLabel id="position-select-label" color="primary">Position</InputLabel>
           <Select
             labelId="position-select-label"
