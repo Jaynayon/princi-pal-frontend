@@ -1,7 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import FormHelperText from '@mui/material/FormHelperText';
-
 import { Container, TextField, InputAdornment, IconButton, Button, Select, InputLabel, MenuItem, FormControl } from "@mui/material";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LockIcon from '@mui/icons-material/Lock';
@@ -28,79 +26,89 @@ const RegistrationPage = () => {
     setShowPassword(!showPassword);
   };
 
-  const validateEmail = (input) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(input);
-  };
+  const validateEmail = (input) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
 
-  const validatePassword = (input) => {
-    const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return regex.test(input);
-  };
+  const validatePassword = (input) => /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(input);
 
   const handleEmailChange = (event) => {
     const { value } = event.target;
     setEmail(value);
-    setEmailError(!validateEmail(value));
+    setEmailError(value !== '' && !validateEmail(value));
   };
 
   const handlePasswordChange = (event) => {
     const { value } = event.target;
     setPassword(value);
-    setPasswordError(!validatePassword(value));
-    if (confirmPassword && value !== confirmPassword) {
-      setConfirmPasswordError(true);
-    } else {
-      setConfirmPasswordError(false);
-    }
+    setPasswordError(value !== '' && !validatePassword(value));
+    setConfirmPasswordError(confirmPassword !== '' && value !== confirmPassword);
   };
 
   const handleConfirmPasswordChange = (event) => {
     const { value } = event.target;
     setConfirmPassword(value);
-    if (password && value !== password) {
-      setConfirmPasswordError(true);
-    } else {
-      setConfirmPasswordError(false);
-    }
+    setConfirmPasswordError(value !== '' && password !== value);
   };
 
   const handlePositionChange = (event) => {
     setPosition(event.target.value);
   };
 
+  const displayErrorWithTimeout = (errorMessage) => {
+    setRegistrationError(errorMessage);
+    setTimeout(() => {
+      setRegistrationError('');
+    }, 800); // Display for 800 milliseconds
+  };
+
   const handleSubmit = async () => {
-  if (!emailError && !passwordError && !confirmPasswordError) {
+    const fields = [email, username, firstName, lastName, password, confirmPassword, position];
+    if (fields.some(field => field === '')) {
+      displayErrorWithTimeout("All fields are required");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      displayErrorWithTimeout("Invalid Email Address");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      displayErrorWithTimeout("Password must be at least 8 characters and contain one special character");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      displayErrorWithTimeout("Passwords don't match");
+      return;
+    }
+
     try {
       const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
       if (response) {
         console.log("Registration successful");
-        // Clear form fields after successful registration
-        setEmail('');
-        setPassword('');
-        setUsername('');
-        setFirstName('');
-        setMiddleName('');
-        setLastName('');
-        setConfirmPassword('');
-        setPosition('');
-        // Clear any registration error message
-        setRegistrationError('');
-        // Redirect to login page or display a success message
+        clearForm();
+        window.location.href = "/dashboard"; // Change this to the correct URL if needed
       } else {
-        setRegistrationError("Registration failed");
+        displayErrorWithTimeout("Registration failed");
       }
     } catch (error) {
       console.error("Error:", error);
-      setRegistrationError("Registration failed");
+      displayErrorWithTimeout("Registration failed");
     }
-  } else {
-    console.log("Form contains errors");
-  }
-};
+  };
 
-  
-  
+  const clearForm = () => {
+    setEmail('');
+    setPassword('');
+    setUsername('');
+    setFirstName('');
+    setMiddleName('');
+    setLastName('');
+    setConfirmPassword('');
+    setPosition('');
+    setRegistrationError('');
+  };
+
   return (
     <Container maxWidth={false} style={{
       width: "100vw",
@@ -132,10 +140,10 @@ const RegistrationPage = () => {
         </div>
         {[
           { label: "Email", icon: <EmailIcon />, value: email, error: emailError, onChange: handleEmailChange },
-          { label: "Username", icon: <PersonIcon />, value: username, error: false, onChange: (e) => setUsername(e.target.value) },
-          { label: "First Name", icon: <PersonIcon />, value: firstName, error: false, onChange: (e) => setFirstName(e.target.value) },
-          { label: "Middle Name", icon: <PersonIcon />, value: middleName, error: false, onChange: (e) => setMiddleName(e.target.value) },
-          { label: "Last Name", icon: <PersonIcon />, value: lastName, error: false, onChange: (e) => setLastName(e.target.value) },
+          { label: "Username", icon: <PersonIcon />, value: username, error: username.length > 20, onChange: (e) => setUsername(e.target.value) },
+          { label: "First Name", icon: <PersonIcon />, value: firstName, error: firstName.length > 20, onChange: (e) => setFirstName(e.target.value) },
+          { label: "Middle Name", icon: <PersonIcon />, value: middleName, error: middleName.length > 20, onChange: (e) => setMiddleName(e.target.value) },
+          { label: "Last Name", icon: <PersonIcon />, value: lastName, error: lastName.length > 20, onChange: (e) => setLastName(e.target.value) },
           { label: "Password", icon: <LockIcon />, value: password, error: passwordError, onChange: handlePasswordChange },
           { label: "Confirm Password", icon: <LockIcon />, value: confirmPassword, error: confirmPasswordError, onChange: handleConfirmPasswordChange },
         ].map((item, index) => (
@@ -148,8 +156,16 @@ const RegistrationPage = () => {
             type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={item.value}
             onChange={item.onChange}
-            error={item.error && index === 0}
-            helperText={item.error && index === 0 ? "Invalid email address" : (index === 5 && passwordError ? "Password must contain at least 8 characters and one special character" : (index === 6 && confirmPasswordError ? "Passwords don't match" : ""))}
+            error={item.error}
+            helperText={item.error ? (
+              index === 0 ? "Invalid Email Address" :
+              index === 1 ? "Username must be less than 20 characters" :
+              index === 2 ? "First Name must be less than 20 characters" :
+              index === 3 ? "Middle Name must be less than 20 characters" :
+              index === 4 ? "Last Name must be less than 20 characters" :
+              index === 5 ? "Password must be at least 8 characters and contain one special character" :
+              index === 6 ? "Passwords don't match" : ""
+            ) : ""}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
               endAdornment: index >= 5 && (
@@ -160,44 +176,42 @@ const RegistrationPage = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set background color and outline color
+            sx={{ 
+              backgroundColor: "#DBF0FD", 
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: item.error ? "red" : "#DBF0FD" }, 
+              borderRadius: '8px' 
+            }}
           />
         ))}
-        <FormControl required sx={{ m: 1, minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD",  }}>
+        <FormControl required sx={{minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD" }}>
           <InputLabel id="position-select-label" color="primary">Position *</InputLabel>
           <Select
-              labelId="position-select-label"
-              id="position-select"
-              value={position}
-              onChange={handlePositionChange}
-              label="Position *"
-              sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set outline color
+            labelId="position-select-label"
+            id="position-select"
+            value={position}
+            onChange={handlePositionChange}
+            label="Position *"
+            sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }}
           >
-              <MenuItem value="">
-                  <em>None</em>
-              </MenuItem>
-              <MenuItem value="ADAS">ADAS</MenuItem>
-              <MenuItem value="Principal">Principal</MenuItem>
-              <MenuItem value="ADOF">ADOF</MenuItem>
+            <MenuItem value=""></MenuItem>
+            <MenuItem value="ADAS">ADAS</MenuItem>
+            <MenuItem value="Principal">Principal</MenuItem>
+            <MenuItem value="ADOF">ADOF</MenuItem>
           </Select>
-      </FormControl>
+        </FormControl>
         {registrationError && (
           <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
         )}
-       <Button
-  sx={{
-    backgroundColor: "#4a99d3",color: "#fff",textTransform: "none",width: "100%",marginBottom: "1rem",padding: "15px",borderRadius: "1.5px",cursor: "pointer",transition: "background-color 0.3s","&:hover": {backgroundColor: "#474bca",},
-  }}
-  disableElevation
-  variant="contained"
-  onClick={() => {
-    handleSubmit(); // Call the submit function to handle registration
-    // Redirect to the dashboard after successful registration
-    window.location.href = "/dashboard"; // Change this to the correct URL if needed
-  }}
->
-  Create Account
-</Button>
+        <Button
+          sx={{
+            backgroundColor: "#4a99d3",color: "#fff",textTransform: "none",width: "100%",marginBottom: "1rem",padding: "15px",borderRadius: "1.5px",cursor: "pointer",transition: "background-color 0.3s","&:hover": {backgroundColor: "#474bca",},
+          }}
+          disableElevation
+          variant="contained"
+          onClick={handleSubmit}
+        >
+          Create Account
+        </Button>
         <Link to="/Login" className="signInLink" style={{ textDecoration: "none", color: "#3048c1" }}>
           <span>{`Do you have an account? `}</span>
           <b>Sign in</b>

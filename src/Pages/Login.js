@@ -134,7 +134,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
                     />
                     {loginError && <Typography color="error" sx={{ fontSize: "14px", mt: 2 }}>{loginError}</Typography>}
                     <Button onClick={handleLogin} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
-                    <Typography variant="body1" sx={{ mt: 2, marginLeft: '30%' }}>
+                    <Typography variant="body1" sx={{ mt: 2, marginLeft: '25%' }}>
                         Not registered yet? <span style={{ color: '#6C6FD5' }}>Create an account </span>
                         <Link to="/Register" style={{ color: '#6EADDC', textDecoration: 'none', fontWeight: 'bold', borderBottom: '1px solid' }}>Signup</Link>
                     </Typography>
