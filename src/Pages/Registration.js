@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -40,15 +40,9 @@ const RegistrationPage = () => {
     setShowPassword(!showPassword);
   };
 
-  const validateEmail = (input) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(input);
-  };
+  const validateEmail = (input) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
 
-  const validatePassword = (input) => {
-    const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return regex.test(input);
-  };
+  const validatePassword = (input) => /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(input);
 
   const handleInputChange = (key, value) => {
     setFormData({
@@ -182,7 +176,11 @@ const RegistrationPage = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set background color and outline color
+            sx={{ 
+              backgroundColor: "#DBF0FD", 
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: item.error ? "red" : "#DBF0FD" }, 
+              borderRadius: '8px' 
+            }}
           />
         ))}
         <FormControl required sx={{ m: 1, minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
@@ -198,6 +196,7 @@ const RegistrationPage = () => {
             <MenuItem value="ADAS">ADAS</MenuItem>
             <MenuItem value="ADOF">ADOF</MenuItem>
           </Select>
+        </FormControl>
         </FormControl>
         {registrationError && (
           <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
