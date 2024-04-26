@@ -181,7 +181,7 @@ export const ProfileTab = ({ user }) => {
                 <DialogTitle>My Profile</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
-                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 100 }} alt="User Avatar" />
+                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 125 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
                             <TextField disabled id="outlined-disabled" label="Username" defaultValue="username" margin="dense" />
                             <TextField disabled id="outlined-disabled" label="Fullname" defaultValue={user.name} margin="dense" />
@@ -192,7 +192,7 @@ export const ProfileTab = ({ user }) => {
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDialogClose}>Close</Button>
+                <Button onClick={handleDialogClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>
