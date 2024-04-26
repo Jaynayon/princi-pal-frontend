@@ -24,6 +24,7 @@ import Divider from '@mui/material/Divider';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import Avatar from "@mui/material/Avatar";
 
 // Custom imports
 import { styling } from "./styling";
@@ -122,6 +123,7 @@ export default function Navigation({ children }) {
       'Budget limit exceeded; urgent action required to align expenses with allocated funds',
       'Congratulations, you have passed the first phase of the application process',
       'CIM is inviting you to be a part of the organization',
+      'UC is inviting you to be a part of the organization',
   ]);
 
   const handleClearOptions = () => {
@@ -175,7 +177,7 @@ const ITEM_HEIGHT = 48;
             {/* Search Bar */}
             <NavigationSearchBar />
 
-            <Box>
+                          <Box>
                             <IconButton color="inherit" onClick={handleMenuOpen}>
                                 <Badge badgeContent={5} color="secondary">
                                     <NotificationsIcon />
@@ -190,7 +192,8 @@ const ITEM_HEIGHT = 48;
                                 PaperProps={{
                                     style: {
                                         maxHeight: ITEM_HEIGHT * 10.5,
-                                        width: '70ch',
+                                        width: '40ch',
+                                        overflowY: 'auto',
                                     },
                                 }}
                             >
@@ -211,7 +214,8 @@ const ITEM_HEIGHT = 48;
 
                                 {options.map((option, index) => (
                                 <React.Fragment key={option}>
-                                    <MenuItem selected={option === 'Pyxis'} onClick={handleMenuClose}>
+                                    <MenuItem onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                                    <Avatar sx={{ marginRight: '8px' }}> </Avatar>
                                         {option}
                                     </MenuItem>
                                     {index !== options.length - 1 && <Divider />}
