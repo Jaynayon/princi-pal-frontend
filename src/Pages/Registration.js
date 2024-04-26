@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -35,6 +35,7 @@ const RegistrationPage = () => {
     confirmPassword: '',
     position: 'ADAS'
   });
+  const [formValid, setFormValid] = useState(true); // Track form validity
 
   const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
@@ -58,10 +59,10 @@ const RegistrationPage = () => {
 
     switch (key) {
       case 'email':
-        setEmailError(!validateEmail(value));
+        setEmailError(value !== '' && !validateEmail(value));
         break;
       case 'password':
-        setPasswordError(!validatePassword(value));
+        setPasswordError(value !== '' && !validatePassword(value));
         if (formData.confirmPassword && value !== formData.confirmPassword) {
           setConfirmPasswordError(true);
         } else {
@@ -69,7 +70,7 @@ const RegistrationPage = () => {
         }
         break;
       case 'confirmPassword':
-        setConfirmPasswordError(value !== formData.password);
+        setConfirmPasswordError(value !== '' && value !== formData.password);
         break;
       default:
         break;
@@ -86,6 +87,16 @@ const RegistrationPage = () => {
   const handleSubmit = async () => {
     const { email, password, username, firstName, middleName, lastName, position } = formData;
 
+    if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
+      console.log("All fields are required");
+      setFormValid(false); // Set form validity to false
+      setTimeout(() => {
+        setFormValid(true); // Clear the form validity error after 800 milliseconds
+      }, 800);
+      return; // Exit the function if any field is empty
+    }
+
+    // Further validation logic for email, password, and confirmPassword
     if (!emailError && !passwordError && !confirmPasswordError) {
       try {
         const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
@@ -154,11 +165,11 @@ const RegistrationPage = () => {
         </div>
         {[
           { label: "Email", icon: <EmailIcon />, key: 'email' },
-          { label: "Username", icon: <PersonIcon />, key: 'username' },
-          { label: "First Name", icon: <PersonIcon />, key: 'firstName' },
-          { label: "Middle Name", icon: <PersonIcon />, key: 'middleName' },
-          { label: "Last Name", icon: <PersonIcon />, key: 'lastName' },
-          { label: "Password", icon: <LockIcon />, key: 'password' },
+          { label: "Username", icon: <PersonIcon />, key: 'username', maxLength: 20 },
+          { label: "First Name", icon: <PersonIcon />, key: 'firstName', maxLength: 20 },
+          { label: "Middle Name", icon: <PersonIcon />, key: 'middleName', maxLength: 20 },
+          { label: "Last Name", icon: <PersonIcon />, key: 'lastName', maxLength: 20 },
+          { label: "Password", icon: <LockIcon />, key: 'password', maxLength: 20 },
           { label: "Confirm Password", icon: <LockIcon />, key: 'confirmPassword' },
         ].map((item, index) => (
           <TextField
@@ -170,8 +181,13 @@ const RegistrationPage = () => {
             type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={formData[item.key]}
             onChange={(e) => handleInputChange(item.key, e.target.value)}
-            error={(item.key === 'email' && emailError) || (item.key === 'password' && passwordError) || (item.key === 'confirmPassword' && confirmPasswordError)}
-            helperText={(item.key === 'email' && emailError) ? "Invalid email address" : ((item.key === 'password' && passwordError) ? "Password must contain at least 8 characters and one special character" : ((item.key === 'confirmPassword' && confirmPasswordError) ? "Passwords don't match" : ""))}
+            error={(item.key === 'email' && emailError) || (item.key === 'password' && passwordError) || (item.key === 'confirmPassword' && confirmPasswordError) || (!formValid && !formData[item.key])} // Add error condition for required fields
+            helperText={
+              (item.key === 'email' && emailError) ? "Invalid email address" :
+              ((item.key === 'password' && passwordError) ? "Password must contain at least 8 characters and one special character" :
+              ((item.key === 'confirmPassword' && confirmPasswordError) ? "Passwords don't match" :
+              (!formValid && !formData[item.key]) ? "This field is required" : ""))
+            }
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
               endAdornment: index >= 5 && (
@@ -182,9 +198,12 @@ const RegistrationPage = () => {
                 </InputAdornment>
               ),
             }}
+            inputProps={{ maxLength: item.maxLength }} // Set maxlength attribute
             sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set background color and outline color
           />
         ))}
+
+
         <FormControl required sx={{ m: 1, minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
           <InputLabel id="position-select-label" color="primary">Position</InputLabel>
           <Select
