@@ -21,6 +21,7 @@ import RestService from "../Services/RestService";
 
 const RegistrationPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [usernameEror, setUsernameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
@@ -84,6 +85,24 @@ const RegistrationPage = () => {
     });
   };
 
+  const handleExistingEmail = async (event) => {
+    try {
+      const exists = await RestService.validateUsernameEmail(event.target.value)
+      exists ? setEmailError(true) : setEmailError(false)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleExistingUsername = async (event) => {
+    try {
+      const exists = await RestService.validateUsernameEmail(event.target.value)
+      exists ? setUsernameError(true) : setUsernameError(false)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const handleSubmit = async () => {
     const { email, password, username, firstName, middleName, lastName, position } = formData;
 
@@ -127,6 +146,32 @@ const RegistrationPage = () => {
       console.log("Form contains errors");
     }
   };
+
+  function getErrorCondition(item) {
+    const { key } = item;
+
+    if (key === 'email') {
+      return emailError ? "Existing or invalid email address" : false;
+    }
+
+    if (key === 'username') {
+      return usernameEror ? "Existing or invalid username" : false;
+    }
+
+    if (key === 'password') {
+      return passwordError ? "Password must contain at least 8 characters and one special character" : false;
+    }
+
+    if (key === 'confirmPassword') {
+      return confirmPasswordError ? "Passwords don't match" : false;
+    }
+
+    if (!formValid && !formData[key]) {
+      return "This field is required";
+    }
+
+    return false;
+  }
 
   return (
     <Container
@@ -176,18 +221,22 @@ const RegistrationPage = () => {
             key={index}
             style={{ marginBottom: "1rem", width: "100%" }}
             color="primary"
+            onBlur={(event) => {
+              item.key === 'email' && handleExistingEmail(event)
+              item.key === 'username' && handleExistingUsername(event)
+            }}
             label={item.label}
             variant="outlined"
             type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={formData[item.key]}
             onChange={(e) => handleInputChange(item.key, e.target.value)}
-            error={(item.key === 'email' && emailError) || (item.key === 'password' && passwordError) || (item.key === 'confirmPassword' && confirmPasswordError) || (!formValid && !formData[item.key])} // Add error condition for required fields
-            helperText={
-              (item.key === 'email' && emailError) ? "Invalid email address" :
-              ((item.key === 'password' && passwordError) ? "Password must contain at least 8 characters and one special character" :
-              ((item.key === 'confirmPassword' && confirmPasswordError) ? "Passwords don't match" :
-              (!formValid && !formData[item.key]) ? "This field is required" : ""))
-            }
+            error={
+              (item.key === 'email' && emailError) ||
+              (item.key === 'username' && usernameEror) ||
+              (item.key === 'password' && passwordError) ||
+              (item.key === 'confirmPassword' && confirmPasswordError) ||
+              (!formValid && !formData[item.key])} // Add error condition for required fields
+            helperText={getErrorCondition(item)}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
               endAdornment: index >= 5 && (
@@ -204,7 +253,7 @@ const RegistrationPage = () => {
         ))}
 
 
-        <FormControl required sx={{minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
+        <FormControl required sx={{ minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
           <InputLabel id="position-select-label" color="primary">Position</InputLabel>
           <Select
             labelId="position-select-label"
