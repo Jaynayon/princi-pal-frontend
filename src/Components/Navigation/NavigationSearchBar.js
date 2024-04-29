@@ -108,7 +108,7 @@ const NavigationSearchBar = () => {
             padding: 0,
             position: "absolute",
             width: "100%",
-            maxHeight: "200px", // Set maximum height here
+            maxHeight: "600px", // Set maximum height here
             overflowY: "auto", // Enable vertical scrolling
             backgroundColor: "#fff",
             border: "1px solid #ccc",

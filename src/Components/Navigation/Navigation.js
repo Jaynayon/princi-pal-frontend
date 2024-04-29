@@ -191,7 +191,7 @@ const ITEM_HEIGHT = 48;
                                 onClose={handleMenuClose}
                                 PaperProps={{
                                     style: {
-                                        maxHeight: ITEM_HEIGHT * 10.5,
+                                        maxHeight: ITEM_HEIGHT * 12.5,
                                         width: '40ch',
                                         overflowY: 'auto',
                                     },
