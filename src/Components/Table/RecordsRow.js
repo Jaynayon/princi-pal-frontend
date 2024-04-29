@@ -8,7 +8,7 @@ function RecordsRow(props) {
     const [rows, setRows] = useState([
         {
             id: 1,
-            date: 'test',
+            date: 'tests',
             details_code: 'testing',
             details: 'testing',
             lastUpdated: 'testing',

@@ -1,7 +1,14 @@
 import React from 'react';
 import plusBtnImg from '../../Assets/Images/plusbtn.png';
+import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import PropTypes from 'prop-types';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Typography from '@mui/material/Typography';
 
-function TableHeader() {
+/*function TableHeader() {
     return (
         <div style={styles.container}>
             <div style={styles.section}>
@@ -20,6 +27,37 @@ function TableHeader() {
             </div>
             <div style={{ flex: 1, minHeight: "50px" }}></div>
         </div>
+    );
+}*/
+
+function TableHeader() {
+    return (
+        <Grid container /*spacing={2}*/>
+            <Grid item xs={6} md={12} lg={12}>
+                <Box sx={{
+                    width: '100%',
+                    height: '100%',
+
+                }}>
+                    Table Header Content
+                </Box>
+            </Grid>
+            <Grid item xs={6} md={12} lg={12}>
+                <Box sx={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'green',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center', // Center content vertically
+                    color: 'white', // Text color
+                    fontWeight: 'bold' // Make text bold
+                }}>
+                    Table Header Content
+                </Box>
+            </Grid>
+        </Grid>
+
     );
 }
 
