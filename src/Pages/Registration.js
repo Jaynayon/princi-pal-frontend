@@ -21,7 +21,7 @@ import RestService from "../Services/RestService";
 
 const RegistrationPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [usernameEror, setUsernameError] = useState(false);
+  const [usernameError, setUsernameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
@@ -53,9 +53,18 @@ const RegistrationPage = () => {
   };
 
   const handleInputChange = (key, value) => {
+    let modifiedValue = value;
+    if (key === 'firstName' || key === 'middleName' || key === 'lastName') {
+      // Replace non-letter characters with an empty string
+      modifiedValue = modifiedValue.replace(/[^a-zA-Z]/g, '');
+    }
+    if (key === 'username') {
+      // Allow only alphanumeric characters for username (letters and numbers)
+      modifiedValue = modifiedValue.replace(/[^a-zA-Z0-9]/g, '');
+    }
     setFormData({
       ...formData,
-      [key]: value
+      [key]: modifiedValue
     });
 
     switch (key) {
@@ -83,6 +92,7 @@ const RegistrationPage = () => {
       ...formData,
       position: event.target.value
     });
+    console.log(formData.position)
   };
 
   const handleExistingEmail = async (event) => {
@@ -134,7 +144,7 @@ const RegistrationPage = () => {
             position: ''
           });
           // Redirect to login page or display a success message
-          window.location.href = "/dashboard"; // Change this to the correct URL if needed
+          //window.location.href = "/dashboard"; // Change this to the correct URL if needed
         } else {
           setRegistrationError("Registration failed");
         }
@@ -155,7 +165,7 @@ const RegistrationPage = () => {
     }
 
     if (key === 'username') {
-      return usernameEror ? "Existing or invalid username" : false;
+      return usernameError ? "Existing or invalid username" : false;
     }
 
     if (key === 'password') {
@@ -232,7 +242,7 @@ const RegistrationPage = () => {
             onChange={(e) => handleInputChange(item.key, e.target.value)}
             error={
               (item.key === 'email' && emailError) ||
-              (item.key === 'username' && usernameEror) ||
+              (item.key === 'username' && usernameError) ||
               (item.key === 'password' && passwordError) ||
               (item.key === 'confirmPassword' && confirmPasswordError) ||
               (!formValid && !formData[item.key])} // Add error condition for required fields
@@ -274,6 +284,10 @@ const RegistrationPage = () => {
           sx={{
             backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem", padding: "15px", borderRadius: "1.5px", cursor: "pointer", transition: "background-color 0.3s", "&:hover": { backgroundColor: "#474bca", },
           }}
+          disabled={
+            (usernameError || emailError || passwordError || confirmPasswordError) ||
+            (formData.email === '' || formData.username === '' || formData.password === '' || formData.confirmPassword === '')
+          }
           disableElevation
           variant="contained"
           onClick={handleSubmit}
