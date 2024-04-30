@@ -8,6 +8,8 @@ import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { RecordsProvider } from '../../Context/RecordsProvider'
+import IconButton from "@mui/material/IconButton";
+import AddBoxIcon from '@mui/icons-material/AddBox';
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -21,7 +23,7 @@ function CustomTabPanel(props) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ paddingTop: 3 }}>
+        <Box sx={{ paddingTop: 1 }}>
           <Typography>{children}</Typography>
         </Box>
       )}
@@ -42,6 +44,31 @@ function a11yProps(index) {
   };
 }
 
+function BudgetSummary(props) {
+  const { title, amount, total = false } = props
+  return (
+    <Paper sx={{ minWidth: 150, height: 65, m: 1, backgroundColor: total ? '#0077B6' : undefined }} variant='outlined'>
+      <Box
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontWeight: 'bold',
+          height: '100%',
+        }}
+      >
+        <Typography variant="body2" align="center" sx={{ fontWeight: 'bold', color: total ? '#ffff' : '#9FA2B4' }}>
+          {title}
+        </Typography>
+        <Typography variant="body2" align="center" sx={{ fontWeight: 'bold', color: total && '#ffff' }}>
+          Php {amount}
+        </Typography>
+      </Box>
+    </Paper>
+  );
+}
+
 function RecordsTable(props) {
   const [value, setValue] = React.useState(0);
 
@@ -53,8 +80,11 @@ function RecordsTable(props) {
     <RecordsProvider>
       <Paper sx={styles.container}>
         <Grid container>
-          <Grid item xs={6} md={12} lg={12}>
-            <Box>
+          <Grid item xs={12} md={12} lg={12}>
+            <Box sx={{
+              overflow: 'auto', //if overflow, hide it
+              overflowWrap: "break-word",
+            }}>
               <Tabs sx={{ minHeight: '10px' }} value={value} onChange={handleChange} aria-label="basic tabs example">
                 <Tab sx={styles.tab} label="LR" {...a11yProps(0)} />
                 <Tab sx={styles.tab} label="Item Two" {...a11yProps(1)} />
@@ -62,16 +92,50 @@ function RecordsTable(props) {
               </Tabs>
             </Box>
           </Grid>
-          <Grid item xs={6} md={12} lg={12}>
+          <Grid item xs={12} md={12} lg={12} sx={{ pt: 2 }}>
             <Box sx={{
-              width: '100%',
-              height: '100%',
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between'
             }}
             >
-              Table Header Content
+              <Grid container>
+                <Grid item xs={12} md={8} lg={6}>
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: "100%",
+                    //backgroundColor: 'green'
+                  }}
+                  >
+                    <IconButton sx={{ alignSelf: "center" }}>
+                      <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
+                    </IconButton>
+                    <Grid container >
+                      <Grid item xs={12} md={12} lg={4}>
+                        <BudgetSummary total title="Total" amount="9,675.43" />
+                      </Grid>
+                      <Grid item xs={12} md={12} lg={4}>
+                        <BudgetSummary title="Budget this month" amount="18,000.00" />
+                      </Grid>
+                      <Grid item xs={12} md={12} lg={4}>
+                        <BudgetSummary title="Balance" amount="8,324.57" />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4} lg={6}>
+                  <Box sx={{ width: '100%', height: '100%' }}>
+                    Table Header Content2
+                  </Box>
+                </Grid>
+              </Grid>
             </Box>
           </Grid>
-          <Grid item xs={6} md={12} lg={12}>
+          {/*Document Tables*/}
+          <Grid item xs={12} md={12} lg={12}>
             <CustomTabPanel value={value} index={0}>
               <LRTable />
             </CustomTabPanel>
