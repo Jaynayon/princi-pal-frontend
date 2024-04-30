@@ -141,7 +141,6 @@ function RecordsRow(props) {
                                                         value={value}
                                                         onChange={(event) => handleInputChange(column.id, row.id, event)}
                                                         onBlur={handleInputBlur}
-                                                        autoFocus
                                                     />
                                                 </Box>
                                         }
