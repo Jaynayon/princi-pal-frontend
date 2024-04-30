@@ -9,8 +9,8 @@ function RecordsRow(props) {
         {
             id: 1,
             date: 'tests',
-            details_code: 'testing',
-            details: 'testing',
+            ors_burs_no: 'testing',
+            particulars: 'testing',
             lastUpdated: 'testing',
             hours: 'testing',
             amount: 100
@@ -18,8 +18,8 @@ function RecordsRow(props) {
         {
             id: 2,
             date: 'test',
-            details_code: 'test',
-            details: 'testing',
+            ors_burs_no: 'testing',
+            particulars: 'testing',
             lastUpdated: 'testing',
             hours: 'testing',
             amount: 150
@@ -33,8 +33,8 @@ function RecordsRow(props) {
     let newRecord = {
         id: 3,
         date: 'test',
-        details_code: 'testing2',
-        details: 'testing2',
+        ors_burs_no: 'testing',
+        particulars: 'testing',
         lastUpdated: 'testing2',
         hours: 'testing2',
         amount: 100
@@ -115,7 +115,10 @@ function RecordsRow(props) {
                                     <TableCell
                                         key={column.id}
                                         align={column.align}
-                                        sx={styles.cell}
+                                        sx={[styles.cell, {
+                                            minWidth: column.minWidth,
+                                            maxWidth: column.maxWidth
+                                        }]}
                                         value={value}
                                         onClick={() => handleCellClick(column.id, row.id)}
                                     >
@@ -141,7 +144,6 @@ function RecordsRow(props) {
                                                     />
                                                 </div>
                                         }
-
                                     </TableCell>
                                 );
                             })}
