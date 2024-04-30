@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
 import { useRecordsContext } from '../../Context/RecordsProvider';
+import Box from '@mui/material/Box';
 
 function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
@@ -124,11 +125,11 @@ function RecordsRow(props) {
                                     >
                                         {
                                             column.id === 'id' ?
-                                                <div style={styles.inputStyling} >
+                                                <Box style={styles.inputStyling} >
                                                     {value}
-                                                </div>
+                                                </Box>
                                                 :
-                                                <div style=
+                                                <Box style=
                                                     {
                                                         editingCell &&
                                                             editingCell.colId === column.id &&
@@ -142,7 +143,7 @@ function RecordsRow(props) {
                                                         onBlur={handleInputBlur}
                                                         autoFocus
                                                     />
-                                                </div>
+                                                </Box>
                                         }
                                     </TableCell>
                                 );
