@@ -247,8 +247,8 @@ const NavigationSearchBar = () => {
               autoWidth
               label="Select"
             >
-              {POSITIONS.map((position) => (
-                <MenuItem value={position}>{position}</MenuItem>
+              {POSITIONS.map((position, index) => (
+                <MenuItem key={index} value={position}>{position}</MenuItem>
               ))}
             </Select>
           </FormControl>
