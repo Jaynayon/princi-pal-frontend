@@ -29,6 +29,11 @@ const SCHOOLS = [
   "Asian College of Technology",
 ];
 
+const POSITIONS = [
+  "ADAS",
+  "ADOF"
+]
+
 const NavigationSearchBar = () => {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -242,8 +247,9 @@ const NavigationSearchBar = () => {
               autoWidth
               label="Select"
             >
-              <MenuItem value="ADAS">ADAS</MenuItem>
-              <MenuItem value="ADOF">ADOF</MenuItem>
+              {POSITIONS.map((position) => (
+                <MenuItem value={position}>{position}</MenuItem>
+              ))}
             </Select>
           </FormControl>
           <DialogActions>
