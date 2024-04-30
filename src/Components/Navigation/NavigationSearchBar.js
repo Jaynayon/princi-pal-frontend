@@ -85,7 +85,7 @@ const NavigationSearchBar = () => {
     school.toLowerCase().includes(query.toLowerCase())
   );
   return (
-    <div style={{ width: "400px", position: "relative" }}>
+    <Box style={{ width: "400px", position: "relative" }}>
       <Box
         component="form"
         sx={{
@@ -259,7 +259,7 @@ const NavigationSearchBar = () => {
           </DialogActions>
         </DialogContent>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 
