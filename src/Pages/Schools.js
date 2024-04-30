@@ -22,7 +22,7 @@ function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
 
     return (
-        <div
+        <Box
             role="tabpanel"
             hidden={value !== index}
             id={`simple-tabpanel-${index}`}
@@ -31,10 +31,10 @@ function CustomTabPanel(props) {
         >
             {value === index && (
                 <Box sx={{ paddingTop: 1 }}>
-                    <Typography>{children}</Typography>
+                    {children}
                 </Box>
             )}
-        </div>
+        </Box>
     );
 }
 
