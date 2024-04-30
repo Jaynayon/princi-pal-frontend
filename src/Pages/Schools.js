@@ -130,7 +130,7 @@ function Schools(props) {
                                     }}
                                     >
                                         <Grid container>
-                                            <Grid item xs={12} md={8} lg={6}>
+                                            <Grid item xs={12} sm={8} md={8} lg={6}>
                                                 <Box sx={{
                                                     display: 'flex',
                                                     flexDirection: 'row',
@@ -144,19 +144,19 @@ function Schools(props) {
                                                         <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
                                                     </IconButton>
                                                     <Grid container >
-                                                        <Grid item xs={12} md={12} lg={4}>
+                                                        <Grid item xs={12} md={4} lg={4}>
                                                             <BudgetSummary total title="Total" amount="9,675.43" />
                                                         </Grid>
-                                                        <Grid item xs={12} md={12} lg={4}>
+                                                        <Grid item xs={12} md={4} lg={4}>
                                                             <BudgetSummary title="Budget this month" amount="18,000.00" />
                                                         </Grid>
-                                                        <Grid item xs={12} md={12} lg={4}>
+                                                        <Grid item xs={12} md={4} lg={4}>
                                                             <BudgetSummary title="Balance" amount="8,324.57" />
                                                         </Grid>
                                                     </Grid>
                                                 </Box>
                                             </Grid>
-                                            <Grid item xs={12} md={4} lg={6}>
+                                            <Grid item xs={12} sm={4} md={4} lg={6}>
                                                 <Box sx={{ width: '100%', height: '100%' }}>
                                                     Table Header Content2
                                                 </Box>
