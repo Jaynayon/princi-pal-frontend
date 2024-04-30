@@ -39,7 +39,7 @@ const User = {
 };
 
 const drawerWidth = 220;
-const initialWidth = 70;
+//const initialWidth = 70;
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -48,11 +48,11 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  paddingLeft: initialWidth, //starts with an initial padding instead of 0
+  paddingLeft: 5, //starts with an initial padding instead of 0
   ...(open && {
-    marginLeft: drawerWidth,
-    paddingLeft: 0, //removes the space and adjust to the drawer
-    width: `calc(100% - ${drawerWidth}px)`,
+    //marginLeft: drawerWidth,
+    //paddingLeft: 0, //removes the space and adjust to the drawer
+    //width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin", "padding"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -109,27 +109,27 @@ export default function Navigation({ children }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenuOpen = (event) => {
-      setAnchorEl(event.currentTarget);
+    setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => {
-      setAnchorEl(null);
+    setAnchorEl(null);
   };
 
   const [options, setOptions] = React.useState([
-      'CIT-U is inviting you to be a part of the organization',
-      'Your application at CTU has been cancelled',
-      'Budget limit exceeded; urgent action required to align expenses with allocated funds',
-      'Congratulations, you have passed the first phase of the application process',
-      'CIM is inviting you to be a part of the organization',
+    'CIT-U is inviting you to be a part of the organization',
+    'Your application at CTU has been cancelled',
+    'Budget limit exceeded; urgent action required to align expenses with allocated funds',
+    'Congratulations, you have passed the first phase of the application process',
+    'CIM is inviting you to be a part of the organization',
   ]);
 
   const handleClearOptions = () => {
-      setOptions([]); // Clear options by setting it to an empty array
+    setOptions([]); // Clear options by setting it to an empty array
   };
 
 
-const ITEM_HEIGHT = 48;
+  const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
     typography: {
@@ -142,86 +142,7 @@ const ITEM_HEIGHT = 48;
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-        <AppBar
-          position="absolute"
-          open={open}
-          sx={{
-            boxShadow: "none",
-            backgroundColor: "transparent",
-            paddingTop: "5px",
-          }}
-        >
-          <Toolbar
-            sx={{
-              pr: "24px", // keep right padding when drawer closed
-              color: "#C5C7CD", //gets inherited
-            }}
-          >
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              sx={{
-                flexGrow: 1,
-                textAlign: "left",
-                color: "#252733",
-                fontWeight: "bold",
-              }}
-            >
-              {displayTitle(selected)}
-            </Typography>
 
-            {/* Search Bar */}
-            <NavigationSearchBar />
-
-            <Box>
-                            <IconButton color="inherit" onClick={handleMenuOpen}>
-                                <Badge badgeContent={5} color="secondary">
-                                    <NotificationsIcon />
-                                </Badge>
-                            </IconButton>
-                            <Menu
-
-                                id="long-menu"
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl)}
-                                onClose={handleMenuClose}
-                                PaperProps={{
-                                    style: {
-                                        maxHeight: ITEM_HEIGHT * 10.5,
-                                        width: '70ch',
-                                    },
-                                }}
-                            >
-                                <Typography variant="subtitle1" sx={{ paddingLeft: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                                    Notifications
-                                    <DeleteOutlineIcon sx={{ ml: 60 }} onClick={handleClearOptions}/>
-                                </Typography>
-
-
-                                <Tabs
-                                    value={0} 
-                                    variant="fullWidth"
-                                    textColor="primary"
-                                    indicatorColor="primary"
-                                >
-                                    <Tab label="All"/>
-                                </Tabs>
-
-                                {options.map((option, index) => (
-                                <React.Fragment key={option}>
-                                    <MenuItem selected={option === 'Pyxis'} onClick={handleMenuClose}>
-                                        {option}
-                                    </MenuItem>
-                                    {index !== options.length - 1 && <Divider />}
-                                </React.Fragment>
-                            ))}
-
-                            </Menu>
-                        </Box>
-          </Toolbar>
-        </AppBar>
         <Drawer
           variant="permanent"
           open={open}
@@ -314,9 +235,85 @@ const ITEM_HEIGHT = 48;
             overflow: "auto",
           }}
         >
-          <Toolbar />
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
+              <AppBar
+                position="relative"
+                open={open}
+                sx={{
+                  boxShadow: "none",
+                  backgroundColor: "transparent",
+                  paddingTop: "5px",
+                }}
+              >
+                <Toolbar
+                  sx={{
+                    pr: "24px", // keep right padding when drawer closed
+                    color: "#C5C7CD", //gets inherited
+                  }}
+                >
+                  <Typography
+                    component="h1"
+                    variant="h6"
+                    color="inherit"
+                    noWrap
+                    sx={{
+                      flexGrow: 1,
+                      textAlign: "left",
+                      color: "#252733",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {displayTitle(selected)}
+                  </Typography>
+
+                  {/* Search Bar */}
+                  <NavigationSearchBar />
+                  <Box>
+                    <IconButton color="inherit" onClick={handleMenuOpen}>
+                      <Badge badgeContent={5} color="secondary">
+                        <NotificationsIcon />
+                      </Badge>
+                    </IconButton>
+                    <Menu
+
+                      id="long-menu"
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                      PaperProps={{
+                        style: {
+                          maxHeight: ITEM_HEIGHT * 10.5,
+                          width: '70ch',
+                        },
+                      }}
+                    >
+                      <Typography variant="subtitle1" sx={{ paddingLeft: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                        Notifications
+                        <DeleteOutlineIcon sx={{ ml: 60 }} onClick={handleClearOptions} />
+                      </Typography>
+                      <Tabs
+                        value={0}
+                        variant="fullWidth"
+                        textColor="primary"
+                        indicatorColor="primary"
+                      >
+                        <Tab label="All" />
+                      </Tabs>
+
+                      {options.map((option, index) => (
+                        <React.Fragment key={option}>
+                          <MenuItem selected={option === 'Pyxis'} onClick={handleMenuClose}>
+                            {option}
+                          </MenuItem>
+                          {index !== options.length - 1 && <Divider />}
+                        </React.Fragment>
+                      ))}
+
+                    </Menu>
+                  </Box>
+                </Toolbar>
+              </AppBar>
               {children}
             </Grid>
           </Container>
