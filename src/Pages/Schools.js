@@ -13,6 +13,7 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import { RecordsProvider } from '../Context/RecordsProvider';
 import { DateFilter, FieldsFilter, SearchFilter } from '../Components/Filters/Filters'
 import LRTable from '../Components/Table/LRTable';
+import Button from '@mui/material/Button';
 
 //import { useState } from 'react';
 //import { useEffect } from 'react';
@@ -117,8 +118,8 @@ function Schools(props) {
                                             onChange={handleChange}
                                             aria-label="basic tabs example">
                                             <Tab sx={styles.tab} label="LR" {...a11yProps(0)} />
-                                            <Tab sx={styles.tab} label="Item Two" {...a11yProps(1)} />
-                                            <Tab sx={styles.tab} label="Item Three" {...a11yProps(2)} />
+                                            <Tab sx={styles.tab} label="RCD" {...a11yProps(1)} />
+                                            <Tab sx={styles.tab} label="JEV" {...a11yProps(2)} />
                                         </Tabs>
                                     </Box>
                                 </Grid>
@@ -126,7 +127,7 @@ function Schools(props) {
                                     <Box sx={{
                                         display: 'flex',
                                         flexDirection: 'row',
-                                        justifyContent: 'space-between'
+                                        justifyContent: 'space-between',
                                     }}
                                     >
                                         <Grid container>
@@ -143,7 +144,7 @@ function Schools(props) {
                                                     <IconButton sx={{ alignSelf: "center" }}>
                                                         <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
                                                     </IconButton>
-                                                    <Grid container >
+                                                    <Grid container pb={1} >
                                                         <Grid item xs={12} md={4} lg={4}>
                                                             <BudgetSummary total title="Total" amount="9,675.43" />
                                                         </Grid>
@@ -157,8 +158,16 @@ function Schools(props) {
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={12} sm={4} md={4} lg={6}>
-                                                <Box sx={{ width: '100%', height: '100%' }}>
-                                                    Table Header Content2
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'flex-end',
+                                                        alignItems: 'center',
+                                                        height: '100%', // Ensure Box fills the height of the Grid item
+                                                        pr: 2
+                                                    }}
+                                                >
+                                                    <Button variant="contained" sx={{ backgroundColor: '#4A99D3' }}>Export</Button>
                                                 </Box>
                                             </Grid>
                                         </Grid>
