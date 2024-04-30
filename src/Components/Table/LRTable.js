@@ -8,7 +8,6 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import RecordsRow from './RecordsRow';
-import TableHeader from './TableHeader';
 import { RecordsProvider } from '../../Context/RecordsProvider'
 
 function LRTable(props) {
