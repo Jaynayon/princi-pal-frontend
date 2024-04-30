@@ -1,5 +1,6 @@
 // React imports
 import * as React from "react";
+import { useEffect, useState } from "react";
 
 // Material-UI imports
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
@@ -62,29 +63,56 @@ const AppBar = styled(MuiAppBar, {
 
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  "& .MuiDrawer-paper": {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    boxSizing: "border-box",
-    ...(!open && {
-      overflowX: "hidden",
+})(({ theme, open }) => {
+  const [mobileMode, setMobileMode] = useState(false); // State to track position
+
+  const updateMobileMode = () => {
+    const { innerWidth } = window;
+    setMobileMode(innerWidth < 600);
+  };
+
+  useEffect(() => {
+    // Call the function to set initial mobileMode state
+    updateMobileMode();
+
+    const handleResize = () => {
+      // Call the function to update mobileMode state on resize
+      updateMobileMode();
+    };
+
+    // Add event listener for resize
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []); // Run effect only on mount and unmount
+
+  return {
+    "& .MuiDrawer-paper": {
+      position: mobileMode ? "absolute" : "relative",
+      whiteSpace: "nowrap",
+      width: drawerWidth,
       transition: theme.transitions.create("width", {
         easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
+        duration: theme.transitions.duration.enteringScreen,
       }),
-      width: theme.spacing(7.7),
-      [theme.breakpoints.up("sm")]: {
+      boxSizing: "border-box",
+      ...(!open && {
+        overflowX: "hidden",
+        transition: theme.transitions.create("width", {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
         width: theme.spacing(7.7),
-      },
-    }),
-  },
-}));
+        [theme.breakpoints.up("sm")]: {
+          width: theme.spacing(7.7),
+        },
+      }),
+    },
+  };
+});
 
 const displayTitle = (selected) => {
   if (
@@ -105,7 +133,7 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle } = useNavigationContext();
+  const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenuOpen = (event) => {
@@ -128,7 +156,6 @@ export default function Navigation({ children }) {
     setOptions([]); // Clear options by setting it to an empty array
   };
 
-
   const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
@@ -142,7 +169,6 @@ export default function Navigation({ children }) {
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-
         <Drawer
           variant="permanent"
           open={open}
@@ -151,6 +177,7 @@ export default function Navigation({ children }) {
               backgroundColor: (theme) => theme.navStyle.base,
               boxShadow: "none",
               borderRight: "none",
+              display: mobileMode && !open ? "none" : null
             },
           }}
         >
@@ -235,7 +262,7 @@ export default function Navigation({ children }) {
             overflow: "auto",
           }}
         >
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Container maxWidth="lg" sx={{ mt: 4, mb: 4, pl: 4 }}>
             <Grid container spacing={3}>
               <AppBar
                 position="relative"
@@ -250,8 +277,20 @@ export default function Navigation({ children }) {
                   sx={{
                     pr: "24px", // keep right padding when drawer closed
                     color: "#C5C7CD", //gets inherited
+                    pl: 1
                   }}
                 >
+                  <IconButton
+                    aria-label="open drawer"
+                    onClick={toggleDrawer}
+                    sx={{
+                      display: !mobileMode ? "none" : null,
+                      color: (theme) => theme.navStyle.color,
+                      //...(open && { display: "none" }),
+                    }}
+                  >
+                    <MenuIcon />
+                  </IconButton>
                   <Typography
                     component="h1"
                     variant="h6"
@@ -262,6 +301,7 @@ export default function Navigation({ children }) {
                       textAlign: "left",
                       color: "#252733",
                       fontWeight: "bold",
+                      width: '400px'
                     }}
                   >
                     {displayTitle(selected)}
