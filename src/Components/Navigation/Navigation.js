@@ -316,7 +316,6 @@ export default function Navigation({ children }) {
                       </Badge>
                     </IconButton>
                     <Menu
-
                       id="long-menu"
                       anchorEl={anchorEl}
                       open={Boolean(anchorEl)}
@@ -332,6 +331,7 @@ export default function Navigation({ children }) {
                         Notifications
                         <DeleteOutlineIcon sx={{ ml: 60 }} onClick={handleClearOptions} />
                       </Typography>
+
                       <Tabs
                         value={0}
                         variant="fullWidth"
@@ -341,15 +341,12 @@ export default function Navigation({ children }) {
                         <Tab label="All" />
                       </Tabs>
 
-                      {options.map((option, index) => (
-                        <React.Fragment key={option}>
-                          <MenuItem selected={option === 'Pyxis'} onClick={handleMenuClose}>
-                            {option}
-                          </MenuItem>
-                          {index !== options.length - 1 && <Divider />}
-                        </React.Fragment>
-                      ))}
-
+                      {options.map((option, index) => [
+                        <MenuItem key={option} selected={option === 'Pyxis'} onClick={handleMenuClose}>
+                          {option}
+                        </MenuItem>,
+                        index !== options.length - 1 && <Divider key={`divider-${index}`} />
+                      ])}
                     </Menu>
                   </Box>
                 </Toolbar>
