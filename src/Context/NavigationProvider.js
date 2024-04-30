@@ -24,6 +24,8 @@ export const NavigationProvider = ({ children }) => {
         if (innerWidth < 600) {
             setMobileMode(true);
             setOpen(false)
+        } else {
+            setMobileMode(false);
         }
     };
 
