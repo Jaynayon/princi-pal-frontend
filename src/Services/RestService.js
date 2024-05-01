@@ -82,12 +82,25 @@ const RestService = (() => {
         return isAuthenticated;
     };
 
+    const getUserById = async (user_id) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/users/${user_id}`)
+            if (response.data) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            throw new Error("Get user failed. Please try again later.");
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
         validateUsernameEmail,
         validateToken,
-        getIsAuthenticated
+        getIsAuthenticated,
+        getUserById
     };
 })();
 
