@@ -75,6 +75,18 @@ export function DisplayItems() {
         return null;
     };
 
+    function logoutUser(cookieName) {
+        // Check if the cookie exists
+        if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
+            // Overwrite the cookie with an empty value and a path that matches the original cookie's path
+            document.cookie = `${cookieName}=; path=/;`;
+            console.log(`${cookieName} cookie removed.`);
+            window.location.href = "http://localhost:3000/";
+        } else {
+            console.log(`${cookieName} cookie not found.`);
+        }
+    }
+
     return (
         list.map((item, index) => (
             <React.Fragment key={index}>
@@ -89,7 +101,10 @@ export function DisplayItems() {
                         to={index < 4 ? `/${item.toLowerCase()}` : '/'} //Logout route has not yet been implemented
                         selected={selected === item}
                         value={item}
-                        onClick={() => { setSelected(item) }}
+                        onClick={() => {
+                            setSelected(item)
+                            !(index < 4) && logoutUser('jwt')
+                        }}
                         sx={theme.navStyle.button}
                     >
                         <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>

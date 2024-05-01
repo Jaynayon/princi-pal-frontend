@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
 import { useRecordsContext } from '../../Context/RecordsProvider';
+import Box from '@mui/material/Box';
 
 function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
@@ -8,9 +9,9 @@ function RecordsRow(props) {
     const [rows, setRows] = useState([
         {
             id: 1,
-            date: 'test',
-            details_code: 'testing',
-            details: 'testing',
+            date: 'tests',
+            ors_burs_no: 'testing',
+            particulars: 'testing',
             lastUpdated: 'testing',
             hours: 'testing',
             amount: 100
@@ -18,8 +19,8 @@ function RecordsRow(props) {
         {
             id: 2,
             date: 'test',
-            details_code: 'test',
-            details: 'testing',
+            ors_burs_no: 'testing',
+            particulars: 'testing',
             lastUpdated: 'testing',
             hours: 'testing',
             amount: 150
@@ -33,8 +34,8 @@ function RecordsRow(props) {
     let newRecord = {
         id: 3,
         date: 'test',
-        details_code: 'testing2',
-        details: 'testing2',
+        ors_burs_no: 'testing',
+        particulars: 'testing',
         lastUpdated: 'testing2',
         hours: 'testing2',
         amount: 100
@@ -115,17 +116,20 @@ function RecordsRow(props) {
                                     <TableCell
                                         key={column.id}
                                         align={column.align}
-                                        sx={styles.cell}
+                                        sx={[styles.cell, {
+                                            minWidth: column.minWidth,
+                                            maxWidth: column.maxWidth
+                                        }]}
                                         value={value}
                                         onClick={() => handleCellClick(column.id, row.id)}
                                     >
                                         {
                                             column.id === 'id' ?
-                                                <div style={styles.inputStyling} >
+                                                <Box style={styles.inputStyling} >
                                                     {value}
-                                                </div>
+                                                </Box>
                                                 :
-                                                <div style=
+                                                <Box style=
                                                     {
                                                         editingCell &&
                                                             editingCell.colId === column.id &&
@@ -137,11 +141,9 @@ function RecordsRow(props) {
                                                         value={value}
                                                         onChange={(event) => handleInputChange(column.id, row.id, event)}
                                                         onBlur={handleInputBlur}
-                                                        autoFocus
                                                     />
-                                                </div>
+                                                </Box>
                                         }
-
                                     </TableCell>
                                 );
                             })}

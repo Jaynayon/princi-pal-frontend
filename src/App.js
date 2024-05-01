@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, Outlet, RouterProvider } from 'react-router-dom';
 import Navigation from './Components/Navigation/Navigation.js';
 import Dashboard from './Pages/Dashboard.js';
@@ -10,20 +10,65 @@ import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
 import WelcomePage from './Pages/WelcomePage.js';
 import Registration from './Pages/Registration.js';
+import RestService from './Services/RestService.js';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const jwtCookie = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('jwt='));
+
+        if (jwtCookie) {
+          const token = jwtCookie.split('=')[1];
+          console.log('JWT Token:', token);
+
+          // Call RestService to validate the token
+          const data = await RestService.validateToken(token);
+
+          if (data) { //data.decodedToken
+            setIsLoggedIn(true)
+          } else {
+            setIsLoggedIn(false)
+          }
+          console.log(data)
+          // Handle response as needed
+        } else {
+          setIsLoggedIn(false)
+          console.log('JWT Token not found in cookies.');
+        }
+      } catch (error) {
+        console.error('Error validating token:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const innerModuleRouter = createBrowserRouter(
     createRoutesFromElements(
-      <Route element={<Root setIsLoggedIn={setIsLoggedIn} isLoggedIn={isLoggedIn} />}>
-        <Route index element={<WelcomePage setIsLoggedIn={setIsLoggedIn} />} />
-        <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-        <Route path="/register" element={<Registration />} />
-        <Route path="/dashboard/*" element={<PageWithNavigation page={<Dashboard />} setIsLoggedIn={setIsLoggedIn} />} />
-        <Route path="/schools/*" element={<PageWithNavigation page={<Schools />} setIsLoggedIn={setIsLoggedIn} />} />
-        <Route path="/people/*" element={<PageWithNavigation page={<People />} setIsLoggedIn={setIsLoggedIn} />} />
-        <Route path="/settings/*" element={<PageWithNavigation page={<Settings />} setIsLoggedIn={setIsLoggedIn} />} />
+      <Route element={<Root />}>
+        <Route index
+          element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <WelcomePage />}
+        />
+        <Route path="/login"
+          element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Login />}
+        />
+        <Route path="/register"
+          element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Registration />} />
+        <Route
+          path="/dashboard/*"
+          element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Login />}
+        />
+        <Route path="/schools/*"
+          element={isLoggedIn ? <PageWithNavigation page={<Schools />} /> : <Login />} />
+        <Route path="/people/*"
+          element={isLoggedIn ? <PageWithNavigation page={<People />} /> : <Login />} />
+        <Route path="/settings/*"
+          element={isLoggedIn ? <PageWithNavigation page={<Settings />} /> : <Login />} />
       </Route>
     )
   );
@@ -46,7 +91,7 @@ const Root = ({ setIsLoggedIn, isLoggedIn }) => {
 const PageWithNavigation = ({ page, setIsLoggedIn }) => {
   return (
     <NavigationProvider>
-      <Navigation setIsLoggedIn={setIsLoggedIn}>
+      <Navigation>
         {page}
       </Navigation>
     </NavigationProvider>

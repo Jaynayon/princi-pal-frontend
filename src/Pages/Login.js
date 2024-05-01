@@ -7,7 +7,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Box from '@mui/material/Box';
 
 
-const LoginPage = ({ setIsLoggedIn }) => {
+const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -52,7 +52,6 @@ const LoginPage = ({ setIsLoggedIn }) => {
 
             if (response) {
                 // Credentials are valid, set isLoggedIn to true
-                setIsLoggedIn(true);
                 window.location.href = "http://localhost:3000/dashboard";
             } else {
                 // Invalid credentials, display error message
