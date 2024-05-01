@@ -5,9 +5,10 @@ const instance = axios.create({
     withCredentials: true, // Enable sending cookies with cross-origin requests
 });
 
+const RestService = (() => {
+    let isAuthenticated = false;
 
-const RestService = {
-    async createUser(fname, mname, lname, username, email, password, position) {
+    const createUser = async (fname, mname, lname, username, email, password, position) => {
         try {
             const response = await instance.post('http://localhost:4000/users', {
                 fname,
@@ -24,7 +25,6 @@ const RestService = {
             });
 
             console.log(response.data);
-            console.log(document.cookie)
             return true;
         } catch (error) {
             console.error('Error creating user:', error);
@@ -34,8 +34,9 @@ const RestService = {
                 throw new Error("Registration failed. Please try again later.");
             }
         }
-    },
-    async authenticateUser(email, password) {
+    };
+
+    const authenticateUser = async (email, password) => {
         try {
             const response = await instance.post('http://localhost:4000/users/validate', {
                 email,
@@ -46,32 +47,48 @@ const RestService = {
                 }
             });
 
-            return response.data.isMatch ? true : false
-
+            isAuthenticated = response.data.isMatch;
+            return isAuthenticated;
         } catch (error) {
-            console.error('Error creating user:', error);
-            if (error.response && error.response.status === 409) {
-                throw new Error("User with the same email or username already exists.");
-            } else {
-                throw new Error("Registration failed. Please try again later.");
-            }
+            console.error('Error authenticating user:', error);
+            throw new Error("Authentication failed. Please try again later.");
         }
-    },
-    async validateUsernameEmail(details) {
+    };
+
+    const validateUsernameEmail = async (details) => {
         try {
             const response = await instance.get(`http://localhost:4000/users/exists/${details}`);
-
-            return response.data.exists
-
+            return response.data.exists;
         } catch (error) {
-            console.error('Error user details:', error);
-            /*if (error.response && error.response.status === 409) {
-                throw new Error("User with the same email or username already exists.");
-            } else {
-                throw new Error("Registration failed. Please try again later.");
-            }*/
+            console.error('Error validating username/email:', error);
+            throw new Error("Validation failed. Please try again later.");
         }
-    },
-};
+    };
+
+    const validateToken = async (token) => {
+        try {
+            if (token) {
+                const response = await instance.post(`http://localhost:4000/authenticate/verify/${token}`);
+                isAuthenticated = true; // Set isAuthenticated to true if token is valid
+                return response.data;
+            }
+        } catch (error) {
+            console.error('Error validating token:', error);
+            throw new Error("Token validation failed. Please try again later.");
+        }
+    };
+
+    const getIsAuthenticated = () => {
+        return isAuthenticated;
+    };
+
+    return {
+        createUser,
+        authenticateUser,
+        validateUsernameEmail,
+        validateToken,
+        getIsAuthenticated
+    };
+})();
 
 export default RestService;
