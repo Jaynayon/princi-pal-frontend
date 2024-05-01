@@ -19,6 +19,8 @@ import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Menu, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { ListItemAvatar } from '@mui/material';
+
 
 function People(props) {
     const [member, setMember] = useState('');
@@ -173,9 +175,25 @@ function People(props) {
                             <MenuItem value="">
                                 <em>None</em>
                             </MenuItem>
-                            <MenuItem>CIT</MenuItem>
-                            <MenuItem>ACT</MenuItem>
-                            <MenuItem>SM CITY</MenuItem>
+                            <MenuItem value="Cebu Institute of Technology - University">
+                    <ListItemAvatar>
+                    <Avatar src="../downloads/cit.png" />
+                    </ListItemAvatar>
+                    Cebu Institute of Technology - University
+                </MenuItem>
+                <MenuItem value="Asian College of Technology">
+                    <ListItemAvatar>
+                    <Avatar src="../downloads/act.png" />
+                    </ListItemAvatar>
+                    Asian College of Technology
+                </MenuItem>
+                <MenuItem value="University of Cebu">
+                    <ListItemAvatar>
+                    <Avatar src="/downloads/uc.jpg" />
+                    </ListItemAvatar>
+                    University of Cebu
+                </MenuItem>
+                            <MenuItem></MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
