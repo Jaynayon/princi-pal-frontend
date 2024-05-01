@@ -1,9 +1,15 @@
 import axios from 'axios';
 
+const instance = axios.create({
+    baseURL: 'http://localhost:4000', // Set your backend URL
+    withCredentials: true, // Enable sending cookies with cross-origin requests
+});
+
+
 const RestService = {
     async createUser(fname, mname, lname, username, email, password, position) {
         try {
-            const response = await axios.post('http://localhost:4000/users', {
+            const response = await instance.post('http://localhost:4000/users', {
                 fname,
                 mname,
                 lname,
@@ -18,6 +24,7 @@ const RestService = {
             });
 
             console.log(response.data);
+            console.log(document.cookie)
             return true;
         } catch (error) {
             console.error('Error creating user:', error);
@@ -30,7 +37,7 @@ const RestService = {
     },
     async authenticateUser(email, password) {
         try {
-            const response = await axios.post('http://localhost:4000/users/validate', {
+            const response = await instance.post('http://localhost:4000/users/validate', {
                 email,
                 password,
             }, {
@@ -52,7 +59,7 @@ const RestService = {
     },
     async validateUsernameEmail(details) {
         try {
-            const response = await axios.get(`http://localhost:4000/users/exists/${details}`);
+            const response = await instance.get(`http://localhost:4000/users/exists/${details}`);
 
             return response.data.exists
 
