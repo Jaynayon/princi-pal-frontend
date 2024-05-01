@@ -150,7 +150,7 @@ export const ProfileTab = ({ user }) => {
         const thresholdLength = 10;
 
         // Check if email length exceeds the threshold
-        if (user.email.length > thresholdLength) {
+        if (currentUser.email.length > thresholdLength) {
             return { color: theme.navStyle.color, fontSize: 10 }; // Adjust font size if email is too long
         }
 
@@ -189,8 +189,8 @@ export const ProfileTab = ({ user }) => {
                 </ListItemIcon>
 
                 <ListItemText
-                    primary={user.name}
-                    secondary={user.email}
+                    primary={currentUser.fname + ' ' + currentUser.lname}
+                    secondary={currentUser.email}
                     primaryTypographyProps={{ fontWeight: 'bold', color: theme.navStyle.color }}
                     secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
                 />
