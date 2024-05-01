@@ -18,13 +18,18 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu } from '@mui/material';
+import { Menu, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 function People(props) {
     const [member, setMember] = useState('');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
+    const [searchValue, setSearchValue] = useState('');
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false); // State for confirmation dialog
+    const [selectedRole, setSelectedRole] = useState(''); // State for selected role
+    const [deleteConfirmationDialogOpen, setDeleteConfirmationDialogOpen] = useState(false); // State for delete confirmation dialog
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);
@@ -43,17 +48,50 @@ function People(props) {
     };
 
     const handleDelete = () => {
+        // Open confirmation dialog before deleting
+        setDeleteConfirmationDialogOpen(true);
+    };
+
+    const confirmDelete = () => {
         // Implement delete functionality here
         console.log("Delete button clicked for row at index:", selectedIndex);
         // Close the menu after delete
         handleMenuClose();
+        // Close delete confirmation dialog
+        setDeleteConfirmationDialogOpen(false);
+    };
+
+    const cancelDelete = () => {
+        // Close delete confirmation dialog without deleting
+        setDeleteConfirmationDialogOpen(false);
     };
 
     const handleRoleChange = (newRole) => {
+        setSelectedRole(newRole); // Set the selected role
+        // Open confirmation dialog before changing role
+        setConfirmationDialogOpen(true);
+    };
+
+    const confirmRoleChange = () => {
         // Implement role change functionality here
-        console.log(`Role changed to ${newRole} for row at index:`, selectedIndex);
+        console.log(`Role changed to ${selectedRole} for row at index:`, selectedIndex);
         // Close the menu after role change
         handleMenuClose();
+        // Close confirmation dialog
+        setConfirmationDialogOpen(false);
+    };
+
+    const cancelRoleChange = () => {
+        // Close confirmation dialog without changing role
+        setConfirmationDialogOpen(false);
+    };
+
+    const handleInvite = () => {
+        // Implement invite functionality here
+        console.log("Inviting email:", inviteEmail);
+        // You can send an invitation using the inviteEmail value
+        // Reset inviteEmail state after sending invitation if needed
+        setInviteEmail('');
     };
 
     const rows = [
@@ -63,6 +101,12 @@ function People(props) {
         { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
         { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
     ];
+
+    // Filtered rows based on search value
+    const filteredRows = rows.filter(row =>
+        row.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        row.email.toLowerCase().includes(searchValue.toLowerCase())
+    );
 
     return (
         <Container className="test" maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -77,6 +121,8 @@ function People(props) {
                         label="Search by name or email"
                         variant="outlined"
                         className="searchTextField"
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
                     />
                     <TextField
                         sx={{ margin: '5px', marginTop: '-5px', marginLeft: '50px' , width: '30%' }}
@@ -84,6 +130,8 @@ function People(props) {
                         label="Invite by email"
                         variant="outlined"
                         className="inviteTextField"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
                     />
                     <FormControl sx={{ minWidth: 120 }} size="53px">
                         <InputLabel sx={{ margin: '5px', marginTop: '-5px'}} id="demo-select-small-label">Member</InputLabel>
@@ -107,6 +155,7 @@ function People(props) {
                         sx={{ margin: '5px', marginTop: '-5px', width: '10%'}}
                         variant="contained"
                         className="inviteButton"
+                        onClick={handleInvite}
                     >
                         Invite
                     </Button>
@@ -143,7 +192,7 @@ function People(props) {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {rows.map((row, index) => (
+                                {filteredRows.map((row, index) => (
                                     <TableRow key={index}>
                                         <TableCell>
                                             <Grid container alignItems="center" spacing={1}>
@@ -199,6 +248,28 @@ function People(props) {
                     </TableContainer>
                 </Grid>
             </Grid>
+            {/* Confirmation dialog for role change */}
+            <Dialog open={confirmationDialogOpen} onClose={() => setConfirmationDialogOpen(false)}>
+                <DialogTitle>Confirmation</DialogTitle>
+                <DialogContent>
+                    Are you sure you want to change?
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={confirmRoleChange}>Cancel</Button>
+                    <Button onClick={cancelRoleChange}>Save Changes</Button>
+                </DialogActions>
+            </Dialog>
+            {/* Confirmation dialog for delete */}
+            <Dialog open={deleteConfirmationDialogOpen} onClose={() => setDeleteConfirmationDialogOpen(false)}>
+                <DialogTitle>Confirmation</DialogTitle>
+                <DialogContent>
+                    Are you sure you want to delete?
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={confirmDelete}>Delete</Button>
+                    <Button onClick={cancelDelete}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 }
