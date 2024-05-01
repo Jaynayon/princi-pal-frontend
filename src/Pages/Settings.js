@@ -141,9 +141,8 @@ function Settings() {
                     </Grid>
                     <Grid item xs={12} md={6} lg={6} sx={{ padding: '10px' }}>
                         <TextFieldWrapper>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Fullname" defaultValue="Fullname" margin="normal" />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue="name@email.com" margin="normal" />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Phone Number" defaultValue="0987 867 9876" margin="normal" />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue="Jay Nayon" margin="normal" />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue="jaynayon@email.com" margin="normal" />
                             <TextField sx={{ width: '100%' }} required id="outlined-required" label="Password" margin="normal" />
                             <TextField sx={{ width: '100%' }} required id="outlined-required" label="Re-Type Password" margin="normal" />
                         </TextFieldWrapper>

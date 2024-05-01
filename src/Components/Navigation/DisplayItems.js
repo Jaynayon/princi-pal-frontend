@@ -181,13 +181,14 @@ export const ProfileTab = ({ user }) => {
                 <DialogTitle>My Profile</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
-                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 125 }} alt="User Avatar"> </Avatar>
+                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 165 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
-                            <TextField disabled id="outlined-disabled" label="Username" defaultValue="username" margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="Fullname" defaultValue={user.name} margin="dense" />
                             <TextField disabled id="outlined-disabled" label="Email" defaultValue={user.email} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Role" defaultValue="ADAS" margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Number" defaultValue="0935 256 2584" margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Username" defaultValue={user.name} margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="First Name" defaultValue="First Name" margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Middle Name" defaultValue="Middle Name" margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Last Name" defaultValue="Last Name" margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Position" defaultValue="ADAS" margin="normal" />
                         </Stack>
                     </Stack>
                 </DialogContent>
