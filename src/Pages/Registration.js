@@ -149,7 +149,7 @@ const RegistrationPage = () => {
             position: ''
           });
           // Redirect to login page or display a success message
-          //window.location.href = "/dashboard"; // Change this to the correct URL if needed
+          window.location.href = "/dashboard"; // Change this to the correct URL if needed
         } else {
           setRegistrationError("Registration failed");
         }
