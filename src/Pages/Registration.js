@@ -56,7 +56,12 @@ const RegistrationPage = () => {
     let modifiedValue = value;
     if (key === 'firstName' || key === 'middleName' || key === 'lastName') {
       // Replace non-letter characters with an empty string
-      modifiedValue = modifiedValue.replace(/[^a-zA-Z]/g, '');
+      modifiedValue = modifiedValue
+        .replace(/^\s+/, '') // Remove leading spaces
+        .replace(/[^a-zA-Z ]+/g, '') // Remove non-letter characters
+        .replace(/\s+/g, ' ') // Normalize spaces
+        .replace(/\b\w/g, match => match.toUpperCase()); // Capitalize first letter of each word
+      //modifiedValue = modifiedValue.replace(/[^a-zA-Z]/g, '');
     }
     if (key === 'username') {
       // Allow only alphanumeric characters for username (letters and numbers)
