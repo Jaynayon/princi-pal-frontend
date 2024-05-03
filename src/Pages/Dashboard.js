@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { DateRangePicker } from 'react-date-range';
 import 'react-date-range/dist/styles.css'; 
 import 'react-date-range/dist/theme/default.css'; 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,8 +13,7 @@ import { DateFilter } from '../Components/Filters/Filters';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-
+import { Box, Button, Menu, MenuItem } from '@mui/material';
 
 const ApexChart = () => {
     const [options] = useState({
@@ -124,6 +120,21 @@ function Dashboard(props) {
         setOpen(false);
     };
 
+    const [schoolMenuAnchor, setSchoolMenuAnchor] = useState(null);
+
+    const handleClickSchoolMenu = (event) => {
+        setSchoolMenuAnchor(event.currentTarget);
+    };
+
+        const handleCloseSchoolMenu = () => {
+    setSchoolMenuAnchor(null);
+    };
+
+    const handleSelectSchool = (school) => {
+    setSelectedSchool(school); 
+    setSchoolMenuAnchor(null); 
+    };
+
     const renderEditableCard = (title) => (
         <Paper
             sx={{
@@ -138,7 +149,7 @@ function Dashboard(props) {
         >
             {title}
             <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{editableAmounts[title].currency} {editableAmounts[title].amount}</p>
-            {title !== 'Total Balance' && (
+            {title === 'Budget Limit' && (
                 <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
                     <EditIcon sx={{ width: '30px', height: '30px' }} />
                 </Button>
@@ -214,26 +225,31 @@ function Dashboard(props) {
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
-                            <DateFilter /> { }
-                            {}
-                            <FormControl sx={{ m: 1, minWidth: 150 }}>
-                                <InputLabel id="school-filter-label">School Filter</InputLabel>
-                                <Select
-                                    labelId="school-filter-label"
-                                    id="school-filter"
-                                    value={selectedSchool}
-                                    onChange={handleSchoolChange}
-                                    label="School"
-                                >
-                                    <MenuItem value="">
-                                        <em>None</em>
-                                    </MenuItem>
-                                    <MenuItem value="CIT">CIT</MenuItem>
-                                    <MenuItem value="ACT">ACT</MenuItem>
-                                    <MenuItem value="SM CITY">SM CITY</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Box>
+                        <DateFilter />
+            <Box sx={{ m: 1, minWidth: 150 }}>
+                <Button
+                    id="school-filter"
+                    aria-controls="school-menu"
+                    aria-haspopup="true"
+                    onClick={handleClickSchoolMenu}
+                    sx={{ fontWeight: '900' }} // Adjust font weight
+                >
+                School
+                </Button>
+                <Menu
+                    id="school-menu"
+                    anchorEl={schoolMenuAnchor}
+                    open={Boolean(schoolMenuAnchor)}
+                    onClose={handleCloseSchoolMenu}
+            >
+                <MenuItem onClick={() => handleSelectSchool("")}><em>None</em></MenuItem>
+                <MenuItem onClick={() => handleSelectSchool("CIT")}>CIT</MenuItem>
+                <MenuItem onClick={() => handleSelectSchool("ACT")}>ACT</MenuItem>
+                <MenuItem onClick={() => handleSelectSchool("SM CITY")}>SM CITY</MenuItem>
+                </Menu>
+                </Box>
+            </Box>
+
                     </Paper>
                 </Grid>
 
