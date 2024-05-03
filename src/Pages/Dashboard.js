@@ -266,44 +266,44 @@ function Dashboard(props) {
             <Box sx={{ position: 'relative' }}>
                 <Grid container spacing={2}>
                 <Grid item xs={12} md={12} lg={12}>
-                    <Paper
-                        sx={[
-                            styles.header, {
-                                p: 2,
-                                display: 'flex',
-                                flexDirection: 'row',
-                            }
-                        ]}
-                        elevation={0}
-                        variant='outlined'>
-                        <Box style={styles.header.buttons}>
-                        <DateFilter />
-            <Box sx={{ m: 1, minWidth: 150 }}>
+    <Paper
+        sx={[
+            styles.header, {
+                p: 2,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between', // Align items to the edges
+            }
+        ]}
+        elevation={0}
+        variant='outlined'
+    >
+        <Box style={styles.header.buttons}>
+            <DateFilter />
+        </Box>
+        <Box style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
             <Select
-    id="school-filter"
-    value={selectedSchool}
-    onChange={(event) => handleSelectSchool(event.target.value)}
-    sx={{
-        fontWeight: '900', // Adjust font weight
-        height: '40px',    // Adjust height
-        minWidth: '120px', // Adjust minimum width
-        marginRight: '10px' // Add right margin for spacing
-    }}
-    displayEmpty
->
-    <MenuItem value="" disabled>
-        School
-    </MenuItem>
-    {Object.keys(schoolData).map((school) => (
-        <MenuItem key={school} value={school}>{school}</MenuItem>
-    ))}
-</Select>
+                id="school-filter"
+                value={selectedSchool}
+                onChange={(event) => handleSelectSchool(event.target.value)}
+                sx={{
+                    fontWeight: '900', // Adjust font weight
+                    height: '40px',    // Adjust height
+                    minWidth: '120px', // Adjust minimum width
+                }}
+                displayEmpty
+            >
+                <MenuItem value="" disabled>
+                    School
+                </MenuItem>
+                {Object.keys(schoolData).map((school) => (
+                    <MenuItem key={school} value={school}>{school}</MenuItem>
+                ))}
+            </Select>
+        </Box>
+    </Paper>
+</Grid>
 
-                </Box>
-            </Box>
-
-                    </Paper>
-                </Grid>
 
                 <Grid item xs={12} md={12} lg={12}>
                     <Box style={{
