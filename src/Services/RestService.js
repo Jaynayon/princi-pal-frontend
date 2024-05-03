@@ -25,6 +25,7 @@ const RestService = (() => {
             });
 
             console.log(response.data);
+
             return true;
         } catch (error) {
             console.error('Error creating user:', error);
@@ -38,8 +39,8 @@ const RestService = (() => {
 
     const authenticateUser = async (email, password) => {
         try {
-            const response = await instance.post('http://localhost:4000/users/validate', {
-                email,
+            const response = await instance.post('http://localhost:4000/authenticate/login', {
+                emailOrUsername: email,
                 password,
             }, {
                 headers: {
@@ -68,9 +69,16 @@ const RestService = (() => {
     const validateToken = async (token) => {
         try {
             if (token) {
-                const response = await instance.post(`http://localhost:4000/authenticate/verify/${token}`);
-                isAuthenticated = true; // Set isAuthenticated to true if token is valid
-                return response.data;
+                const response = await instance.get(`http://localhost:4000/authenticate/verify/?token=${token}`)
+                    .then(response => {
+                        console.log('Response data:', response.data);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error('Error verifying token:', error);
+                        // Handle errors here (e.g., display error message)
+                    });
+                return response
             }
         } catch (error) {
             console.error('Error validating token:', error);
@@ -82,12 +90,25 @@ const RestService = (() => {
         return isAuthenticated;
     };
 
+    const getUserById = async (user_id) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/users/${user_id}`)
+            if (response.data) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            throw new Error("Get user failed. Please try again later.");
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
         validateUsernameEmail,
         validateToken,
-        getIsAuthenticated
+        getIsAuthenticated,
+        getUserById
     };
 })();
 

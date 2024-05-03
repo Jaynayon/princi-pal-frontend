@@ -22,7 +22,8 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Popover from '@mui/material/Popover';
 import Stack from '@mui/material/Stack';
-
+//import RestService from '../Services/RestService'
+import { useNavigationContext } from '../Context/NavigationProvider';
 
 const DemoPaper = styled(Paper)(({ theme }) => ({
     //width: 1200, adjust automatically
@@ -78,18 +79,23 @@ const ButtonWrapper = styled('div')({
 });
 
 function Settings() {
-        const [anchorEl, setAnchorEl] = React.useState(null);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const { currentUser } = useNavigationContext()
 
-        const handleClick = (event) => {
-            setAnchorEl(event.currentTarget);
-        };
+    if (!currentUser) {
+        return null
+    }
 
-        const handleClose = () => {
-            setAnchorEl(null);
-        };
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-        const open = Boolean(anchorEl);
-        const id = open ? 'simple-popover' : undefined;
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -100,49 +106,49 @@ function Settings() {
                             <Avatar sx={{ bgcolor: blue[500], width: 130, height: 130, marginBottom: '15px' }}>J</Avatar>
                             <FabWrapper>
                                 <Fab size="small" color="black" aria-label="add">
-                                <AddIcon aria-describedby={id} variant="contained" onClick={handleClick}/>
-                                <Popover
-                                    id={id}
-                                    open={open}
-                                    anchorEl={anchorEl}
-                                    onClose={handleClose}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'left',
-                                    }}
-                                    PaperProps={{
-                                        style: {
-                                            width: '220px', // Adjust width as needed
-                                            maxHeight: '300px', // Adjust height as needed
-                                        },
-                                    }}
-                                >
-                                    <Typography sx={{ p: 2 }}>Avatar color</Typography>
-                                    <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                        <Avatar sx={{ bgcolor: lightGreen[500], width: 30, height: 30 }} > </Avatar>
-                                        <Avatar sx={{ bgcolor: red[500], width: 30, height: 30 }} > </Avatar>
-                                        <Avatar sx={{ bgcolor: grey[900], width: 30, height: 30 }} > </Avatar>
-                                        <Avatar sx={{ bgcolor: blueGrey[500], width: 30, height: 30 }} > </Avatar>
-                                        <Avatar sx={{ bgcolor: deepPurple[500], width: 30, height: 30 }} > </Avatar>
-                                    </Stack>
-                                    <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                        <Avatar sx={{ bgcolor: brown[500], width: 30, height: 30 }} > </Avatar>
-                                        <Avatar sx={{ bgcolor: deepOrange[500], width: 30, height: 30 }} > </Avatar>
-                                        <Avatar sx={{ bgcolor: yellow[500], width: 30, height: 30 }} > </Avatar>
-                                        <Avatar sx={{ bgcolor: indigo[500], width: 30, height: 30 }} > </Avatar>
-                                        <Avatar sx={{ bgcolor: pink[500], width: 30, height: 30 }} > </Avatar>
-                                    </Stack>
-                                </Popover>
+                                    <AddIcon aria-describedby={id} variant="contained" onClick={handleClick} />
+                                    <Popover
+                                        id={id}
+                                        open={open}
+                                        anchorEl={anchorEl}
+                                        onClose={handleClose}
+                                        anchorOrigin={{
+                                            vertical: 'bottom',
+                                            horizontal: 'left',
+                                        }}
+                                        PaperProps={{
+                                            style: {
+                                                width: '220px', // Adjust width as needed
+                                                maxHeight: '300px', // Adjust height as needed
+                                            },
+                                        }}
+                                    >
+                                        <Typography sx={{ p: 2 }}>Avatar color</Typography>
+                                        <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+                                            <Avatar sx={{ bgcolor: lightGreen[500], width: 30, height: 30 }} > </Avatar>
+                                            <Avatar sx={{ bgcolor: red[500], width: 30, height: 30 }} > </Avatar>
+                                            <Avatar sx={{ bgcolor: grey[900], width: 30, height: 30 }} > </Avatar>
+                                            <Avatar sx={{ bgcolor: blueGrey[500], width: 30, height: 30 }} > </Avatar>
+                                            <Avatar sx={{ bgcolor: deepPurple[500], width: 30, height: 30 }} > </Avatar>
+                                        </Stack>
+                                        <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+                                            <Avatar sx={{ bgcolor: brown[500], width: 30, height: 30 }} > </Avatar>
+                                            <Avatar sx={{ bgcolor: deepOrange[500], width: 30, height: 30 }} > </Avatar>
+                                            <Avatar sx={{ bgcolor: yellow[500], width: 30, height: 30 }} > </Avatar>
+                                            <Avatar sx={{ bgcolor: indigo[500], width: 30, height: 30 }} > </Avatar>
+                                            <Avatar sx={{ bgcolor: pink[500], width: 30, height: 30 }} > </Avatar>
+                                        </Stack>
+                                    </Popover>
                                 </Fab>
                             </FabWrapper>
-                            <Typography variant="h6" fontWeight="bold">Jay Nayon Jr.</Typography>
-                            <Typography variant="h8" fontWeight="bold">ADAS</Typography>
+                            <Typography variant="h6" fontWeight="bold">{currentUser.fname + " " + currentUser.lname}</Typography>
+                            <Typography variant="h8" fontWeight="bold">{currentUser.position}</Typography>
                         </AvatarContainer>
                     </Grid>
                     <Grid item xs={12} md={6} lg={6} sx={{ padding: '10px' }}>
                         <TextFieldWrapper>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Fullname" defaultValue="Fullname" margin="normal" />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue="name@email.com" margin="normal" />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Fullname" defaultValue={currentUser.fname + " " + currentUser.mname + " " + currentUser.lname} margin="normal" />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
                             <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Phone Number" defaultValue="0987 867 9876" margin="normal" />
                             <TextField sx={{ width: '100%' }} required id="outlined-required" label="Password" margin="normal" />
                             <TextField sx={{ width: '100%' }} required id="outlined-required" label="Re-Type Password" margin="normal" />
