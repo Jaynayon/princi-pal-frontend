@@ -100,9 +100,11 @@ function Dashboard(props) {
 
     const handleChange = (event) => {
         const newValue = event.target.value;
+        // Regular expression to match float numbers with exactly 2 decimal places
+        const regex = /^\d+(\.\d{0,2})?$/;
         if (
             newValue === '' ||                      
-            (newValue >= 0 && newValue <= 999999)  
+            (regex.test(newValue) && parseFloat(newValue) >= 0 && parseFloat(newValue) <= 999999)  
         ) {
             setEditableAmounts({
                 ...editableAmounts,
@@ -110,9 +112,11 @@ function Dashboard(props) {
             });
             setError('');
         } else {
-            setError('Please enter a valid number between 0 and 999,999.');
+            setError('Please enter a valid number between 0 and 999,999 with up to 2 decimal places.');
         }
     };
+    
+    
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -242,7 +246,7 @@ function Dashboard(props) {
                     open={Boolean(schoolMenuAnchor)}
                     onClose={handleCloseSchoolMenu}
             >
-                <MenuItem onClick={() => handleSelectSchool("")}><em>None</em></MenuItem>
+
                 <MenuItem onClick={() => handleSelectSchool("CIT")}>CIT</MenuItem>
                 <MenuItem onClick={() => handleSelectSchool("ACT")}>ACT</MenuItem>
                 <MenuItem onClick={() => handleSelectSchool("SM CITY")}>SM CITY</MenuItem>
