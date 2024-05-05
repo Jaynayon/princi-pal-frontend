@@ -11,6 +11,74 @@ import RecordsRow from './RecordsRow';
 import { RecordsProvider } from '../../Context/RecordsProvider'
 
 function LRTable(props) {
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(4);
+    const [rows, setRows] = useState([
+        {
+            id: 1,
+            date: 'tests',
+            orsBursNo: 'testing',
+            particulars: 'testing',
+            lastUpdated: 'testing',
+            hours: 'testing',
+            amount: 100
+        },
+        {
+            id: 2,
+            date: 'test',
+            orsBursNo: 'testing',
+            particulars: 'testing',
+            lastUpdated: 'testing',
+            hours: 'testing',
+            amount: 150
+        },
+        {
+            id: 3,
+            date: 'test',
+            orsBursNo: 'testing',
+            particulars: 'testing',
+            lastUpdated: 'testing',
+            hours: 'testing',
+            amount: 250
+        },
+        {
+            id: 4,
+            date: 'test',
+            orsBursNo: 'testing',
+            particulars: 'testing',
+            lastUpdated: 'testing',
+            hours: 'testing',
+            amount: 350
+        },
+        {
+            id: 5,
+            date: 'test',
+            orsBursNo: 'testing',
+            particulars: 'testing',
+            lastUpdated: 'testing',
+            hours: 'testing',
+            amount: 450
+        },
+        {
+            id: 6,
+            date: 'test',
+            orsBursNo: 'testing',
+            particulars: 'testing',
+            lastUpdated: 'testing',
+            hours: 'testing',
+            amount: 450
+        },
+    ]);
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset to the first page when changing rows per page
+    };
+
     const columns = [
         {
             id: 'date',
@@ -21,7 +89,7 @@ function LRTable(props) {
             format: (value) => value.toLocaleString('en-US'),
         },
         {
-            id: 'ors_burs_no',
+            id: 'orsBursNo',
             label: 'ORS/BURS No.',
             minWidth: 50,
             maxWidth: 100,
@@ -46,14 +114,6 @@ function LRTable(props) {
         },
     ];
 
-    const handleChangePage = (event, newPage) => {
-        console.log('wahaha')
-    };
-
-    const handleChangeRowsPerPage = (event) => {
-        console.log('wahaha')
-    };
-
     return (
         <React.Fragment>
             <TableContainer sx={styles.tableContainer}>
@@ -77,8 +137,10 @@ function LRTable(props) {
                     </TableHead>
                     <TableBody>
                         <RecordsRow
-                            page={0}
-                            rowsPerPage={4}
+                            rows={rows}
+                            setRows={setRows}
+                            page={page}
+                            rowsPerPage={rowsPerPage}
                             columns={columns}
                             text={""} />
                     </TableBody>
@@ -87,9 +149,9 @@ function LRTable(props) {
             <TablePagination
                 rowsPerPageOptions={[4, 10, 25, 100]}
                 component="div"
-                count={5}
-                rowsPerPage={4}
-                page={0}
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
