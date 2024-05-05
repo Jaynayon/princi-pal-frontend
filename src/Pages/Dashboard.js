@@ -10,8 +10,7 @@ import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
 import { DateFilter } from '../Components/Filters/Filters';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
+
 import Select from '@mui/material/Select';
 import { Box, Button, Menu, MenuItem } from '@mui/material';
 
@@ -105,6 +104,27 @@ function Dashboard(props) {
     const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
 
+    const [selectedMonthYear, setSelectedMonthYear] = useState('');
+
+    const [applyButtonClicked, setApplyButtonClicked] = useState(false);
+
+    useEffect(() => {
+        const firstOption = Object.keys(schoolData)[0];
+        if (!selectedSchool) {
+            setSelectedSchool(firstOption);
+            setEditableAmounts(schoolData[firstOption]);
+        }
+        // Set initial selected month and year if "Apply" button not clicked yet
+        if (!applyButtonClicked) {
+            setSelectedMonthYear(getCurrentMonthYear());
+        }
+    }, [schoolData, selectedSchool, applyButtonClicked]);
+
+    const handleDateFilterApply = (selectedMonthYear) => {
+        setSelectedMonthYear(selectedMonthYear);
+    };
+
+    
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
         const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -138,7 +158,7 @@ function Dashboard(props) {
             });
             setError('');
         } else {
-            setError('Please enter a valid number between 0 and 999,999 with up to 2 decimal places.');
+            setError('Please enter a valid number.');
         }
     };
 
@@ -252,7 +272,7 @@ function Dashboard(props) {
                 }}
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
-                <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{getCurrentMonthYear()}</p>
+                <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{selectedMonthYear}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget: {monthlyBudgetData.currency} {monthlyBudgetData.amount}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget Limit: {budgetLimitData.currency} {budgetLimitData.amount}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Balance: {totalBalanceData.currency} {totalBalanceData.amount}</p>
@@ -279,7 +299,7 @@ function Dashboard(props) {
         variant='outlined'
     >
         <Box style={styles.header.buttons}>
-            <DateFilter />
+        <DateFilter onApply={handleDateFilterApply} />
         </Box>
         <Box style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
             <Select
@@ -326,7 +346,7 @@ function Dashboard(props) {
                             noWrap
                         
                         >
-                            {getCurrentMonthYear()}
+                              {selectedMonthYear}
                         </
                         Typography>
                     </Box>
