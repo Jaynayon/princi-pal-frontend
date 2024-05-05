@@ -11,7 +11,8 @@ export const NavigationProvider = ({ children }) => {
     const [open, setOpen] = useState(true);
     const [navStyle, setNavStyle] = React.useState('light'); // Initial theme
     const [mobileMode, setMobileMode] = useState(false); // State to track position
-    const [currentUser, setCurrentUser] = useState(null)
+    const [currentUser, setCurrentUser] = useState(null);
+    const [currentSchool, setCurrentSchool] = useState(null);
     const [userId, setUserId] = useState(null)
     const prevOpenRef = useRef(false);
 
@@ -51,11 +52,13 @@ export const NavigationProvider = ({ children }) => {
                     if (data) { //data.decodedToken
                         setUserId(data)
                         if (!currentUser) {
-                            setCurrentUser(await RestService.getUserById(data.decodedToken.id))
+                            setCurrentUser(await RestService.getUserById(data.id))
+
                         }
                     } else {
                         //setIsLoggedIn(false)
                     }
+                    console.log(currentUser)
                     // Handle response as needed
                 } else {
                     //setIsLoggedIn(false)
@@ -87,7 +90,7 @@ export const NavigationProvider = ({ children }) => {
     return (
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
-            navStyle, setNavStyle, mobileMode, userId, currentUser
+            navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool
         }}>
             {children}
         </NavigationContext.Provider>

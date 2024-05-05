@@ -20,17 +20,22 @@ import { useNavigationContext } from '../../Context/NavigationProvider';
 //import RestService from '../../Services/RestService';
 
 //Static object testing
-/*const currentUser = {
+const currentUser = {
     name: 'Jay Nayon',
     email: 'jay.nayonjr@cit.edu',
-    schools: [
-        'Jaclupan ES', 'Talisay ES'
+    schools: [{
+        id: "1234",
+        name: 'Jaclupan ES'
+    }, {
+        id: "1235",
+        name: 'Talisay ES'
+    }
     ]
-}*/
+}
 
 export default function DisplaySchools() {
     const theme = useTheme();
-    const { open, toggleDrawer, prevOpen, selected, setSelected, currentUser } = useNavigationContext();
+    const { open, toggleDrawer, prevOpen, selected, setSelected, currentSchool, setCurrentSchool/*currentUser*/ } = useNavigationContext();
     //const [currentUser, setCurrentUser] = useState(null)
     const [openSub, setOpenSub] = useState(false);
 
@@ -40,6 +45,17 @@ export default function DisplaySchools() {
         }
     }, [open]);
 
+    console.log(currentSchool);
+
+    const handleSelectedSingle = () => {
+        setSelected(currentUser.schools[0].name)
+        setCurrentSchool(currentUser.schools[0]);
+    }
+
+    const handleSelectedMultiple = (item) => {
+        setSelected(item.name);
+        setCurrentSchool(item);
+    }
 
     const handleClick = () => {
         setOpenSub(!openSub);
@@ -69,7 +85,7 @@ export default function DisplaySchools() {
     }
 
     return (
-        currentUser && currentUser.schools.length > 0 ? //Check if user has schools assigned
+        /*currentUser &&*/ currentUser.schools.length > 0 ? //Check if user has schools assigned
             (currentUser.schools.length > 1 ? //Check if user has multiple schools
                 <React.Fragment>
                     <ListItemButton
@@ -123,7 +139,7 @@ export default function DisplaySchools() {
                                             component={Link}
                                             to={'/schools'}
                                             selected={selected === item.name}
-                                            onClick={() => { setSelected(item.name) }}
+                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(item)}
                                             sx={theme.navStyle.button}
                                         >
                                             <ListItemText
@@ -149,7 +165,7 @@ export default function DisplaySchools() {
                         to={'/schools'}
                         sx={theme.navStyle.button}
                         selected={selected === currentUser.schools[0].name}
-                        onClick={() => { setSelected(currentUser.schools[0].name) }}
+                        onClick={/*() => { setSelected(currentUser.schools[0].name) }*/() => handleSelectedSingle()}
                     >
                         <ListItemIcon
                             sx={{
