@@ -131,19 +131,10 @@ export const ProfileTab = ({ user }) => {
     const theme = useTheme();
     const [selected, setSelected] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
-    //const { currentUser } = useNavigationContext();
+    const { currentUser } = useNavigationContext();
 
-    /*if (!currentUser) {
+    if (!currentUser) {
         return null
-    }*/
-
-    //static lang sa
-    const currentUser = {
-        fname: "test",
-        mname: 'test',
-        lname: 'test',
-        username: 'test',
-        email: "test@gmail.com"
     }
 
     const handleDialogOpen = () => {
