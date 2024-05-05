@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
-import { useRecordsContext } from '../../Context/RecordsProvider';
+import { useSchoolContext } from '../../Context/SchoolProvider';
 import Box from '@mui/material/Box';
 
 function RecordsRow(props) {
     const { rows, setRows, page, rowsPerPage, columns } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
-
+    const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
+    const { fetchLrByDocumentId } = useSchoolContext();
 
     // const appendRow = (newRow) => {
     //     setRows(prevRows => [...prevRows, newRow]);
@@ -26,23 +27,42 @@ function RecordsRow(props) {
     useEffect(() => {
         //appendRow(newRecord)
         //console.log(rows)
-    }, [])
+    }, [initialValue])
 
-    const handleCellClick = (colId, rowId) => {
+    const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });
+        setInitialValue(event.target.value); // Save the initial value of the clicked cell
+        setInputValue(event.target.value); // Set input value to the current value
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
 
     const handleInputChange = (colId, rowId, event) => {
-        const updatedRows = [...rows];
-        updatedRows[rowId - 1][colId] = event.target.value;
-        setRows(updatedRows);
-        setInputValue(rows[rowId - 1][colId]);
+        // Find the index of the object with matching id
+        const rowIndex = rows.findIndex(row => row.id === rowId);
+
+        if (rowIndex !== -1) {
+            // Copy the array to avoid mutating state directly
+            const updatedRows = [...rows];
+
+            // Update the specific property of the object
+            updatedRows[rowIndex][colId] = event.target.value;
+
+            // Update the state with the modified rows
+            //console.log(updatedRows[rowIndex])
+            setRows(updatedRows);
+            setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
+        } else {
+            console.error(`Row with id ${rowId} not found`);
+        }
     };
 
     const handleInputBlur = () => {
         setEditingCell(null);
         // Perform any action when input is blurred (e.g., save the value)
+        if (inputValue !== initialValue) {
+            console.log("Wow there is changes");
+            //fetchLrByDocumentId(); dapat update
+        }
         console.log('Value saved:', inputValue);
     };
 
@@ -68,30 +88,27 @@ function RecordsRow(props) {
                                                 maxWidth: column.maxWidth
                                             }
                                         ]}
-                                        onClick={() => handleCellClick(column.id, row.id)}
+                                        onClick={(event) => handleCellClick(column.id, row.id, event)}
                                     >
-                                        {column.id === 'id' ? (
-                                            <Box style={styles.inputStyling}>{value}</Box>
-                                        ) : (
-                                            <Box
-                                                style={
-                                                    editingCell &&
-                                                        editingCell.colId === column.id &&
-                                                        editingCell.rowId === row.id
-                                                        ? styles.divInput
-                                                        : null
+
+                                        <Box
+                                            style={
+                                                editingCell &&
+                                                    editingCell.colId === column.id &&
+                                                    editingCell.rowId === row.id
+                                                    ? styles.divInput
+                                                    : null
+                                            }
+                                        >
+                                            <input
+                                                style={styles.inputStyling}
+                                                value={value}
+                                                onChange={(event) =>
+                                                    handleInputChange(column.id, row.id, event)
                                                 }
-                                            >
-                                                <input
-                                                    style={styles.inputStyling}
-                                                    value={value}
-                                                    onChange={(event) =>
-                                                        handleInputChange(column.id, row.id, event)
-                                                    }
-                                                    onBlur={handleInputBlur}
-                                                />
-                                            </Box>
-                                        )}
+                                                onBlur={handleInputBlur}
+                                            />
+                                        </Box>
                                     </TableCell>
                                 );
                             })}

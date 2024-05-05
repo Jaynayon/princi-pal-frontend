@@ -102,13 +102,26 @@ const RestService = (() => {
         }
     };
 
+    const getLrByDocumentId = async (doc_id) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/lr/documents/${doc_id}`)
+            if (response.data) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            throw new Error("Get lr failed. Please try again later.");
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
         validateUsernameEmail,
         validateToken,
         getIsAuthenticated,
-        getUserById
+        getUserById,
+        getLrByDocumentId
     };
 })();
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -8,76 +8,15 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import RecordsRow from './RecordsRow';
-import { RecordsProvider } from '../../Context/RecordsProvider'
+import { useSchoolContext } from '../../Context/SchoolProvider';
+import { useNavigationContext } from '../../Context/NavigationProvider';
 
 function LRTable(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
-    const [rows, setRows] = useState([
-        {
-            id: 1,
-            date: 'tests',
-            orsBursNo: 'testing',
-            particulars: 'testing',
-            lastUpdated: 'testing',
-            hours: 'testing',
-            amount: 100
-        },
-        {
-            id: 2,
-            date: 'test',
-            orsBursNo: 'testing',
-            particulars: 'testing',
-            lastUpdated: 'testing',
-            hours: 'testing',
-            amount: 150
-        },
-        {
-            id: 3,
-            date: 'test',
-            orsBursNo: 'testing',
-            particulars: 'testing',
-            lastUpdated: 'testing',
-            hours: 'testing',
-            amount: 250
-        },
-        {
-            id: 4,
-            date: 'test',
-            orsBursNo: 'testing',
-            particulars: 'testing',
-            lastUpdated: 'testing',
-            hours: 'testing',
-            amount: 350
-        },
-        {
-            id: 5,
-            date: 'test',
-            orsBursNo: 'testing',
-            particulars: 'testing',
-            lastUpdated: 'testing',
-            hours: 'testing',
-            amount: 450
-        },
-        {
-            id: 6,
-            date: 'test',
-            orsBursNo: 'testing',
-            particulars: 'testing',
-            lastUpdated: 'testing',
-            hours: 'testing',
-            amount: 450
-        },
-    ]);
-
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0); // Reset to the first page when changing rows per page
-    };
+    const { lr, setLr } = useSchoolContext();
+    const { fetchLrByDocumentId } = useSchoolContext();
+    const { selected } = useNavigationContext();
 
     const columns = [
         {
@@ -114,6 +53,20 @@ function LRTable(props) {
         },
     ];
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset to the first page when changing rows per page
+    };
+
+    useEffect(() => {
+        fetchLrByDocumentId("663583ecf624082c3503c623");
+        //console.log("LR TABLE: Get this school's lr and document");
+    }, [selected]);
+
     return (
         <React.Fragment>
             <TableContainer sx={styles.tableContainer}>
@@ -137,8 +90,8 @@ function LRTable(props) {
                     </TableHead>
                     <TableBody>
                         <RecordsRow
-                            rows={rows}
-                            setRows={setRows}
+                            rows={lr}
+                            setRows={setLr}
                             page={page}
                             rowsPerPage={rowsPerPage}
                             columns={columns}
@@ -149,7 +102,7 @@ function LRTable(props) {
             <TablePagination
                 rowsPerPageOptions={[4, 10, 25, 100]}
                 component="div"
-                count={rows.length}
+                count={lr.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

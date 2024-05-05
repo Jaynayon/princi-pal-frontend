@@ -1,5 +1,5 @@
 import '../App.css'
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -15,6 +15,8 @@ import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Com
 import LRTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
 import { SchoolProvider } from '../Context/SchoolProvider';
+import { useSchoolContext } from '../Context/SchoolProvider';
+import { useNavigationContext } from '../Context/NavigationProvider';
 
 //import { useState } from 'react';
 //import { useEffect } from 'react';
@@ -79,10 +81,16 @@ function BudgetSummary(props) {
 
 function Schools(props) {
     const [value, setValue] = React.useState(0);
+    //const { selected } = useNavigationContext();
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    // useEffect(() => {
+    //     //fetchLrByDocumentId();
+    //     console.log("Get this school's lr and document");
+    // }, [selected]);
 
     return (
         <SchoolProvider>
@@ -108,7 +116,57 @@ function Schools(props) {
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
                         <RecordsProvider>
-                            <Paper sx={styles.container}>
+                            <Grid item xs={12} md={12} lg={12}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                                >
+                                    <Grid container>
+                                        <Grid item xs={12} sm={8} md={8} lg={6}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                height: "100%",
+                                                //backgroundColor: 'green'
+                                            }}
+                                            >
+                                                <IconButton sx={{ alignSelf: "center" }}>
+                                                    <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
+                                                </IconButton>
+                                                <Grid container pb={1} >
+                                                    <Grid item xs={12} md={4} lg={4}>
+                                                        <BudgetSummary total title="Total" amount="9,675.43" />
+                                                    </Grid>
+                                                    <Grid item xs={12} md={4} lg={4}>
+                                                        <BudgetSummary title="Budget this month" amount="18,000.00" />
+                                                    </Grid>
+                                                    <Grid item xs={12} md={4} lg={4}>
+                                                        <BudgetSummary title="Balance" amount="8,324.57" />
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={12} sm={4} md={4} lg={6}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    justifyContent: 'flex-end',
+                                                    alignItems: 'center',
+                                                    height: '100%', // Ensure Box fills the height of the Grid item
+                                                    pr: 2
+                                                }}
+                                            >
+                                                <Button variant="contained" sx={{ backgroundColor: '#4A99D3' }}>Export</Button>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </Grid>
+                            <Paper sx={[styles.container, { mt: 1 }]}>
                                 <Grid container>
                                     <Grid item xs={12} md={12} lg={12}>
                                         <Box sx={{
@@ -125,56 +183,7 @@ function Schools(props) {
                                             </Tabs>
                                         </Box>
                                     </Grid>
-                                    <Grid item xs={12} md={12} lg={12} sx={{ pt: 2 }}>
-                                        <Box sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                        }}
-                                        >
-                                            <Grid container>
-                                                <Grid item xs={12} sm={8} md={8} lg={6}>
-                                                    <Box sx={{
-                                                        display: 'flex',
-                                                        flexDirection: 'row',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        height: "100%",
-                                                        //backgroundColor: 'green'
-                                                    }}
-                                                    >
-                                                        <IconButton sx={{ alignSelf: "center" }}>
-                                                            <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
-                                                        </IconButton>
-                                                        <Grid container pb={1} >
-                                                            <Grid item xs={12} md={4} lg={4}>
-                                                                <BudgetSummary total title="Total" amount="9,675.43" />
-                                                            </Grid>
-                                                            <Grid item xs={12} md={4} lg={4}>
-                                                                <BudgetSummary title="Budget this month" amount="18,000.00" />
-                                                            </Grid>
-                                                            <Grid item xs={12} md={4} lg={4}>
-                                                                <BudgetSummary title="Balance" amount="8,324.57" />
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Box>
-                                                </Grid>
-                                                <Grid item xs={12} sm={4} md={4} lg={6}>
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            justifyContent: 'flex-end',
-                                                            alignItems: 'center',
-                                                            height: '100%', // Ensure Box fills the height of the Grid item
-                                                            pr: 2
-                                                        }}
-                                                    >
-                                                        <Button variant="contained" sx={{ backgroundColor: '#4A99D3' }}>Export</Button>
-                                                    </Box>
-                                                </Grid>
-                                            </Grid>
-                                        </Box>
-                                    </Grid>
+
                                     {/*Document Tables*/}
                                     <Grid item xs={12} md={12} lg={12}>
                                         <CustomTabPanel value={value} index={0}>
