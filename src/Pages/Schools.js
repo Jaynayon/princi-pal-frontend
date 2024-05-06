@@ -19,6 +19,7 @@ import { SchoolProvider } from '../Context/SchoolProvider';
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
+import DocumentSummary from '../Components/Summary/DocumentSummary';
 
 //import { useState } from 'react';
 //import { useEffect } from 'react';
@@ -61,12 +62,21 @@ const emptyDocument = {
     cashAdvance: 0
 }
 
-function Schools(props) {
-    // Initialize current date to get current month and year
-    const currentDate = new Date();
-    const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
-    const currentYear = currentDate.getFullYear().toString(); // Get full year as string
+// Initialize current date to get current month and year
+const currentDate = new Date();
+const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
+const currentYear = currentDate.getFullYear().toString(); // Get full year as string
 
+const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const years = [
+    '2021', '2022', '2023', '2024'
+];
+
+function Schools(props) {
     // Set initial state for month and year using current date
     const [month, setMonth] = useState(currentMonth);
     const [year, setYear] = useState(currentYear);
@@ -80,32 +90,12 @@ function Schools(props) {
     }
 
 
+
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Get this school's lr and document");
-        // wala pay proper optimization sa routes
-        // const fetchData = async () => {
-        //     if (selected && currentSchool && currentSchool.name) {
-        //         try {
-        //             const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-        //                 "6634e7fc43d8096920d765ff",
-        //                 year,
-        //                 month
-        //             );
-
-        //             if (getDocument) {
-        //                 setCurrentDocument(getDocument);
-        //             } else {
-        //                 setCurrentDocument(emptyDocument);
-        //             }
-        //         } catch (error) {
-        //             console.error('Error fetching document:', error);
-        //         }
-        //     }
-        // };
-
         // Fetches a Document based on the current school's id
-        const fetchData = async () => {
+        const fetchLrData = async () => {
             try {
                 const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
                     currentSchool.id,
@@ -123,29 +113,15 @@ function Schools(props) {
             }
         };
 
-        fetchData();
+        if (value === 0) {
+            fetchLrData();
+        } else if (value === 1) {
+            console.log("Fetch RCD")
+        } else if (value === 2) {
+            console.log("Fetch JEV")
+        }
 
-        const handlePageRefresh = () => {
-            const isLoggedIn = !!document.cookie.includes('jwt='); // Check if JWT token exists in cookies
-            if (isLoggedIn) {
-                // Redirect to /dashboard if not logged in
-                window.location.href = "/dashboard";
-            } else {
-                window.location.replace("/login");
-            }
-        };
-
-        // Add event listener to handle page refresh
-        window.addEventListener('beforeunload', handlePageRefresh);
-
-        return () => {
-            // Clean up event listener on component unmount
-            window.removeEventListener('beforeunload', handlePageRefresh);
-        };
-
-    }, [selected, year, month, currentSchool]);
-
-    console.log("test")
+    }, [selected, year, month, currentSchool, value]);
 
     if (!currentDocument) {
         return null;
@@ -156,7 +132,15 @@ function Schools(props) {
     };
 
     return (
-        <SchoolProvider value={{ currentDocument, setCurrentDocument, month, setMonth, year, setYear }}>
+        <SchoolProvider
+            value={{
+                currentMonth, currentYear,
+                currentDocument, setCurrentDocument,
+                month, setMonth,
+                year, setYear,
+                months, years
+            }}
+        >
             <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
                 <Grid container spacing={2} sx={{ position: 'relative' }}> {/*relative to allow date component to float*/}
                     <Grid item xs={12} md={12} lg={12}>
@@ -197,20 +181,7 @@ function Schools(props) {
                                                 //backgroundColor: 'green'
                                             }}
                                             >
-                                                <IconButton sx={{ alignSelf: "center" }}>
-                                                    <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
-                                                </IconButton>
-                                                <Grid container pb={1} >
-                                                    <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary total title="Total" amount={currentDocument?.budget || 0} />
-                                                    </Grid>
-                                                    <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary title="Budget this month" amount={currentDocument?.cashAdvance || 0} />
-                                                    </Grid>
-                                                    <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary title="Balance" amount={(currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)} />
-                                                    </Grid>
-                                                </Grid>
+                                                <DocumentSummary />
                                             </Box>
                                         </Grid>
                                         <Grid item xs={12} sm={4} md={4} lg={6}>
