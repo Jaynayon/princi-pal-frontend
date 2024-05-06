@@ -13,6 +13,7 @@ export const NavigationProvider = ({ children }) => {
     const [mobileMode, setMobileMode] = useState(false); // State to track position
     const [currentUser, setCurrentUser] = useState(null);
     const [currentSchool, setCurrentSchool] = useState(null);
+    const [currentDocument, setCurrentDocument] = useState(null);
     const [userId, setUserId] = useState(null)
     const prevOpenRef = useRef(false);
 
@@ -22,6 +23,8 @@ export const NavigationProvider = ({ children }) => {
             return !prevOpen;
         });
     };
+    //stuff
+    console.log(currentSchool)
 
     const updateMobileMode = () => {
         const { innerWidth } = window;
@@ -33,7 +36,24 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
-    console.log(userId)
+    console.log(userId);
+
+    const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
+        try {
+            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
+
+            if (getDocument) { //data.decodedToken
+                setCurrentDocument(getDocument);
+            } else {
+                //setIsLoggedIn(false)
+            }
+            console.log(getDocument);
+            // Handle response as needed
+
+        } catch (error) {
+            console.error('Error validating token:', error);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -69,6 +89,7 @@ export const NavigationProvider = ({ children }) => {
             }
         };
         fetchData();
+        fetchDocumentBySchoolIdYearMonth("6634e7fc43d8096920d765ff", 2024, "May");
 
         // Call the function to set initial mobileMode state
         updateMobileMode();
@@ -90,7 +111,8 @@ export const NavigationProvider = ({ children }) => {
     return (
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
-            navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool
+            navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
+            fetchDocumentBySchoolIdYearMonth, currentDocument, setCurrentDocument
         }}>
             {children}
         </NavigationContext.Provider>

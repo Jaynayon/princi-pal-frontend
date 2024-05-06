@@ -110,7 +110,30 @@ const RestService = (() => {
             }
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
-            throw new Error("Get lr failed. Please try again later.");
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const getDocumentBySchoolIdYearMonth = async (school_id, year, month) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/documents/school/${school_id}/${year}/${month}`)
+                .then(response => {
+                    console.log(response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error(error.response.data)
+                })
+
+            if (response) {
+                return response;
+            }
+        } catch (error) {
+            console.log(error.resonse.data)
+            //console.error('Error fetching lrs by document id:', error.message);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
         }
     };
 
@@ -121,7 +144,8 @@ const RestService = (() => {
         validateToken,
         getIsAuthenticated,
         getUserById,
-        getLrByDocumentId
+        getLrByDocumentId,
+        getDocumentBySchoolIdYearMonth
     };
 })();
 

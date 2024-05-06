@@ -5,15 +5,14 @@ const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 
-export const SchoolProvider = ({ children }) => {
+export const SchoolProvider = ({ children, value }) => {
     // Initialize current date to get current month and year
     const currentDate = new Date();
     const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
     const currentYear = currentDate.getFullYear().toString(); // Get full year as string
 
     // Set initial state for month and year using current date
-    const [month, setMonth] = useState(currentMonth);
-    const [year, setYear] = useState(currentYear);
+    const { currentDocument, setCurrentDocument, month, setMonth, year, setYear } = value;
     const [lr, setLr] = useState([]);
 
     const months = [
@@ -48,6 +47,23 @@ export const SchoolProvider = ({ children }) => {
         }
     };
 
+    // const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
+    //     try {
+    //         const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
+
+    //         if (getDocument) { //data.decodedToken
+    //             setCurrentDocument(getDocument);
+    //         } else {
+    //             setCurrentDocument(getDocument);
+    //         }
+    //         console.log(getDocument);
+    //         // Handle response as needed
+
+    //     } catch (error) {
+    //         console.error('Error validating token:', error);
+    //     }
+    // };
+
     useEffect(() => {
         console.log("update document");
 
@@ -57,7 +73,8 @@ export const SchoolProvider = ({ children }) => {
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
-            lr, setLr, fetchLrByDocumentId
+            lr, setLr, fetchLrByDocumentId, setCurrentDocument,
+            currentDocument
         }}>
             {children}
         </SchoolContext.Provider>

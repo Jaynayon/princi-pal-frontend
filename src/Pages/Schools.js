@@ -14,9 +14,11 @@ import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
 import LRTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
+import BudgetSummary from '../Components/Summary/BudgetSummary';
 import { SchoolProvider } from '../Context/SchoolProvider';
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { useNavigationContext } from '../Context/NavigationProvider';
+import RestService from '../Services/RestService';
 
 //import { useState } from 'react';
 //import { useEffect } from 'react';
@@ -54,46 +56,119 @@ function a11yProps(index) {
     };
 }
 
-function BudgetSummary(props) {
-    const { title, amount, total = false } = props
-    return (
-        <Paper sx={{ minWidth: 150, height: 65, m: 1, backgroundColor: total ? '#0077B6' : undefined }} variant='outlined'>
-            <Box
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    fontWeight: 'bold',
-                    height: '100%',
-                }}
-            >
-                <Typography variant="body2" align="center" sx={{ fontWeight: 'bold', color: total ? '#ffff' : '#9FA2B4' }}>
-                    {title}
-                </Typography>
-                <Typography variant="body2" align="center" sx={{ fontWeight: 'bold', color: total && '#ffff' }}>
-                    Php {amount}
-                </Typography>
-            </Box>
-        </Paper>
-    );
+const emptyDocument = {
+    budget: 0,
+    cashAdvance: 0
 }
 
 function Schools(props) {
+    // Initialize current date to get current month and year
+    const currentDate = new Date();
+    const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
+    const currentYear = currentDate.getFullYear().toString(); // Get full year as string
+
+    // Set initial state for month and year using current date
+    const [month, setMonth] = useState(currentMonth);
+    const [year, setYear] = useState(currentYear);
+
     const [value, setValue] = React.useState(0);
-    //const { selected } = useNavigationContext();
+    const [currentDocument, setCurrentDocument] = useState(null);
+    const { selected, currentSchool } = useNavigationContext();
+
+    // Fetches a Document based on the current school's id
+    const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
+        try {
+            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
+
+            if (getDocument) { //data.decodedToken
+                setCurrentDocument(getDocument);
+            } else {
+                setCurrentDocument(emptyDocument);
+            }
+            console.log(getDocument);
+            // Handle response as needed
+
+        } catch (error) {
+            console.error('Error validating token:', error);
+        }
+    };
+
+    //Only retried documents from that school if the current selection is a school
+    React.useEffect(() => {
+        console.log("Get this school's lr and document");
+        // wala pay proper optimization sa routes
+        // const fetchData = async () => {
+        //     if (selected && currentSchool && currentSchool.name) {
+        //         try {
+        //             const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
+        //                 "6634e7fc43d8096920d765ff",
+        //                 year,
+        //                 month
+        //             );
+
+        //             if (getDocument) {
+        //                 setCurrentDocument(getDocument);
+        //             } else {
+        //                 setCurrentDocument(emptyDocument);
+        //             }
+        //         } catch (error) {
+        //             console.error('Error fetching document:', error);
+        //         }
+        //     }
+        // };
+
+        const fetchData = async () => {
+            try {
+                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
+                    "6634e7fc43d8096920d765ff",
+                    year,
+                    month
+                );
+
+                if (getDocument) {
+                    setCurrentDocument(getDocument);
+                } else {
+                    setCurrentDocument(emptyDocument);
+                }
+            } catch (error) {
+                console.error('Error fetching document:', error);
+            }
+        };
+
+        fetchData();
+
+        const handlePageRefresh = () => {
+            const isLoggedIn = !!document.cookie.includes('jwt='); // Check if JWT token exists in cookies
+            if (isLoggedIn) {
+                // Redirect to /dashboard if not logged in
+                window.location.href = "/dashboard";
+            } else {
+                window.location.replace("/login");
+            }
+        };
+
+        // Add event listener to handle page refresh
+        window.addEventListener('beforeunload', handlePageRefresh);
+
+        return () => {
+            // Clean up event listener on component unmount
+            window.removeEventListener('beforeunload', handlePageRefresh);
+        };
+
+    }, [selected, year, month, currentSchool]);
+
+    console.log("test")
+
+    if (!currentDocument) {
+        return null;
+    }
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
-    // useEffect(() => {
-    //     //fetchLrByDocumentId();
-    //     console.log("Get this school's lr and document");
-    // }, [selected]);
-
     return (
-        <SchoolProvider>
+        <SchoolProvider value={{ currentDocument, setCurrentDocument, month, setMonth, year, setYear }}>
             <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
                 <Grid container spacing={2} sx={{ position: 'relative' }}> {/*relative to allow date component to float*/}
                     <Grid item xs={12} md={12} lg={12}>
@@ -139,13 +214,13 @@ function Schools(props) {
                                                 </IconButton>
                                                 <Grid container pb={1} >
                                                     <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary total title="Total" amount="9,675.43" />
+                                                        <BudgetSummary total title="Total" amount={currentDocument?.budget || 0} />
                                                     </Grid>
                                                     <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary title="Budget this month" amount="18,000.00" />
+                                                        <BudgetSummary title="Budget this month" amount={currentDocument?.cashAdvance || 0} />
                                                     </Grid>
                                                     <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary title="Balance" amount="8,324.57" />
+                                                        <BudgetSummary title="Balance" amount={(currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)} />
                                                     </Grid>
                                                 </Grid>
                                             </Box>

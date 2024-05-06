@@ -15,7 +15,7 @@ function LRTable(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
     const { lr, setLr } = useSchoolContext();
-    const { fetchLrByDocumentId } = useSchoolContext();
+    const { fetchLrByDocumentId, fetchDocumentBySchoolIdYearMonth, year, month } = useSchoolContext();
     const { selected } = useNavigationContext();
 
     const columns = [
@@ -64,8 +64,9 @@ function LRTable(props) {
 
     useEffect(() => {
         fetchLrByDocumentId("663583ecf624082c3503c623");
+        //fetchDocumentBySchoolIdYearMonth("6634e7fc43d8096920d765ff", year, month);
         //console.log("LR TABLE: Get this school's lr and document");
-    }, [selected]);
+    }, [selected, year, month]);
 
     return (
         <React.Fragment>
