@@ -63,7 +63,7 @@ const ApexChart = ({ data }) => {
 };
 
 function Dashboard(props) {
-    const [selectedSchool, setSelectedSchool] = useState('');
+    const [selectedSchool, setSelectedSchool] = useState('None'); // Default selected option is "None"
     const [schoolData, setSchoolData] = useState({
         'CIT': {
             monthlyBudget: { currency: 'Php', amount: '1000.00' },
@@ -87,12 +87,13 @@ function Dashboard(props) {
 
     useEffect(() => {
         const firstOption = Object.keys(schoolData)[0];
-        if (!selectedSchool) {
-            setSelectedSchool(firstOption);
-            setEditableAmounts(schoolData[firstOption]);
+        if (!selectedSchool || !schoolData[selectedSchool]) {
+            setSelectedSchool('None');
+            setEditableAmounts({});
+        } else {
+            setEditableAmounts(schoolData[selectedSchool]);
         }
     }, [schoolData, selectedSchool]);
-
     const handleSchoolChange = (event) => {
         setSelectedSchool(event.target.value);
     };
@@ -249,9 +250,9 @@ function Dashboard(props) {
     };
     
     const renderSummaryCard = () => {
-        const monthlyBudgetData = editableAmounts['Monthly Budget'] || { currency: '', amount: '' };
-        const budgetLimitData = editableAmounts['Budget Limit'] || { currency: '', amount: '' };
-        const totalBalanceData = editableAmounts['Total Balance'] || { currency: '', amount: '' };
+        const monthlyBudgetData = selectedSchool ? (editableAmounts['Monthly Budget'] || { currency: '', amount: '' }) : { currency: '', amount: '' };
+        const budgetLimitData = selectedSchool ? (editableAmounts['Budget Limit'] || { currency: '', amount: '' }) : { currency: '', amount: '' };
+        const totalBalanceData = selectedSchool ? (editableAmounts['Total Balance'] || { currency: '', amount: '' }) : { currency: '', amount: '' };
     
         return (
             <Paper
@@ -271,6 +272,7 @@ function Dashboard(props) {
             </Paper>
         );
     };
+    
 
     return (
         <Container className="test" maxWidth="lg">
