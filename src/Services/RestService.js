@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { saveAs } from 'file-saver';
 
 const instance = axios.create({
     baseURL: 'http://localhost:4000', // Set your backend URL
@@ -137,6 +138,25 @@ const RestService = (() => {
         }
     };
 
+    const getExcelFromLr = async (document_id) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/downloadExcel/${document_id}`, {
+                responseType: 'blob' // Set the response type to 'blob' to handle binary data
+            });
+
+            // Extract blob data from the response
+            const blobData = new Blob([response.data], { type: 'application/octet-stream' });
+
+            // Use FileSaver.js to trigger file download
+            saveAs(blobData, 'LR-2024.xlsx');
+
+            return response.data; // Optionally return the blob data
+        } catch (error) {
+            console.error('Error downloading Excel file:', error);
+            return null;
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
@@ -145,7 +165,8 @@ const RestService = (() => {
         getIsAuthenticated,
         getUserById,
         getLrByDocumentId,
-        getDocumentBySchoolIdYearMonth
+        getDocumentBySchoolIdYearMonth,
+        getExcelFromLr
     };
 })();
 

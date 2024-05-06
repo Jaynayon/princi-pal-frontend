@@ -75,6 +75,11 @@ function Schools(props) {
     const [currentDocument, setCurrentDocument] = useState(null);
     const { selected, currentSchool } = useNavigationContext();
 
+    const exportDocumentOnClick = async () => {
+        await RestService.getExcelFromLr(currentDocument.id);
+    }
+
+
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Get this school's lr and document");
@@ -218,7 +223,11 @@ function Schools(props) {
                                                     pr: 2
                                                 }}
                                             >
-                                                <Button variant="contained" sx={{ backgroundColor: '#4A99D3' }}>Export</Button>
+                                                <Button variant="contained"
+                                                    sx={{ backgroundColor: '#4A99D3' }}
+                                                    onClick={() => exportDocumentOnClick()}
+                                                >Export
+                                                </Button>
                                             </Box>
                                         </Grid>
                                     </Grid>
