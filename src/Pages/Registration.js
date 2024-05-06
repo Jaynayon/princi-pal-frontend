@@ -95,21 +95,22 @@ const RegistrationPage = () => {
     console.log(formData.position)
   };
 
-  const handleExistingEmail = async (event) => {
+  const handleExistingEmail = async () => {
     try {
-      const exists = await RestService.validateUsernameEmail(event.target.value)
-      exists ? setEmailError(true) : setEmailError(false)
+      const exists = await RestService.validateEmail(formData.email);
+      setEmailError(exists);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
+  
   // useEffect hook to handle existing email validation
   useEffect(() => {
-    // Check if email field is not empty and perform validation
     if (formData.email !== '') {
       handleExistingEmail();
     }
   }, [formData.email]);
+  
 
   const handleExistingUsername = async (event) => {
     try {
@@ -151,7 +152,7 @@ const RegistrationPage = () => {
             position: ''
           });
           // Redirect to login page or display a success message
-          //window.location.href = "/dashboard"; // Change this to the correct URL if needed
+          window.location.href = "/dashboard"; // Change this to the correct URL if needed
         } else {
           setRegistrationError("Registration failed");
         }
