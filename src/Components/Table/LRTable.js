@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -8,9 +8,17 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import RecordsRow from './RecordsRow';
-import { RecordsProvider } from '../../Context/RecordsProvider'
+import { useSchoolContext } from '../../Context/SchoolProvider';
+import { useNavigationContext } from '../../Context/NavigationProvider';
+import RestService from '../../Services/RestService';
 
 function LRTable(props) {
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(4);
+    const { lr, setLr } = useSchoolContext();
+    const { fetchLrByDocumentId } = useSchoolContext();
+    const { selected, currentDocument } = useNavigationContext();
+
     const columns = [
         {
             id: 'date',
@@ -21,7 +29,7 @@ function LRTable(props) {
             format: (value) => value.toLocaleString('en-US'),
         },
         {
-            id: 'ors_burs_no',
+            id: 'orsBursNo',
             label: 'ORS/BURS No.',
             minWidth: 50,
             maxWidth: 100,
@@ -47,12 +55,44 @@ function LRTable(props) {
     ];
 
     const handleChangePage = (event, newPage) => {
-        console.log('wahaha')
+        setPage(newPage);
     };
 
     const handleChangeRowsPerPage = (event) => {
-        console.log('wahaha')
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset to the first page when changing rows per page
     };
+
+    useEffect(() => {
+        // unoptimized
+        // const fetchDataLr = async () => {
+        //     if (selected && currentDocument && currentDocument.id) {
+        //         try {
+        //             // Fetches an LR based on the current document
+        //             fetchLrByDocumentId(currentDocument.id);
+        //         } catch (error) {
+        //             console.error('Error fetching document:', error);
+        //         }
+        //     }
+        // };
+        const fetchDataLr = async () => {
+            try {
+                if (!currentDocument) {
+                    return null;
+                }
+                // Fetches an LR based on the current document
+                fetchLrByDocumentId(currentDocument.id);
+            } catch (error) {
+                console.error('Error fetching document:', error);
+            }
+        };
+        fetchDataLr();
+
+    }, [selected, currentDocument]);
+
+    if (!lr) {
+        return null;
+    }
 
     return (
         <React.Fragment>
@@ -77,8 +117,10 @@ function LRTable(props) {
                     </TableHead>
                     <TableBody>
                         <RecordsRow
-                            page={0}
-                            rowsPerPage={4}
+                            rows={lr}
+                            setRows={setLr}
+                            page={page}
+                            rowsPerPage={rowsPerPage}
                             columns={columns}
                             text={""} />
                     </TableBody>
@@ -87,9 +129,9 @@ function LRTable(props) {
             <TablePagination
                 rowsPerPageOptions={[4, 10, 25, 100]}
                 component="div"
-                count={5}
-                rowsPerPage={4}
-                page={0}
+                count={lr.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
