@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
+import RestService from "../Services/RestService"
 
 const NavigationContext = createContext();
 
@@ -10,6 +11,9 @@ export const NavigationProvider = ({ children }) => {
     const [open, setOpen] = useState(true);
     const [navStyle, setNavStyle] = React.useState('light'); // Initial theme
     const [mobileMode, setMobileMode] = useState(false); // State to track position
+    const [currentUser, setCurrentUser] = useState(null);
+    const [currentSchool, setCurrentSchool] = useState(null);
+    const [userId, setUserId] = useState(null)
     const prevOpenRef = useRef(false);
 
     const toggleDrawer = () => {
@@ -29,7 +33,43 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
+    console.log(userId)
+
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const jwtCookie = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('jwt='));
+
+                if (jwtCookie) {
+                    const token = jwtCookie.split('=')[1];
+                    console.log('JWT Token Provider:', token);
+
+                    // Call RestService to validate the token
+                    const data = await RestService.validateToken(token);
+
+                    if (data) { //data.decodedToken
+                        setUserId(data)
+                        if (!currentUser) {
+                            setCurrentUser(await RestService.getUserById(data.id))
+
+                        }
+                    } else {
+                        //setIsLoggedIn(false)
+                    }
+                    console.log(currentUser)
+                    // Handle response as needed
+                } else {
+                    //setIsLoggedIn(false)
+                    console.log('JWT Token not found in cookies.');
+                }
+            } catch (error) {
+                console.error('Error validating token:', error);
+            }
+        };
+        fetchData();
+
         // Call the function to set initial mobileMode state
         updateMobileMode();
 
@@ -45,12 +85,12 @@ export const NavigationProvider = ({ children }) => {
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []); // Run effect only on mount and unmount
+    }, [currentUser]); // Run effect only on mount and unmount
 
     return (
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
-            navStyle, setNavStyle, mobileMode
+            navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool
         }}>
             {children}
         </NavigationContext.Provider>
