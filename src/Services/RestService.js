@@ -23,9 +23,17 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            });
+            })
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error validating user:', error);
+                    // Handle errors here (e.g., display error message)
+                });
 
-            console.log(response.data);
+            console.log(response);
 
             return true;
         } catch (error) {
@@ -47,9 +55,17 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            });
+            })
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error validating user:', error);
+                    // Handle errors here (e.g., display error message)
+                });
 
-            isAuthenticated = response.data.isMatch;
+            isAuthenticated = response.isMatch;
             return isAuthenticated;
         } catch (error) {
             console.error('Error authenticating user:', error);
@@ -59,8 +75,18 @@ const RestService = (() => {
 
     const validateUsernameEmail = async (details) => {
         try {
-            const response = await instance.get(`http://localhost:4000/users/exists/${details}`);
-            return response.data.exists;
+            const response = await instance.get(`http://localhost:4000/users/exists/${details}`)
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error validating user:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response) {
+                return response.exists;
+            }
         } catch (error) {
             console.error('Error validating username/email:', error);
             throw new Error("Validation failed. Please try again later.");
@@ -94,8 +120,16 @@ const RestService = (() => {
     const getUserById = async (user_id) => {
         try {
             const response = await instance.get(`http://localhost:4000/users/${user_id}`)
-            if (response.data) {
-                return response.data;
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error getting user:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response) {
+                return response;
             }
         } catch (error) {
             console.error('Error fetching user:', error);
@@ -106,8 +140,16 @@ const RestService = (() => {
     const getLrByDocumentId = async (doc_id) => {
         try {
             const response = await instance.get(`http://localhost:4000/lr/documents/${doc_id}`)
-            if (response.data) {
-                return response.data;
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response) {
+                return response;
             }
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
