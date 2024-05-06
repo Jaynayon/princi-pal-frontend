@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { saveAs } from 'file-saver';
 
 const instance = axios.create({
     baseURL: 'http://localhost:4000', // Set your backend URL
@@ -102,13 +103,70 @@ const RestService = (() => {
         }
     };
 
+    const getLrByDocumentId = async (doc_id) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/lr/documents/${doc_id}`)
+            if (response.data) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const getDocumentBySchoolIdYearMonth = async (school_id, year, month) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/documents/school/${school_id}/${year}/${month}`)
+                .then(response => {
+                    console.log(response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error(error.response.data)
+                })
+
+            if (response) {
+                return response;
+            }
+        } catch (error) {
+            console.log(error.resonse.data)
+            //console.error('Error fetching lrs by document id:', error.message);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const getExcelFromLr = async (document_id) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/downloadExcel/${document_id}`, {
+                responseType: 'blob' // Set the response type to 'blob' to handle binary data
+            });
+
+            // Extract blob data from the response
+            const blobData = new Blob([response.data], { type: 'application/octet-stream' });
+
+            // Use FileSaver.js to trigger file download
+            saveAs(blobData, 'LR-2024.xlsx');
+
+            return response.data; // Optionally return the blob data
+        } catch (error) {
+            console.error('Error downloading Excel file:', error);
+            return null;
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
         validateUsernameEmail,
         validateToken,
         getIsAuthenticated,
-        getUserById
+        getUserById,
+        getLrByDocumentId,
+        getDocumentBySchoolIdYearMonth,
+        getExcelFromLr
     };
 })();
 
