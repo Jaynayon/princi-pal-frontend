@@ -1,25 +1,19 @@
-import React, { useState } from 'react';
-import { DateRangePicker } from 'react-date-range';
-import 'react-date-range/dist/styles.css';
-import 'react-date-range/dist/theme/default.css';
+import React, { useState, useEffect } from 'react';
+import 'react-date-range/dist/styles.css'; 
+import 'react-date-range/dist/theme/default.css'; 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
 import { DateFilter } from '../Components/Filters/Filters';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import { Box, Button, Menu, MenuItem } from '@mui/material';
 
-
-const ApexChart = () => {
+const ApexChart = ({ data }) => {
     const [options] = useState({
         chart: {
             height: 350,
@@ -55,7 +49,7 @@ const ApexChart = () => {
 
     const [series] = useState([{
         name: "Budget",
-        data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
+        data: data.budgetData
     }]);
 
     return (
@@ -70,18 +64,60 @@ const ApexChart = () => {
 
 function Dashboard(props) {
     const [selectedSchool, setSelectedSchool] = useState('');
+    const [schoolData, setSchoolData] = useState({
+        'CIT': {
+            monthlyBudget: { currency: 'Php', amount: '1000.00' },
+            budgetLimit: { currency: 'Php', amount: '0.00' },
+            totalBalance: { currency: 'Php', amount: '500.00' },
+            budgetData: [10, 41, 35, 51, 49, 62, 69, 91, 148]
+        },
+        'ACT': {
+            monthlyBudget: { currency: 'Php', amount: '1500.00' },
+            budgetLimit: { currency: 'Php', amount: '0.00' },
+            totalBalance: { currency: 'Php', amount: '1000.00' },
+            budgetData: [20, 45, 25, 61, 55, 72, 78, 101, 156]
+        },
+        'SM CITY': {
+            monthlyBudget: { currency: 'Php', amount: '2000.00' },
+            budgetLimit: { currency: 'Php', amount: '0.00' },
+            totalBalance: { currency: 'Php', amount: '1500.00' },
+            budgetData: [15, 38, 30, 49, 40, 65, 70, 85, 135]
+        }
+    });
+
+    useEffect(() => {
+        const firstOption = Object.keys(schoolData)[0];
+        if (!selectedSchool) {
+            setSelectedSchool(firstOption);
+            setEditableAmounts(schoolData[firstOption]);
+        }
+    }, [schoolData, selectedSchool]);
+
     const handleSchoolChange = (event) => {
         setSelectedSchool(event.target.value);
     };
-
+    
     const [clickedButton, setClickedButton] = useState('');
-    const [editableAmounts, setEditableAmounts] = useState({
-        'Monthly Budget': { currency: 'Php', amount: '0.00' },
-        'Budget Limit': { currency: 'Php', amount: '0.00' },
-        'Total Balance': { currency: 'Php', amount: '0.00' }
-    });
+    const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
+    const [selectedMonthYear, setSelectedMonthYear] = useState('');
+    const [applyButtonClicked, setApplyButtonClicked] = useState(false);
+
+    useEffect(() => {
+        const firstOption = Object.keys(schoolData)[0];
+        if (!selectedSchool) {
+            setSelectedSchool(firstOption);
+            setEditableAmounts(schoolData[firstOption]);
+        }
+        if (!applyButtonClicked) {
+            setSelectedMonthYear(getCurrentMonthYear());
+        }
+    }, [schoolData, selectedSchool, applyButtonClicked]);
+
+    const handleDateFilterApply = (selectedMonthYear) => {
+        setSelectedMonthYear(selectedMonthYear);
+    };
 
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
@@ -104,9 +140,10 @@ function Dashboard(props) {
 
     const handleChange = (event) => {
         const newValue = event.target.value;
+        const regex = /^\d+(\.\d{0,2})?$/;
         if (
-            newValue === '' ||
-            (newValue >= 0 && newValue <= 999999)
+            newValue === '' ||                      
+            (regex.test(newValue) && parseFloat(newValue) >= 0 && parseFloat(newValue) <= 999999999)  
         ) {
             setEditableAmounts({
                 ...editableAmounts,
@@ -114,93 +151,130 @@ function Dashboard(props) {
             });
             setError('');
         } else {
-            setError('Please enter a valid number between 0 and 999,999.');
+            setError('Please enter a valid number.');
         }
     };
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        console.log(`New ${clickedButton}: ${editableAmounts[clickedButton].currency} ${editableAmounts[clickedButton].amount}`);
+        const updatedAmount = editableAmounts[clickedButton];
+        console.log(`New ${clickedButton}: ${updatedAmount.currency} ${updatedAmount.amount}`);
+        setSchoolData({
+            ...schoolData,
+            [selectedSchool]: {
+                ...schoolData[selectedSchool],
+                budgetLimit: updatedAmount
+            }
+        });
         setOpen(false);
     };
 
-    const renderEditableCard = (title) => (
-        <Paper
-            sx={{
-                position: 'relative',
-                p: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                height: 160,
-                textAlign: 'left',
-                paddingLeft: (title === 'Monthly Budget' || title === 'Budget Limit' || title === 'Total Balance') ? '30px' : '0',
-            }}
-        >
-            {title}
-            <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{editableAmounts[title].currency} {editableAmounts[title].amount}</p>
-            {title !== 'Total Balance' && (
-                <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                    <EditIcon sx={{ width: '30px', height: '30px' }} />
-                </Button>
-            )}
-            <Modal
-                open={open && clickedButton === title}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    p: 4,
-                    width: 400,
-                    borderRadius: '15px',
-                    textAlign: 'center',
-                }}>
-                    <Button onClick={handleClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
-                    <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Edit {title}</h2>
-                    <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-                        <TextField
-                            type="text"
-                            value={editableAmounts[title].amount}
-                            onChange={handleChange}
-                            label="Input New Amount"
-                        />
-                    </form>
-                    <div style={{ marginBottom: '20px' }}>
-                        <Button onClick={handleSubmit} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Save</Button>
-                    </div>
-                </Box>
-            </Modal>
-        </Paper>
-    );
+    const [schoolMenuAnchor, setSchoolMenuAnchor] = useState(null);
 
-    const renderSummaryCard = () => (
-        <Paper
-            sx={{
-                p: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                height: 380,
-                textAlign: 'left',
-            }}
-        >
-            <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
-            <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{getCurrentMonthYear()}</p>
-            <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget: {editableAmounts['Monthly Budget'].currency} {editableAmounts['Monthly Budget'].amount}</p>
-            <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget Limit: {editableAmounts['Budget Limit'].currency} {editableAmounts['Budget Limit'].amount}</p>
-            <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Balance: {editableAmounts['Total Balance'].currency} {editableAmounts['Total Balance'].amount}</p>
-        </Paper>
-    );
+    const handleClickSchoolMenu = (event) => {
+        setSchoolMenuAnchor(event.currentTarget);
+    };
+
+    const handleCloseSchoolMenu = () => {
+        setSchoolMenuAnchor(null);
+    };
+
+    const handleSelectSchool = (school) => {
+        setSelectedSchool(school); 
+        setSchoolMenuAnchor(null); 
+        setEditableAmounts(schoolData[school]);
+    };
+
+    const renderEditableCard = (title) => {
+        const amountData = editableAmounts[title] || { currency: '', amount: '' };
+        let displayTitle = title;
+        if (title === 'monthlyBudget') displayTitle = 'Monthly Budget';
+        else if (title === 'budgetLimit') displayTitle = 'Budget Limit';
+        else if (title === 'totalBalance') displayTitle = 'Total Balance';
+    
+        return (
+            <Paper
+                sx={{
+                    position: 'relative',
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 160,
+                    textAlign: 'left',
+                    paddingLeft: (displayTitle === 'Monthly Budget' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
+                }}
+            >
+                {displayTitle}
+                <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{amountData.currency} {amountData.amount}</p>
+                {displayTitle === 'Budget Limit' && (
+                    <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
+                        <EditIcon sx={{ width: '30px', height: '30px' }} />
+                    </Button>
+                )}
+                <Modal
+                    open={open && clickedButton === title}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                        width: 400,
+                        borderRadius: '15px',
+                        textAlign: 'center',
+                    }}>
+                        <Button onClick={handleClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
+                        <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Edit {displayTitle}</h2>
+                        <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+                            <TextField
+                                type="text"
+                                value={amountData.amount}
+                                onChange={handleChange}
+                                label="Input New Amount"
+                            />
+                        </form>
+                        <div style={{ marginBottom: '20px' }}>
+                            <Button onClick={handleSubmit} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Save</Button>
+                        </div>
+                    </Box>
+                </Modal>
+            </Paper>
+        );
+    };
+    
+    const renderSummaryCard = () => {
+        const monthlyBudgetData = editableAmounts['Monthly Budget'] || { currency: '', amount: '' };
+        const budgetLimitData = editableAmounts['Budget Limit'] || { currency: '', amount: '' };
+        const totalBalanceData = editableAmounts['Total Balance'] || { currency: '', amount: '' };
+    
+        return (
+            <Paper
+                sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 380,
+                    textAlign: 'left',
+                }}
+            >
+                <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
+                <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{selectedMonthYear}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget: {monthlyBudgetData.currency} {monthlyBudgetData.amount}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget Limit: {budgetLimitData.currency} {budgetLimitData.amount}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Balance: {totalBalanceData.currency} {totalBalanceData.amount}</p>
+            </Paper>
+        );
+    };
 
     return (
         <Container className="test" maxWidth="lg">
             <Box sx={{ position: 'relative' }}>
-                { }
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12} lg={12}>
                         <Paper
@@ -209,38 +283,41 @@ function Dashboard(props) {
                                     p: 2,
                                     display: 'flex',
                                     flexDirection: 'row',
+                                    justifyContent: 'space-between', 
                                 }
                             ]}
                             elevation={0}
-                            variant='outlined'>
+                            variant='outlined'
+                        >
                             <Box style={styles.header.buttons}>
-                                <DateFilter /> { }
-                                { }
-                                <FormControl sx={{ m: 1, minWidth: 150 }}>
-                                    {/*<InputLabel id="school-filter-label">School Filter</InputLabel>
+                                <DateFilter onApply={handleDateFilterApply} />
+                            </Box>
+                            <Box style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
                                 <Select
-                                    labelId="school-filter-label"
                                     id="school-filter"
                                     value={selectedSchool}
-                                    onChange={handleSchoolChange}
-                                    label="School"
+                                    onChange={(event) => handleSelectSchool(event.target.value)}
+                                    sx={{
+                                        fontWeight: '900', 
+                                        height: '40px',    
+                                        minWidth: '120px', 
+                                    }}
+                                    displayEmpty
                                 >
-                                    <MenuItem value="">
-                                        <em>None</em>
+                                    <MenuItem value="" disabled>
+                                        School
                                     </MenuItem>
-                                    <MenuItem value="CIT">CIT</MenuItem>
-                                    <MenuItem value="ACT">ACT</MenuItem>
-                                    <MenuItem value="SM CITY">SM CITY</MenuItem>
-                    </Select>*/}
-                                </FormControl>
+                                    {Object.keys(schoolData).map((school) => (
+                                        <MenuItem key={school} value={school}>{school}</MenuItem>
+                                    ))}
+                                </Select>
                             </Box>
                         </Paper>
                     </Grid>
-
                     <Grid item xs={12} md={12} lg={12}>
                         <Box style={{
                             display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
-                            marginLeft: '10px', marginRight: '10px'
+                            marginLeft: '10px', marginRight: '10px' 
                         }}>
                             <Typography
                                 component="h1"
@@ -256,13 +333,11 @@ function Dashboard(props) {
                                 variant="h6"
                                 color="inherit"
                                 noWrap
-
                             >
-                                {getCurrentMonthYear()}
+                                {selectedMonthYear}
                             </Typography>
                         </Box>
                     </Grid>
-
                     <Grid item xs={12} md={12} lg={12}
                         sx={{
                             display: 'flex',
@@ -271,17 +346,16 @@ function Dashboard(props) {
                         }}>
                         <Grid container >
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('Monthly Budget')}
+                                {renderEditableCard('monthlyBudget')}
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('Budget Limit')}
+                                {renderEditableCard('budgetLimit')}
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('Total Balance')}
+                                {renderEditableCard('totalBalance')}
                             </Grid>
                         </Grid>
                     </Grid>
-
                     <Grid item xs={12} md={12} lg={12}>
                         <Grid container >
                             <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
@@ -293,16 +367,18 @@ function Dashboard(props) {
                                         height: 380,
                                     }}
                                 >
-                                    <ApexChart />
+                                    {selectedSchool && schoolData[selectedSchool] ? (
+                                        <ApexChart data={schoolData[selectedSchool]} />
+                                    ) : (
+                                        <Typography variant="body1">No data available for the selected school.</Typography>
+                                    )}
                                 </Paper>
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-
                                 {renderSummaryCard()}
                             </Grid>
                         </Grid>
                     </Grid>
-
                 </Grid>
             </Box>
         </Container>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import SortIcon from '@mui/icons-material/Sort';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
@@ -13,238 +13,209 @@ import FormControl from '@mui/material/FormControl';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import IconButton from '@mui/material/IconButton';
-import Popover from '@mui/material/Popover';
 
 export function FieldsFilter() {
     return (
-        <React.Fragment>
-            <Button variant="text" >
-                <FilterAltIcon sx={styles.icon} />
-                <Typography
-                    noWrap
-                    style={styles.description}
-                >
-                    Filter
-                </Typography>
-            </Button>
-        </React.Fragment>
-    )
+        <Button variant="text">
+            <FilterAltIcon sx={styles.icon} />
+            <Typography noWrap style={styles.description}>
+                Filter
+            </Typography>
+        </Button>
+    );
 }
 
-export function DateFilter() {
+export function DateFilter({ onApply }) {
     const theme = useTheme();
-    const prevMonthRef = useRef(0);
-    const prevYearRef = useRef(0);
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const [month, setMonth] = React.useState('January');
-    const [year, setYear] = React.useState('2021');
+    const [button, setButton] = useState(false);
+    const [date, setDate] = useState('');
+    const [year, setYear] = useState('');
+    const [selectedMonth, setSelectedMonth] = useState('');
+    const [selectedYear, setSelectedYear] = useState('');
 
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
     const MenuProps = {
         PaperProps: {
             style: {
-                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP
+                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
             },
         },
     };
 
-    const months = [
+    const dates = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
     const years = [
-        '2021', '2022', '2023', '2024'
+        '2023', '2024'
     ];
 
-    function getStyles(name, personName, theme) {
-        return {
-            fontWeight: "650",
-            color:
-                personName.indexOf(name) === -1
-                    ? null
-                    : "#176AF6"
-        };
-    }
-
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
+    
+    const handleApply = () => {
+        setSelectedMonth(date);
+        setSelectedYear(year);
+        onApply(`${date} ${year}`);
+        setButton(false); // Hide the filter box after applying
     };
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover' : undefined;
-
-    const handleNextMonth = (event) => {
-        prevMonthRef.current += 1;
-        if (prevMonthRef.current > months.length - 1) {
-            prevMonthRef.current = 0;
-            if (prevYearRef.current < years.length - 1) {
-                prevYearRef.current += 1;
-                setYear(years[prevYearRef.current])
-            }
-        }
-        setMonth(months[prevMonthRef.current]);
-    }
-
-    const handlePrevMonth = (event) => {
-        prevMonthRef.current -= 1;
-        if (prevMonthRef.current < 0) {
-            prevMonthRef.current = months.length - 1;
-            prevYearRef.current -= 1;
-            if (prevYearRef.current < 0) {
-                prevYearRef.current = 0;
-            }
-            setYear(years[prevYearRef.current])
-        }
-        setMonth(months[prevMonthRef.current]);
-    }
+    const getStyles = (name, personName) => ({
+        fontWeight: "650",
+        color: personName === name ? "#176AF6" : null
+    });
 
     const handleChangeMonth = (event) => {
-        const {
-            target: { value },
-        } = event;
-        prevMonthRef.current = months.indexOf(value)
-        setMonth(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+        const { value } = event.target;
+        setDate(value);
     };
 
     const handleChangeYear = (event) => {
-        const {
-            target: { value },
-        } = event;
-        prevYearRef.current = years.indexOf(value)
-        setYear(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+        const { value } = event.target;
+        setYear(value);
     };
 
+    const handleClickOutside = (event) => {
+        const filterBox = document.getElementById('filterBox');
+        if (filterBox && !filterBox.contains(event.target)) {
+            setButton(false); 
+        }
+    };
+
+    const handleClickLeft = () => {
+        const currentDate = new Date(`${date} 1, ${year}`);
+        currentDate.setMonth(currentDate.getMonth() - 1);
+
+        // Check if the date is January 2023
+        if (currentDate.getFullYear() <= 2022) {
+            return; // If it's 2022 or earlier, do nothing
+        }
+        
+        
+        setDate(dates[currentDate.getMonth()]);
+        setYear(String(currentDate.getFullYear()));
+    };
+
+    const handleClickRight = () => {
+        const currentDate = new Date(`${date} 1, ${year}`);
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        if (currentDate.getFullYear() >= 2024 && currentDate.getMonth() === 0) {
+            return; // If it's January 2024 or later, do nothing
+        }
+        setDate(dates[currentDate.getMonth()]);
+        setYear(String(currentDate.getFullYear()));
+    };
+
+    useEffect(() => {
+       
+        
+
+        // Get current month and year
+        const currentDate = new Date();
+        const currentMonth = dates[currentDate.getMonth()];
+        const currentYear = String(currentDate.getFullYear());
+
+        // Set initial state to current month and year
+        setDate(currentMonth);
+        setYear(currentYear);
+
+        return () => {
+            // Clean up the event listener when component unmounts
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     return (
-        <React.Fragment>
-            <Box>
-                <Button onClick={handleClick}>
-                    <SortIcon sx={styles.icon} />
-                    <Typography noWrap style={styles.description}>
-                        Sort by Date
-                    </Typography>
-                </Button>
-                <Popover
-                    id={id}
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
+        <Box>
+            <Button onClick={() => setButton(!button)}>
+                <SortIcon sx={styles.icon} />
+                <Typography noWrap style={styles.description}>
+                    Sort by Date
+                </Typography>
+            </Button>
+            <Paper
+                id="filterBox"
+                sx={{
+                    display: 'flex',
+                    position: 'absolute',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    height: '80px',
+                    paddingLeft: '10px',
+                    paddingRight: '10px',
+                    backgroundColor: '#f5f5f5',
+                    transition: 'opacity 0.15s ease-in-out', // Define transition effect
+                    opacity: button ? 1 : 0, // Set opacity based on button state
+                    pointerEvents: button ? 'auto' : 'none', // Enable/disable pointer events based on button state
+                }}
+            >
+                <IconButton
+                    onClick={handleClickLeft}
+                    sx={{
+                        color: theme.navStyle.color
                     }}
                 >
-                    <Paper
-                        sx={{
-                            display: 'flex',
-                            //position: 'absolute',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            height: '80px',
-                            width: '330px',
-                            paddingLeft: '10px',
-                            paddingRight: '10px',
-                            backgroundColor: '#f5f5f5',
-                            transition: 'opacity 0.15s ease-in-out', // Define transition effect
-                        }}
-                    >
-                        <IconButton
-                            onClick={handlePrevMonth}
-                            sx={{
-                                //justifyContent: 'flex-end',
-                                color: (theme) => theme.navStyle.color
-                            }}
+                    <ChevronLeftIcon color='inherit' />
+                </IconButton>
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingLeft: '15px',
+                    paddingRight: '15px'
+                }}>
+                    <FormControl sx={{ m: 1, minWidth: 80, margin: 0 }}>
+                        <Select
+                            displayEmpty
+                            value={date}
+                            onChange={handleChangeMonth}
+                            MenuProps={MenuProps}
+                            sx={{ height: '40px', fontWeight: '900' }}
+                            inputProps={{ 'aria-label': 'Without label' }}
                         >
-                            <ChevronLeftIcon color='inherit' />
-                        </IconButton>
-                        <Box sx=
-                            {{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                paddingLeft: '15px',
-                                paddingRight: '15px'
-                            }}
-                        >
-                            <FormControl sx={{ m: 1, minWidth: 80, margin: 0 }}>
-                                <Select
-                                    displayEmpty
-                                    value={month}
-                                    onChange={handleChangeMonth}
-                                    MenuProps={MenuProps}
-                                    sx={{
-                                        "& .MuiSelect-select": {
-                                            padding: '10px', // Adjust input padding
-                                            backgroundColor: 'white', // Set input background color
-                                            fontWeight: '900', // Set input font weight
-                                        },
-                                        '& .MuiOutlinedInput-notchedOutline': { border: 0 }
-                                    }}
-                                    inputProps={{ 'aria-label': 'Without label' }}
+                            {dates.map((name) => (
+                                <MenuItem
+                                    key={name}
+                                    value={name}
+                                    style={getStyles(name, date)}
                                 >
-                                    {months.map((name) => (
-                                        <MenuItem
-                                            key={name}
-                                            value={name}
-                                            style={getStyles(name, month, theme)}
-                                        >
-                                            {name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <FormControl sx={{ m: 1, minWidth: 80, margin: 0 }}>
-                                <Select
-                                    displayEmpty
-                                    value={year}
-                                    onChange={handleChangeYear}
-                                    MenuProps={MenuProps}
-                                    sx={{
-                                        "& .MuiSelect-select": {
-                                            padding: '10px', // Adjust input padding
-                                            backgroundColor: 'white', // Set input background color
-                                            fontWeight: '900', // Set input font weight
-                                        },
-                                        '& .MuiOutlinedInput-notchedOutline': { border: 0 }
-                                    }}
-                                    inputProps={{ 'aria-label': 'Without label' }}
-                                >
-                                    {years.map((name) => (
-                                        <MenuItem
-                                            key={name}
-                                            value={name}
-                                            style={getStyles(name, year, theme)}
-                                        >
-                                            {name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        <IconButton
-                            onClick={handleNextMonth}
-                            sx={{
-                                //justifyContent: 'flex-end',
-                                color: (theme) => theme.navStyle.color
-                            }}
+                                    {name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl sx={{ m: 1, minWidth: 80, margin: 0 }}>
+                        <Select
+                            displayEmpty
+                            value={year}
+                            onChange={handleChangeYear}
+                            MenuProps={MenuProps}
+                            sx={{ height: '40px', fontWeight: '900' }}
+                            inputProps={{ 'aria-label': 'Without label' }}
                         >
-                            <ChevronRightIcon color='inherit' />
-                        </IconButton>
-                    </Paper>
-                </Popover>
-            </Box>
-        </React.Fragment>
+                            {years.map((name) => (
+                                <MenuItem
+                                    key={name}
+                                    value={name}
+                                    style={getStyles(name, year)}
+                                >
+                                    {name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
+                <IconButton
+                    onClick={handleClickRight}
+                    sx={{
+                        color: theme.navStyle.color
+                    }}
+                >
+                    <ChevronRightIcon color='inherit' />
+                </IconButton>
+                <Button onClick={handleApply}>Apply</Button>
+            </Paper>
+        </Box>
     );
 }
 
@@ -252,34 +223,27 @@ export function SearchFilter() {
     const [input, setInput] = useState('');
 
     const handleInputChange = (event) => {
-        setInput(event.target.value)
-    }
+        setInput(event.target.value);
+    };
 
     const handleInputBlur = () => {
-        //Something after searching
-    }
+        // Something after searching
+    };
 
     useEffect(() => {
-        console.log(input)
-    }, [input])
+        console.log(input);
+    }, [input]);
 
     return (
-        <React.Fragment>
-            <Box
-                sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                }}
-            >
-                <SearchIcon sx={styles.icon} />
-                <input
-                    style={styles.input}
-                    placeholder='Search'
-                    onChange={(event) => handleInputChange(event)}
-                    onBlur={handleInputBlur()}
-                />
-            </Box>
-        </React.Fragment>
+        <Box sx={{ alignItems: 'center', display: 'flex' }}>
+            <SearchIcon sx={styles.icon} />
+            <input
+                style={styles.input}
+                placeholder='Search'
+                onChange={handleInputChange}
+                onBlur={handleInputBlur}
+            />
+        </Box>
     );
 }
 
@@ -306,4 +270,4 @@ const styles = {
         border: 'none',
         width: '400px'
     }
-}
+};
