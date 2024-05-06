@@ -39,11 +39,7 @@ const RestService = (() => {
 
     const authenticateUser = async (email, password) => {
         try {
-<<<<<<< HEAD
             const response = await instance.post('/authenticate/login', {
-=======
-            const response = await instance.post('http://localhost:4000/authenticate/login', {
->>>>>>> c3f84fe27f98811a2b1c22a276b063ee4e82524f
                 emailOrUsername: email,
                 password,
             }, {
@@ -73,22 +69,9 @@ const RestService = (() => {
     const validateToken = async (token) => {
         try {
             if (token) {
-<<<<<<< HEAD
                 const response = await instance.get(`/authenticate/verify/?token=${token}`);
                 console.log('Response data:', response.data);
                 return response.data;
-=======
-                const response = await instance.get(`http://localhost:4000/authenticate/verify/?token=${token}`)
-                    .then(response => {
-                        console.log('Response data:', response.data);
-                        return response.data;
-                    })
-                    .catch(error => {
-                        console.error('Error verifying token:', error);
-                        // Handle errors here (e.g., display error message)
-                    });
-                return response
->>>>>>> c3f84fe27f98811a2b1c22a276b063ee4e82524f
             }
         } catch (error) {
             console.error('Error validating token:', error);
@@ -102,11 +85,7 @@ const RestService = (() => {
 
     const getUserById = async (user_id) => {
         try {
-<<<<<<< HEAD
             const response = await instance.get(`/users/${user_id}`);
-=======
-            const response = await instance.get(`http://localhost:4000/users/${user_id}`)
->>>>>>> c3f84fe27f98811a2b1c22a276b063ee4e82524f
             if (response.data) {
                 return response.data;
             }
