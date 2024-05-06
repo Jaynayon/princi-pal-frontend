@@ -1,4 +1,3 @@
-// React imports
 import React, { useState, useEffect } from 'react';
 
 // Material-UI imports
@@ -19,6 +18,15 @@ import SettingsIcon from '@mui/icons-material/Settings';
 // Custom component import
 import DisplaySchools from './DisplaySchools';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import { blue } from '@mui/material/colors';
 
 export function DisplayItems() {
     const theme = useTheme();
@@ -67,6 +75,18 @@ export function DisplayItems() {
         return null;
     };
 
+    function logoutUser(cookieName) {
+        // Check if the cookie exists
+        if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
+            // Overwrite the cookie with an empty value and a path that matches the original cookie's path
+            document.cookie = `${cookieName}=; path=/;`;
+            console.log(`${cookieName} cookie removed.`);
+            window.location.href = "http://localhost:3000/";
+        } else {
+            console.log(`${cookieName} cookie not found.`);
+        }
+    }
+
     return (
         list.map((item, index) => (
             <React.Fragment key={index}>
@@ -81,7 +101,10 @@ export function DisplayItems() {
                         to={index < 4 ? `/${item.toLowerCase()}` : '/'} //Logout route has not yet been implemented
                         selected={selected === item}
                         value={item}
-                        onClick={() => { setSelected(item) }}
+                        onClick={() => {
+                            setSelected(item)
+                            !(index < 4) && logoutUser('jwt')
+                        }}
                         sx={theme.navStyle.button}
                     >
                         <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
@@ -107,12 +130,27 @@ export function DisplayItems() {
 export const ProfileTab = ({ user }) => {
     const theme = useTheme();
     const [selected, setSelected] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
+    const { currentUser } = useNavigationContext();
+
+    if (!currentUser) {
+        return null
+    }
+
+    const handleDialogOpen = () => {
+        setDialogOpen(true);
+    };
+
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+        setSelected(false)
+    };
     const adjustSecondaryTypography = () => {
         // Define a threshold length for email after which font size will be reduced
         const thresholdLength = 10;
 
         // Check if email length exceeds the threshold
-        if (user.email.length > thresholdLength) {
+        if (currentUser.email.length > thresholdLength) {
             return { color: theme.navStyle.color, fontSize: 10 }; // Adjust font size if email is too long
         }
 
@@ -127,13 +165,19 @@ export const ProfileTab = ({ user }) => {
                     padding: '5px',
                 }}
                 selected={selected}
-                onClick={() => setSelected(!selected)}>
+                onClick={() => {
+                    setSelected(!selected);
+                    handleDialogOpen();
+                }}
+            >
+
                 <ListItemIcon
                     sx={{
                         minWidth: '40px',
                         width: '50px'
                     }}
                 >
+
                     <AccountCircleIcon
                         sx={{
                             color: theme.navStyle.color,
@@ -141,14 +185,35 @@ export const ProfileTab = ({ user }) => {
                             width: '100%',
                         }}
                     />
+
                 </ListItemIcon>
+
                 <ListItemText
-                    primary={user.name}
-                    secondary={user.email}
+                    primary={currentUser.fname + ' ' + currentUser.lname}
+                    secondary={currentUser.email}
                     primaryTypographyProps={{ fontWeight: 'bold', color: theme.navStyle.color }}
                     secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
                 />
+
             </ListItemButton>
+            <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                <DialogTitle>My Profile</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={2} margin={2} direction="row" alignItems="center">
+                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 165 }} alt="User Avatar"> </Avatar>
+                        <Stack spacing={2}>
+                            <TextField disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Fullname" defaultValue={currentUser.fname + ' ' + currentUser.mname + ' ' + currentUser.lname} margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Number" defaultValue="0935 256 2584" margin="normal" />
+                        </Stack>
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleDialogClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
+                </DialogActions>
+            </Dialog>
         </React.Fragment>
     );
 };
