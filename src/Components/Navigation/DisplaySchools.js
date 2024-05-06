@@ -24,10 +24,10 @@ const currentUser = {
     name: 'Jay Nayon',
     email: 'jay.nayonjr@cit.edu',
     schools: [{
-        id: "1234",
+        id: "6634e7fc43d8096920d765ff",
         name: 'Jaclupan ES'
     }, {
-        id: "1235",
+        id: "66354cb59de52335e7ad78ab",
         name: 'Talisay ES'
     }
     ]

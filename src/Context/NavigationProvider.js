@@ -24,7 +24,7 @@ export const NavigationProvider = ({ children }) => {
         });
     };
     //stuff
-    console.log(currentSchool)
+    console.log(currentSchool);
 
     const updateMobileMode = () => {
         const { innerWidth } = window;
@@ -89,7 +89,7 @@ export const NavigationProvider = ({ children }) => {
             }
         };
         fetchData();
-        fetchDocumentBySchoolIdYearMonth("6634e7fc43d8096920d765ff", 2024, "May");
+        //fetchDocumentBySchoolIdYearMonth("6634e7fc43d8096920d765ff", 2024, "May");
 
         // Call the function to set initial mobileMode state
         updateMobileMode();

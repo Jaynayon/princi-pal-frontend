@@ -10,13 +10,14 @@ import TableRow from '@mui/material/TableRow';
 import RecordsRow from './RecordsRow';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import RestService from '../../Services/RestService';
 
 function LRTable(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
     const { lr, setLr } = useSchoolContext();
-    const { fetchLrByDocumentId, fetchDocumentBySchoolIdYearMonth, year, month } = useSchoolContext();
-    const { selected } = useNavigationContext();
+    const { fetchLrByDocumentId } = useSchoolContext();
+    const { selected, currentDocument } = useNavigationContext();
 
     const columns = [
         {
@@ -63,10 +64,35 @@ function LRTable(props) {
     };
 
     useEffect(() => {
-        fetchLrByDocumentId("663583ecf624082c3503c623");
-        //fetchDocumentBySchoolIdYearMonth("6634e7fc43d8096920d765ff", year, month);
-        //console.log("LR TABLE: Get this school's lr and document");
-    }, [selected, year, month]);
+        // unoptimized
+        // const fetchDataLr = async () => {
+        //     if (selected && currentDocument && currentDocument.id) {
+        //         try {
+        //             // Fetches an LR based on the current document
+        //             fetchLrByDocumentId(currentDocument.id);
+        //         } catch (error) {
+        //             console.error('Error fetching document:', error);
+        //         }
+        //     }
+        // };
+        const fetchDataLr = async () => {
+            try {
+                if (!currentDocument) {
+                    return null;
+                }
+                // Fetches an LR based on the current document
+                fetchLrByDocumentId(currentDocument.id);
+            } catch (error) {
+                console.error('Error fetching document:', error);
+            }
+        };
+        fetchDataLr();
+
+    }, [selected, currentDocument]);
+
+    if (!lr) {
+        return null;
+    }
 
     return (
         <React.Fragment>

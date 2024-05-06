@@ -38,7 +38,7 @@ export const SchoolProvider = ({ children, value }) => {
             if (data) { //data.decodedToken
                 setLr(data)
             } else {
-                //setIsLoggedIn(false)
+                setLr(null); //meaning it's empty 
             }
             console.log(data);
             // Handle response as needed
@@ -67,8 +67,8 @@ export const SchoolProvider = ({ children, value }) => {
     useEffect(() => {
         console.log("update document");
 
-        //fetchLrByDocumentId();
-    }, [month, year]); // Run effect only on mount and unmount*/
+        fetchLrByDocumentId(currentDocument.id);
+    }, [month, year, currentDocument]); // Run effect only on mount and unmount*/
 
     return (
         <SchoolContext.Provider value={{

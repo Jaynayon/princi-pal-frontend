@@ -75,24 +75,6 @@ function Schools(props) {
     const [currentDocument, setCurrentDocument] = useState(null);
     const { selected, currentSchool } = useNavigationContext();
 
-    // Fetches a Document based on the current school's id
-    const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
-        try {
-            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
-
-            if (getDocument) { //data.decodedToken
-                setCurrentDocument(getDocument);
-            } else {
-                setCurrentDocument(emptyDocument);
-            }
-            console.log(getDocument);
-            // Handle response as needed
-
-        } catch (error) {
-            console.error('Error validating token:', error);
-        }
-    };
-
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Get this school's lr and document");
@@ -117,10 +99,11 @@ function Schools(props) {
         //     }
         // };
 
+        // Fetches a Document based on the current school's id
         const fetchData = async () => {
             try {
                 const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                    "6634e7fc43d8096920d765ff",
+                    currentSchool.id,
                     year,
                     month
                 );
