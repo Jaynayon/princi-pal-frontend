@@ -119,7 +119,7 @@ function Schools(props) {
 
         setIsAdding(false); //reset state 
 
-    }, [selected, year, month, value, reload]);
+    }, [selected, year, month, value, reload, currentSchool]);
 
     if (!currentDocument) {
         return null;

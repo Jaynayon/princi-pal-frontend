@@ -72,7 +72,7 @@ export const SchoolProvider = ({ children, value }) => {
             amount: 0
         }
 
-        isAdding && (setLr(prevRows => [...prevRows, newLr]))
+        isAdding && (setLr(prevRows => [newLr, ...prevRows]))
 
     };
 

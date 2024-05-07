@@ -13,7 +13,7 @@ import { useNavigationContext } from '../../Context/NavigationProvider';
 
 function LRTable(props) {
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(4);
     const { lr, setLr } = useSchoolContext();
     const { fetchLrByDocumentId } = useSchoolContext();
     const { selected, currentDocument } = useNavigationContext();
