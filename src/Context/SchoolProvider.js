@@ -9,13 +9,15 @@ export const SchoolProvider = ({ children, value }) => {
     // Set initial state for month and year using current date
     const {
         currentMonth, currentYear,
+        currentSchool, setCurrentSchool,
         currentDocument, setCurrentDocument,
         month, setMonth,
         year, setYear,
         months, years,
         isAdding, setIsAdding,
         addOneRow, setAddOneRow,
-        fetchLrData
+        reload, setReload,
+        fetchDocumentData
     } = value;
     const [lr, setLr] = useState([]);
 
@@ -101,7 +103,8 @@ export const SchoolProvider = ({ children, value }) => {
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
-            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchLrData
+            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
+            currentSchool, setCurrentSchool, reload, setReload
         }}>
             {children}
         </SchoolContext.Provider>

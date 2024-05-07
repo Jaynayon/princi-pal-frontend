@@ -23,7 +23,7 @@ function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { displayFields, isAdding, fetchLrData } = useSchoolContext();
+    const { displayFields, isAdding, fetchDocumentData, setReload, reload } = useSchoolContext();
 
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -32,7 +32,7 @@ function RecordsRow(props) {
     useEffect(() => {
         console.log("123123123123123123123123123123123123123")
         displayFields(isAdding);
-    }, [isAdding])
+    }, [isAdding]);
 
     const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });
@@ -52,12 +52,12 @@ function RecordsRow(props) {
         setSelectedIndex(null);
     };
 
-    const handleDelete = (rowId) => {
+    const handleDelete = async (rowId) => {
         // Implement delete functionality here
         console.log("Delete button clicked for row at index:", selectedIndex);
         console.log("Delete lr id: " + rowId)
         deleteLrByid(rowId);
-        fetchLrData();
+        setReload(!reload);
         // Close the menu after delete
         handleMenuClose();
     };

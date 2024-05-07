@@ -64,18 +64,18 @@ function LRTable(props) {
     };
 
     useEffect(() => {
-        const fetchDataLr = async () => {
-            try {
-                if (!currentDocument) {
-                    return null;
-                }
-                // Fetches an LR based on the current document
-                fetchLrByDocumentId(currentDocument.id);
-            } catch (error) {
-                console.error('Error fetching document:', error);
-            }
-        };
-        fetchDataLr();
+        // const fetchDataLr = async () => {
+        //     try {
+        //         if (!currentDocument) {
+        //             return null;
+        //         }
+        //         // Fetches an LR based on the current document
+        //         fetchLrByDocumentId(currentDocument.id);
+        //     } catch (error) {
+        //         console.error('Error fetching document:', error);
+        //     }
+        // };
+        // fetchDataLr();
 
     }, [selected, currentDocument, fetchLrByDocumentId]);
 

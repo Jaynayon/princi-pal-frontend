@@ -21,9 +21,6 @@ import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 
-//import { useState } from 'react';
-//import { useEffect } from 'react';
-
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
 
@@ -88,11 +85,13 @@ function Schools(props) {
     const [currentDocument, setCurrentDocument] = useState(null);
     const { selected, currentSchool } = useNavigationContext();
 
+    const [reload, setReload] = useState(false);
+
     const exportDocumentOnClick = async () => {
         await RestService.getExcelFromLr(currentDocument.id);
     }
 
-    const fetchLrData = async () => {
+    const fetchDocumentData = async () => {
         try {
             const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
                 currentSchool.id,
@@ -116,17 +115,18 @@ function Schools(props) {
         // Fetches a Document based on the current school's id
 
 
-        if (value === 0) {
-            fetchLrData(); console.log("Fetch LR")
-        } else if (value === 1) {
-            console.log("Fetch RCD")
-        } else if (value === 2) {
-            console.log("Fetch JEV")
-        }
+        // if (value === 0) {
+        //     fetchLrData(); console.log("Fetch LR")
+        // } else if (value === 1) {
+        //     console.log("Fetch RCD")
+        // } else if (value === 2) {
+        //     console.log("Fetch JEV")
+        // }
+        fetchDocumentData();
 
         setIsAdding(false);
 
-    }, [selected, year, month, currentSchool, value]);
+    }, [selected, year, month, value, reload]);
 
     if (!currentDocument) {
         return null;
@@ -146,7 +146,8 @@ function Schools(props) {
                 months, years,
                 isAdding, setIsAdding,
                 addOneRow, setAddOneRow,
-                fetchLrData
+                reload, setReload,
+                fetchDocumentData
             }}
         >
             <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
