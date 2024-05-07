@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
+import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import RestService from "../Services/RestService"
 
 const SchoolContext = createContext();
@@ -44,7 +44,7 @@ export const SchoolProvider = ({ children, value }) => {
         }
     };
 
-    const updateLr = async () => {
+    const updateLr = useCallback(async () => {
         try {
             // Call RestService to fetch lr by document id
             const data = await RestService.getLrByDocumentId(currentDocument.id);
@@ -59,11 +59,9 @@ export const SchoolProvider = ({ children, value }) => {
         } catch (error) {
             console.error('Error fetching lr:', error);
         }
-    };
+    }, [currentDocument, setLr]);
 
-    console.log(addOneRow);
-
-    const displayFields = (isAdding) => {
+    const displayFields = useCallback((isAdding) => {
         let newLr = {
             id: 3,
             date: '',
@@ -74,13 +72,13 @@ export const SchoolProvider = ({ children, value }) => {
 
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
 
-    };
+    }, [])
 
     useEffect(() => {
-        console.log("update document");
+        console.log("update lr");
 
-        fetchLrByDocumentId(currentDocument.id);
-    }, [month, year, currentDocument]); // Run effect only on mount and unmount*/
+        updateLr();
+    }, [month, year, currentDocument, updateLr]); // Run effect only on mount and unmount*/
 
     return (
         <SchoolContext.Provider value={{

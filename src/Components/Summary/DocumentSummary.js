@@ -14,7 +14,7 @@ function DocumentSummary(props) {
         setIsAdding(true); // Set isAdding to true when button is clicked
     };
 
-    console.log(currentDocument);
+    //console.log(currentDocument);
 
     if (!currentDocument) {
         return null;

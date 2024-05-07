@@ -17,7 +17,8 @@ function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { displayFields, isAdding, currentDocument, setReload, reload, setLr, lr } = useSchoolContext();
+    const { displayFields, isAdding, currentDocument, setReload,
+        reload, setLr, lr, updateLr, fetchDocumentData } = useSchoolContext();
 
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -25,8 +26,10 @@ function RecordsRow(props) {
 
     useEffect(() => {
         console.log("123123123123123123123123123123123123123")
-        displayFields(isAdding);
-    }, [isAdding]);
+        if (isAdding === true) {
+            displayFields(isAdding);
+        }
+    }, [isAdding, displayFields]);
 
     const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });
@@ -52,7 +55,7 @@ function RecordsRow(props) {
         console.log("Delete button clicked for row at index:", selectedIndex);
         console.log("Delete lr id: " + rowId)
         deleteLrByid(rowId);
-        setReload(!reload);
+        //setReload(!reload);
         // Close the menu after delete
         handleMenuClose();
     };
@@ -65,6 +68,7 @@ function RecordsRow(props) {
             } else {
                 console.log("LR not deleted");
             }
+            setReload(!reload);
         } catch (error) {
             console.error('Error fetching document:', error);
         }
@@ -78,6 +82,7 @@ function RecordsRow(props) {
             } else {
                 console.log("LR not updated");
             }
+            setReload(!reload);
         } catch (error) {
             console.error('Error fetching document:', error);
         }
@@ -91,6 +96,7 @@ function RecordsRow(props) {
             } else {
                 console.log("LR not created");
             }
+            setReload(!reload);
         } catch (error) {
             console.error('Error fetching document:', error);
         }
@@ -101,6 +107,7 @@ function RecordsRow(props) {
     const handleNewRecordCancel = () => {
         console.log("cancel");
         if (lr.length > 1) {
+            //updateLr();
             setReload(!reload);
         } else {
             setLr([])
@@ -112,7 +119,8 @@ function RecordsRow(props) {
         console.log("accept");
         const rowIndex = rows.findIndex(row => row.id === rowId);
         createLrByDocumentId(currentDocument.id, rows[rowIndex]);
-        setReload(!reload);
+        //updateLr();
+        //setReload(!reload);
     }
 
     const handleInputChange = (colId, rowId, event) => {
@@ -143,7 +151,9 @@ function RecordsRow(props) {
             if (inputValue !== initialValue) {
                 console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
                 updateLrById(colId, rowId, inputValue);
-                setReload(!reload);
+                //fetchDocumentData();
+                //updateLr();
+                //setReload(!reload);
             }
             console.log('Value saved:', inputValue);
         }
