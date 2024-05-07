@@ -17,7 +17,7 @@ function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { displayFields, isAdding, fetchDocumentData, setReload, reload } = useSchoolContext();
+    const { displayFields, isAdding, currentDocument, setReload, reload, setLr, lr } = useSchoolContext();
 
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -32,6 +32,7 @@ function RecordsRow(props) {
         setEditingCell({ colId, rowId });
         setInitialValue(event.target.value); // Save the initial value of the clicked cell
         setInputValue(event.target.value); // Set input value to the current value
+        console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
 
@@ -82,12 +83,36 @@ function RecordsRow(props) {
         }
     }
 
-    const handleNewRecordCancel = () => {
-        console.log("cancel");
+    const createLrByDocumentId = async (doc_id, obj) => {
+        try {
+            const response = await RestService.createLrByDocId(doc_id, obj);
+            if (response) {
+                console.log(`LR is created`);
+            } else {
+                console.log("LR not created");
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
     }
 
-    const handleNewRecordAccept = () => {
+    //If lr length is greater than one; reload to fetch documents and lr createLrByDocId
+    //else, set lr to empty
+    const handleNewRecordCancel = () => {
+        console.log("cancel");
+        if (lr.length > 1) {
+            setReload(!reload);
+        } else {
+            setLr([])
+        }
+    }
+
+    //Find the index of the lr row where id == 3 and push that value to db
+    const handleNewRecordAccept = (rowId) => {
         console.log("accept");
+        const rowIndex = rows.findIndex(row => row.id === rowId);
+        createLrByDocumentId(currentDocument.id, rows[rowIndex]);
+        setReload(!reload);
     }
 
     const handleInputChange = (colId, rowId, event) => {
@@ -113,12 +138,15 @@ function RecordsRow(props) {
     const handleInputBlur = (colId, rowId) => {
         setEditingCell(null);
         // Perform any action when input is blurred (e.g., save the value)
-        if (inputValue !== initialValue) {
-            console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-            updateLrById(colId, rowId, inputValue);
-            setReload(!reload);
+        // Only applies if it's not the new row
+        if (rowId !== 3) {
+            if (inputValue !== initialValue) {
+                console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
+                updateLrById(colId, rowId, inputValue);
+                setReload(!reload);
+            }
+            console.log('Value saved:', inputValue);
         }
-        console.log('Value saved:', inputValue);
     };
 
     return (
@@ -176,7 +204,7 @@ function RecordsRow(props) {
                                         justifyContent: "center",
                                         width: 65
                                     }}>
-                                        <IconButton onClick={() => handleNewRecordAccept()}>
+                                        <IconButton onClick={() => handleNewRecordAccept(row.id)}>
                                             <CheckCircleIcon sx={{
                                                 color: 'green'
                                             }} />

@@ -259,6 +259,37 @@ const RestService = (() => {
         }
     };
 
+    const createLrByDocId = async (doc_id, obj) => {
+        try {
+            const response = await instance.post('http://localhost:4000/lr/create', {
+                documentsId: doc_id,
+                date: obj.date,
+                orsBursNo: obj.orsBursNo,
+                particulars: obj.particulars,
+                amount: obj.amount
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error creating user by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
 
     return {
         createUser,
@@ -271,7 +302,8 @@ const RestService = (() => {
         getDocumentBySchoolIdYearMonth,
         getExcelFromLr,
         deleteLrById,
-        updateLrById
+        updateLrById,
+        createLrByDocId
     };
 })();
 
