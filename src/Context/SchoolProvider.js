@@ -5,25 +5,21 @@ const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 
-let newLr = {
-    id: 3,
-    date: '',
-    orsBursNo: '',
-    particulars: '',
-    amount: 0
-}
-
 export const SchoolProvider = ({ children, value }) => {
     // Set initial state for month and year using current date
     const {
         currentMonth, currentYear,
+        currentSchool, setCurrentSchool,
         currentDocument, setCurrentDocument,
         month, setMonth,
         year, setYear,
-        months, years
+        months, years,
+        isAdding, setIsAdding,
+        addOneRow, setAddOneRow,
+        reload, setReload,
+        fetchDocumentData
     } = value;
     const [lr, setLr] = useState([]);
-    const [isAdding, setIsAdding] = useState(false);
 
     const monthIndex = months.indexOf(currentMonth);
     const yearIndex = years.indexOf(currentYear);
@@ -48,30 +44,37 @@ export const SchoolProvider = ({ children, value }) => {
         }
     };
 
-    const displayFields = () => {
-        if (!lr) {
-            setLr(prevRows => [...prevRows, newLr]);
-        } else {
-            setLr(prevRows => [...prevRows, newLr]);
+    const updateLr = async () => {
+        try {
+            // Call RestService to fetch lr by document id
+            const data = await RestService.getLrByDocumentId(currentDocument.id);
+            console.log("lr")
+            if (data) { //data.decodedToken
+                setLr(data)
+            } else {
+                setLr([]); //meaning it's empty 
+            }
+            console.log(data);
+            // Handle response as needed
+        } catch (error) {
+            console.error('Error fetching lr:', error);
         }
     };
 
-    // const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
-    //     try {
-    //         const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
+    console.log(addOneRow);
 
-    //         if (getDocument) { //data.decodedToken
-    //             setCurrentDocument(getDocument);
-    //         } else {
-    //             setCurrentDocument(getDocument);
-    //         }
-    //         console.log(getDocument);
-    //         // Handle response as needed
+    const displayFields = (isAdding) => {
+        let newLr = {
+            id: 3,
+            date: '',
+            orsBursNo: '',
+            particulars: '',
+            amount: 0
+        }
 
-    //     } catch (error) {
-    //         console.error('Error validating token:', error);
-    //     }
-    // };
+        isAdding && (setLr(prevRows => [newLr, ...prevRows]))
+
+    };
 
     useEffect(() => {
         console.log("update document");
@@ -83,7 +86,8 @@ export const SchoolProvider = ({ children, value }) => {
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
-            displayFields, isAdding, setIsAdding
+            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
+            currentSchool, setCurrentSchool, reload, setReload
         }}>
             {children}
         </SchoolContext.Provider>

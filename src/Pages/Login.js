@@ -108,6 +108,11 @@ const LoginPage = () => {
                         fullWidth
                         onClick={handleEmailFieldClick}
                         sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleLogin(); // Invoke handleLogin on Enter key press
+                            }
+                        }}
                     />
                     <Typography variant="subtitle1" sx={{ fontSize: "18px", fontWeight: "600", mt: 4 }}>Password</Typography> {/* Updated spacing */}
                     <TextField
@@ -130,6 +135,11 @@ const LoginPage = () => {
                         fullWidth
                         sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
                         onClick={handlePasswordFieldClick}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleLogin(); // Invoke handleLogin on Enter key press
+                            }
+                        }}
                     />
                     {loginError && <Typography color="error" sx={{ fontSize: "14px", mt: 2 }}>{loginError}</Typography>}
                     <Button onClick={handleLogin} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>

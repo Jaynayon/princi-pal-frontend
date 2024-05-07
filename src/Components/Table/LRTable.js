@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -10,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import RecordsRow from './RecordsRow';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import { useNavigationContext } from '../../Context/NavigationProvider';
-import RestService from '../../Services/RestService';
+// import RestService from '../../Services/RestService';
 
 function LRTable(props) {
     const [page, setPage] = useState(0);
@@ -64,31 +63,20 @@ function LRTable(props) {
     };
 
     useEffect(() => {
-        // unoptimized
         // const fetchDataLr = async () => {
-        //     if (selected && currentDocument && currentDocument.id) {
-        //         try {
-        //             // Fetches an LR based on the current document
-        //             fetchLrByDocumentId(currentDocument.id);
-        //         } catch (error) {
-        //             console.error('Error fetching document:', error);
+        //     try {
+        //         if (!currentDocument) {
+        //             return null;
         //         }
+        //         // Fetches an LR based on the current document
+        //         fetchLrByDocumentId(currentDocument.id);
+        //     } catch (error) {
+        //         console.error('Error fetching document:', error);
         //     }
         // };
-        const fetchDataLr = async () => {
-            try {
-                if (!currentDocument) {
-                    return null;
-                }
-                // Fetches an LR based on the current document
-                fetchLrByDocumentId(currentDocument.id);
-            } catch (error) {
-                console.error('Error fetching document:', error);
-            }
-        };
-        fetchDataLr();
+        // fetchDataLr();
 
-    }, [selected, currentDocument]);
+    }, [selected, currentDocument, fetchLrByDocumentId]);
 
     if (!lr) {
         return null;
