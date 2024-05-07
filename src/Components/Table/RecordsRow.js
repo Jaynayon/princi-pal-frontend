@@ -3,6 +3,10 @@ import { TableCell, TableRow } from "@mui/material";
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import Box from '@mui/material/Box';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import Button from '@mui/material/Button';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import MenuItem from '@mui/material/MenuItem';
+import { Menu } from '@mui/material';
 
 let newLr = {
     id: 3,
@@ -20,6 +24,10 @@ function RecordsRow(props) {
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
     const { displayFields, isAdding } = useSchoolContext();
 
+    const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
+    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
+
     useEffect(() => {
         console.log("123123123123123123123123123123123123123")
         displayFields(isAdding);
@@ -30,6 +38,25 @@ function RecordsRow(props) {
         setInitialValue(event.target.value); // Save the initial value of the clicked cell
         setInputValue(event.target.value); // Set input value to the current value
         console.log('row Id: ' + rowId + " and col Id: " + colId)
+    };
+
+    const handleDeleteOpen = (event, index) => {
+        setDeleteAnchorEl(event.currentTarget);
+        setSelectedIndex(index);
+    };
+
+    const handleMenuClose = () => {
+        setDropdownAnchorEl(null);
+        setDeleteAnchorEl(null);
+        setSelectedIndex(null);
+    };
+
+    const handleDelete = (rowId) => {
+        // Implement delete functionality here
+        console.log("Delete button clicked for row at index:", selectedIndex);
+        console.log("Delete lr id: " + rowId)
+        // Close the menu after delete
+        handleMenuClose();
     };
 
     const handleInputChange = (colId, rowId, event) => {
@@ -108,6 +135,32 @@ function RecordsRow(props) {
                                     </TableCell>
                                 );
                             })}
+                            <TableCell>
+                                {/* Conditional rendering based on row.id */}
+                                {row.id === 3 ? (
+                                    <div>testing</div>
+                                ) : (
+                                    <React.Fragment>
+                                        {/* Delete button */}
+                                        <Button
+                                            aria-controls={`menu-delete-${index}`}
+                                            aria-haspopup="true"
+                                            onClick={(event) => handleDeleteOpen(event, index)}
+                                        >
+                                            <MoreHorizIcon />
+                                        </Button>
+                                        {/* Delete menu */}
+                                        <Menu
+                                            id={`menu-delete-${index}`}
+                                            anchorEl={deleteAnchorEl}
+                                            open={Boolean(deleteAnchorEl && selectedIndex === index)}
+                                            onClose={handleMenuClose}
+                                        >
+                                            <MenuItem onClick={() => handleDelete(row.id)}>Delete</MenuItem>
+                                        </Menu>
+                                    </React.Fragment>
+                                )}
+                            </TableCell>
                         </TableRow>
                     );
                 })}
