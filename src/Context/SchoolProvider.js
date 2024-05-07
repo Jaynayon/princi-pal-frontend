@@ -14,7 +14,8 @@ export const SchoolProvider = ({ children, value }) => {
         year, setYear,
         months, years,
         isAdding, setIsAdding,
-        addOneRow, setAddOneRow
+        addOneRow, setAddOneRow,
+        fetchLrData
     } = value;
     const [lr, setLr] = useState([]);
 
@@ -29,6 +30,23 @@ export const SchoolProvider = ({ children, value }) => {
             // Call RestService to fetch lr by document id
             const data = await RestService.getLrByDocumentId(id);
 
+            if (data) { //data.decodedToken
+                setLr(data)
+            } else {
+                setLr([]); //meaning it's empty 
+            }
+            console.log(data);
+            // Handle response as needed
+        } catch (error) {
+            console.error('Error fetching lr:', error);
+        }
+    };
+
+    const updateLr = async () => {
+        try {
+            // Call RestService to fetch lr by document id
+            const data = await RestService.getLrByDocumentId(currentDocument.id);
+            console.log("lr")
             if (data) { //data.decodedToken
                 setLr(data)
             } else {
@@ -83,7 +101,7 @@ export const SchoolProvider = ({ children, value }) => {
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
-            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow
+            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchLrData
         }}>
             {children}
         </SchoolContext.Provider>

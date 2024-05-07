@@ -199,6 +199,29 @@ const RestService = (() => {
         }
     };
 
+    const deleteLrById = async (lr_id) => {
+        try {
+            const response = await instance.delete(`http://localhost:4000/lr/${lr_id}`)
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+
     return {
         createUser,
         authenticateUser,
@@ -208,7 +231,8 @@ const RestService = (() => {
         getUserById,
         getLrByDocumentId,
         getDocumentBySchoolIdYearMonth,
-        getExcelFromLr
+        getExcelFromLr,
+        deleteLrById
     };
 })();
 

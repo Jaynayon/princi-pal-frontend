@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import MenuItem from '@mui/material/MenuItem';
 import { Menu } from '@mui/material';
+import RestService from '../../Services/RestService';
 
 let newLr = {
     id: 3,
@@ -22,7 +23,7 @@ function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { displayFields, isAdding } = useSchoolContext();
+    const { displayFields, isAdding, fetchLrData } = useSchoolContext();
 
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -55,8 +56,23 @@ function RecordsRow(props) {
         // Implement delete functionality here
         console.log("Delete button clicked for row at index:", selectedIndex);
         console.log("Delete lr id: " + rowId)
+        deleteLrByid(rowId);
+        fetchLrData();
         // Close the menu after delete
         handleMenuClose();
+    };
+
+    const deleteLrByid = async (rowId) => {
+        try {
+            const response = await RestService.deleteLrById(rowId);
+            if (response) {
+                console.log(`LR with id: ${rowId} is deleted`);
+            } else {
+                console.log("LR not deleted");
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
     };
 
     const handleInputChange = (colId, rowId, event) => {

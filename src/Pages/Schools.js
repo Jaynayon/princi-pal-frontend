@@ -92,27 +92,29 @@ function Schools(props) {
         await RestService.getExcelFromLr(currentDocument.id);
     }
 
+    const fetchLrData = async () => {
+        try {
+            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
+                currentSchool.id,
+                year,
+                month
+            );
+
+            if (getDocument) {
+                setCurrentDocument(getDocument);
+            } else {
+                setCurrentDocument(emptyDocument);
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    };
+
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Get this school's lr and document: " + currentSchool?.name);
         // Fetches a Document based on the current school's id
-        const fetchLrData = async () => {
-            try {
-                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                    currentSchool.id,
-                    year,
-                    month
-                );
 
-                if (getDocument) {
-                    setCurrentDocument(getDocument);
-                } else {
-                    setCurrentDocument(emptyDocument);
-                }
-            } catch (error) {
-                console.error('Error fetching document:', error);
-            }
-        };
 
         if (value === 0) {
             fetchLrData(); console.log("Fetch LR")
@@ -143,7 +145,8 @@ function Schools(props) {
                 year, setYear,
                 months, years,
                 isAdding, setIsAdding,
-                addOneRow, setAddOneRow
+                addOneRow, setAddOneRow,
+                fetchLrData
             }}
         >
             <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
