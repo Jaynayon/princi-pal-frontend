@@ -23,9 +23,17 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            });
+            })
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error validating user:', error);
+                    // Handle errors here (e.g., display error message)
+                });
 
-            console.log(response.data);
+            console.log(response);
 
             return true;
         } catch (error) {
@@ -47,9 +55,17 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            });
+            })
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error validating user:', error);
+                    // Handle errors here (e.g., display error message)
+                });
 
-            isAuthenticated = response.data.isMatch;
+            isAuthenticated = response.isMatch;
             return isAuthenticated;
         } catch (error) {
             console.error('Error authenticating user:', error);
@@ -99,8 +115,16 @@ const RestService = (() => {
     const getLrByDocumentId = async (doc_id) => {
         try {
             const response = await instance.get(`http://localhost:4000/lr/documents/${doc_id}`)
-            if (response.data) {
-                return response.data;
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response) {
+                return response;
             }
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
@@ -150,6 +174,98 @@ const RestService = (() => {
         }
     };
 
+    const deleteLrById = async (lr_id) => {
+        try {
+            const response = await instance.delete(`http://localhost:4000/lr/${lr_id}`)
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const updateLrById = async (colId, rowId, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (colId === "amount") {
+            obj = { amount: value };
+        } else if (colId === "particulars") {
+            obj = { particulars: value };
+        } else if (colId === "orsBursNo") {
+            obj = { orsBursNo: value };
+        } else if (colId === "date") {
+            obj = { date: value };
+        }
+
+        try {
+            const response = await instance.patch(`http://localhost:4000/lr/${rowId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const createLrByDocId = async (doc_id, obj) => {
+        try {
+            const response = await instance.post('http://localhost:4000/lr/create', {
+                documentsId: doc_id,
+                date: obj.date,
+                orsBursNo: obj.orsBursNo,
+                particulars: obj.particulars,
+                amount: obj.amount
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error creating user by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+
     return {
         createUser,
         authenticateUser,
@@ -159,7 +275,10 @@ const RestService = (() => {
         getUserById,
         getLrByDocumentId,
         getDocumentBySchoolIdYearMonth,
-        getExcelFromLr
+        getExcelFromLr,
+        deleteLrById,
+        updateLrById,
+        createLrByDocId
     };
 })();
 

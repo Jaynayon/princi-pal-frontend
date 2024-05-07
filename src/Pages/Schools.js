@@ -1,27 +1,20 @@
 import '../App.css'
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import IconButton from "@mui/material/IconButton";
-import AddBoxIcon from '@mui/icons-material/AddBox';
 import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
 import LRTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
-import BudgetSummary from '../Components/Summary/BudgetSummary';
 import { SchoolProvider } from '../Context/SchoolProvider';
-import { useSchoolContext } from '../Context/SchoolProvider';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
-
-//import { useState } from 'react';
-//import { useEffect } from 'react';
+import DocumentSummary from '../Components/Summary/DocumentSummary';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -61,91 +54,72 @@ const emptyDocument = {
     cashAdvance: 0
 }
 
-function Schools(props) {
-    // Initialize current date to get current month and year
-    const currentDate = new Date();
-    const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
-    const currentYear = currentDate.getFullYear().toString(); // Get full year as string
+// Initialize current date to get current month and year
+const currentDate = new Date();
+const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
+const currentYear = currentDate.getFullYear().toString(); // Get full year as string
 
+const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const years = [
+    '2021', '2022', '2023', '2024'
+];
+
+function Schools(props) {
     // Set initial state for month and year using current date
     const [month, setMonth] = useState(currentMonth);
     const [year, setYear] = useState(currentYear);
+
+    const [isAdding, setIsAdding] = useState(false);
+    const [addOneRow, setAddOneRow] = useState(false);
 
     const [value, setValue] = React.useState(0);
     const [currentDocument, setCurrentDocument] = useState(null);
     const { selected, currentSchool } = useNavigationContext();
 
+    const [reload, setReload] = useState(false);
+
     const exportDocumentOnClick = async () => {
         await RestService.getExcelFromLr(currentDocument.id);
     }
 
+    const fetchDocumentData = async () => {
+        try {
+            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
+                currentSchool.id,
+                year,
+                month
+            );
+
+            if (getDocument) {
+                setCurrentDocument(getDocument);
+            } else {
+                setCurrentDocument(emptyDocument);
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    };
 
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
-        console.log("Get this school's lr and document");
-        // wala pay proper optimization sa routes
-        // const fetchData = async () => {
-        //     if (selected && currentSchool && currentSchool.name) {
-        //         try {
-        //             const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-        //                 "6634e7fc43d8096920d765ff",
-        //                 year,
-        //                 month
-        //             );
+        console.log("Get this school's lr and document: " + currentSchool?.name);
 
-        //             if (getDocument) {
-        //                 setCurrentDocument(getDocument);
-        //             } else {
-        //                 setCurrentDocument(emptyDocument);
-        //             }
-        //         } catch (error) {
-        //             console.error('Error fetching document:', error);
-        //         }
-        //     }
-        // };
+        // if (value === 0) {
+        //     fetchLrData(); console.log("Fetch LR")
+        // } else if (value === 1) {
+        //     console.log("Fetch RCD")
+        // } else if (value === 2) {
+        //     console.log("Fetch JEV")
+        // }
+        fetchDocumentData();
 
-        // Fetches a Document based on the current school's id
-        const fetchData = async () => {
-            try {
-                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                    currentSchool.id,
-                    year,
-                    month
-                );
+        setIsAdding(false); //reset state 
 
-                if (getDocument) {
-                    setCurrentDocument(getDocument);
-                } else {
-                    setCurrentDocument(emptyDocument);
-                }
-            } catch (error) {
-                console.error('Error fetching document:', error);
-            }
-        };
-
-        fetchData();
-
-        const handlePageRefresh = () => {
-            const isLoggedIn = !!document.cookie.includes('jwt='); // Check if JWT token exists in cookies
-            if (isLoggedIn) {
-                // Redirect to /dashboard if not logged in
-                window.location.href = "/dashboard";
-            } else {
-                window.location.replace("/login");
-            }
-        };
-
-        // Add event listener to handle page refresh
-        window.addEventListener('beforeunload', handlePageRefresh);
-
-        return () => {
-            // Clean up event listener on component unmount
-            window.removeEventListener('beforeunload', handlePageRefresh);
-        };
-
-    }, [selected, year, month, currentSchool]);
-
-    console.log("test")
+    }, [selected, year, month, value, reload, currentSchool]);
 
     if (!currentDocument) {
         return null;
@@ -156,7 +130,19 @@ function Schools(props) {
     };
 
     return (
-        <SchoolProvider value={{ currentDocument, setCurrentDocument, month, setMonth, year, setYear }}>
+        <SchoolProvider
+            value={{
+                currentMonth, currentYear,
+                currentDocument, setCurrentDocument,
+                month, setMonth,
+                year, setYear,
+                months, years,
+                isAdding, setIsAdding,
+                addOneRow, setAddOneRow,
+                reload, setReload,
+                fetchDocumentData
+            }}
+        >
             <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
                 <Grid container spacing={2} sx={{ position: 'relative' }}> {/*relative to allow date component to float*/}
                     <Grid item xs={12} md={12} lg={12}>
@@ -197,20 +183,7 @@ function Schools(props) {
                                                 //backgroundColor: 'green'
                                             }}
                                             >
-                                                <IconButton sx={{ alignSelf: "center" }}>
-                                                    <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
-                                                </IconButton>
-                                                <Grid container pb={1} >
-                                                    <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary total title="Total" amount={currentDocument?.budget || 0} />
-                                                    </Grid>
-                                                    <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary title="Budget this month" amount={currentDocument?.cashAdvance || 0} />
-                                                    </Grid>
-                                                    <Grid item xs={12} md={4} lg={4}>
-                                                        <BudgetSummary title="Balance" amount={(currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)} />
-                                                    </Grid>
-                                                </Grid>
+                                                <DocumentSummary />
                                             </Box>
                                         </Grid>
                                         <Grid item xs={12} sm={4} md={4} lg={6}>

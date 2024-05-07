@@ -13,7 +13,6 @@ export const NavigationProvider = ({ children }) => {
     const [mobileMode, setMobileMode] = useState(false); // State to track position
     const [currentUser, setCurrentUser] = useState(null);
     const [currentSchool, setCurrentSchool] = useState(null);
-    const [currentDocument, setCurrentDocument] = useState(null);
     const [userId, setUserId] = useState(null)
     const prevOpenRef = useRef(false);
 
@@ -23,8 +22,9 @@ export const NavigationProvider = ({ children }) => {
             return !prevOpen;
         });
     };
+
     //stuff
-    console.log(currentSchool);
+    console.log(currentUser);
 
     const updateMobileMode = () => {
         const { innerWidth } = window;
@@ -38,25 +38,8 @@ export const NavigationProvider = ({ children }) => {
 
     console.log(userId);
 
-    const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
-        try {
-            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
-
-            if (getDocument) { //data.decodedToken
-                setCurrentDocument(getDocument);
-            } else {
-                //setIsLoggedIn(false)
-            }
-            console.log(getDocument);
-            // Handle response as needed
-
-        } catch (error) {
-            console.error('Error validating token:', error);
-        }
-    };
-
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchUser = async () => {
             try {
                 const jwtCookie = document.cookie
                     .split('; ')
@@ -72,8 +55,18 @@ export const NavigationProvider = ({ children }) => {
                     if (data) { //data.decodedToken
                         setUserId(data)
                         if (!currentUser) {
-                            setCurrentUser(await RestService.getUserById(data.id))
-
+                            const user = await RestService.getUserById(data.id);
+                            setCurrentUser({
+                                ...user,
+                                schools: [{
+                                    id: "6634e7fc43d8096920d765ff",
+                                    name: 'Jaclupan ES'
+                                }, {
+                                    id: "66354cb59de52335e7ad78ab",
+                                    name: 'Talisay ES'
+                                }
+                                ]
+                            })
                         }
                     } else {
                         //setIsLoggedIn(false)
@@ -88,8 +81,8 @@ export const NavigationProvider = ({ children }) => {
                 console.error('Error validating token:', error);
             }
         };
-        fetchData();
-        //fetchDocumentBySchoolIdYearMonth("6634e7fc43d8096920d765ff", 2024, "May");
+
+        fetchUser();
 
         // Call the function to set initial mobileMode state
         updateMobileMode();
@@ -111,8 +104,7 @@ export const NavigationProvider = ({ children }) => {
     return (
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
-            navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
-            fetchDocumentBySchoolIdYearMonth, currentDocument, setCurrentDocument
+            navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool
         }}>
             {children}
         </NavigationContext.Provider>

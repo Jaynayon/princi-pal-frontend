@@ -18,7 +18,6 @@ import Grid from "@mui/material/Grid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import SearchIcon from "@mui/icons-material/Search";
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import Divider from '@mui/material/Divider';
