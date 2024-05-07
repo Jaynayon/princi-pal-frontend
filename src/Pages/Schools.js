@@ -1,22 +1,17 @@
 import '../App.css'
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import IconButton from "@mui/material/IconButton";
-import AddBoxIcon from '@mui/icons-material/AddBox';
 import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
 import LRTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
-import BudgetSummary from '../Components/Summary/BudgetSummary';
 import { SchoolProvider } from '../Context/SchoolProvider';
-import { useSchoolContext } from '../Context/SchoolProvider';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
@@ -122,7 +117,7 @@ function Schools(props) {
         // }
         fetchDocumentData();
 
-        setIsAdding(false);
+        setIsAdding(false); //reset state 
 
     }, [selected, year, month, value, reload]);
 

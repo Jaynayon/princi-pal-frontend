@@ -5,20 +5,6 @@ const NavigationContext = createContext();
 
 export const useNavigationContext = () => useContext(NavigationContext);
 
-//Static object testing
-const currentUser = {
-    name: 'Jay Nayon',
-    email: 'jay.nayonjr@cit.edu',
-    schools: [{
-        id: "6634e7fc43d8096920d765ff",
-        name: 'Jaclupan ES'
-    }, {
-        id: "66354cb59de52335e7ad78ab",
-        name: 'Talisay ES'
-    }
-    ]
-}
-
 export const NavigationProvider = ({ children }) => {
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
     const [selected, setSelected] = useState('Dashboard');
