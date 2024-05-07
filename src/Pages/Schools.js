@@ -81,6 +81,9 @@ function Schools(props) {
     const [month, setMonth] = useState(currentMonth);
     const [year, setYear] = useState(currentYear);
 
+    const [isAdding, setIsAdding] = useState(false);
+    const [addOneRow, setAddOneRow] = useState(false);
+
     const [value, setValue] = React.useState(0);
     const [currentDocument, setCurrentDocument] = useState(null);
     const { selected, currentSchool } = useNavigationContext();
@@ -89,11 +92,9 @@ function Schools(props) {
         await RestService.getExcelFromLr(currentDocument.id);
     }
 
-
-
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
-        console.log("Get this school's lr and document");
+        console.log("Get this school's lr and document: " + currentSchool?.name);
         // Fetches a Document based on the current school's id
         const fetchLrData = async () => {
             try {
@@ -114,12 +115,14 @@ function Schools(props) {
         };
 
         if (value === 0) {
-            fetchLrData();
+            fetchLrData(); console.log("Fetch LR")
         } else if (value === 1) {
             console.log("Fetch RCD")
         } else if (value === 2) {
             console.log("Fetch JEV")
         }
+
+        setIsAdding(false);
 
     }, [selected, year, month, currentSchool, value]);
 
@@ -138,7 +141,9 @@ function Schools(props) {
                 currentDocument, setCurrentDocument,
                 month, setMonth,
                 year, setYear,
-                months, years
+                months, years,
+                isAdding, setIsAdding,
+                addOneRow, setAddOneRow
             }}
         >
             <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>

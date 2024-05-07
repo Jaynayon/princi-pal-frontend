@@ -18,16 +18,11 @@ function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { displayFields, isAdding, setIsAdding } = useSchoolContext();
-    const { selected } = useNavigationContext();
+    const { displayFields, isAdding } = useSchoolContext();
 
     useEffect(() => {
-        if (isAdding) {
-            displayFields();
-        }
-        if (selected) {
-            setIsAdding(false);
-        }
+        console.log("123123123123123123123123123123123123123")
+        displayFields(isAdding);
     }, [isAdding])
 
     const handleCellClick = (colId, rowId, event) => {

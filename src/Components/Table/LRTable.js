@@ -64,17 +64,6 @@ function LRTable(props) {
     };
 
     useEffect(() => {
-        // unoptimized
-        // const fetchDataLr = async () => {
-        //     if (selected && currentDocument && currentDocument.id) {
-        //         try {
-        //             // Fetches an LR based on the current document
-        //             fetchLrByDocumentId(currentDocument.id);
-        //         } catch (error) {
-        //             console.error('Error fetching document:', error);
-        //         }
-        //     }
-        // };
         const fetchDataLr = async () => {
             try {
                 if (!currentDocument) {
@@ -88,7 +77,7 @@ function LRTable(props) {
         };
         fetchDataLr();
 
-    }, [selected, currentDocument]);
+    }, [selected, currentDocument, fetchLrByDocumentId]);
 
     if (!lr) {
         return null;

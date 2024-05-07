@@ -5,14 +5,6 @@ const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 
-let newLr = {
-    id: 3,
-    date: '',
-    orsBursNo: '',
-    particulars: '',
-    amount: 0
-}
-
 export const SchoolProvider = ({ children, value }) => {
     // Set initial state for month and year using current date
     const {
@@ -20,10 +12,11 @@ export const SchoolProvider = ({ children, value }) => {
         currentDocument, setCurrentDocument,
         month, setMonth,
         year, setYear,
-        months, years
+        months, years,
+        isAdding, setIsAdding,
+        addOneRow, setAddOneRow
     } = value;
     const [lr, setLr] = useState([]);
-    const [isAdding, setIsAdding] = useState(false);
 
     const monthIndex = months.indexOf(currentMonth);
     const yearIndex = years.indexOf(currentYear);
@@ -48,12 +41,19 @@ export const SchoolProvider = ({ children, value }) => {
         }
     };
 
-    const displayFields = () => {
-        if (!lr) {
-            setLr(prevRows => [...prevRows, newLr]);
-        } else {
-            setLr(prevRows => [...prevRows, newLr]);
+    console.log(addOneRow);
+
+    const displayFields = (isAdding) => {
+        let newLr = {
+            id: 3,
+            date: '',
+            orsBursNo: '',
+            particulars: '',
+            amount: 0
         }
+
+        isAdding && (setLr(prevRows => [...prevRows, newLr]))
+
     };
 
     // const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
@@ -83,7 +83,7 @@ export const SchoolProvider = ({ children, value }) => {
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
-            displayFields, isAdding, setIsAdding
+            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow
         }}>
             {children}
         </SchoolContext.Provider>
