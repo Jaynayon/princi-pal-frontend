@@ -221,6 +221,44 @@ const RestService = (() => {
         }
     };
 
+    const updateLrById = async (colId, rowId, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (colId === "amount") {
+            obj = { amount: value };
+        } else if (colId === "particulars") {
+            obj = { particulars: value };
+        } else if (colId === "orsBursNo") {
+            obj = { orsBursNo: value };
+        } else if (colId === "date") {
+            obj = { date: value };
+        }
+
+        try {
+            const response = await instance.patch(`http://localhost:4000/lr/${rowId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
 
     return {
         createUser,
@@ -232,7 +270,8 @@ const RestService = (() => {
         getLrByDocumentId,
         getDocumentBySchoolIdYearMonth,
         getExcelFromLr,
-        deleteLrById
+        deleteLrById,
+        updateLrById
     };
 })();
 

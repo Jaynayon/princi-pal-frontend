@@ -9,15 +9,6 @@ import MenuItem from '@mui/material/MenuItem';
 import { Menu } from '@mui/material';
 import RestService from '../../Services/RestService';
 
-let newLr = {
-    id: 3,
-    date: '',
-    orsBursNo: '',
-    particulars: '',
-    amount: 0
-}
-
-
 function RecordsRow(props) {
     const { rows, setRows, page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
@@ -75,6 +66,19 @@ function RecordsRow(props) {
         }
     };
 
+    const updateLrById = async (colId, rowId, value) => {
+        try {
+            const response = await RestService.updateLrById(colId, rowId, value);
+            if (response) {
+                console.log(`LR with id: ${rowId} is updated`);
+            } else {
+                console.log("LR not updated");
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }
+
     const handleInputChange = (colId, rowId, event) => {
         // Find the index of the object with matching id
         const rowIndex = rows.findIndex(row => row.id === rowId);
@@ -95,12 +99,13 @@ function RecordsRow(props) {
         }
     };
 
-    const handleInputBlur = () => {
+    const handleInputBlur = (colId, rowId) => {
         setEditingCell(null);
         // Perform any action when input is blurred (e.g., save the value)
         if (inputValue !== initialValue) {
-            console.log("Wow there is changes");
-            //fetchLrByDocumentId(); dapat update
+            console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
+            updateLrById(colId, rowId, inputValue);
+            setReload(!reload);
         }
         console.log('Value saved:', inputValue);
     };
@@ -145,7 +150,7 @@ function RecordsRow(props) {
                                                 onChange={(event) =>
                                                     handleInputChange(column.id, row.id, event)
                                                 }
-                                                onBlur={handleInputBlur}
+                                                onBlur={() => handleInputBlur(column.id, row.id)}
                                             />
                                         </Box>
                                     </TableCell>
