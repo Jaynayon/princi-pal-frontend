@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -100,19 +100,27 @@ const RegistrationPage = () => {
     console.log(formData.position)
   };
 
-  const handleExistingEmail = async (event) => {
+  const handleExistingEmail = async () => {
     try {
-      const exists = await RestService.validateUsernameEmail(event.target.value)
-      exists ? setEmailError(true) : setEmailError(false)
+      const exists = await RestService.validateEmail(formData.email);
+      setEmailError(exists);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
+  
+  // useEffect hook to handle existing email validation
+  useEffect(() => {
+    if (formData.email !== '') {
+      handleExistingEmail();
+    }
+  }, [formData.email]);
+  
 
   const handleExistingUsername = async (event) => {
     try {
       const exists = await RestService.validateUsernameEmail(event.target.value)
-      exists ? setUsernameError(true) : setUsernameError(false)
+      setUsernameError(exists);
     } catch (error) {
       console.log(error)
     }
@@ -149,7 +157,7 @@ const RegistrationPage = () => {
             position: ''
           });
           // Redirect to login page or display a success message
-          window.location.href = "/dashboard"; // Change this to the correct URL if needed
+          window.location.href = "/login"; // Change this to the correct URL if needed
         } else {
           setRegistrationError("Registration failed");
         }
@@ -164,30 +172,39 @@ const RegistrationPage = () => {
 
   function getErrorCondition(item) {
     const { key } = item;
-
+  
     if (key === 'email') {
-      return emailError ? "Existing or invalid email address" : false;
+      if (emailError && !validateEmail(formData.email)) {
+        return "Invalid email address";
+      } else if (emailError) {
+        return "Existing email address";
+      }
     }
-
+  
     if (key === 'username') {
-      return usernameError ? "Existing or invalid username" : false;
+      if (usernameError) {
+        return "Existing username";
+      } else if (formData.username && !/^[a-zA-Z0-9]+$/.test(formData.username)) {
+        return "Invalid username format";
+      }
     }
-
+  
     if (key === 'password') {
       return passwordError ? "Password must contain at least 8 characters and one special character" : false;
     }
-
+  
     if (key === 'confirmPassword') {
       return confirmPasswordError ? "Passwords don't match" : false;
     }
-
+  
     if (!formValid && !formData[key]) {
       return "This field is required";
     }
-
+  
     return false;
   }
-
+  
+  
   return (
     <Container
       maxWidth={false}
