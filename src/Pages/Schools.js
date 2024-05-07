@@ -112,8 +112,6 @@ function Schools(props) {
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Get this school's lr and document: " + currentSchool?.name);
-        // Fetches a Document based on the current school's id
-
 
         // if (value === 0) {
         //     fetchLrData(); console.log("Fetch LR")

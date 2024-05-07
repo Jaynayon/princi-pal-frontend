@@ -76,23 +76,6 @@ export const SchoolProvider = ({ children, value }) => {
 
     };
 
-    // const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
-    //     try {
-    //         const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
-
-    //         if (getDocument) { //data.decodedToken
-    //             setCurrentDocument(getDocument);
-    //         } else {
-    //             setCurrentDocument(getDocument);
-    //         }
-    //         console.log(getDocument);
-    //         // Handle response as needed
-
-    //     } catch (error) {
-    //         console.error('Error validating token:', error);
-    //     }
-    // };
-
     useEffect(() => {
         console.log("update document");
 
