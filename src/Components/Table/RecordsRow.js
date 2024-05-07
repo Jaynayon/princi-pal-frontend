@@ -8,6 +8,9 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import MenuItem from '@mui/material/MenuItem';
 import { Menu } from '@mui/material';
 import RestService from '../../Services/RestService';
+import IconButton from "@mui/material/IconButton";
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 function RecordsRow(props) {
     const { rows, setRows, page, rowsPerPage } = props;
@@ -77,6 +80,14 @@ function RecordsRow(props) {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
+    }
+
+    const handleNewRecordCancel = () => {
+        console.log("cancel");
+    }
+
+    const handleNewRecordAccept = () => {
+        console.log("accept");
     }
 
     const handleInputChange = (colId, rowId, event) => {
@@ -159,7 +170,23 @@ function RecordsRow(props) {
                             <TableCell>
                                 {/* Conditional rendering based on row.id */}
                                 {row.id === 3 ? (
-                                    <div>testing</div>
+                                    <Box sx={{
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        width: 65
+                                    }}>
+                                        <IconButton onClick={() => handleNewRecordAccept()}>
+                                            <CheckCircleIcon sx={{
+                                                color: 'green'
+                                            }} />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleNewRecordCancel()}>
+                                            <CancelIcon sx={{
+                                                color: 'red'
+                                            }} />
+                                        </IconButton>
+                                    </Box>
                                 ) : (
                                     <React.Fragment>
                                         {/* Delete button */}
