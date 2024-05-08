@@ -1,5 +1,5 @@
 // React imports
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // Material-UI imports
 import Box from '@mui/material/Box';
@@ -26,7 +26,12 @@ export default function DisplaySchools() {
     //const [currentUser, setCurrentUser] = useState(null)
     const [openSub, setOpenSub] = useState(false);
 
+    // const initializeSchool = useCallback(() => {
+    //     currentUser && setCurrentSchool(currentUser.schools[0]);
+    // }, [currentUser, setCurrentSchool])
+
     useEffect(() => {
+        // initializeSchool();
         if (!open) {
             setOpenSub(false);
         }
