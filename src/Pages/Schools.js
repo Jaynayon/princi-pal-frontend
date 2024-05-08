@@ -1,5 +1,5 @@
 import '../App.css'
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -86,40 +86,35 @@ function Schools(props) {
         await RestService.getExcelFromLr(currentDocument.id);
     }
 
-    const fetchDocumentData = async () => {
+    const fetchDocumentData = useCallback(async () => {
         try {
-            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                currentSchool.id,
-                year,
-                month
-            );
+            if (currentSchool) {
+                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
+                    currentSchool?.id,
+                    year,
+                    month
+                );
 
-            if (getDocument) {
-                setCurrentDocument(getDocument);
-            } else {
-                setCurrentDocument(emptyDocument);
+                if (getDocument) {
+                    setCurrentDocument(getDocument);
+                } else {
+                    setCurrentDocument(emptyDocument);
+                }
             }
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    };
+    }, [currentSchool, setCurrentDocument, year, month]);
+
+    console.log("Schools render")
 
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
-        console.log("Get this school's lr and document: " + currentSchool?.name);
+        console.log("Schools useEffect: document updated");
 
-        // if (value === 0) {
-        //     fetchLrData(); console.log("Fetch LR")
-        // } else if (value === 1) {
-        //     console.log("Fetch RCD")
-        // } else if (value === 2) {
-        //     console.log("Fetch JEV")
-        // }
         fetchDocumentData();
-
-        setIsAdding(false); //reset state 
-
-    }, [selected, year, month, value, reload, currentSchool]);
+        setIsAdding(false); //reset state to allow displayFields again
+    }, [selected, year, month, value, reload, fetchDocumentData]);
 
     if (!currentDocument) {
         return null;
