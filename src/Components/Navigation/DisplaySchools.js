@@ -1,5 +1,5 @@
 // React imports
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // Material-UI imports
 import Box from '@mui/material/Box';
@@ -17,30 +17,39 @@ import { Link } from 'react-router-dom';
 // Custom imports
 import { VerticalLine } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
-
-//Static object testing
-const User = {
-    name: 'Jay Nayon',
-    email: 'jay.nayonjr@cit.edu',
-    schools: [
-        'Jaclupan ES', 'Talisay ES'
-    ]
-}
+import { useSchoolContext } from '../../Context/SchoolProvider';
+//import RestService from '../../Services/RestService';
 
 export default function DisplaySchools() {
     const theme = useTheme();
-    const { open, toggleDrawer, prevOpen, selected, setSelected } = useNavigationContext();
+    const { open, toggleDrawer, prevOpen, selected, setSelected, currentSchool, setCurrentSchool, currentUser } = useNavigationContext();
+    //const [currentUser, setCurrentUser] = useState(null)
     const [openSub, setOpenSub] = useState(false);
 
+    // const initializeSchool = useCallback(() => {
+    //     currentUser && setCurrentSchool(currentUser.schools[0]);
+    // }, [currentUser, setCurrentSchool])
+
     useEffect(() => {
+        // initializeSchool();
         if (!open) {
-            setOpenSub(false)
+            setOpenSub(false);
         }
-    }, [open])
+    }, [open]);
+
+    const handleSelectedSingle = () => {
+        setSelected(currentUser.schools[0].name)
+        setCurrentSchool(currentUser.schools[0]);
+    }
+
+    const handleSelectedMultiple = (item) => {
+        setSelected(item.name);
+        setCurrentSchool(item);
+    }
 
     const handleClick = () => {
         setOpenSub(!openSub);
-        if (prevOpen && User.schools.length > 1) { //This feature only applies to users with multiple schools
+        if (prevOpen && currentUser.schools.length > 1) { //This feature only applies to users with multiple schools
             toggleDrawer(true)
         }
     };
@@ -65,16 +74,18 @@ export default function DisplaySchools() {
         },
     }
 
+    console.log(currentUser);
+
     return (
-        User.schools.length > 0 ? //Check if user has schools assigned
-            (User.schools.length > 1 ? //Check if user has multiple schools
+        currentUser && currentUser.schools.length > 0 ? //Check if user has schools assigned
+            (currentUser.schools.length > 1 ? //Check if user has multiple schools
                 <React.Fragment>
                     <ListItemButton
                         sx={theme.navStyle.button}
                         onClick={handleClick}
-                        selected={User.schools.length > 1 ?
+                        selected={currentUser.schools.length > 1 ?
                             !open ? selectSchool() : false
-                            : selected === User.schools[0]
+                            : selected === currentUser.schools[0].name
                         } //button is only selected if the drawer is closed
                     >
                         <ListItemIcon
@@ -113,21 +124,21 @@ export default function DisplaySchools() {
                                 color={theme.navStyle.color}
                             />
                             <List component="div" disablePadding>
-                                {User.schools.map((item, index) => {
+                                {currentUser.schools.map((item, index) => {
                                     return (
                                         <ListItemButton
                                             key={index}
                                             component={Link}
                                             to={'/schools'}
-                                            selected={selected === item}
-                                            onClick={() => { setSelected(item) }}
+                                            selected={selected === item.name}
+                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(item)}
                                             sx={theme.navStyle.button}
                                         >
                                             <ListItemText
-                                                primary={item}
+                                                primary={item.name}
                                                 primaryTypographyProps={{
                                                     ...styles.text,
-                                                    ...(selected === item
+                                                    ...(selected === item.name
                                                         ? { color: theme.navStyle.bold, fontWeight: 'bold' }
                                                         : { color: theme.navStyle.color }
                                                     )
@@ -145,8 +156,8 @@ export default function DisplaySchools() {
                         component={Link}
                         to={'/schools'}
                         sx={theme.navStyle.button}
-                        selected={selected === User.schools[0]}
-                        onClick={() => { setSelected(User.schools[0]) }}
+                        selected={selected === currentUser.schools[0].name}
+                        onClick={/*() => { setSelected(currentUser.schools[0].name) }*/() => handleSelectedSingle()}
                     >
                         <ListItemIcon
                             sx={{
@@ -156,14 +167,14 @@ export default function DisplaySchools() {
                         >
                             <SchoolIcon sx={{
                                 ...styles.icon,
-                                color: selected === User.schools[0] ? theme.navStyle.bold : theme.navStyle.color
+                                color: selected === currentUser.schools[0].name ? theme.navStyle.bold : theme.navStyle.color
                             }}
                             />
                         </ListItemIcon>
                         <ListItemText
                             primary={"School"}
                             primaryTypographyProps={
-                                selected === User.schools[0]
+                                selected === currentUser.schools[0].name
                                     ? { color: theme.navStyle.bold, fontWeight: 'bold' }
                                     : { color: theme.navStyle.color }
                             }

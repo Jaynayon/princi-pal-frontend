@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { DateFilter } from '../Components/Filters/Filters';
+import { DateRangePicker } from 'react-date-range';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -10,6 +12,12 @@ import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
+import { DateFilter } from '../Components/Filters/Filters';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
 
 const ApexChart = () => {
     const [options] = useState({
@@ -61,6 +69,11 @@ const ApexChart = () => {
 };
 
 function Dashboard(props) {
+    const [selectedSchool, setSelectedSchool] = useState('');
+    const handleSchoolChange = (event) => {
+        setSelectedSchool(event.target.value);
+    };
+
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({
         'Monthly Budget': { currency: 'Php', amount: '0.00' },
@@ -91,17 +104,19 @@ function Dashboard(props) {
 
     const handleChange = (event) => {
         const newValue = event.target.value;
-        if (newValue.length <= 12 && (/^-?\d*\.?\d*$/.test(newValue) || newValue === '')) {
+        if (
+            newValue === '' ||
+            (newValue >= 0 && newValue <= 999999)
+        ) {
             setEditableAmounts({
                 ...editableAmounts,
                 [clickedButton]: { ...editableAmounts[clickedButton], amount: newValue }
             });
             setError('');
         } else {
-            setError('Please enter a valid number.');
+            setError('Please enter a valid number between 0 and 999,999.');
         }
     };
-
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -123,9 +138,11 @@ function Dashboard(props) {
         >
             {title}
             <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{editableAmounts[title].currency} {editableAmounts[title].amount}</p>
-            <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                <EditIcon sx={{ width: '30px', height: '30px' }} />
-            </Button>
+            {title !== 'Total Balance' && (
+                <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
+                    <EditIcon sx={{ width: '30px', height: '30px' }} />
+                </Button>
+            )}
             <Modal
                 open={open && clickedButton === title}
                 onClose={handleClose}
@@ -182,95 +199,112 @@ function Dashboard(props) {
 
     return (
         <Container className="test" maxWidth="lg">
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={12} lg={12}>
-                    <Paper
-                        sx={[
-                            styles.header, {
-                                p: 2,
-                                display: 'flex',
-                                flexDirection: 'row',
-                            }
-                        ]}
-                        elevation={0}
-                        variant='outlined'>
-                        <Box style={styles.header.buttons}>
-                            <DateFilter /> { }
-                        </Box>
-                    </Paper>
-                </Grid>
-
-                <Grid item xs={12} md={12} lg={12}>
-                    <Box style={{
-                        display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
-                        marginLeft: '10px', marginRight: '10px' //margin Analytics title and Date
-                    }}>
-                        <Typography
-                            component="h1"
-                            variant="h6"
-                            color="inherit"
-                            noWrap
-                            sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
-                        >
-                            Analytics
-                        </Typography>
-                        <Typography
-                            component="h1"
-                            variant="h6"
-                            color="inherit"
-                            noWrap
-                        //sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
-                        >
-                            {getCurrentMonthYear()}
-                        </Typography>
-                    </Box>
-                </Grid>
-                {/* Horizontal layout for editable cards */}
-                <Grid item xs={12} md={12} lg={12}
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginTop: "-15px",
-                    }}>
-                    <Grid container >
-                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                            {renderEditableCard('Monthly Budget')}
-                        </Grid>
-                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                            {renderEditableCard('Budget Limit')}
-                        </Grid>
-                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                            {renderEditableCard('Total Balance')}
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid item xs={12} md={12} lg={12}>
-                    <Grid container >
-                        <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
-                            <Paper
-                                sx={{
+            <Box sx={{ position: 'relative' }}>
+                { }
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Paper
+                            sx={[
+                                styles.header, {
                                     p: 2,
                                     display: 'flex',
-                                    flexDirection: 'column',
-                                    height: 380,
-                                }}
-                            >
-                                <ApexChart />
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                    flexDirection: 'row',
+                                }
+                            ]}
+                            elevation={0}
+                            variant='outlined'>
+                            <Box style={styles.header.buttons}>
+                                <DateFilter /> { }
+                                { }
+                                <FormControl sx={{ m: 1, minWidth: 150 }}>
+                                    {/*<InputLabel id="school-filter-label">School Filter</InputLabel>
+                                <Select
+                                    labelId="school-filter-label"
+                                    id="school-filter"
+                                    value={selectedSchool}
+                                    onChange={handleSchoolChange}
+                                    label="School"
+                                >
+                                    <MenuItem value="">
+                                        <em>None</em>
+                                    </MenuItem>
+                                    <MenuItem value="CIT">CIT</MenuItem>
+                                    <MenuItem value="ACT">ACT</MenuItem>
+                                    <MenuItem value="SM CITY">SM CITY</MenuItem>
+                    </Select>*/}
+                                </FormControl>
+                            </Box>
+                        </Paper>
+                    </Grid>
 
-                            {renderSummaryCard()}
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Box style={{
+                            display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
+                            marginLeft: '10px', marginRight: '10px'
+                        }}>
+                            <Typography
+                                component="h1"
+                                variant="h6"
+                                color="inherit"
+                                noWrap
+                                sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
+                            >
+                                Analytics
+                            </Typography>
+                            <Typography
+                                component="h1"
+                                variant="h6"
+                                color="inherit"
+                                noWrap
+
+                            >
+                                {getCurrentMonthYear()}
+                            </Typography>
+                        </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={12} lg={12}
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            marginTop: "-15px",
+                        }}>
+                        <Grid container >
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                {renderEditableCard('Monthly Budget')}
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                {renderEditableCard('Budget Limit')}
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                {renderEditableCard('Total Balance')}
+                            </Grid>
                         </Grid>
                     </Grid>
+
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Grid container >
+                            <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
+                                <Paper
+                                    sx={{
+                                        p: 2,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        height: 380,
+                                    }}
+                                >
+                                    <ApexChart />
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+
+                                {renderSummaryCard()}
+                            </Grid>
+                        </Grid>
+                    </Grid>
+
                 </Grid>
-
-
-
-
-
-
-            </Grid>
+            </Box>
         </Container>
     );
 }
