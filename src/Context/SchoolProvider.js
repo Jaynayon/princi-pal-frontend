@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import RestService from "../Services/RestService"
 
-const SchoolContext = createContext();
+export const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 

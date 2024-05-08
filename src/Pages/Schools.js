@@ -9,7 +9,7 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
-import LRTable from '../Components/Table/LRTable';
+import DocumentTable from '../Components/Table/DocumentTable';
 import Button from '@mui/material/Button';
 import { SchoolProvider } from '../Context/SchoolProvider';
 import { useNavigationContext } from '../Context/NavigationProvider';
@@ -222,7 +222,7 @@ function Schools(props) {
                                     {/*Document Tables*/}
                                     <Grid item xs={12} md={12} lg={12}>
                                         <CustomTabPanel value={value} index={0}>
-                                            <LRTable />
+                                            <DocumentTable />
                                         </CustomTabPanel>
                                         <CustomTabPanel value={value} index={1}>
                                             Item Two
