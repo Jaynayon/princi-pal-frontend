@@ -1,29 +1,25 @@
-import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
+import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import RestService from "../Services/RestService"
 
 const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 
-let newLr = {
-    id: 3,
-    date: '',
-    orsBursNo: '',
-    particulars: '',
-    amount: 0
-}
-
 export const SchoolProvider = ({ children, value }) => {
     // Set initial state for month and year using current date
     const {
         currentMonth, currentYear,
+        currentSchool, setCurrentSchool,
         currentDocument, setCurrentDocument,
         month, setMonth,
         year, setYear,
-        months, years
+        months, years,
+        isAdding, setIsAdding,
+        addOneRow, setAddOneRow,
+        reload, setReload,
+        fetchDocumentData
     } = value;
     const [lr, setLr] = useState([]);
-    const [isAdding, setIsAdding] = useState(false);
 
     const monthIndex = months.indexOf(currentMonth);
     const yearIndex = years.indexOf(currentYear);
@@ -48,42 +44,50 @@ export const SchoolProvider = ({ children, value }) => {
         }
     };
 
-    const displayFields = () => {
-        if (!lr) {
-            setLr(prevRows => [...prevRows, newLr]);
-        } else {
-            setLr(prevRows => [...prevRows, newLr]);
+    const updateLr = useCallback(async () => {
+        try {
+            if (currentDocument) {
+                // Call RestService to fetch lr by document id
+                const data = await RestService.getLrByDocumentId(currentDocument.id);
+                console.log("lr")
+                if (data) { //data.decodedToken
+                    setLr(data)
+                } else {
+                    setLr([]); //meaning it's empty 
+                }
+                console.log(data);
+                // Handle response as needed
+            }
+        } catch (error) {
+            console.error('Error fetching lr:', error);
         }
-    };
+    }, [currentDocument, setLr]);
 
-    // const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
-    //     try {
-    //         const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
+    const displayFields = useCallback((isAdding) => {
+        let newLr = {
+            id: 3,
+            date: '',
+            orsBursNo: '',
+            particulars: '',
+            amount: 0
+        }
 
-    //         if (getDocument) { //data.decodedToken
-    //             setCurrentDocument(getDocument);
-    //         } else {
-    //             setCurrentDocument(getDocument);
-    //         }
-    //         console.log(getDocument);
-    //         // Handle response as needed
+        isAdding && (setLr(prevRows => [newLr, ...prevRows]))
 
-    //     } catch (error) {
-    //         console.error('Error validating token:', error);
-    //     }
-    // };
+    }, [])
 
     useEffect(() => {
-        console.log("update document");
+        console.log("SchoolProvider useEffect: update lr");
 
-        fetchLrByDocumentId(currentDocument.id);
-    }, [month, year, currentDocument]); // Run effect only on mount and unmount*/
+        updateLr();
+    }, [month, year, currentDocument, updateLr]); // Run effect only on mount and unmount*/
 
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
-            displayFields, isAdding, setIsAdding
+            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
+            currentSchool, setCurrentSchool, reload, setReload
         }}>
             {children}
         </SchoolContext.Provider>

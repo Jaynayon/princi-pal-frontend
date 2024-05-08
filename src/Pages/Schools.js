@@ -1,28 +1,20 @@
 import '../App.css'
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import IconButton from "@mui/material/IconButton";
-import AddBoxIcon from '@mui/icons-material/AddBox';
 import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
 import LRTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
-import BudgetSummary from '../Components/Summary/BudgetSummary';
 import { SchoolProvider } from '../Context/SchoolProvider';
-import { useSchoolContext } from '../Context/SchoolProvider';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
-
-//import { useState } from 'react';
-//import { useEffect } from 'react';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -81,24 +73,24 @@ function Schools(props) {
     const [month, setMonth] = useState(currentMonth);
     const [year, setYear] = useState(currentYear);
 
+    const [isAdding, setIsAdding] = useState(false);
+    const [addOneRow, setAddOneRow] = useState(false);
+
     const [value, setValue] = React.useState(0);
     const [currentDocument, setCurrentDocument] = useState(null);
     const { selected, currentSchool } = useNavigationContext();
+
+    const [reload, setReload] = useState(false);
 
     const exportDocumentOnClick = async () => {
         await RestService.getExcelFromLr(currentDocument.id);
     }
 
-
-
-    //Only retried documents from that school if the current selection is a school
-    React.useEffect(() => {
-        console.log("Get this school's lr and document");
-        // Fetches a Document based on the current school's id
-        const fetchLrData = async () => {
-            try {
+    const fetchDocumentData = useCallback(async () => {
+        try {
+            if (currentSchool) {
                 const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                    currentSchool.id,
+                    currentSchool?.id,
                     year,
                     month
                 );
@@ -108,20 +100,21 @@ function Schools(props) {
                 } else {
                     setCurrentDocument(emptyDocument);
                 }
-            } catch (error) {
-                console.error('Error fetching document:', error);
             }
-        };
-
-        if (value === 0) {
-            fetchLrData();
-        } else if (value === 1) {
-            console.log("Fetch RCD")
-        } else if (value === 2) {
-            console.log("Fetch JEV")
+        } catch (error) {
+            console.error('Error fetching document:', error);
         }
+    }, [currentSchool, setCurrentDocument, year, month]);
 
-    }, [selected, year, month, currentSchool, value]);
+    console.log("Schools render")
+
+    //Only retried documents from that school if the current selection is a school
+    React.useEffect(() => {
+        console.log("Schools useEffect: document updated");
+
+        fetchDocumentData();
+        setIsAdding(false); //reset state to allow displayFields again
+    }, [selected, year, month, value, reload, fetchDocumentData]);
 
     if (!currentDocument) {
         return null;
@@ -138,7 +131,11 @@ function Schools(props) {
                 currentDocument, setCurrentDocument,
                 month, setMonth,
                 year, setYear,
-                months, years
+                months, years,
+                isAdding, setIsAdding,
+                addOneRow, setAddOneRow,
+                reload, setReload,
+                fetchDocumentData
             }}
         >
             <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>

@@ -2,38 +2,29 @@ import React from 'react';
 import BudgetSummary from './BudgetSummary';
 import Grid from '@mui/material/Grid';
 import { useSchoolContext } from '../../Context/SchoolProvider';
-import { useNavigationContext } from '../../Context/NavigationProvider';
+// import { useNavigationContext } from '../../Context/NavigationProvider';
 import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 
 function DocumentSummary(props) {
-    const { currentDocument, setIsAdding, isAdding, displayFields } = useSchoolContext();
-    const { selected, currentSchool } = useNavigationContext();
+    const { currentDocument, setIsAdding } = useSchoolContext();
+    // const { selected, currentSchool } = useNavigationContext();
 
-    console.log(currentDocument);
-    // React.useEffect(() => {
-    //     fetchDocumentBySchoolIdYearMonth("6634e7fc43d8096920d765ff", year, month);
-    // }, [selected, month, year])
+    const handleAddButtonClick = () => {
+        setIsAdding(true); // Set isAdding to true when button is clicked
+    };
+
+    //console.log(currentDocument);
 
     if (!currentDocument) {
         return null;
     }
 
-    // const addFields = () => {
-    //     if (setIsAdding && selected === currentSchool.name) {
-    //         setIsAdding(true);
-    //         displayFields();
-    //     } else {
-    //         setIsAdding(false);
-    //     }
-    //     console.log(isAdding);
-    // }
-
     return (
         <React.Fragment>
             <IconButton
                 sx={{ alignSelf: "center" }}
-                onClick={() => setIsAdding(true)}
+                onClick={handleAddButtonClick}
             >
                 <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
             </IconButton>
