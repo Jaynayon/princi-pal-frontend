@@ -194,7 +194,8 @@ function RecordsRow(props) {
                                                 onBlur={() => handleInputBlur(column.id, row.id)}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {
-                                                        handleInputBlur(column.id, row.id); // Invoke handleLogin on Enter key press
+                                                        e.preventDefault();
+                                                        e.target.blur(); // Invoke handleLogin on Enter key press
                                                     }
                                                 }}
                                             />
