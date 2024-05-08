@@ -14,8 +14,9 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import IconButton from '@mui/material/IconButton';
 import Popover from '@mui/material/Popover';
+import { useSchoolContext } from '../../Context/SchoolProvider';
 
-export function FieldsFilter() {
+export function SchoolFieldsFilter() {
     return (
         <React.Fragment>
             <Button variant="text" >
@@ -31,13 +32,10 @@ export function FieldsFilter() {
     )
 }
 
-export function DateFilter() {
+export function SchoolDateFilter() {
     const theme = useTheme();
-    const prevMonthRef = useRef(0);
-    const prevYearRef = useRef(0);
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const [month, setMonth] = React.useState('January');
-    const [year, setYear] = React.useState('2021');
+    const { prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years } = useSchoolContext();
 
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -48,15 +46,6 @@ export function DateFilter() {
             },
         },
     };
-
-    const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-
-    const years = [
-        '2021', '2022', '2023', '2024'
-    ];
 
     function getStyles(name, personName, theme) {
         return {
@@ -248,7 +237,7 @@ export function DateFilter() {
     );
 }
 
-export function SearchFilter() {
+export function SchoolSearchFilter() {
     const [input, setInput] = useState('');
 
     const handleInputChange = (event) => {

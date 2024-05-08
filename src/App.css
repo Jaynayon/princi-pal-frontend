@@ -3,7 +3,8 @@
 }
 
 .App-logo {
-  height: 40vmin;
+  height: 20vmin; /* Adjusted height for responsiveness */
+  width: auto; /* Ensure the width adjusts automatically */
   pointer-events: none;
 }
 
@@ -20,7 +21,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(1rem + 2vmin); /* Adjusted font size for responsiveness */
   color: white;
 }
 
@@ -50,5 +51,16 @@
 
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Media query for smaller screens */
+@media screen and (max-width: 768px) {
+  .App-logo {
+    height: 15vmin; /* Adjusted height for smaller screens */
+  }
+  
+  .App-header {
+    font-size: calc(0.8rem + 2vmin); /* Adjusted font size for smaller screens */
   }
 }

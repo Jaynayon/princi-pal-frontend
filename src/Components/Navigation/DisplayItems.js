@@ -75,6 +75,18 @@ export function DisplayItems() {
         return null;
     };
 
+    function logoutUser(cookieName) {
+        // Check if the cookie exists
+        if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
+            // Overwrite the cookie with an empty value and a path that matches the original cookie's path
+            document.cookie = `${cookieName}=; path=/;`;
+            console.log(`${cookieName} cookie removed.`);
+            window.location.href = "http://localhost:3000/";
+        } else {
+            console.log(`${cookieName} cookie not found.`);
+        }
+    }
+
     return (
         list.map((item, index) => (
             <React.Fragment key={index}>
@@ -89,7 +101,10 @@ export function DisplayItems() {
                         to={index < 4 ? `/${item.toLowerCase()}` : '/'} //Logout route has not yet been implemented
                         selected={selected === item}
                         value={item}
-                        onClick={() => { setSelected(item) }}
+                        onClick={() => {
+                            setSelected(item)
+                            !(index < 4) && logoutUser('jwt')
+                        }}
                         sx={theme.navStyle.button}
                     >
                         <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
@@ -116,7 +131,11 @@ export const ProfileTab = ({ user }) => {
     const theme = useTheme();
     const [selected, setSelected] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
+    const { currentUser } = useNavigationContext();
 
+    if (!currentUser) {
+        return null
+    }
 
     const handleDialogOpen = () => {
         setDialogOpen(true);
@@ -131,7 +150,7 @@ export const ProfileTab = ({ user }) => {
         const thresholdLength = 10;
 
         // Check if email length exceeds the threshold
-        if (user.email.length > thresholdLength) {
+        if (currentUser.email.length > thresholdLength) {
             return { color: theme.navStyle.color, fontSize: 10 }; // Adjust font size if email is too long
         }
 
@@ -170,8 +189,8 @@ export const ProfileTab = ({ user }) => {
                 </ListItemIcon>
 
                 <ListItemText
-                    primary={user.name}
-                    secondary={user.email}
+                    primary={currentUser.fname + ' ' + currentUser.lname}
+                    secondary={currentUser.email}
                     primaryTypographyProps={{ fontWeight: 'bold', color: theme.navStyle.color }}
                     secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
                 />
@@ -181,12 +200,12 @@ export const ProfileTab = ({ user }) => {
                 <DialogTitle>My Profile</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
-                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 125 }} alt="User Avatar"> </Avatar>
+                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 165 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
-                            <TextField disabled id="outlined-disabled" label="Username" defaultValue="username" margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="Fullname" defaultValue={user.name} margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="Email" defaultValue={user.email} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Role" defaultValue="ADAS" margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Fullname" defaultValue={currentUser.fname + ' ' + currentUser.mname + ' ' + currentUser.lname} margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" />
                             <TextField disabled id="outlined-disabled" label="Number" defaultValue="0935 256 2584" margin="normal" />
                         </Stack>
                     </Stack>

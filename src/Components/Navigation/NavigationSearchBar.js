@@ -29,12 +29,17 @@ const SCHOOLS = [
   "Asian College of Technology",
 ];
 
+const POSITIONS = [
+  "ADAS",
+  "ADOF"
+]
+
 const NavigationSearchBar = () => {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState("");
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
-  const [select, setSelect] = useState("");
+  const [select, setSelect] = useState("ADAS");
   const [appliedSchools, setAppliedSchools] = useState([]);
 
   const handleApplySchool = () => {
@@ -80,7 +85,7 @@ const NavigationSearchBar = () => {
     school.toLowerCase().includes(query.toLowerCase())
   );
   return (
-    <div style={{ width: "400px", position: "relative" }}>
+    <Box style={{ width: "400px", position: "relative" }}>
       <Box
         component="form"
         sx={{
@@ -108,7 +113,7 @@ const NavigationSearchBar = () => {
             padding: 0,
             position: "absolute",
             width: "100%",
-            maxHeight: "200px", // Set maximum height here
+            maxHeight: "600px", // Set maximum height here
             overflowY: "auto", // Enable vertical scrolling
             backgroundColor: "#fff",
             border: "1px solid #ccc",
@@ -245,8 +250,9 @@ const NavigationSearchBar = () => {
               autoWidth
               label="Select"
             >
-              <MenuItem value="ADAS">ADAS</MenuItem>
-              <MenuItem value="ADOF">ADOF</MenuItem>
+              {POSITIONS.map((position, index) => (
+                <MenuItem key={index} value={position}>{position}</MenuItem>
+              ))}
             </Select>
           </FormControl>
           <DialogActions>
@@ -256,7 +262,7 @@ const NavigationSearchBar = () => {
           </DialogActions>
         </DialogContent>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 

@@ -1,5 +1,6 @@
 // React imports
 import * as React from "react";
+import { useEffect, useState } from "react";
 
 // Material-UI imports
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
@@ -40,7 +41,7 @@ const User = {
 };
 
 const drawerWidth = 220;
-const initialWidth = 70;
+//const initialWidth = 70;
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -49,11 +50,11 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  paddingLeft: initialWidth, //starts with an initial padding instead of 0
+  paddingLeft: 5, //starts with an initial padding instead of 0
   ...(open && {
-    marginLeft: drawerWidth,
-    paddingLeft: 0, //removes the space and adjust to the drawer
-    width: `calc(100% - ${drawerWidth}px)`,
+    //marginLeft: drawerWidth,
+    //paddingLeft: 0, //removes the space and adjust to the drawer
+    //width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin", "padding"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -63,29 +64,56 @@ const AppBar = styled(MuiAppBar, {
 
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  "& .MuiDrawer-paper": {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    boxSizing: "border-box",
-    ...(!open && {
-      overflowX: "hidden",
+})(({ theme, open }) => {
+  const [mobileMode, setMobileMode] = useState(false); // State to track position
+
+  const updateMobileMode = () => {
+    const { innerWidth } = window;
+    setMobileMode(innerWidth < 600);
+  };
+
+  useEffect(() => {
+    // Call the function to set initial mobileMode state
+    updateMobileMode();
+
+    const handleResize = () => {
+      // Call the function to update mobileMode state on resize
+      updateMobileMode();
+    };
+
+    // Add event listener for resize
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []); // Run effect only on mount and unmount
+
+  return {
+    "& .MuiDrawer-paper": {
+      position: mobileMode ? "absolute" : "relative",
+      whiteSpace: "nowrap",
+      width: drawerWidth,
       transition: theme.transitions.create("width", {
         easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
+        duration: theme.transitions.duration.enteringScreen,
       }),
-      width: theme.spacing(7.7),
-      [theme.breakpoints.up("sm")]: {
+      boxSizing: "border-box",
+      ...(!open && {
+        overflowX: "hidden",
+        transition: theme.transitions.create("width", {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
         width: theme.spacing(7.7),
-      },
-    }),
-  },
-}));
+        [theme.breakpoints.up("sm")]: {
+          width: theme.spacing(7.7),
+        },
+      }),
+    },
+  };
+});
 
 const displayTitle = (selected) => {
   if (
@@ -106,32 +134,30 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle } = useNavigationContext();
+  const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenuOpen = (event) => {
-      setAnchorEl(event.currentTarget);
+    setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => {
-      setAnchorEl(null);
+    setAnchorEl(null);
   };
 
   const [options, setOptions] = React.useState([
-      'CIT-U is inviting you to be a part of the organization',
-      'Your application at CTU has been cancelled',
-      'Budget limit exceeded; urgent action required to align expenses with allocated funds',
-      'Congratulations, you have passed the first phase of the application process',
-      'CIM is inviting you to be a part of the organization',
-      'UC is inviting you to be a part of the organization',
+    'CIT-U is inviting you to be a part of the organization',
+    'Your application at CTU has been cancelled',
+    'Budget limit exceeded; urgent action required to align expenses with allocated funds',
+    'Congratulations, you have passed the first phase of the application process',
+    'CIM is inviting you to be a part of the organization',
   ]);
 
   const handleClearOptions = () => {
-      setOptions([]); // Clear options by setting it to an empty array
+    setOptions([]); // Clear options by setting it to an empty array
   };
 
-
-const ITEM_HEIGHT = 48;
+  const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
     typography: {
@@ -144,88 +170,6 @@ const ITEM_HEIGHT = 48;
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-        <AppBar
-          position="absolute"
-          open={open}
-          sx={{
-            boxShadow: "none",
-            backgroundColor: "transparent",
-            paddingTop: "5px",
-          }}
-        >
-          <Toolbar
-            sx={{
-              pr: "24px", // keep right padding when drawer closed
-              color: "#C5C7CD", //gets inherited
-            }}
-          >
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              sx={{
-                flexGrow: 1,
-                textAlign: "left",
-                color: "#252733",
-                fontWeight: "bold",
-              }}
-            >
-              {displayTitle(selected)}
-            </Typography>
-
-            {/* Search Bar */}
-            <NavigationSearchBar />
-
-                          <Box>
-                            <IconButton color="inherit" onClick={handleMenuOpen}>
-                                <Badge badgeContent={5} color="secondary">
-                                    <NotificationsIcon />
-                                </Badge>
-                            </IconButton>
-                            <Menu
-
-                                id="long-menu"
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl)}
-                                onClose={handleMenuClose}
-                                PaperProps={{
-                                    style: {
-                                        maxHeight: ITEM_HEIGHT * 10.5,
-                                        width: '40ch',
-                                        overflowY: 'auto',
-                                    },
-                                }}
-                            >
-                                <Typography variant="subtitle1" sx={{ paddingLeft: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                                    Notifications
-                                    <DeleteOutlineIcon sx={{ ml: 60 }} onClick={handleClearOptions}/>
-                                </Typography>
-
-
-                                <Tabs
-                                    value={0} 
-                                    variant="fullWidth"
-                                    textColor="primary"
-                                    indicatorColor="primary"
-                                >
-                                    <Tab label="All"/>
-                                </Tabs>
-
-                                {options.map((option, index) => (
-                                <React.Fragment key={option}>
-                                    <MenuItem onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
-                                    <Avatar sx={{ marginRight: '8px' }}> </Avatar>
-                                        {option}
-                                    </MenuItem>
-                                    {index !== options.length - 1 && <Divider />}
-                                </React.Fragment>
-                            ))}
-
-                            </Menu>
-                        </Box>
-          </Toolbar>
-        </AppBar>
         <Drawer
           variant="permanent"
           open={open}
@@ -234,6 +178,7 @@ const ITEM_HEIGHT = 48;
               backgroundColor: (theme) => theme.navStyle.base,
               boxShadow: "none",
               borderRight: "none",
+              display: mobileMode && !open ? "none" : null
             },
           }}
         >
@@ -318,9 +263,95 @@ const ITEM_HEIGHT = 48;
             overflow: "auto",
           }}
         >
-          <Toolbar />
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Container maxWidth="lg" sx={{ mt: 4, mb: 4, pl: 4 }}>
             <Grid container spacing={3}>
+              <AppBar
+                position="relative"
+                open={open}
+                sx={{
+                  boxShadow: "none",
+                  backgroundColor: "transparent",
+                  paddingTop: "5px",
+                }}
+              >
+                <Toolbar
+                  sx={{
+                    pr: "24px", // keep right padding when drawer closed
+                    color: "#C5C7CD", //gets inherited
+                    pl: 1
+                  }}
+                >
+                  <IconButton
+                    aria-label="open drawer"
+                    onClick={toggleDrawer}
+                    sx={{
+                      display: !mobileMode ? "none" : null,
+                      color: (theme) => theme.navStyle.color,
+                      //...(open && { display: "none" }),
+                    }}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                  <Typography
+                    component="h1"
+                    variant="h6"
+                    color="inherit"
+                    noWrap
+                    sx={{
+                      flexGrow: 1,
+                      textAlign: "left",
+                      color: "#252733",
+                      fontWeight: "bold",
+                      width: '400px'
+                    }}
+                  >
+                    {displayTitle(selected)}
+                  </Typography>
+
+                  {/* Search Bar */}
+                  <NavigationSearchBar />
+                  <Box>
+                    <IconButton color="inherit" onClick={handleMenuOpen}>
+                      <Badge badgeContent={5} color="secondary">
+                        <NotificationsIcon />
+                      </Badge>
+                    </IconButton>
+                    <Menu
+                      id="long-menu"
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                      PaperProps={{
+                        style: {
+                          maxHeight: ITEM_HEIGHT * 10.5,
+                          width: '70ch',
+                        },
+                      }}
+                    >
+                      <Typography variant="subtitle1" sx={{ paddingLeft: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                        Notifications
+                        <DeleteOutlineIcon sx={{ ml: 60 }} onClick={handleClearOptions} />
+                      </Typography>
+
+                      <Tabs
+                        value={0}
+                        variant="fullWidth"
+                        textColor="primary"
+                        indicatorColor="primary"
+                      >
+                        <Tab label="All" />
+                      </Tabs>
+
+                      {options.map((option, index) => [
+                        <MenuItem key={option} selected={option === 'Pyxis'} onClick={handleMenuClose}>
+                          {option}
+                        </MenuItem>,
+                        index !== options.length - 1 && <Divider key={`divider-${index}`} />
+                      ])}
+                    </Menu>
+                  </Box>
+                </Toolbar>
+              </AppBar>
               {children}
             </Grid>
           </Container>
