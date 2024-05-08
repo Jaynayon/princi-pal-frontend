@@ -86,31 +86,31 @@ function Schools(props) {
         await RestService.getExcelFromLr(currentDocument.id);
     }
 
-    console.log("testetateataetetestetaetetst")
-
     const fetchDocumentData = useCallback(async () => {
         try {
-            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                currentSchool?.id,
-                year,
-                month
-            );
+            if (currentSchool) {
+                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
+                    currentSchool?.id,
+                    year,
+                    month
+                );
 
-            if (getDocument) {
-                setCurrentDocument(getDocument);
-            } else {
-                setCurrentDocument(emptyDocument);
+                if (getDocument) {
+                    setCurrentDocument(getDocument);
+                } else {
+                    setCurrentDocument(emptyDocument);
+                }
             }
         } catch (error) {
             console.error('Error fetching document:', error);
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
-    console.log("document updated")
+    console.log("Schools render")
 
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
-        console.log("Get this school's document: ");
+        console.log("Schools useEffect: document updated");
 
         fetchDocumentData();
         setIsAdding(false); //reset state to allow displayFields again

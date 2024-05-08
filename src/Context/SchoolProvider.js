@@ -46,16 +46,18 @@ export const SchoolProvider = ({ children, value }) => {
 
     const updateLr = useCallback(async () => {
         try {
-            // Call RestService to fetch lr by document id
-            const data = await RestService.getLrByDocumentId(currentDocument.id);
-            console.log("lr")
-            if (data) { //data.decodedToken
-                setLr(data)
-            } else {
-                setLr([]); //meaning it's empty 
+            if (currentDocument) {
+                // Call RestService to fetch lr by document id
+                const data = await RestService.getLrByDocumentId(currentDocument.id);
+                console.log("lr")
+                if (data) { //data.decodedToken
+                    setLr(data)
+                } else {
+                    setLr([]); //meaning it's empty 
+                }
+                console.log(data);
+                // Handle response as needed
             }
-            console.log(data);
-            // Handle response as needed
         } catch (error) {
             console.error('Error fetching lr:', error);
         }
@@ -75,7 +77,7 @@ export const SchoolProvider = ({ children, value }) => {
     }, [])
 
     useEffect(() => {
-        console.log("update lr");
+        console.log("SchoolProvider useEffect: update lr");
 
         updateLr();
     }, [month, year, currentDocument, updateLr]); // Run effect only on mount and unmount*/

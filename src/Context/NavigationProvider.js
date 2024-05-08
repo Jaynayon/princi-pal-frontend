@@ -23,9 +23,6 @@ export const NavigationProvider = ({ children }) => {
         });
     };
 
-    //stuff
-    console.log(currentUser);
-
     const updateMobileMode = () => {
         const { innerWidth } = window;
         if (innerWidth < 600) {
@@ -36,9 +33,10 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
-    console.log(userId);
+    console.log("Navigation Provider render");
 
     useEffect(() => {
+        console.log("Navigation Provider useEffect render");
         const fetchUser = async () => {
             try {
                 const jwtCookie = document.cookie

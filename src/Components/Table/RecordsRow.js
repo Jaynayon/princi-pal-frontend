@@ -25,7 +25,7 @@ function RecordsRow(props) {
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
 
     useEffect(() => {
-        console.log("123123123123123123123123123123123123123")
+        console.log("RecordsRow useEffect")
         if (isAdding === true) {
             displayFields(isAdding);
         }
@@ -55,8 +55,6 @@ function RecordsRow(props) {
         console.log("Delete button clicked for row at index:", selectedIndex);
         console.log("Delete lr id: " + rowId)
         deleteLrByid(rowId);
-        //setReload(!reload);
-        // Close the menu after delete
         handleMenuClose();
     };
 
@@ -119,8 +117,6 @@ function RecordsRow(props) {
         console.log("accept");
         const rowIndex = rows.findIndex(row => row.id === rowId);
         createLrByDocumentId(currentDocument.id, rows[rowIndex]);
-        //updateLr();
-        //setReload(!reload);
     }
 
     const handleInputChange = (colId, rowId, event) => {
@@ -135,7 +131,6 @@ function RecordsRow(props) {
             updatedRows[rowIndex][colId] = event.target.value;
 
             // Update the state with the modified rows
-            //console.log(updatedRows[rowIndex])
             setRows(updatedRows);
             setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
         } else {
@@ -151,9 +146,6 @@ function RecordsRow(props) {
             if (inputValue !== initialValue) {
                 console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
                 updateLrById(colId, rowId, inputValue);
-                //fetchDocumentData();
-                //updateLr();
-                //setReload(!reload);
             }
             console.log('Value saved:', inputValue);
         }
