@@ -18,33 +18,33 @@ class LRTable extends Component {
         };
     }
 
-    componentDidMount() {
-        // Accessing context values using this.context
-        const {
-            month,
-            year,
-            setLr,
-            fetchLrByDocumentId,
-            currentDocument,
-        } = this.context;
+    // componentDidMount() {
+    //     // Accessing context values using this.context
+    //     const {
+    //         month,
+    //         year,
+    //         setLr,
+    //         fetchLrByDocumentId,
+    //         currentDocument,
+    //     } = this.context;
 
-        // Example usage of context values
-        console.log('Current Month:', month);
-        console.log('Current Year:', year);
+    //     // Example usage of context values
+    //     console.log('Current Month:', month);
+    //     console.log('Current Year:', year);
 
-        // Perform operations with context values
-        // For example, fetching LR data
-        const documentId = currentDocument ? currentDocument.id : null;
-        if (documentId) {
-            fetchLrByDocumentId(documentId)
-                .then(lrData => {
-                    setLr(lrData);
-                })
-                .catch(error => {
-                    console.error('Error fetching LR data:', error);
-                });
-        }
-    }
+    //     // Perform operations with context values
+    //     // For example, fetching LR data
+    //     const documentId = currentDocument ? currentDocument.id : null;
+    //     if (documentId) {
+    //         fetchLrByDocumentId(documentId)
+    //             .then(lrData => {
+    //                 setLr(lrData);
+    //             })
+    //             .catch(error => {
+    //                 console.error('Error fetching LR data:', error);
+    //             });
+    //     }
+    // }
 
     handleChangePage = (event, newPage) => {
         this.setState({ page: newPage });

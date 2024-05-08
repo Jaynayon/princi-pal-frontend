@@ -17,7 +17,7 @@ export const SchoolProvider = ({ children, value }) => {
         isAdding, setIsAdding,
         addOneRow, setAddOneRow,
         reload, setReload,
-        fetchDocumentData
+        fetchDocumentData, val
     } = value;
     const [lr, setLr] = useState([]);
 
@@ -78,9 +78,11 @@ export const SchoolProvider = ({ children, value }) => {
 
     useEffect(() => {
         console.log("SchoolProvider useEffect: update lr");
+        if (val === 0) { // if LR tab is selected
+            updateLr();
+        }
 
-        updateLr();
-    }, [month, year, currentDocument, updateLr]); // Run effect only on mount and unmount*/
+    }, [month, year, currentDocument, val, updateLr]); // Run effect only on mount and unmount*/
 
     return (
         <SchoolContext.Provider value={{

@@ -106,7 +106,7 @@ function Schools(props) {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
-    console.log("Schools render")
+    console.log("Schools renders")
 
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
@@ -135,7 +135,7 @@ function Schools(props) {
                 isAdding, setIsAdding,
                 addOneRow, setAddOneRow,
                 reload, setReload,
-                fetchDocumentData
+                fetchDocumentData, val: value
             }}
         >
             <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -225,7 +225,7 @@ function Schools(props) {
                                             <DocumentTable />
                                         </CustomTabPanel>
                                         <CustomTabPanel value={value} index={1}>
-                                            Item Two
+                                            <DocumentTable />
                                         </CustomTabPanel>
                                         <CustomTabPanel value={value} index={2}>
                                             Item Three
