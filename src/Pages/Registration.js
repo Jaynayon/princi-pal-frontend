@@ -123,11 +123,8 @@ const RegistrationPage = () => {
 
     if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
       console.log("All fields are required");
-      setFormValid(false); // Set form validity to false
-      setTimeout(() => {
-        setFormValid(true); // Clear the form validity error after 800 milliseconds
-      }, 800);
-      return; // Exit the function if any field is empty
+      setFormValid(false); // Set form validity to false immediately
+      return; // Exit the function
     }
 
     // Further validation logic for email, password, and confirmPassword
