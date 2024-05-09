@@ -166,7 +166,7 @@ const RestService = (() => {
                     return response.data;
                 })
                 .catch(error => {
-                    console.error(error.response.data)
+                    console.error(error.response.data.message)
                 })
 
             if (response) {
