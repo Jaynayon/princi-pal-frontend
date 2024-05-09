@@ -61,7 +61,6 @@ const RegistrationPage = () => {
         .replace(/[^a-zA-Z ]+/g, '') // Remove non-letter characters
         .replace(/\s+/g, ' ') // Normalize spaces
         .replace(/\b\w/g, match => match.toUpperCase()); // Capitalize first letter of each word
-      //modifiedValue = modifiedValue.replace(/[^a-zA-Z]/g, '');
     }
     if (key === 'username') {
       // Allow only alphanumeric characters for username (letters and numbers)
@@ -88,7 +87,7 @@ const RegistrationPage = () => {
         setConfirmPasswordError(value !== '' && value !== formData.password);
         break;
       default:
-        break;
+        break; 
     }
   };
 
@@ -102,12 +101,25 @@ const RegistrationPage = () => {
 
   const handleExistingEmail = async (event) => {
     try {
-      const exists = await RestService.validateUsernameEmail(event.target.value)
-      exists ? setEmailError(true) : setEmailError(false)
+      const exists = await RestService.validateUsernameEmail(event.target.value); //returns boolean
+      //return exists ? setEmailError(true) :setEmailError(false);
+      setEmailError(exists);
+      console.log("email: " + exists);
     } catch (error) {
-      console.log(error)
+      console.error(error);
     }
-  }
+  };
+
+  const getEmail = async (email) => {
+    try {
+      const exists = await RestService.validateUsernameEmail(email); //returns boolean
+      return exists ? true : false;
+      //setEmailError(exists);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   const handleExistingUsername = async (event) => {
     try {
@@ -146,7 +158,7 @@ const RegistrationPage = () => {
             position: ''
           });
           // Redirect to login page or display a success message
-          window.location.href = "/dashboard"; // Change this to the correct URL if needed
+          window.location.href = "/login"; // Change this to the correct URL if needed
         } else {
           setRegistrationError("Registration failed");
         }
@@ -159,32 +171,37 @@ const RegistrationPage = () => {
     }
   };
 
-  function getErrorCondition(item) {
+  function getErrorCondition(item, event) {
     const { key } = item;
-
     if (key === 'email') {
-      return emailError ? "Existing or invalid email address" : false;
+      let message;
+      if (formData.email && !validateEmail(formData.email)) {
+        message = "Invalid email address";
+      } else if(emailError){
+        message = "Email address already exists";
+      }
+      return emailError ? message : false;
     }
-
+  
     if (key === 'username') {
       return usernameError ? "Existing or invalid username" : false;
     }
-
+  
     if (key === 'password') {
       return passwordError ? "Password must contain at least 8 characters and one special character" : false;
     }
-
+  
     if (key === 'confirmPassword') {
       return confirmPasswordError ? "Passwords don't match" : false;
     }
-
+  
     if (!formValid && !formData[key]) {
       return "This field is required";
     }
-
+  
     return false;
   }
-
+  
   return (
     <Container
       maxWidth={false}
@@ -242,12 +259,7 @@ const RegistrationPage = () => {
             type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={formData[item.key]}
             onChange={(e) => handleInputChange(item.key, e.target.value)}
-            error={
-              (item.key === 'email' && emailError) ||
-              (item.key === 'username' && usernameError) ||
-              (item.key === 'password' && passwordError) ||
-              (item.key === 'confirmPassword' && confirmPasswordError) ||
-              (!formValid && !formData[item.key])} // Add error condition for required fields
+            error={getErrorCondition(item) ? true : false}
             helperText={getErrorCondition(item)}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,

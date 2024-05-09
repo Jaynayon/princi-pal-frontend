@@ -73,9 +73,15 @@ const RestService = (() => {
         }
     };
 
-    const validateUsernameEmail = async (details) => {
+    const validateUsernameEmail = async (email) => {
         try {
-            const response = await instance.get(`http://localhost:4000/users/exists/${details}`)
+            const response = await instance.post('http://localhost:4000/users/exists' , {
+                emailOrUsername: email
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
                 .then(response => {
                     console.log('Response data:', response.data);
                     return response.data;
@@ -85,7 +91,7 @@ const RestService = (() => {
                     // Handle errors here (e.g., display error message)
                 });
             if (response) {
-                return response.exists;
+                return response;
             }
         } catch (error) {
             console.error('Error validating username/email:', error);
@@ -166,7 +172,7 @@ const RestService = (() => {
                     return response.data;
                 })
                 .catch(error => {
-                    console.error(error.response.data.message)
+                    console.error(error.response.data)
                 })
 
             if (response) {
