@@ -25,6 +25,7 @@ import Divider from '@mui/material/Divider';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import Avatar from "@mui/material/Avatar";
 
 // Custom imports
 import { styling } from "./styling";

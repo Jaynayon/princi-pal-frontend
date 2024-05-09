@@ -5,24 +5,25 @@ const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 
+let newLr = {
+    id: 3,
+    date: '',
+    orsBursNo: '',
+    particulars: '',
+    amount: 0
+}
+
 export const SchoolProvider = ({ children, value }) => {
-    // Initialize current date to get current month and year
-    const currentDate = new Date();
-    const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
-    const currentYear = currentDate.getFullYear().toString(); // Get full year as string
-
     // Set initial state for month and year using current date
-    const { currentDocument, setCurrentDocument, month, setMonth, year, setYear } = value;
+    const {
+        currentMonth, currentYear,
+        currentDocument, setCurrentDocument,
+        month, setMonth,
+        year, setYear,
+        months, years
+    } = value;
     const [lr, setLr] = useState([]);
-
-    const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-
-    const years = [
-        '2021', '2022', '2023', '2024'
-    ];
+    const [isAdding, setIsAdding] = useState(false);
 
     const monthIndex = months.indexOf(currentMonth);
     const yearIndex = years.indexOf(currentYear);
@@ -38,12 +39,20 @@ export const SchoolProvider = ({ children, value }) => {
             if (data) { //data.decodedToken
                 setLr(data)
             } else {
-                setLr(null); //meaning it's empty 
+                setLr([]); //meaning it's empty 
             }
             console.log(data);
             // Handle response as needed
         } catch (error) {
             console.error('Error fetching lr:', error);
+        }
+    };
+
+    const displayFields = () => {
+        if (!lr) {
+            setLr(prevRows => [...prevRows, newLr]);
+        } else {
+            setLr(prevRows => [...prevRows, newLr]);
         }
     };
 
@@ -73,8 +82,8 @@ export const SchoolProvider = ({ children, value }) => {
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
-            lr, setLr, fetchLrByDocumentId, setCurrentDocument,
-            currentDocument
+            lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
+            displayFields, isAdding, setIsAdding
         }}>
             {children}
         </SchoolContext.Provider>

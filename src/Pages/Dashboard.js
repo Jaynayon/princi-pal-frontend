@@ -10,6 +10,7 @@ import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
 import { DateFilter } from '../Components/Filters/Filters';
+
 import Select from '@mui/material/Select';
 import { Box, Button, Menu, MenuItem } from '@mui/material';
 
@@ -63,7 +64,8 @@ const ApexChart = ({ data }) => {
 };
 
 function Dashboard(props) {
-    const [selectedSchool, setSelectedSchool] = useState('None');
+    const [showInitial, setShowInitial] = useState(true);
+    const [selectedSchool, setSelectedSchool] = useState('');
     const [schoolData, setSchoolData] = useState({
         'CIT': {
             monthlyBudget: { currency: 'Php', amount: '1000.00' },
@@ -87,13 +89,12 @@ function Dashboard(props) {
 
     useEffect(() => {
         const firstOption = Object.keys(schoolData)[0];
-        if (!selectedSchool || !schoolData[selectedSchool]) {
-            setSelectedSchool('None');
-            setEditableAmounts({});
-        } else {
-            setEditableAmounts(schoolData[selectedSchool]);
+        if (!selectedSchool) {
+            setSelectedSchool(firstOption);
+            setEditableAmounts(schoolData[firstOption]); // Set editableAmounts with the data of the first option
         }
     }, [schoolData, selectedSchool]);
+    
 
     const handleSchoolChange = (event) => {
         setSelectedSchool(event.target.value);
@@ -103,7 +104,9 @@ function Dashboard(props) {
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
+
     const [selectedMonthYear, setSelectedMonthYear] = useState('');
+
     const [applyButtonClicked, setApplyButtonClicked] = useState(false);
 
     useEffect(() => {
@@ -112,6 +115,7 @@ function Dashboard(props) {
             setSelectedSchool(firstOption);
             setEditableAmounts(schoolData[firstOption]);
         }
+        // Set initial selected month and year if "Apply" button not clicked yet
         if (!applyButtonClicked) {
             setSelectedMonthYear(getCurrentMonthYear());
         }
@@ -121,9 +125,11 @@ function Dashboard(props) {
         setSelectedMonthYear(selectedMonthYear);
     };
 
+    
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
-        const monthNames = ["January", "February", "March", "April", "May", "June",
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ];
         const month = monthNames[currentDate.getMonth()];
@@ -142,6 +148,7 @@ function Dashboard(props) {
 
     const handleChange = (event) => {
         const newValue = event.target.value;
+        // Regular expression to match float numbers with exactly 2 decimal places
         const regex = /^\d+(\.\d{0,2})?$/;
         if (
             newValue === '' ||                      
@@ -153,7 +160,7 @@ function Dashboard(props) {
             });
             setError('');
         } else {
-            setError('Please enter a valid number.');
+            setError('Please enter a valid number between 0 and 999,999 with up to 2 decimal places.');
         }
     };
 
@@ -187,6 +194,11 @@ function Dashboard(props) {
         setEditableAmounts(schoolData[school]);
     };
 
+    const handleShowNormalDashboard = () => {
+        setShowInitial(false); // Hide initial view
+    };
+
+    
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
         let displayTitle = title;
@@ -250,10 +262,11 @@ function Dashboard(props) {
         );
     };
     
+    
     const renderSummaryCard = () => {
-        const monthlyBudgetData = selectedSchool ? (editableAmounts['Monthly Budget'] || { currency: '', amount: '' }) : { currency: '', amount: '' };
-        const budgetLimitData = selectedSchool ? (editableAmounts['Budget Limit'] || { currency: '', amount: '' }) : { currency: '', amount: '' };
-        const totalBalanceData = selectedSchool ? (editableAmounts['Total Balance'] || { currency: '', amount: '' }) : { currency: '', amount: '' };
+        const monthlyBudgetData = editableAmounts['Monthly Budget'] || { currency: '', amount: '' };
+        const budgetLimitData = editableAmounts['Budget Limit'] || { currency: '', amount: '' };
+        const totalBalanceData = editableAmounts['Total Balance'] || { currency: '', amount: '' };
     
         return (
             <Paper
@@ -273,120 +286,142 @@ function Dashboard(props) {
             </Paper>
         );
     };
+    
 
     return (
         <Container className="test" maxWidth="lg">
             <Box sx={{ position: 'relative' }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Paper
-                            sx={[
-                                styles.header, {
+                {showInitial ? (
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Paper
+                                sx={{
                                     p: 2,
                                     display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between', 
-                                }
-                            ]}
-                            elevation={0}
-                            variant='outlined'
-                        >
-                            <Box style={styles.header.buttons}>
-                                <DateFilter onApply={handleDateFilterApply} />
-                            </Box>
-                            <Box style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                                <Select
-                                    id="school-filter"
-                                    value={selectedSchool}
-                                    onChange={(event) => handleSelectSchool(event.target.value)}
-                                    sx={{
-                                        fontWeight: '900', 
-                                        height: '40px',    
-                                        minWidth: '120px', 
-                                    }}
-                                    displayEmpty
-                                >
-                                    <MenuItem value="" disabled>
-                                        School
-                                    </MenuItem>
-                                    {Object.keys(schoolData).map((school) => (
-                                        <MenuItem key={school} value={school}>{school}</MenuItem>
-                                    ))}
-                                </Select>
-                            </Box>
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Box style={{
-                            display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
-                            marginLeft: '10px', marginRight: '10px' 
-                        }}>
-                            <Typography
-                                component="h1"
-                                variant="h6"
-                                color="inherit"
-                                noWrap
-                                sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
+                                    flexDirection: 'column',
+                                    height: 380,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
                             >
-                                Analytics
-                            </Typography>
-                            <Typography
-                                component="h1"
-                                variant="h6"
-                                color="inherit"
-                                noWrap
-                            >
-                                {selectedMonthYear}
-                            </Typography>
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            marginTop: "-15px",
-                        }}>
-                        <Grid container >
-                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('monthlyBudget')}
-                            </Grid>
-                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('budgetLimit')}
-                            </Grid>
-                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('totalBalance')}
-                            </Grid>
+                               <Box sx={{ fontWeight: 'bold' }}>
+                                <Typography variant="h6">Currently, you are not assigned to a school.</Typography>
+                                </Box>
+                                <Typography variant="body1">Once assigned, available data will be displayed here.</Typography>
+
+                                <Button onClick={handleShowNormalDashboard} variant="contained" color="primary" sx={{ marginTop: '1rem' }}>Show Dashboard</Button>
+                            </Paper>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Grid container >
-                            <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
-                                <Paper
-                                    sx={{
+                ) : (
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={12} lg={12}>
+                            <Paper
+                                sx={[
+                                    styles.header, {
                                         p: 2,
                                         display: 'flex',
-                                        flexDirection: 'column',
-                                        height: 380,
-                                    }}
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between', // Align items to the edges
+                                    }
+                                ]}
+                                elevation={0}
+                                variant='outlined'
+                            >
+                                <Box style={styles.header.buttons}>
+                                    <DateFilter onApply={handleDateFilterApply} />
+                                </Box>
+                                <Box style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                                    <Select
+                                        id="school-filter"
+                                        value={selectedSchool}
+                                        onChange={(event) => handleSelectSchool(event.target.value)}
+                                        sx={{
+                                            fontWeight: '900', // Adjust font weight
+                                            height: '40px',    // Adjust height
+                                            minWidth: '120px', // Adjust minimum width
+                                        }}
+                                        displayEmpty
+                                    >
+                                        <MenuItem value="" disabled>
+                                            School
+                                        </MenuItem>
+                                        {Object.keys(schoolData).map((school) => (
+                                            <MenuItem key={school} value={school}>{school}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={12}>
+                            <Box style={{
+                                display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
+                                marginLeft: '10px', marginRight: '10px' 
+                            }}>
+                                <Typography
+                                    component="h1"
+                                    variant="h6"
+                                    color="inherit"
+                                    noWrap
+                                    sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
                                 >
-                                    {selectedSchool && schoolData[selectedSchool] ? (
-                                        <ApexChart data={schoolData[selectedSchool]} />
-                                    ) : (
-                                        <Typography variant="body1">No data available. Please select school.</Typography>
-                                    )}
-                                </Paper>
+                                    Analytics
+                                </Typography>
+                                <Typography
+                                    component="h1"
+                                    variant="h6"
+                                    color="inherit"
+                                    noWrap
+                                >
+                                    {selectedMonthYear}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={12}
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                marginTop: "-15px",
+                            }}>
+                            <Grid container >
+                                <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                    {renderEditableCard('monthlyBudget')}
+                                </Grid>
+                                <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                    {renderEditableCard('budgetLimit')}
+                                </Grid>
+                                <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                    {renderEditableCard('totalBalance')}
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderSummaryCard()}
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={12}>
+                            <Grid container >
+                                <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
+                                    <Paper
+                                        sx={{
+                                            p: 2,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            height: 380,
+                                        }}
+                                    >
+                                        {selectedSchool && schoolData[selectedSchool] ? (
+                                            <ApexChart data={schoolData[selectedSchool]} />
+                                        ) : null}
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                    {renderSummaryCard()}
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
-                </Grid>
+                )}
             </Box>
         </Container>
     );
 }
-
 const styles = {
     header: {
         overflow: 'auto',

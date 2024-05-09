@@ -2,32 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import Box from '@mui/material/Box';
+import { useNavigationContext } from '../../Context/NavigationProvider';
+
+let newLr = {
+    id: 3,
+    date: '',
+    orsBursNo: '',
+    particulars: '',
+    amount: 0
+}
+
 
 function RecordsRow(props) {
-    const { rows, setRows, page, rowsPerPage, columns } = props;
+    const { rows, setRows, page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { fetchLrByDocumentId } = useSchoolContext();
-
-    // const appendRow = (newRow) => {
-    //     setRows(prevRows => [...prevRows, newRow]);
-    // };
-
-    // let newRecord = {
-    //     id: 3,
-    //     date: 'test',
-    //     ors_burs_no: 'testing',
-    //     particulars: 'testing',
-    //     lastUpdated: 'testing2',
-    //     hours: 'testing2',
-    //     amount: 100
-    // }
+    const { displayFields, isAdding, setIsAdding } = useSchoolContext();
+    const { selected } = useNavigationContext();
 
     useEffect(() => {
-        //appendRow(newRecord)
-        //console.log(rows)
-    }, [initialValue])
+        if (isAdding) {
+            displayFields();
+        }
+        if (selected) {
+            setIsAdding(false);
+        }
+    }, [isAdding])
 
     const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });

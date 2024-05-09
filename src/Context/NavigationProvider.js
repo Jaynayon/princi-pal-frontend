@@ -73,7 +73,6 @@ export const NavigationProvider = ({ children }) => {
                         setUserId(data)
                         if (!currentUser) {
                             setCurrentUser(await RestService.getUserById(data.id))
-
                         }
                     } else {
                         //setIsLoggedIn(false)
@@ -89,7 +88,6 @@ export const NavigationProvider = ({ children }) => {
             }
         };
         fetchData();
-        //fetchDocumentBySchoolIdYearMonth("6634e7fc43d8096920d765ff", 2024, "May");
 
         // Call the function to set initial mobileMode state
         updateMobileMode();
