@@ -109,7 +109,10 @@ export const SchoolProvider = ({ children }) => {
             date: '',
             orsBursNo: '',
             particulars: '',
-            amount: 0
+            amount: 0,
+            objectCode: '',
+            payee: '',
+            natureOfPayment: 'Cash'
         }
 
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
