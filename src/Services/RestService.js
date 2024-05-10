@@ -75,7 +75,7 @@ const RestService = (() => {
 
     const validateUsernameEmail = async (email) => {
         try {
-            const response = await instance.post('http://localhost:4000/users/exists' , {
+            const response = await instance.post('http://localhost:4000/users/exists', {
                 emailOrUsername: email
             }, {
                 headers: {
@@ -239,6 +239,12 @@ const RestService = (() => {
             obj = { orsBursNo: value };
         } else if (colId === "date") {
             obj = { date: value };
+        } else if (colId === "objectCode") {
+            obj = { objectCode: value };
+        } else if (colId === "payee") {
+            obj = { payee: value };
+        } else if (colId === "natureOfPayment") {
+            obj = { natureOfPayment: value };
         }
 
         try {
@@ -272,7 +278,10 @@ const RestService = (() => {
                 date: obj.date,
                 orsBursNo: obj.orsBursNo,
                 particulars: obj.particulars,
-                amount: obj.amount
+                amount: obj.amount,
+                objectCode: obj.objectCode,
+                payee: obj.payee,
+                natureOfPayment: obj.natureOfPayment
             }, {
                 headers: {
                     'Content-Type': 'application/json'
