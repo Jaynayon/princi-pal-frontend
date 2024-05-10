@@ -110,7 +110,7 @@ function RecordsRow(props) {
             //updateLr();
             fetchDocumentData();
         } else {
-            setReload(!reload);
+            setReload(!reload); //just to reload school.js to fetch lr data
         }
     }
 
@@ -226,7 +226,12 @@ function RecordsRow(props) {
                                         </IconButton>
                                     </Box>
                                 ) : (
-                                    <React.Fragment>
+                                    <Box sx={{
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        width: 40
+                                    }}>
                                         {/* Delete button */}
                                         <Button
                                             aria-controls={`menu-delete-${index}`}
@@ -244,7 +249,7 @@ function RecordsRow(props) {
                                         >
                                             <MenuItem onClick={() => handleDelete(row.id)}>Delete</MenuItem>
                                         </Menu>
-                                    </React.Fragment>
+                                    </Box>
                                 )}
                             </TableCell>
                         </TableRow>
