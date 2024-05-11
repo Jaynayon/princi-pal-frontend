@@ -8,7 +8,10 @@ export const useSchoolContext = () => useContext(SchoolContext);
 
 const emptyDocument = {
     budget: 0,
-    cashAdvance: 0
+    cashAdvance: 0,
+    claimant: "",
+    sds: "",
+    headAccounting: ""
 }
 
 // Initialize current date to get current month and year
@@ -27,7 +30,7 @@ const years = [
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool } = useNavigationContext();
+    const { currentSchool, selected } = useNavigationContext();
 
     // Set initial state for month and year using current date
     const [month, setMonth] = useState(currentMonth);
@@ -120,10 +123,7 @@ export const SchoolProvider = ({ children }) => {
     }, [])
 
     useEffect(() => {
-        console.log("SchoolProvider useEffect: update lr");
-        //if (val === 0) { // if LR tab is selected
-        //updateLr();
-        //}
+        console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
 
     }, [month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
