@@ -12,7 +12,8 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import RecordsRow from './RecordsRow';
 import Typography from '@mui/material/Typography';
-import { SchoolContext } from '../../Context/SchoolProvider';
+import { SchoolContext, useSchoolContext } from '../../Context/SchoolProvider';
+import RestService from '../../Services/RestService';
 
 class LRTable extends Component {
     constructor(props) {
@@ -23,33 +24,16 @@ class LRTable extends Component {
         };
     }
 
-    // componentDidMount() {
-    //     // Accessing context values using this.context
-    //     const {
-    //         month,
-    //         year,
-    //         setLr,
-    //         fetchLrByDocumentId,
-    //         currentDocument,
-    //     } = this.context;
+    componentDidMount() {
+        // Accessing context values using this.context
+        const {
+            currentDocument,
+        } = this.context;
 
-    //     // Example usage of context values
-    //     console.log('Current Month:', month);
-    //     console.log('Current Year:', year);
-
-    //     // Perform operations with context values
-    //     // For example, fetching LR data
-    //     const documentId = currentDocument ? currentDocument.id : null;
-    //     if (documentId) {
-    //         fetchLrByDocumentId(documentId)
-    //             .then(lrData => {
-    //                 setLr(lrData);
-    //             })
-    //             .catch(error => {
-    //                 console.error('Error fetching LR data:', error);
-    //             });
-    //     }
-    // }
+        if (!currentDocument) {
+            return null;
+        }
+    }
 
     handleChangePage = (event, newPage) => {
         this.setState({ page: newPage });
@@ -64,7 +48,7 @@ class LRTable extends Component {
 
     render() {
         const { page, rowsPerPage } = this.state;
-        const { lr } = this.context;
+        const { lr, currentDocument } = this.context;
         const columns = [
             {
                 id: 'date',
@@ -124,10 +108,6 @@ class LRTable extends Component {
             },
         ];
 
-        if (!lr) {
-            return null;
-        }
-
         return (
             <SchoolContext.Consumer>
                 {({ setLr }) => (
@@ -161,39 +141,25 @@ class LRTable extends Component {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        {/*<Box sx={{
-                            display: "flex"
-                        }}>
-                            <Box sx={{
-                                width: "50%",
-                                height: "100%",
-                                backgroundColor: "green"
-                            }}>
-                                s
-                            </Box>
-                            <TablePagination
-                                rowsPerPageOptions={[4, 10, 25, 100]}
-                                component="div"
-                                count={lr.length}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                onPageChange={this.handleChangePage}
-                                onRowsPerPageChange={this.handleChangeRowsPerPage}
-                            />
-                        </Box>*/}
                         <Grid container sx={{ mt: 1, pb: 1, overflowX: 'auto' }}>
                             <Grid item xs={12} sm={12} md={8} lg={8} >
-                                <Grid container >
+                                <Grid container sx={{ pl: 2, pb: 1 }}>
                                     <Grid item xs={6} sm={6} md={6} lg={6}>
                                         <DocumentTextFields
+                                            id={currentDocument?.id} //pass by value
+                                            value={currentDocument?.claimant}
                                             description="Claimant"
                                         />
                                         <DocumentTextFields
+                                            id={currentDocument?.id}
+                                            value={currentDocument?.sds}
                                             description="SDS"
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={6} md={6} lg={6}>
                                         <DocumentTextFields
+                                            id={currentDocument?.id}
+                                            value={currentDocument?.headAccounting}
                                             description="Head. Accounting Div. Unit"
                                         />
                                     </Grid>
@@ -224,7 +190,45 @@ LRTable.contextType = SchoolContext;
 export default LRTable;
 
 const DocumentTextFields = (props) => {
-    const { description } = props;
+    const { description, value, id } = props;
+    const [input, setInput] = React.useState(value);
+    const [prevInput, setPrevInput] = React.useState('initial state');
+
+    const handleInputChange = (event) => {
+        setInput(event.target.value);
+    }
+
+    const handleInputBlur = () => {
+        if (prevInput !== input) {
+            console.log("there are changes");
+            updateDocumentById();
+        } else
+            console.log("no changes");
+    }
+
+    const handleInputOnClick = (event) => {
+        setPrevInput(event.target.value);
+    }
+
+
+    const updateDocumentById = async () => {
+        try {
+            const response = await RestService.updateDocumentById(id, description, input);
+            if (response) {
+                console.log(`Document with id: ${id} is updated`);
+            } else {
+                console.log("Document not updated");
+            }
+
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }
+
+    if (!id) {
+        return null;
+    }
+
     return (
         <Box sx={{
             display: 'flex',
@@ -233,24 +237,23 @@ const DocumentTextFields = (props) => {
             pt: 1
         }}>
             <Box sx={{
-                width: 90,
-                fontSize: 14,
+                pr: 1.5,
+                width: 80,
+                fontSize: 13,
                 fontWeight: 650,
-                color: "#9FA2B4",
-                pr: 1.5
+                color: "#9FA2B4"
             }}>
                 <Typography variant="inherit">
                     {description}
                 </Typography>
             </Box>
             <TextField
-                // value={value}
+                value={input}
                 variant='standard'
                 sx={{
                     "& fieldset": { border: 'none' }
                 }}
                 InputProps={{
-                    //disableUnderline: true,
                     style: {
                         display: 'flex',
                         alignItems: 'center',
@@ -260,10 +263,9 @@ const DocumentTextFields = (props) => {
                         pl: 5,
                     }
                 }}
-                // onChange={(event) =>
-                //     handleInputChange(column.id, row.id, event)
-                // }
-                //onBlur={() => handleInputBlur(column.id, row.id)}
+                onChange={(event) => handleInputChange(event)}
+                onClick={(event) => handleInputOnClick(event)}
+                onBlur={(event) => handleInputBlur(event)}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
