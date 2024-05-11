@@ -151,6 +151,19 @@ export default function Navigation({ children }) {
     'Budget limit exceeded; urgent action required to align expenses with allocated funds',
     'Congratulations, you have passed the first phase of the application process',
     'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
+    'CIM is inviting you to be a part of the organization',
   ]);
 
   const handleClearOptions = () => {
@@ -323,8 +336,9 @@ export default function Navigation({ children }) {
                       onClose={handleMenuClose}
                       PaperProps={{
                         style: {
-                          maxHeight: ITEM_HEIGHT * 10.5,
-                          width: '70ch',
+                          maxHeight: ITEM_HEIGHT * 13,
+                          width: '42ch',
+                          position: 'fixed',
                         },
                       }}
                     >
@@ -341,13 +355,15 @@ export default function Navigation({ children }) {
                       >
                         <Tab label="All" />
                       </Tabs>
-
-                      {options.map((option, index) => [
-                        <MenuItem key={option} selected={option === 'Pyxis'} onClick={handleMenuClose}>
-                          {option}
-                        </MenuItem>,
-                        index !== options.length - 1 && <Divider key={`divider-${index}`} />
-                      ])}
+                      {options.map((option, index) => (
+                      <React.Fragment key={option}>
+                          <MenuItem onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                          <Avatar sx={{ marginRight: '8px' }}> </Avatar>
+                              {option}
+                          </MenuItem>
+                          {index !== options.length - 1 && <Divider />}
+                      </React.Fragment>
+                  ))}
                     </Menu>
                   </Box>
                 </Toolbar>

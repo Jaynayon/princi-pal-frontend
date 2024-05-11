@@ -180,7 +180,7 @@ export const ProfileTab = ({ user }) => {
 
                     <AccountCircleIcon
                         sx={{
-                            color: theme.navStyle.color,
+                            color: currentUser.avatar,
                             fontSize: '35px',
                             width: '100%',
                         }}
@@ -200,13 +200,14 @@ export const ProfileTab = ({ user }) => {
                 <DialogTitle>My Profile</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
-                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 165 }} alt="User Avatar"> </Avatar>
+                        <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
                             <TextField disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="Fullname" defaultValue={currentUser.fname + ' ' + currentUser.mname + ' ' + currentUser.lname} margin="dense" />
+                            <TextField disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " " } margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " " } margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" />
                             <TextField disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
                             <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Number" defaultValue="0935 256 2584" margin="normal" />
                         </Stack>
                     </Stack>
                 </DialogContent>
