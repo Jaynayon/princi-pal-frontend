@@ -305,6 +305,42 @@ const RestService = (() => {
         }
     };
 
+    const updateDocumentById = async (docId, description, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (description === "Claimant") {
+            obj = { claimant: value };
+        } else if (description === "SDS") {
+            obj = { sds: value };
+        } else if (description === "Head. Accounting Div. Unit") {
+            obj = { headAccounting: value };
+        }
+
+        try {
+            const response = await instance.patch(`http://localhost:4000/documents/${docId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
 
     return {
         createUser,
@@ -318,7 +354,8 @@ const RestService = (() => {
         getExcelFromLr,
         deleteLrById,
         updateLrById,
-        createLrByDocId
+        createLrByDocId,
+        updateDocumentById
     };
 })();
 
