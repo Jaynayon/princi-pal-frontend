@@ -174,6 +174,7 @@ function RecordsRow(props) {
                                         ]}
                                         onClick={(event) => handleCellClick(column.id, row.id, event)}
                                     >
+                                        {/*UACS field*/}
                                         {column.id === "objectCode" ?
                                             <Box sx={{
                                                 display: 'flex',
