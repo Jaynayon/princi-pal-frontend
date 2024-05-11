@@ -66,7 +66,6 @@ function RecordsRow(props) {
             } else {
                 console.log("LR not deleted");
             }
-            //setReload(!reload);
             fetchDocumentData();
         } catch (error) {
             console.error('Error fetching document:', error);
@@ -106,7 +105,6 @@ function RecordsRow(props) {
     const handleNewRecordCancel = () => {
         console.log("cancel");
         if (lr.length > 1) {
-            //updateLr();
             fetchDocumentData();
         } else {
             setReload(!reload); //just to reload school.js to fetch lr data

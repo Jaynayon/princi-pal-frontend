@@ -61,14 +61,19 @@ function UacsDateFilter(props) {
         const {
             target: { value },
         } = event;
-        // Only applies if it's not the new row
+
         setSelectedCode(
             // On autofill we get a stringified value.
             typeof value === 'string' ? value.split(',') : value,
         );
-        handleInputChange("objectCode", rowId, event);
-        if (rowId !== 3) {
 
+        // updates the row state in RecordsRow
+        // mainly used in displayFields feature where a new object is inserted
+        // with the id == 3
+        handleInputChange("objectCode", rowId, event);
+
+        // Only applies if it's not the new row
+        if (rowId !== 3) {
             updateLrByIdUacs(value);
         }
     };

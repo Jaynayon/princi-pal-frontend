@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Table from '@mui/material/Table';
+import Box from '@mui/material/Box';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -152,10 +153,30 @@ class LRTable extends Component {
                                         page={page}
                                         rowsPerPage={rowsPerPage}
                                         columns={columns}
-                                        text={""} />
+                                    />
                                 </TableBody>
                             </Table>
                         </TableContainer>
+                        {/*<Box sx={{
+                            display: "flex"
+                        }}>
+                            <Box sx={{
+                                width: "50%",
+                                height: "100%",
+                                backgroundColor: "green"
+                            }}>
+                                s
+                            </Box>
+                            <TablePagination
+                                rowsPerPageOptions={[4, 10, 25, 100]}
+                                component="div"
+                                count={lr.length}
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                onPageChange={this.handleChangePage}
+                                onRowsPerPageChange={this.handleChangeRowsPerPage}
+                            />
+                        </Box>*/}
                         <TablePagination
                             rowsPerPageOptions={[4, 10, 25, 100]}
                             component="div"
