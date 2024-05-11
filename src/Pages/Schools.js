@@ -1,5 +1,5 @@
 import '../App.css'
-import React, { useState, useCallback } from 'react';
+import React, { } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -11,8 +11,8 @@ import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
 import DocumentTable from '../Components/Table/DocumentTable';
 import Button from '@mui/material/Button';
-import { SchoolProvider, useSchoolContext } from '../Context/SchoolProvider';
-import { useNavigationContext } from '../Context/NavigationProvider';
+import { useSchoolContext } from '../Context/SchoolProvider';
+// import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 
@@ -51,7 +51,7 @@ function a11yProps(index) {
 
 function Schools(props) {
     const { year, month, setIsAdding, currentDocument, reload, updateLr } = useSchoolContext();
-    const { selected } = useNavigationContext();
+    //const { selected } = useNavigationContext();
     const [value, setValue] = React.useState(0);
     const exportDocumentOnClick = async () => {
         await RestService.getExcelFromLr(currentDocument.id);
@@ -61,19 +61,19 @@ function Schools(props) {
 
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
-        console.log("Schools useEffect: document updated");
+        console.log("Schools useEffect: lr updated");
 
         updateLr(); //update lr
         setIsAdding(false); //reset state to allow displayFields again
-    }, [year, month, value, reload, updateLr]);
-
-    if (!currentDocument) {
-        return null;
-    }
+    }, [year, month, value, reload, updateLr, setIsAdding]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    if (!currentDocument) { //returns null until there's value
+        return null;
+    }
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>

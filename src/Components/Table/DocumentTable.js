@@ -108,9 +108,7 @@ class LRTable extends Component {
             },
         ];
 
-        if (!currentDocument) { //returns null until there's value
-            return null;
-        }
+
 
         return (
             <SchoolContext.Consumer>
