@@ -21,19 +21,36 @@ class LRTable extends Component {
         this.state = {
             page: 0,
             rowsPerPage: 4,
+            claimant: "",
+            sds: "",
+            headAccounting: ""
         };
     }
 
     componentDidMount() {
         // Accessing context values using this.context
-        const {
-            currentDocument,
-        } = this.context;
+        const { currentDocument, fetchDocumentData, value } = this.context;
+
+        this.setState({ claimant: currentDocument.claimant })
+        this.setState({ sds: currentDocument.sds })
+        this.setState({ headAccounting: currentDocument.headAccounting })
 
         if (!currentDocument) {
             return null;
         }
+        if (value === 0) {
+            fetchDocumentData();
+        }
+
     }
+
+    // componentDidUpdate(prevProps, prevState) {
+    //     // Check if currentDocument prop from context has changed
+    //     if (this.context.currentDocument !== prevProps.currentDocument) {
+    //         // Update state based on the new currentDocument prop
+    //         this.updateStateFromDocument(this.context.currentDocument);
+    //     }
+    // }
 
     handleChangePage = (event, newPage) => {
         this.setState({ page: newPage });
@@ -47,8 +64,8 @@ class LRTable extends Component {
     };
 
     render() {
-        const { page, rowsPerPage } = this.state;
-        const { lr, currentDocument } = this.context;
+        const { page, rowsPerPage, claimant, sds, headAccounting } = this.state;
+        const { lr } = this.context;
         const columns = [
             {
                 id: 'date',
@@ -112,7 +129,7 @@ class LRTable extends Component {
 
         return (
             <SchoolContext.Consumer>
-                {({ setLr }) => (
+                {({ setLr, currentDocument }) => (
                     <React.Fragment>
                         <TableContainer>
                             <Table stickyHeader aria-label="sticky table">
@@ -192,38 +209,41 @@ LRTable.contextType = SchoolContext;
 export default LRTable;
 
 const DocumentTextFields = (props) => {
-    const { fetchDocumentData } = useSchoolContext();
+    // const { } = useSchoolContext();
     const { description, value, id } = props;
     const [input, setInput] = React.useState(value);
     const [prevInput, setPrevInput] = React.useState('initial state');
+
+    React.useEffect(() => {
+        setInput(value); // Set previous input on initial render
+    }, [value]); // Update prevInput whenever value prop changes
 
     const handleInputChange = (event) => {
         setInput(event.target.value);
     }
 
-    const handleInputBlur = () => {
+    const handleInputBlur = async () => {
         if (prevInput !== input) {
             console.log("there are changes");
-            updateDocumentById(); //update field in db
+            await updateDocumentById(input); //update field in db
         } else
             console.log("no changes");
-
     }
 
     const handleInputOnClick = (event) => {
         setPrevInput(event.target.value);
     }
 
-    const updateDocumentById = async () => {
+    const updateDocumentById = async (newValue) => {
         try {
             const response = await RestService.updateDocumentById(id, description, input);
             if (response) {
                 console.log(`Document with id: ${id} is updated`);
-
+                setInput(newValue);
             } else {
                 console.log("Document not updated");
             }
-            fetchDocumentData(); //fetch data changes
+            //fetchDocumentData(); //fetch data changes
         } catch (error) {
             console.error('Error fetching document:', error);
         }
