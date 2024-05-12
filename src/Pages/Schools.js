@@ -50,11 +50,11 @@ function a11yProps(index) {
 }
 
 function Schools(props) {
-    const { year, month, setIsAdding, currentDocument, reload, updateLr } = useSchoolContext();
+    const { year, month, setIsAdding, currentDocument, currentSchool, reload, updateLr, value, setValue } = useSchoolContext();
     //const { selected } = useNavigationContext();
-    const [value, setValue] = React.useState(0);
+
     const exportDocumentOnClick = async () => {
-        await RestService.getExcelFromLr(currentDocument.id);
+        await RestService.getExcelFromLr(currentDocument.id, currentSchool.id, year, month);
     }
 
     console.log("Schools renders")
@@ -62,8 +62,10 @@ function Schools(props) {
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Schools useEffect: lr updated");
+        if (value === 0) {
+            updateLr(); //update lr
+        }
 
-        updateLr(); //update lr
         setIsAdding(false); //reset state to allow displayFields again
     }, [year, month, value, reload, updateLr, setIsAdding]);
 

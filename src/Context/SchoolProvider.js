@@ -32,6 +32,9 @@ export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
     const { currentSchool, selected } = useNavigationContext();
 
+    // Document Tabs: LR & RCD, JEV
+    const [value, setValue] = React.useState(0);
+
     // Set initial state for month and year using current date
     const [month, setMonth] = useState(currentMonth);
     const [year, setYear] = useState(currentYear);
@@ -126,14 +129,14 @@ export const SchoolProvider = ({ children }) => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
 
-    }, [month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
+    }, [value, month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
 
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
             displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, reload, setReload
+            currentSchool, reload, setReload, value, setValue
         }}>
             {children}
         </SchoolContext.Provider>
