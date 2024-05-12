@@ -129,7 +129,7 @@ export const SchoolProvider = ({ children }) => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
 
-    }, [value, month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
+    }, [month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
 
     return (
         <SchoolContext.Provider value={{

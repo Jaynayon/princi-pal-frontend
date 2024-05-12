@@ -15,6 +15,7 @@ import { useSchoolContext } from '../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
+import JEVTable from '../Components/Table/JEVTable';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -62,12 +63,10 @@ function Schools(props) {
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Schools useEffect: lr updated");
-        if (value === 0) {
-            updateLr(); //update lr
-        }
+        updateLr(); //update lr
 
         setIsAdding(false); //reset state to allow displayFields again
-    }, [year, month, value, reload, updateLr, setIsAdding]);
+    }, [year, month, reload, updateLr, setIsAdding]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -164,7 +163,7 @@ function Schools(props) {
                                         <DocumentTable />
                                     </CustomTabPanel>
                                     <CustomTabPanel value={value} index={1}>
-                                        <DocumentTable />
+                                        <JEVTable />
                                     </CustomTabPanel>
                                 </Grid>
                             </Grid>
