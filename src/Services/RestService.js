@@ -297,6 +297,38 @@ const RestService = (() => {
         }
     };
 
+    const updateJevById = async (colId, rowId, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (colId === "amount") {
+            obj = { amount: value };
+        }
+
+        try {
+            const response = await instance.patch(`http://localhost:4000/jev/${rowId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
     const createLrByDocId = async (doc_id, obj) => {
         try {
             const response = await instance.post('http://localhost:4000/lr/create', {
@@ -382,7 +414,8 @@ const RestService = (() => {
         updateLrById,
         createLrByDocId,
         updateDocumentById,
-        getJevByDocumentId
+        getJevByDocumentId,
+        updateJevById
     };
 })();
 
