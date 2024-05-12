@@ -192,6 +192,7 @@ LRTable.contextType = SchoolContext;
 export default LRTable;
 
 const DocumentTextFields = (props) => {
+    const { fetchDocumentData } = useSchoolContext();
     const { description, value, id } = props;
     const [input, setInput] = React.useState(value);
     const [prevInput, setPrevInput] = React.useState('initial state');
@@ -203,25 +204,26 @@ const DocumentTextFields = (props) => {
     const handleInputBlur = () => {
         if (prevInput !== input) {
             console.log("there are changes");
-            updateDocumentById();
+            updateDocumentById(); //update field in db
         } else
             console.log("no changes");
+
     }
 
     const handleInputOnClick = (event) => {
         setPrevInput(event.target.value);
     }
 
-
     const updateDocumentById = async () => {
         try {
             const response = await RestService.updateDocumentById(id, description, input);
             if (response) {
                 console.log(`Document with id: ${id} is updated`);
+
             } else {
                 console.log("Document not updated");
             }
-
+            fetchDocumentData(); //fetch data changes
         } catch (error) {
             console.error('Error fetching document:', error);
         }
