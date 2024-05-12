@@ -18,7 +18,7 @@ function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { displayFields, isAdding, currentDocument, lr, fetchDocumentData, setReload, reload } = useSchoolContext();
+    const { displayFields, isAdding, currentDocument, lr, fetchDocumentData, setReload, reload, value, updateLr } = useSchoolContext();
 
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -26,10 +26,10 @@ function RecordsRow(props) {
 
     useEffect(() => {
         console.log("RecordsRow useEffect")
-        if (isAdding === true) {
+        if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
             displayFields(isAdding);
         }
-    }, [isAdding, displayFields]);
+    }, [isAdding, displayFields, value]);
 
     const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });
