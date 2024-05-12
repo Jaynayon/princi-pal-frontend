@@ -186,9 +186,14 @@ const RestService = (() => {
         }
     };
 
-    const getExcelFromLr = async (document_id) => {
+    const getExcelFromLr = async (docId, schoolId, year, month) => {
         try {
-            const response = await instance.get(`http://localhost:4000/downloadExcel/${document_id}`, {
+            const response = await instance.post('http://localhost:4000/downloadExcel', {
+                documentId: docId,
+                schoolId: schoolId,
+                year,
+                month
+            }, {
                 responseType: 'blob' // Set the response type to 'blob' to handle binary data
             });
 
