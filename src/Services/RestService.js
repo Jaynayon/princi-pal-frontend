@@ -164,6 +164,27 @@ const RestService = (() => {
         }
     };
 
+    const getJevByDocumentId = async (doc_id) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/jev/documents/${doc_id}`)
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response) {
+                return response;
+            }
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
     const getDocumentBySchoolIdYearMonth = async (school_id, year, month) => {
         try {
             const response = await instance.get(`http://localhost:4000/documents/school/${school_id}/${year}/${month}`)
@@ -360,7 +381,8 @@ const RestService = (() => {
         deleteLrById,
         updateLrById,
         createLrByDocId,
-        updateDocumentById
+        updateDocumentById,
+        getJevByDocumentId
     };
 })();
 

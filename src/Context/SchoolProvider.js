@@ -46,6 +46,7 @@ export const SchoolProvider = ({ children }) => {
 
     const [currentDocument, setCurrentDocument] = useState(null);
     const [lr, setLr] = useState([]);
+    const [jev, setJev] = useState([]);
 
     const monthIndex = months.indexOf(currentMonth);
     const yearIndex = years.indexOf(currentYear);
@@ -73,22 +74,24 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
-    const fetchLrByDocumentId = async (id) => {
+    const updateJev = useCallback(async () => {
         try {
-            // Call RestService to fetch lr by document id
-            const data = await RestService.getLrByDocumentId(id);
-
-            if (data) { //data.decodedToken
-                setLr(data)
-            } else {
-                setLr([]); //meaning it's empty 
+            if (currentDocument) {
+                // Call RestService to fetch lr by document id
+                const data = await RestService.getJevByDocumentId(currentDocument.id);
+                console.log("lr")
+                if (data) { //data.decodedToken
+                    setJev(data)
+                } else {
+                    setJev([]); //meaning it's empty 
+                }
+                console.log(data);
+                // Handle response as needed
             }
-            console.log(data);
-            // Handle response as needed
         } catch (error) {
             console.error('Error fetching lr:', error);
         }
-    };
+    }, [currentDocument, setJev]);
 
     const updateLr = useCallback(async () => {
         try {
@@ -134,9 +137,9 @@ export const SchoolProvider = ({ children }) => {
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
-            lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
+            lr, setLr, setCurrentDocument, currentDocument,
             displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, reload, setReload, value, setValue
+            currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev
         }}>
             {children}
         </SchoolContext.Provider>
