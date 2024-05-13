@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, Outlet, RouterProvider } from 'react-router-dom';
 import Navigation from './Components/Navigation/Navigation.js';
 import Dashboard from './Pages/Dashboard.js';
-import Schools from './Pages/Schools.js';
+import SchoolPage from './Pages/SchoolPage.js';
 import People from './Pages/People.js';
 import Settings from './Pages/Settings.js';
 import Login from './Pages/Login.js';
@@ -65,7 +65,7 @@ function App() {
           element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Login />}
         />
         <Route path="/schools/*"
-          element={isLoggedIn ? <PageWithNavigation page={<Schools />} /> : <Login />} />
+          element={isLoggedIn ? <PageWithNavigation page={<SchoolPage />} /> : <Login />} />
         <Route path="/people/*"
           element={isLoggedIn ? <PageWithNavigation page={<People />} /> : <Login />} />
         <Route path="/settings/*"
