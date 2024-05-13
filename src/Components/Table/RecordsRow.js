@@ -18,7 +18,8 @@ function RecordsRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { displayFields, isAdding, currentDocument, lr, fetchDocumentData, setReload, reload, value, updateLr } = useSchoolContext();
+    const { displayFields, isAdding, currentDocument, lr, fetchDocumentData, setReload,
+        reload, value, createNewDocument, jev, updateJev } = useSchoolContext();
 
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -102,20 +103,24 @@ function RecordsRow(props) {
 
     //If lr length is greater than one; reload to fetch documents and lr createLrByDocId
     //else, set lr to empty
-    const handleNewRecordCancel = () => {
+    const handleNewRecordCancel = async () => {
         console.log("cancel");
         if (lr.length > 1) {
-            fetchDocumentData();
+            await fetchDocumentData();
         } else {
             setReload(!reload); //just to reload school.js to fetch lr data
         }
     }
 
     //Find the index of the lr row where id == 3 and push that value to db
-    const handleNewRecordAccept = (rowId) => {
+    const handleNewRecordAccept = async (rowId) => {
         console.log("accept");
         const rowIndex = rows.findIndex(row => row.id === rowId);
-        createLrByDocumentId(currentDocument.id, rows[rowIndex]);
+        // jev length upon initialization will always be > 2
+        if (jev.length < 2) { //if there's no current document or it's not yet existing
+            createNewDocument(rows[rowIndex]);
+        }
+        await createLrByDocumentId(currentDocument.id, rows[rowIndex]);
     }
 
     const handleInputChange = (colId, rowId, event) => {
@@ -137,14 +142,14 @@ function RecordsRow(props) {
         }
     };
 
-    const handleInputBlur = (colId, rowId) => {
+    const handleInputBlur = async (colId, rowId) => {
         setEditingCell(null);
         // Perform any action when input is blurred (e.g., save the value)
         // Only applies if it's not the new row
         if (rowId !== 3) {
             if (inputValue !== initialValue) {
                 console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-                updateLrById(colId, rowId, inputValue);
+                await updateLrById(colId, rowId, inputValue);
             }
             console.log('Value saved:', inputValue);
         }

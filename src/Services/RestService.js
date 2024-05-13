@@ -363,6 +363,42 @@ const RestService = (() => {
         }
     };
 
+    const createDocBySchoolId = async (schoolId, month, year, obj) => {
+        try {
+            const response = await instance.post('http://localhost:4000/documents/create', {
+                schoolId,
+                month,
+                year
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Check if document creation was successful
+            if (response) {
+                const newDocumentId = response.data.id;
+
+                // Insert new LR using the newly created document's ID
+                const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
+
+                if (lrCreationResponse) {
+                    console.log('LR created successfully');
+                } else {
+                    console.error('Failed to create LR');
+                }
+
+                return response.data; // Return the created document data
+            } else {
+                console.error('Failed to create document');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating document:', error);
+            return null;
+        }
+    };
+
     const updateDocumentById = async (docId, description, value) => {
         let obj = {}
 
@@ -415,7 +451,8 @@ const RestService = (() => {
         createLrByDocId,
         updateDocumentById,
         getJevByDocumentId,
-        updateJevById
+        updateJevById,
+        createDocBySchoolId
     };
 })();
 

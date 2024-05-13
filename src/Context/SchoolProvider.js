@@ -74,6 +74,28 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
+    const createNewDocument = useCallback(async (obj) => {
+        try {
+            if (currentSchool) {
+                const getDocument = await RestService.createDocBySchoolId(
+                    currentSchool.id,
+                    month,
+                    year,
+                    obj
+                );
+
+                if (getDocument) {
+                    setCurrentDocument(getDocument);
+                } else {
+                    setCurrentDocument(emptyDocument);
+                }
+                fetchDocumentData();
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }, [currentSchool, fetchDocumentData, setCurrentDocument, year, month]);
+
     const updateJev = useCallback(async () => {
         try {
             if (currentDocument) {
@@ -130,6 +152,7 @@ export const SchoolProvider = ({ children }) => {
 
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
+        // console.log(currentSchool.name+ "with id: "+currentSchool);
         fetchDocumentData();
 
     }, [month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
@@ -139,7 +162,7 @@ export const SchoolProvider = ({ children }) => {
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, setCurrentDocument, currentDocument,
             displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev
+            currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev, createNewDocument
         }}>
             {children}
         </SchoolContext.Provider>
