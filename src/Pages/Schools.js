@@ -63,11 +63,14 @@ function Schools(props) {
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Schools useEffect: lr updated");
-        if (value === 0) {
-            updateLr(); //update or fetch lr data on load
-        } else if (value === 1) {
-            updateJev();
-        }
+        // if (value === 0) {
+        //     updateLr(); //update or fetch lr data on load
+        // } else if (value === 1) {
+        //     updateJev();
+        // }
+
+        updateLr();
+        updateJev();
         setIsAdding(false); //reset state to allow displayFields again
 
     }, [value, year, month, reload, updateLr, updateJev, setIsAdding]);
