@@ -8,6 +8,7 @@ import Settings from './Pages/Settings.js';
 import Login from './Pages/Login.js';
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
+import { SchoolProvider } from './Context/SchoolProvider.js';
 import WelcomePage from './Pages/WelcomePage.js';
 import Registration from './Pages/Registration.js';
 import RestService from './Services/RestService.js';
@@ -91,9 +92,11 @@ const Root = ({ setIsLoggedIn, isLoggedIn }) => {
 const PageWithNavigation = ({ page, setIsLoggedIn }) => {
   return (
     <NavigationProvider>
-      <Navigation>
-        {page}
-      </Navigation>
+      <SchoolProvider>
+        <Navigation>
+          {page}
+        </Navigation>
+      </SchoolProvider>
     </NavigationProvider>
   );
 };

@@ -32,9 +32,11 @@ export function DisplayItems() {
     const theme = useTheme();
     const { list, selected, setSelected } = useNavigationContext();
 
-    useEffect(() => {
-        console.log(selected);
-    }, [selected]);
+    console.log("display items rendered");
+
+    // useEffect(() => {
+    //     console.log(selected);
+    // }, [selected]);
 
     const styles = {
         icon: {
@@ -212,7 +214,7 @@ export const ProfileTab = ({ user }) => {
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                <Button onClick={handleDialogClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
+                    <Button onClick={handleDialogClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

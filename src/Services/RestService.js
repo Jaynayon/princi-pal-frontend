@@ -73,9 +73,15 @@ const RestService = (() => {
         }
     };
 
-    const validateUsernameEmail = async (details) => {
+    const validateUsernameEmail = async (email) => {
         try {
-            const response = await instance.get(`http://localhost:4000/users/exists/${details}`)
+            const response = await instance.post('http://localhost:4000/users/exists', {
+                emailOrUsername: email
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
                 .then(response => {
                     console.log('Response data:', response.data);
                     return response.data;
@@ -85,7 +91,7 @@ const RestService = (() => {
                     // Handle errors here (e.g., display error message)
                 });
             if (response) {
-                return response.exists;
+                return response;
             }
         } catch (error) {
             console.error('Error validating username/email:', error);
@@ -158,6 +164,27 @@ const RestService = (() => {
         }
     };
 
+    const getJevByDocumentId = async (doc_id) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/jev/documents/${doc_id}`)
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response) {
+                return response;
+            }
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
     const getDocumentBySchoolIdYearMonth = async (school_id, year, month) => {
         try {
             const response = await instance.get(`http://localhost:4000/documents/school/${school_id}/${year}/${month}`)
@@ -180,9 +207,14 @@ const RestService = (() => {
         }
     };
 
-    const getExcelFromLr = async (document_id) => {
+    const getExcelFromLr = async (docId, schoolId, year, month) => {
         try {
-            const response = await instance.get(`http://localhost:4000/downloadExcel/${document_id}`, {
+            const response = await instance.post('http://localhost:4000/downloadExcel', {
+                documentId: docId,
+                schoolId: schoolId,
+                year,
+                month
+            }, {
                 responseType: 'blob' // Set the response type to 'blob' to handle binary data
             });
 
@@ -199,6 +231,211 @@ const RestService = (() => {
         }
     };
 
+    const deleteLrById = async (lr_id) => {
+        try {
+            const response = await instance.delete(`http://localhost:4000/lr/${lr_id}`)
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const updateLrById = async (colId, rowId, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (colId === "amount") {
+            obj = { amount: value };
+        } else if (colId === "particulars") {
+            obj = { particulars: value };
+        } else if (colId === "orsBursNo") {
+            obj = { orsBursNo: value };
+        } else if (colId === "date") {
+            obj = { date: value };
+        } else if (colId === "objectCode") {
+            obj = { objectCode: value };
+        } else if (colId === "payee") {
+            obj = { payee: value };
+        } else if (colId === "natureOfPayment") {
+            obj = { natureOfPayment: value };
+        }
+
+        try {
+            const response = await instance.patch(`http://localhost:4000/lr/${rowId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const updateJevById = async (colId, rowId, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (colId === "amount") {
+            obj = { amount: value };
+        }
+
+        try {
+            const response = await instance.patch(`http://localhost:4000/jev/${rowId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const createLrByDocId = async (doc_id, obj) => {
+        try {
+            const response = await instance.post('http://localhost:4000/lr/create', {
+                documentsId: doc_id,
+                date: obj.date,
+                orsBursNo: obj.orsBursNo,
+                particulars: obj.particulars,
+                amount: obj.amount,
+                objectCode: obj.objectCode,
+                payee: obj.payee,
+                natureOfPayment: obj.natureOfPayment
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error creating user by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+    const createDocBySchoolId = async (schoolId, month, year, obj) => {
+        try {
+            const response = await instance.post('http://localhost:4000/documents/create', {
+                schoolId,
+                month,
+                year
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Check if document creation was successful
+            if (response) {
+                const newDocumentId = response.data.id;
+
+                // Insert new LR using the newly created document's ID
+                const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
+
+                if (lrCreationResponse) {
+                    console.log('LR created successfully');
+                } else {
+                    console.error('Failed to create LR');
+                }
+
+                return response.data; // Return the created document data
+            } else {
+                console.error('Failed to create document');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating document:', error);
+            return null;
+        }
+    };
+
+    const updateDocumentById = async (docId, description, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (description === "Claimant") {
+            obj = { claimant: value };
+        } else if (description === "SDS") {
+            obj = { sds: value };
+        } else if (description === "Head. Accounting Div. Unit") {
+            obj = { headAccounting: value };
+        }
+
+        try {
+            const response = await instance.patch(`http://localhost:4000/documents/${docId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log('Response data:', response.data);
+                return response.data;
+            })
+                .catch(error => {
+                    console.error('Error getting document:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
+
     return {
         createUser,
         authenticateUser,
@@ -208,7 +445,14 @@ const RestService = (() => {
         getUserById,
         getLrByDocumentId,
         getDocumentBySchoolIdYearMonth,
-        getExcelFromLr
+        getExcelFromLr,
+        deleteLrById,
+        updateLrById,
+        createLrByDocId,
+        updateDocumentById,
+        getJevByDocumentId,
+        updateJevById,
+        createDocBySchoolId
     };
 })();
 
