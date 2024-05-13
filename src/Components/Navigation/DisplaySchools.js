@@ -17,34 +17,27 @@ import { Link } from 'react-router-dom';
 // Custom imports
 import { VerticalLine } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
-import { useSchoolContext } from '../../Context/SchoolProvider';
 //import RestService from '../../Services/RestService';
 
 export default function DisplaySchools() {
     const theme = useTheme();
-    const { open, toggleDrawer, prevOpen, selected, setSelected, currentSchool, setCurrentSchool, currentUser } = useNavigationContext();
-    //const [currentUser, setCurrentUser] = useState(null)
-    const [openSub, setOpenSub] = useState(false);
-
-    // const initializeSchool = useCallback(() => {
-    //     currentUser && setCurrentSchool(currentUser.schools[0]);
-    // }, [currentUser, setCurrentSchool])
+    const { open, toggleDrawer, prevOpen, selected, setSelected, setCurrentSchool, currentUser, openSub, setOpenSub } = useNavigationContext();
 
     useEffect(() => {
         // initializeSchool();
         if (!open) {
             setOpenSub(false);
         }
-    }, [open]);
+    }, [open, setOpenSub]);
 
     const handleSelectedSingle = () => {
         setSelected(currentUser.schools[0].name)
         setCurrentSchool(currentUser.schools[0]);
     }
 
-    const handleSelectedMultiple = (item) => {
-        setSelected(item.name);
-        setCurrentSchool(item);
+    const handleSelectedMultiple = (index) => {
+        setSelected(currentUser.schools[index].name);
+        setCurrentSchool(currentUser.schools[index]);
     }
 
     const handleClick = () => {
@@ -131,7 +124,7 @@ export default function DisplaySchools() {
                                             component={Link}
                                             to={'/schools'}
                                             selected={selected === item.name}
-                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(item)}
+                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(index)}
                                             sx={theme.navStyle.button}
                                         >
                                             <ListItemText

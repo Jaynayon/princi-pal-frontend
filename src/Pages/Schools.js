@@ -1,5 +1,5 @@
 import '../App.css'
-import React, { useState, useCallback } from 'react';
+import React, { } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -9,12 +9,13 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
-import LRTable from '../Components/Table/LRTable';
+import DocumentTable from '../Components/Table/DocumentTable';
 import Button from '@mui/material/Button';
-import { SchoolProvider } from '../Context/SchoolProvider';
-import { useNavigationContext } from '../Context/NavigationProvider';
+import { useSchoolContext } from '../Context/SchoolProvider';
+// import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
+import JEVTable from '../Components/Table/JEVTable';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -49,195 +50,135 @@ function a11yProps(index) {
     };
 }
 
-const emptyDocument = {
-    budget: 0,
-    cashAdvance: 0
-}
-
-// Initialize current date to get current month and year
-const currentDate = new Date();
-const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
-const currentYear = currentDate.getFullYear().toString(); // Get full year as string
-
-const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-const years = [
-    '2021', '2022', '2023', '2024'
-];
-
 function Schools(props) {
-    // Set initial state for month and year using current date
-    const [month, setMonth] = useState(currentMonth);
-    const [year, setYear] = useState(currentYear);
-
-    const [isAdding, setIsAdding] = useState(false);
-    const [addOneRow, setAddOneRow] = useState(false);
-
-    const [value, setValue] = React.useState(0);
-    const [currentDocument, setCurrentDocument] = useState(null);
-    const { selected, currentSchool } = useNavigationContext();
-
-    const [reload, setReload] = useState(false);
+    const { year, month, setIsAdding, currentDocument, currentSchool, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
+    //const { selected } = useNavigationContext();
 
     const exportDocumentOnClick = async () => {
-        await RestService.getExcelFromLr(currentDocument.id);
+        await RestService.getExcelFromLr(currentDocument.id, currentSchool.id, year, month);
     }
 
-    const fetchDocumentData = useCallback(async () => {
-        try {
-            if (currentSchool) {
-                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                    currentSchool?.id,
-                    year,
-                    month
-                );
-
-                if (getDocument) {
-                    setCurrentDocument(getDocument);
-                } else {
-                    setCurrentDocument(emptyDocument);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    }, [currentSchool, setCurrentDocument, year, month]);
-
-    console.log("Schools render")
+    console.log("Schools renders")
 
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
-        console.log("Schools useEffect: document updated");
+        console.log("Schools useEffect: lr updated");
+        // if (value === 0) {
+        //     updateLr(); //update or fetch lr data on load
+        // } else if (value === 1) {
+        //     updateJev();
+        // }
 
-        fetchDocumentData();
+        updateLr();
+        updateJev();
         setIsAdding(false); //reset state to allow displayFields again
-    }, [selected, year, month, value, reload, fetchDocumentData]);
 
-    if (!currentDocument) {
-        return null;
-    }
+    }, [value, year, month, reload, updateLr, updateJev, setIsAdding]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
+    if (!currentDocument) { //returns null until there's value
+        return null;
+    }
+
     return (
-        <SchoolProvider
-            value={{
-                currentMonth, currentYear,
-                currentDocument, setCurrentDocument,
-                month, setMonth,
-                year, setYear,
-                months, years,
-                isAdding, setIsAdding,
-                addOneRow, setAddOneRow,
-                reload, setReload,
-                fetchDocumentData
-            }}
-        >
-            <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
-                <Grid container spacing={2} sx={{ position: 'relative' }}> {/*relative to allow date component to float*/}
-                    <Grid item xs={12} md={12} lg={12}>
-                        <Paper
-                            sx={[
-                                styles.header, {
-                                    p: 2,
-                                    display: 'flex',
-                                    flexDirection: 'row'
-                                }
-                            ]}
-                            elevation={0}
-                            variant='outlined'>
-                            <Box style={styles.header.buttons}>
-                                <SchoolDateFilter />
-                                <SchoolFieldsFilter />
-                                <SchoolSearchFilter />
-                            </Box>
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <RecordsProvider>
-                            <Grid item xs={12} md={12} lg={12}>
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                                >
-                                    <Grid container>
-                                        <Grid item xs={12} sm={8} md={8} lg={6}>
-                                            <Box sx={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                height: "100%",
-                                                //backgroundColor: 'green'
-                                            }}
-                                            >
-                                                <DocumentSummary />
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={12} sm={4} md={4} lg={6}>
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    justifyContent: 'flex-end',
-                                                    alignItems: 'center',
-                                                    height: '100%', // Ensure Box fills the height of the Grid item
-                                                    pr: 2
-                                                }}
-                                            >
-                                                <Button variant="contained"
-                                                    sx={{ backgroundColor: '#4A99D3' }}
-                                                    onClick={() => exportDocumentOnClick()}
-                                                >Export
-                                                </Button>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                            </Grid>
-                            <Paper sx={[styles.container, { mt: 1 }]}>
+        <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
+            <Grid container spacing={2} sx={{ position: 'relative' }}> {/*relative to allow date component to float*/}
+                <Grid item xs={12} md={12} lg={12}>
+                    <Paper
+                        sx={[
+                            styles.header, {
+                                p: 2,
+                                display: 'flex',
+                                flexDirection: 'row'
+                            }
+                        ]}
+                        elevation={0}
+                        variant='outlined'>
+                        <Box style={styles.header.buttons}>
+                            <SchoolDateFilter />
+                            <SchoolFieldsFilter />
+                            <SchoolSearchFilter />
+                        </Box>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} md={12} lg={12}>
+                    <RecordsProvider>
+                        <Grid item xs={12} md={12} lg={12}>
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                            }}
+                            >
                                 <Grid container>
-                                    <Grid item xs={12} md={12} lg={12}>
+                                    <Grid item xs={12} sm={8} md={8} lg={6}>
                                         <Box sx={{
-                                            overflow: 'auto', //if overflow, hide it
-                                            overflowWrap: "break-word",
-                                        }}>
-                                            <Tabs sx={{ minHeight: '10px' }}
-                                                value={value}
-                                                onChange={handleChange}
-                                                aria-label="basic tabs example">
-                                                <Tab sx={styles.tab} label="LR" {...a11yProps(0)} />
-                                                <Tab sx={styles.tab} label="RCD" {...a11yProps(1)} />
-                                                <Tab sx={styles.tab} label="JEV" {...a11yProps(2)} />
-                                            </Tabs>
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            height: "100%",
+                                            //backgroundColor: 'green'
+                                        }}
+                                        >
+                                            <DocumentSummary />
                                         </Box>
                                     </Grid>
-
-                                    {/*Document Tables*/}
-                                    <Grid item xs={12} md={12} lg={12}>
-                                        <CustomTabPanel value={value} index={0}>
-                                            <LRTable />
-                                        </CustomTabPanel>
-                                        <CustomTabPanel value={value} index={1}>
-                                            Item Two
-                                        </CustomTabPanel>
-                                        <CustomTabPanel value={value} index={2}>
-                                            Item Three
-                                        </CustomTabPanel>
+                                    <Grid item xs={12} sm={4} md={4} lg={6}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-end',
+                                                alignItems: 'center',
+                                                height: '100%', // Ensure Box fills the height of the Grid item
+                                                pr: 2
+                                            }}
+                                        >
+                                            <Button variant="contained"
+                                                sx={{ backgroundColor: '#4A99D3' }}
+                                                onClick={() => exportDocumentOnClick()}
+                                            >Export
+                                            </Button>
+                                        </Box>
                                     </Grid>
                                 </Grid>
-                            </Paper>
-                        </RecordsProvider>
-                    </Grid>
+                            </Box>
+                        </Grid>
+                        <Paper sx={[styles.container, { mt: 1 }]}>
+                            <Grid container>
+                                <Grid item xs={12} md={12} lg={12}>
+                                    <Box sx={{
+                                        overflow: 'auto', //if overflow, hide it
+                                        overflowWrap: "break-word",
+                                    }}>
+                                        <Tabs sx={{ minHeight: '10px' }}
+                                            value={value}
+                                            onChange={handleChange}
+                                            aria-label="basic tabs example">
+                                            <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
+                                            <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
+                                        </Tabs>
+                                    </Box>
+                                </Grid>
+
+                                {/*Document Tables*/}
+                                <Grid item xs={12} md={12} lg={12}>
+                                    <CustomTabPanel value={value} index={0}>
+                                        <DocumentTable />
+                                    </CustomTabPanel>
+                                    <CustomTabPanel value={value} index={1}>
+                                        <JEVTable />
+                                    </CustomTabPanel>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </RecordsProvider>
                 </Grid>
-            </Container >
-        </SchoolProvider>
+            </Grid>
+        </Container >
     );
 }
 
