@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Table from '@mui/material/Table';
 import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import TableBody from '@mui/material/TableBody';
@@ -12,7 +11,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import RecordsRow from './RecordsRow';
 import Typography from '@mui/material/Typography';
-import { SchoolContext, useSchoolContext } from '../../Context/SchoolProvider';
+import { SchoolContext } from '../../Context/SchoolProvider';
 import RestService from '../../Services/RestService';
 
 class LRTable extends Component {
@@ -64,8 +63,8 @@ class LRTable extends Component {
     };
 
     render() {
-        const { page, rowsPerPage, claimant, sds, headAccounting } = this.state;
-        const { lr } = this.context;
+        const { page, rowsPerPage, headAccounting } = this.state;
+        const { lr, currentDocument, setLr } = this.context;
         const columns = [
             {
                 id: 'date',
@@ -125,80 +124,74 @@ class LRTable extends Component {
             },
         ];
 
-
-
         return (
-            <SchoolContext.Consumer>
-                {({ setLr, currentDocument }) => (
-                    <React.Fragment>
-                        <TableContainer>
-                            <Table stickyHeader aria-label="sticky table">
-                                <TableHead>
-                                    <TableRow>
-                                        {columns.map((column) => (
-                                            <TableCell
-                                                key={column.id}
-                                                align={column.align}
-                                                style={{
-                                                    minWidth: column.minWidth,
-                                                    maxWidth: column.maxWidth,
-                                                }}
-                                            >
-                                                {column.label}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    <RecordsRow
-                                        rows={lr}
-                                        setRows={setLr}
-                                        page={page}
-                                        rowsPerPage={rowsPerPage}
-                                        columns={columns}
-                                    />
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        <Grid container sx={{ mt: 1, pb: 1, overflowX: 'auto' }}>
-                            <Grid item xs={12} sm={12} md={8} lg={8} >
-                                <Grid container sx={{ pl: 2, pb: 1 }}>
-                                    <Grid item xs={6} sm={6} md={6} lg={6}>
-                                        <DocumentTextFields
-                                            id={currentDocument?.id} //pass by value
-                                            value={currentDocument?.claimant}
-                                            description="Claimant"
-                                        />
-                                        <DocumentTextFields
-                                            id={currentDocument?.id}
-                                            value={currentDocument?.sds}
-                                            description="SDS"
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6} md={6} lg={6}>
-                                        <DocumentTextFields
-                                            id={currentDocument?.id}
-                                            value={currentDocument?.headAccounting}
-                                            description="Head. Accounting Div. Unit"
-                                        />
-                                    </Grid>
-                                </Grid>
+            <React.Fragment>
+                <TableContainer>
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                {columns.map((column) => (
+                                    <TableCell
+                                        key={column.id}
+                                        align={column.align}
+                                        style={{
+                                            minWidth: column.minWidth,
+                                            maxWidth: column.maxWidth,
+                                        }}
+                                    >
+                                        {column.label}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            <RecordsRow
+                                rows={lr}
+                                setRows={setLr}
+                                page={page}
+                                rowsPerPage={rowsPerPage}
+                                columns={columns}
+                            />
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <Grid container sx={{ mt: 1, pb: 1, overflowX: 'auto' }}>
+                    <Grid item xs={12} sm={12} md={8} lg={8} >
+                        <Grid container sx={{ pl: 2, pb: 1 }}>
+                            <Grid item xs={6} sm={6} md={6} lg={6}>
+                                <DocumentTextFields
+                                    id={currentDocument?.id} //pass by value
+                                    value={currentDocument?.claimant}
+                                    description="Claimant"
+                                />
+                                <DocumentTextFields
+                                    id={currentDocument?.id}
+                                    value={currentDocument?.sds}
+                                    description="SDS"
+                                />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={4} lg={4} sx={{ pt: 1 }}>
-                                <TablePagination
-                                    rowsPerPageOptions={[4, 10, 25, 100]}
-                                    component="div"
-                                    count={lr.length}
-                                    rowsPerPage={rowsPerPage}
-                                    page={page}
-                                    onPageChange={this.handleChangePage}
-                                    onRowsPerPageChange={this.handleChangeRowsPerPage}
+                            <Grid item xs={12} sm={6} md={6} lg={6}>
+                                <DocumentTextFields
+                                    id={currentDocument?.id}
+                                    value={currentDocument?.headAccounting}
+                                    description="Head. Accounting Div. Unit"
                                 />
                             </Grid>
                         </Grid>
-                    </React.Fragment>
-                )}
-            </SchoolContext.Consumer>
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={4} lg={4} sx={{ pt: 1 }}>
+                        <TablePagination
+                            rowsPerPageOptions={[4, 10, 25, 100]}
+                            component="div"
+                            count={lr.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={this.handleChangePage}
+                            onRowsPerPageChange={this.handleChangeRowsPerPage}
+                        />
+                    </Grid>
+                </Grid>
+            </React.Fragment>
         );
     }
 }
