@@ -20,6 +20,12 @@ function DocumentSummary(props) {
         return null;
     }
 
+    // Function to format a number with commas and two decimal places
+    const formatNumber = (number) => {
+        if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
+        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
     return (
         <React.Fragment>
             <IconButton
@@ -30,13 +36,16 @@ function DocumentSummary(props) {
             </IconButton>
             <Grid container pb={1} >
                 <Grid item xs={12} md={4} lg={4}>
-                    <BudgetSummary total title="Total" amount={currentDocument?.budget || 0} />
+                    <BudgetSummary total title="Total" amount={formatNumber(currentDocument?.budget || 0)} />
                 </Grid>
                 <Grid item xs={12} md={4} lg={4}>
-                    <BudgetSummary title="Budget this month" amount={currentDocument?.cashAdvance || 0} />
+                    <BudgetSummary title="Budget this month" amount={formatNumber(currentDocument?.cashAdvance || 0)} />
                 </Grid>
                 <Grid item xs={12} md={4} lg={4}>
-                    <BudgetSummary title="Balance" amount={(currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)} />
+                    <BudgetSummary
+                        title="Balance"
+                        amount={formatNumber((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0))}
+                    />
                 </Grid>
             </Grid>
         </React.Fragment>

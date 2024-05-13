@@ -8,7 +8,10 @@ export const useSchoolContext = () => useContext(SchoolContext);
 
 const emptyDocument = {
     budget: 0,
-    cashAdvance: 0
+    cashAdvance: 0,
+    claimant: "",
+    sds: "",
+    headAccounting: ""
 }
 
 // Initialize current date to get current month and year
@@ -27,7 +30,10 @@ const years = [
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool } = useNavigationContext();
+    const { currentSchool, selected } = useNavigationContext();
+
+    // Document Tabs: LR & RCD, JEV
+    const [value, setValue] = React.useState(0);
 
     // Set initial state for month and year using current date
     const [month, setMonth] = useState(currentMonth);
@@ -40,6 +46,7 @@ export const SchoolProvider = ({ children }) => {
 
     const [currentDocument, setCurrentDocument] = useState(null);
     const [lr, setLr] = useState([]);
+    const [jev, setJev] = useState([]);
 
     const monthIndex = months.indexOf(currentMonth);
     const yearIndex = years.indexOf(currentYear);
@@ -67,22 +74,46 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
-    const fetchLrByDocumentId = async (id) => {
+    const createNewDocument = useCallback(async (obj) => {
         try {
-            // Call RestService to fetch lr by document id
-            const data = await RestService.getLrByDocumentId(id);
+            if (currentSchool) {
+                const getDocument = await RestService.createDocBySchoolId(
+                    currentSchool.id,
+                    month,
+                    year,
+                    obj
+                );
 
-            if (data) { //data.decodedToken
-                setLr(data)
-            } else {
-                setLr([]); //meaning it's empty 
+                if (getDocument) {
+                    setCurrentDocument(getDocument);
+                } else {
+                    setCurrentDocument(emptyDocument);
+                }
+                fetchDocumentData();
             }
-            console.log(data);
-            // Handle response as needed
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }, [currentSchool, fetchDocumentData, setCurrentDocument, year, month]);
+
+    const updateJev = useCallback(async () => {
+        try {
+            if (currentDocument) {
+                // Call RestService to fetch lr by document id
+                const data = await RestService.getJevByDocumentId(currentDocument.id);
+                console.log("lr")
+                if (data) { //data.decodedToken
+                    setJev(data)
+                } else {
+                    setJev([]); //meaning it's empty 
+                }
+                console.log(data);
+                // Handle response as needed
+            }
         } catch (error) {
             console.error('Error fetching lr:', error);
         }
-    };
+    }, [currentDocument, setJev]);
 
     const updateLr = useCallback(async () => {
         try {
@@ -109,7 +140,10 @@ export const SchoolProvider = ({ children }) => {
             date: '',
             orsBursNo: '',
             particulars: '',
-            amount: 0
+            amount: 0,
+            objectCode: '',
+            payee: '',
+            natureOfPayment: 'Cash'
         }
 
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
@@ -117,10 +151,8 @@ export const SchoolProvider = ({ children }) => {
     }, [])
 
     useEffect(() => {
-        console.log("SchoolProvider useEffect: update lr");
-        //if (val === 0) { // if LR tab is selected
-        //updateLr();
-        //}
+        console.log("SchoolProvider useEffect: update document");
+        // console.log(currentSchool.name+ "with id: "+currentSchool);
         fetchDocumentData();
 
     }, [month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
@@ -128,9 +160,9 @@ export const SchoolProvider = ({ children }) => {
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
-            lr, setLr, fetchLrByDocumentId, setCurrentDocument, currentDocument,
+            lr, setLr, setCurrentDocument, currentDocument,
             displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, reload, setReload
+            currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev, createNewDocument
         }}>
             {children}
         </SchoolContext.Provider>
