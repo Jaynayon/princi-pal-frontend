@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
+import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import RestService from "../Services/RestService"
 
 const NavigationContext = createContext();
@@ -9,11 +9,11 @@ export const NavigationProvider = ({ children }) => {
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
     const [selected, setSelected] = useState('Dashboard');
     const [open, setOpen] = useState(true);
+    const [openSub, setOpenSub] = useState(false);
     const [navStyle, setNavStyle] = React.useState('light'); // Initial theme
     const [mobileMode, setMobileMode] = useState(false); // State to track position
     const [currentUser, setCurrentUser] = useState(null);
     const [currentSchool, setCurrentSchool] = useState(null);
-    const [currentDocument, setCurrentDocument] = useState(null);
     const [userId, setUserId] = useState(null)
     const prevOpenRef = useRef(false);
 
@@ -23,8 +23,6 @@ export const NavigationProvider = ({ children }) => {
             return !prevOpen;
         });
     };
-    //stuff
-    console.log(currentSchool);
 
     const updateMobileMode = () => {
         const { innerWidth } = window;
@@ -36,58 +34,60 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
-    console.log(userId);
+    console.log("Navigation Provider render");
+    console.log(selected)
+    console.log(openSub)
 
-    const fetchDocumentBySchoolIdYearMonth = async (id, year, month) => {
+    const fetchUser = useCallback(async () => {
         try {
-            const getDocument = await RestService.getDocumentBySchoolIdYearMonth(id, year, month);
+            const jwtCookie = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('jwt='));
 
-            if (getDocument) { //data.decodedToken
-                setCurrentDocument(getDocument);
+            if (jwtCookie) {
+                const token = jwtCookie.split('=')[1];
+                console.log('JWT Token Provider:', token);
+
+                // Call RestService to validate the token
+                const data = await RestService.validateToken(token);
+
+                if (data) { //data.decodedToken
+                    setUserId(data)
+                    if (!currentUser) {
+                        const user = await RestService.getUserById(data.id);
+                        setCurrentUser({
+                            ...user,
+                            schools: [{
+                                id: "6634e7fc43d8096920d765ff",
+                                name: 'Jaclupan ES'
+                            }, {
+                                id: "66354cb59de52335e7ad78ab",
+                                name: 'Talisay ES'
+                            }
+                            ]
+                        })
+
+                    }
+                }
+                if (currentUser) { // if current user is not null or undefined, set school
+                    setCurrentSchool(currentUser.schools[0]);
+                }
+                console.log(currentUser)
+                // Handle response as needed
             } else {
                 //setIsLoggedIn(false)
+                console.log('JWT Token not found in cookies.');
             }
-            console.log(getDocument);
-            // Handle response as needed
-
         } catch (error) {
             console.error('Error validating token:', error);
         }
-    };
+    }, [currentUser]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const jwtCookie = document.cookie
-                    .split('; ')
-                    .find(row => row.startsWith('jwt='));
+        console.log("Navigation Provider useEffect render");
 
-                if (jwtCookie) {
-                    const token = jwtCookie.split('=')[1];
-                    console.log('JWT Token Provider:', token);
 
-                    // Call RestService to validate the token
-                    const data = await RestService.validateToken(token);
-
-                    if (data) { //data.decodedToken
-                        setUserId(data)
-                        if (!currentUser) {
-                            setCurrentUser(await RestService.getUserById(data.id))
-                        }
-                    } else {
-                        //setIsLoggedIn(false)
-                    }
-                    console.log(currentUser)
-                    // Handle response as needed
-                } else {
-                    //setIsLoggedIn(false)
-                    console.log('JWT Token not found in cookies.');
-                }
-            } catch (error) {
-                console.error('Error validating token:', error);
-            }
-        };
-        fetchData();
+        fetchUser();
 
         // Call the function to set initial mobileMode state
         updateMobileMode();
@@ -110,7 +110,7 @@ export const NavigationProvider = ({ children }) => {
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
             navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
-            fetchDocumentBySchoolIdYearMonth, currentDocument, setCurrentDocument
+            openSub, setOpenSub
         }}>
             {children}
         </NavigationContext.Provider>

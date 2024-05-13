@@ -91,7 +91,7 @@ function Dashboard(props) {
         const firstOption = Object.keys(schoolData)[0];
         if (!selectedSchool) {
             setSelectedSchool(firstOption);
-            setEditableAmounts(schoolData[firstOption]); // Set editableAmounts with the data of the first option
+            setEditableAmounts(schoolData[firstOption]); 
         }
     }, [schoolData, selectedSchool]);
     
@@ -115,7 +115,7 @@ function Dashboard(props) {
             setSelectedSchool(firstOption);
             setEditableAmounts(schoolData[firstOption]);
         }
-        // Set initial selected month and year if "Apply" button not clicked yet
+       
         if (!applyButtonClicked) {
             setSelectedMonthYear(getCurrentMonthYear());
         }
@@ -148,7 +148,6 @@ function Dashboard(props) {
 
     const handleChange = (event) => {
         const newValue = event.target.value;
-        // Regular expression to match float numbers with exactly 2 decimal places
         const regex = /^\d+(\.\d{0,2})?$/;
         if (
             newValue === '' ||                      
@@ -195,7 +194,7 @@ function Dashboard(props) {
     };
 
     const handleShowNormalDashboard = () => {
-        setShowInitial(false); // Hide initial view
+        setShowInitial(false); 
     };
 
     
@@ -322,7 +321,7 @@ function Dashboard(props) {
                                         p: 2,
                                         display: 'flex',
                                         flexDirection: 'row',
-                                        justifyContent: 'space-between', // Align items to the edges
+                                        justifyContent: 'space-between', 
                                     }
                                 ]}
                                 elevation={0}
@@ -337,9 +336,9 @@ function Dashboard(props) {
                                         value={selectedSchool}
                                         onChange={(event) => handleSelectSchool(event.target.value)}
                                         sx={{
-                                            fontWeight: '900', // Adjust font weight
-                                            height: '40px',    // Adjust height
-                                            minWidth: '120px', // Adjust minimum width
+                                            fontWeight: '900',
+                                            height: '40px',    
+                                            minWidth: '120px', 
                                         }}
                                         displayEmpty
                                     >

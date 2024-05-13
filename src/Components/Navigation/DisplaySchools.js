@@ -1,5 +1,5 @@
 // React imports
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // Material-UI imports
 import Box from '@mui/material/Box';
@@ -19,42 +19,25 @@ import { VerticalLine } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 //import RestService from '../../Services/RestService';
 
-//Static object testing
-const currentUser = {
-    name: 'Jay Nayon',
-    email: 'jay.nayonjr@cit.edu',
-    schools: [{
-        id: "6634e7fc43d8096920d765ff",
-        name: 'Jaclupan ES'
-    }, {
-        id: "66354cb59de52335e7ad78ab",
-        name: 'Talisay ES'
-    }
-    ]
-}
-
 export default function DisplaySchools() {
     const theme = useTheme();
-    const { open, toggleDrawer, prevOpen, selected, setSelected, currentSchool, setCurrentSchool/*currentUser*/ } = useNavigationContext();
-    //const [currentUser, setCurrentUser] = useState(null)
-    const [openSub, setOpenSub] = useState(false);
+    const { open, toggleDrawer, prevOpen, selected, setSelected, setCurrentSchool, currentUser, openSub, setOpenSub } = useNavigationContext();
 
     useEffect(() => {
+        // initializeSchool();
         if (!open) {
             setOpenSub(false);
         }
-    }, [open]);
-
-    console.log(currentSchool);
+    }, [open, setOpenSub]);
 
     const handleSelectedSingle = () => {
         setSelected(currentUser.schools[0].name)
         setCurrentSchool(currentUser.schools[0]);
     }
 
-    const handleSelectedMultiple = (item) => {
-        setSelected(item.name);
-        setCurrentSchool(item);
+    const handleSelectedMultiple = (index) => {
+        setSelected(currentUser.schools[index].name);
+        setCurrentSchool(currentUser.schools[index]);
     }
 
     const handleClick = () => {
@@ -84,8 +67,10 @@ export default function DisplaySchools() {
         },
     }
 
+    console.log(currentUser);
+
     return (
-        /*currentUser &&*/ currentUser.schools.length > 0 ? //Check if user has schools assigned
+        currentUser && currentUser.schools.length > 0 ? //Check if user has schools assigned
             (currentUser.schools.length > 1 ? //Check if user has multiple schools
                 <React.Fragment>
                     <ListItemButton
@@ -139,7 +124,7 @@ export default function DisplaySchools() {
                                             component={Link}
                                             to={'/schools'}
                                             selected={selected === item.name}
-                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(item)}
+                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(index)}
                                             sx={theme.navStyle.button}
                                         >
                                             <ListItemText
