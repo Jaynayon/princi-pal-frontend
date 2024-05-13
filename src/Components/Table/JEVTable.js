@@ -20,30 +20,13 @@ class JEVTable extends Component {
 
     // componentDidMount() {
     //     // Accessing context values using this.context
-    //     const {
-    //         month,
-    //         year,
-    //         setLr,
-    //         fetchLrByDocumentId,
-    //         currentDocument,
-    //     } = this.context;
+    //     const { currentDocument, fetchDocumentData, value } = this.context;
 
-    //     // Example usage of context values
-    //     console.log('Current Month:', month);
-    //     console.log('Current Year:', year);
-
-    //     // Perform operations with context values
-    //     // For example, fetching LR data
-    //     const documentId = currentDocument ? currentDocument.id : null;
-    //     if (documentId) {
-    //         fetchLrByDocumentId(documentId)
-    //             .then(lrData => {
-    //                 setLr(lrData);
-    //             })
-    //             .catch(error => {
-    //                 console.error('Error fetching LR data:', error);
-    //             });
+    //     if (!currentDocument) {
+    //         return null;
     //     }
+
+    //     fetchDocumentData();
     // }
 
     handleChangePage = (event, newPage) => {
