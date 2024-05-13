@@ -104,7 +104,7 @@ export const NavigationProvider = ({ children }) => {
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [currentUser]); // Run effect only on mount and unmount
+    }, [currentUser, fetchUser]); // Run effect only on mount and unmount
 
     return (
         <NavigationContext.Provider value={{
