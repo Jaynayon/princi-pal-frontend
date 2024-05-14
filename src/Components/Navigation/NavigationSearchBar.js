@@ -120,6 +120,7 @@ const NavigationSearchBar = () => {
             boxShadow: "0px 8px 16px 0px rgba(0,0,0,0.2)",
             color: "#424242",
             textAlign: "start",
+            zIndex: 999,
           }}
         >
           <li

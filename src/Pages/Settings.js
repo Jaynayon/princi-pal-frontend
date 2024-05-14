@@ -22,6 +22,13 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Popover from '@mui/material/Popover';
 import Stack from '@mui/material/Stack';
+import InputAdornment from '@mui/material/InputAdornment';
+import {
+    VisibilityOff as VisibilityOffIcon,
+    Lock as LockIcon,
+    Person as PersonIcon,
+    Email as EmailIcon,
+  } from '@mui/icons-material';
 //import RestService from '../Services/RestService'
 import { useNavigationContext } from '../Context/NavigationProvider';
 
@@ -94,6 +101,12 @@ function Settings() {
         setAnchorEl(null);
     };
 
+    const handleColorChange = (color) => {
+        setAnchorEl(null);
+        handleClick(false);
+        currentUser.avatar = color;
+    };
+    
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
 
@@ -103,7 +116,7 @@ function Settings() {
                 <Grid container>
                     <Grid item xs={12} md={6} lg={6} sx={{ padding: '10px' }}>
                         <AvatarContainer>
-                            <Avatar sx={{ bgcolor: blue[500], width: 130, height: 130, marginBottom: '15px' }}>J</Avatar>
+                        <Avatar sx={{ bgcolor: currentUser.avatar, width: 130, height: 130, marginBottom: '15px' }} > </Avatar>
                             <FabWrapper>
                                 <Fab size="small" color="black" aria-label="add">
                                     <AddIcon aria-describedby={id} variant="contained" onClick={handleClick} />
@@ -123,21 +136,25 @@ function Settings() {
                                             },
                                         }}
                                     >
-                                        <Typography sx={{ p: 2 }}>Avatar color</Typography>
+                                        <Typography sx={{ p: 2 }}>Avatar colors</Typography>
                                         <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                            <Avatar sx={{ bgcolor: lightGreen[500], width: 30, height: 30 }} > </Avatar>
-                                            <Avatar sx={{ bgcolor: red[500], width: 30, height: 30 }} > </Avatar>
-                                            <Avatar sx={{ bgcolor: grey[900], width: 30, height: 30 }} > </Avatar>
-                                            <Avatar sx={{ bgcolor: blueGrey[500], width: 30, height: 30 }} > </Avatar>
-                                            <Avatar sx={{ bgcolor: deepPurple[500], width: 30, height: 30 }} > </Avatar>
-                                        </Stack>
-                                        <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                            <Avatar sx={{ bgcolor: brown[500], width: 30, height: 30 }} > </Avatar>
-                                            <Avatar sx={{ bgcolor: deepOrange[500], width: 30, height: 30 }} > </Avatar>
-                                            <Avatar sx={{ bgcolor: yellow[500], width: 30, height: 30 }} > </Avatar>
-                                            <Avatar sx={{ bgcolor: indigo[500], width: 30, height: 30 }} > </Avatar>
-                                            <Avatar sx={{ bgcolor: pink[500], width: 30, height: 30 }} > </Avatar>
-                                        </Stack>
+                                        {[lightGreen[500], red[500], grey[900], blueGrey[500], deepPurple[500]].map((color, index) => (
+                                            <Avatar
+                                                key={index}
+                                                sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
+                                                onClick={() => handleColorChange(color)}
+                                            > </Avatar>
+                                        ))}
+                                    </Stack>
+                                    <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+                                        {[brown[500], deepOrange[500], yellow[500], indigo[500], pink[500]].map((color, index) => (
+                                            <Avatar
+                                                key={index}
+                                                sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
+                                                onClick={() => handleColorChange(color)}
+                                            > </Avatar>
+                                        ))}
+                                    </Stack>
                                     </Popover>
                                 </Fab>
                             </FabWrapper>
@@ -145,13 +162,65 @@ function Settings() {
                             <Typography variant="h8" fontWeight="bold">{currentUser.position}</Typography>
                         </AvatarContainer>
                     </Grid>
-                    <Grid item xs={12} md={6} lg={6} sx={{ padding: '10px' }}>
+                    <Grid item xs={12} md={6} lg={5.5} sx={{ padding: '2px' }}>
                         <TextFieldWrapper>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Fullname" defaultValue={currentUser.fname + " " + currentUser.mname + " " + currentUser.lname} margin="normal" />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Phone Number" defaultValue="0987 867 9876" margin="normal" />
-                            <TextField sx={{ width: '100%' }} required id="outlined-required" label="Password" margin="normal" />
-                            <TextField sx={{ width: '100%' }} required id="outlined-required" label="Re-Type Password" margin="normal" />
+                        <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
+                                    InputProps={{
+                                        startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailIcon />
+                                        </InputAdornment>
+                                        ),
+                                    }}
+                                    />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " " } margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " " } margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} required id="outlined-required" label="Password" margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <LockIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} required id="outlined-required" label="Re-Type Password" margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <LockIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
                         </TextFieldWrapper>
                         <ButtonWrapper>
                             <Button variant="contained">Save</Button>
