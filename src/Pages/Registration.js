@@ -96,15 +96,12 @@ const RegistrationPage = () => {
       ...formData,
       position: event.target.value
     });
-    console.log(formData.position)
   };
 
   const handleExistingEmail = async (event) => {
     try {
       const exists = await RestService.validateUsernameEmail(event.target.value); //returns boolean
-      //return exists ? setEmailError(true) :setEmailError(false);
-      setEmailError(exists);
-      console.log("email: " + exists);
+      setEmailError(exists || !validateEmail(event.target.value));
     } catch (error) {
       console.error(error);
     }
@@ -114,21 +111,19 @@ const RegistrationPage = () => {
     try {
       const exists = await RestService.validateUsernameEmail(email); //returns boolean
       return exists ? true : false;
-      //setEmailError(exists);
     } catch (error) {
       console.error(error);
     }
   };
 
-
   const handleExistingUsername = async (event) => {
     try {
-      const exists = await RestService.validateUsernameEmail(event.target.value)
-      exists ? setUsernameError(true) : setUsernameError(false)
+      const exists = await RestService.validateUsernameEmail(event.target.value);
+      setUsernameError(exists);
     } catch (error) {
-      console.log(error)
+      console.error(error);
     }
-  }
+  };
 
   const handleSubmit = async () => {
     const { email, password, username, firstName, middleName, lastName, position } = formData;
@@ -171,37 +166,37 @@ const RegistrationPage = () => {
     }
   };
 
-  function getErrorCondition(item, event) {
+  function getErrorCondition(item) {
     const { key } = item;
     if (key === 'email') {
       let message;
       if (formData.email && !validateEmail(formData.email)) {
         message = "Invalid email address";
-      } else if(emailError){
+      } else if (emailError) {
         message = "Email address already exists";
       }
       return emailError ? message : false;
     }
-  
+
     if (key === 'username') {
       return usernameError ? "Existing or invalid username" : false;
     }
-  
+
     if (key === 'password') {
       return passwordError ? "Password must contain at least 8 characters and one special character" : false;
     }
-  
+
     if (key === 'confirmPassword') {
       return confirmPasswordError ? "Passwords don't match" : false;
     }
-  
+
     if (!formValid && !formData[key]) {
       return "This field is required";
     }
-  
+
     return false;
   }
-  
+
   return (
     <Container
       maxWidth={false}
@@ -251,15 +246,15 @@ const RegistrationPage = () => {
             style={{ marginBottom: "1rem", width: "100%" }}
             color="primary"
             onBlur={(event) => {
-              item.key === 'email' && handleExistingEmail(event)
-              item.key === 'username' && handleExistingUsername(event)
+              if (item.key === 'email') handleExistingEmail(event);
+              if (item.key === 'username') handleExistingUsername(event);
             }}
             label={item.label}
             variant="outlined"
             type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={formData[item.key]}
             onChange={(e) => handleInputChange(item.key, e.target.value)}
-            error={getErrorCondition(item) ? true : false}
+            error={Boolean(getErrorCondition(item))}
             helperText={getErrorCondition(item)}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
@@ -275,7 +270,6 @@ const RegistrationPage = () => {
             sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set background color and outline color
           />
         ))}
-
 
         <FormControl required sx={{ minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
           <InputLabel id="position-select-label" color="primary">Position</InputLabel>
