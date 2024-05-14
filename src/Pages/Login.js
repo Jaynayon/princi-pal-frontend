@@ -1,6 +1,6 @@
 import { useState } from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { TextField, InputAdornment, IconButton, Button, Typography, Paper, Container, Grid } from "@mui/material";
+import { TextField, InputAdornment, IconButton, Button, Typography, Container, Grid } from "@mui/material";
 import RestService from "../Services/RestService";
 import { Link } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -11,14 +11,6 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
-
-    const handleEmailFieldClick = () => {
-        setLoginError('');
-    };
-
-    const handlePasswordFieldClick = () => {
-        setLoginError('');
-    };
 
     const handleShowPasswordClick = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
@@ -37,7 +29,6 @@ const LoginPage = () => {
                 } else {
                     setLoginError('Please enter your password.');
                 }
-                setTimeout(() => setLoginError(''), 800); // Clear error after 0.8 seconds
                 return;
             }
 
@@ -50,7 +41,6 @@ const LoginPage = () => {
             } else {
                 // Invalid credentials, display error message
                 setLoginError('Incorrect email or password.');
-                setTimeout(() => setLoginError(''), 2000); // Clear error after 2 seconds
             }
         } catch (error) {
             console.error('Error:', error);
@@ -59,7 +49,6 @@ const LoginPage = () => {
             } else {
                 setLoginError('An error occurred while logging in. Please try again later.');
             }
-            setTimeout(() => setLoginError(''), 800); // Clear error after 0.8 seconds
         }
     };
 
@@ -114,7 +103,6 @@ const LoginPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         fullWidth
-                        onClick={handleEmailFieldClick}
                         sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -142,7 +130,6 @@ const LoginPage = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         fullWidth
                         sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
-                        onClick={handlePasswordFieldClick}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 handleLogin(); // Invoke handleLogin on Enter key press
