@@ -20,7 +20,6 @@ function RecordsRow(props) {
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
-    const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
 
     const {
         displayFields,
@@ -57,7 +56,6 @@ function RecordsRow(props) {
     };
 
     const handleMenuClose = () => {
-        setDropdownAnchorEl(null);
         setDeleteAnchorEl(null);
         setSelectedIndex(null);
     };
