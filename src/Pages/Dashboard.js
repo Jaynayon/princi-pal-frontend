@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import 'react-date-range/dist/styles.css'; 
-import 'react-date-range/dist/theme/default.css'; 
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -10,9 +10,10 @@ import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
 import { DateFilter } from '../Components/Filters/Filters';
-
+import RestService from '../Services/RestService';
 import Select from '@mui/material/Select';
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { Box, Button, MenuItem } from '@mui/material';
+import { useNavigationContext } from '../Context/NavigationProvider';
 
 const ApexChart = ({ data }) => {
     const [options] = useState({
@@ -63,8 +64,12 @@ const ApexChart = ({ data }) => {
     );
 };
 
+
 function Dashboard(props) {
+    // State declarations
+    const { currentUser } = useNavigationContext()
     const [showInitial, setShowInitial] = useState(true);
+    const [currentUserHasNoSchools, setCurrentUserHasNoSchools] = useState(false);
     const [selectedSchool, setSelectedSchool] = useState('');
     const [schoolData, setSchoolData] = useState({
         'CIT': {
@@ -86,46 +91,35 @@ function Dashboard(props) {
             budgetData: [15, 38, 30, 49, 40, 65, 70, 85, 135]
         }
     });
-
-    useEffect(() => {
-        const firstOption = Object.keys(schoolData)[0];
-        if (!selectedSchool) {
-            setSelectedSchool(firstOption);
-            setEditableAmounts(schoolData[firstOption]); 
-        }
-    }, [schoolData, selectedSchool]);
-    
-
-    const handleSchoolChange = (event) => {
-        setSelectedSchool(event.target.value);
-    };
-    
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
-
     const [selectedMonthYear, setSelectedMonthYear] = useState('');
-
     const [applyButtonClicked, setApplyButtonClicked] = useState(false);
+    const [schoolMenuAnchor, setSchoolMenuAnchor] = useState(null);
 
+
+    // Effects
+
+    
     useEffect(() => {
         const firstOption = Object.keys(schoolData)[0];
         if (!selectedSchool) {
             setSelectedSchool(firstOption);
             setEditableAmounts(schoolData[firstOption]);
         }
-       
         if (!applyButtonClicked) {
             setSelectedMonthYear(getCurrentMonthYear());
         }
     }, [schoolData, selectedSchool, applyButtonClicked]);
 
+    
+    // Event handlers
     const handleDateFilterApply = (selectedMonthYear) => {
         setSelectedMonthYear(selectedMonthYear);
     };
 
-    
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
         const monthNames = [
@@ -150,8 +144,8 @@ function Dashboard(props) {
         const newValue = event.target.value;
         const regex = /^\d+(\.\d{0,2})?$/;
         if (
-            newValue === '' ||                      
-            (regex.test(newValue) && parseFloat(newValue) >= 0 && parseFloat(newValue) <= 999999999)  
+            newValue === '' ||
+            (regex.test(newValue) && parseFloat(newValue) >= 0 && parseFloat(newValue) <= 999999999)
         ) {
             setEditableAmounts({
                 ...editableAmounts,
@@ -177,26 +171,12 @@ function Dashboard(props) {
         setOpen(false);
     };
 
-    const [schoolMenuAnchor, setSchoolMenuAnchor] = useState(null);
-
-    const handleClickSchoolMenu = (event) => {
-        setSchoolMenuAnchor(event.currentTarget);
-    };
-
-    const handleCloseSchoolMenu = () => {
-        setSchoolMenuAnchor(null);
-    };
-
     const handleSelectSchool = (school) => {
-        setSelectedSchool(school); 
-        setSchoolMenuAnchor(null); 
+        setSelectedSchool(school);
+        setSchoolMenuAnchor(null);
         setEditableAmounts(schoolData[school]);
     };
-
-    const handleShowNormalDashboard = () => {
-        setShowInitial(false); 
-    };
-
+    
     
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
@@ -285,142 +265,138 @@ function Dashboard(props) {
             </Paper>
         );
     };
+
+    if (!currentUser) {
+        return null
+    }
+
+    if (!currentUser.schools || currentUser.schools.length === 0) {
+        return (
+            <Container maxWidth="lg">
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <Typography variant="h5" gutterBottom>
+                            Currently, you are not assigned to a school.
+                        </Typography>
+                        <Typography variant="body1">
+                            Once assigned, available data will be displayed here.
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </Container>
+        );
+    }
     
 
     return (
-        <Container className="test" maxWidth="lg">
-            <Box sx={{ position: 'relative' }}>
-                {showInitial ? (
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <Paper
-                                sx={{
-                                    p: 2,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    height: 380,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                            >
-                               <Box sx={{ fontWeight: 'bold' }}>
-                                <Typography variant="h6">Currently, you are not assigned to a school.</Typography>
-                                </Box>
-                                <Typography variant="body1">Once assigned, available data will be displayed here.</Typography>
-
-                                <Button onClick={handleShowNormalDashboard} variant="contained" color="primary" sx={{ marginTop: '1rem' }}>Show Dashboard</Button>
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                ) : (
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={12} lg={12}>
-                            <Paper
-                                sx={[
-                                    styles.header, {
-                                        p: 2,
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between', 
-                                    }
-                                ]}
-                                elevation={0}
-                                variant='outlined'
-                            >
-                                <Box style={styles.header.buttons}>
-                                    <DateFilter onApply={handleDateFilterApply} />
-                                </Box>
-                                <Box style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                                    <Select
-                                        id="school-filter"
-                                        value={selectedSchool}
-                                        onChange={(event) => handleSelectSchool(event.target.value)}
-                                        sx={{
-                                            fontWeight: '900',
-                                            height: '40px',    
-                                            minWidth: '120px', 
-                                        }}
-                                        displayEmpty
-                                    >
-                                        <MenuItem value="" disabled>
-                                            School
-                                        </MenuItem>
-                                        {Object.keys(schoolData).map((school) => (
-                                            <MenuItem key={school} value={school}>{school}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </Box>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} md={12} lg={12}>
-                            <Box style={{
-                                display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
-                                marginLeft: '10px', marginRight: '10px' 
-                            }}>
-                                <Typography
-                                    component="h1"
-                                    variant="h6"
-                                    color="inherit"
-                                    noWrap
-                                    sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
-                                >
-                                    Analytics
-                                </Typography>
-                                <Typography
-                                    component="h1"
-                                    variant="h6"
-                                    color="inherit"
-                                    noWrap
-                                >
-                                    {selectedMonthYear}
-                                </Typography>
-                            </Box>
-                        </Grid>
-                        <Grid item xs={12} md={12} lg={12}
+    <Container className="test" maxWidth="lg">
+        <Grid container spacing={2}>
+            <Grid item xs={12} md={12} lg={12}>
+                <Paper
+                    sx={[
+                        styles.header, {
+                            p: 2,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between', 
+                        }
+                    ]}
+                    elevation={0}
+                    variant='outlined'
+                >
+                    <Box style={styles.header.buttons}>
+                        <DateFilter onApply={handleDateFilterApply} />
+                    </Box>
+                    <Box style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                        <Select
+                            id="school-filter"
+                            value={selectedSchool}
+                            onChange={(event) => handleSelectSchool(event.target.value)}
                             sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                marginTop: "-15px",
-                            }}>
-                            <Grid container >
-                                <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                    {renderEditableCard('monthlyBudget')}
-                                </Grid>
-                                <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                    {renderEditableCard('budgetLimit')}
-                                </Grid>
-                                <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                    {renderEditableCard('totalBalance')}
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={12} md={12} lg={12}>
-                            <Grid container >
-                                <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
-                                    <Paper
-                                        sx={{
-                                            p: 2,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            height: 380,
-                                        }}
-                                    >
-                                        {selectedSchool && schoolData[selectedSchool] ? (
-                                            <ApexChart data={schoolData[selectedSchool]} />
-                                        ) : null}
-                                    </Paper>
-                                </Grid>
-                                <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                    {renderSummaryCard()}
-                                </Grid>
-                            </Grid>
-                        </Grid>
+                                fontWeight: '900',
+                                height: '40px',    
+                                minWidth: '120px', 
+                            }}
+                            displayEmpty
+                        >
+                            <MenuItem value="" disabled>
+                                School
+                            </MenuItem>
+                            {Object.keys(schoolData).map((school) => (
+                                <MenuItem key={school} value={school}>{school}</MenuItem>
+                            ))}
+                        </Select>
+                    </Box>
+                </Paper>
+            </Grid>
+            <Grid item xs={12} md={12} lg={12}>
+                <Box style={{
+                    display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
+                    marginLeft: '10px', marginRight: '10px' 
+                }}>
+                    <Typography
+                        component="h1"
+                        variant="h6"
+                        color="inherit"
+                        noWrap
+                        sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
+                    >
+                        Analytics
+                    </Typography>
+                    <Typography
+                        component="h1"
+                        variant="h6"
+                        color="inherit"
+                        noWrap
+                    >
+                        {selectedMonthYear}
+                    </Typography>
+                </Box>
+            </Grid>
+            <Grid item xs={12} md={12} lg={12}
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: "-15px",
+                }}>
+                <Grid container >
+                    <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                        {renderEditableCard('monthlyBudget')}
                     </Grid>
-                )}
-            </Box>
-        </Container>
-    );
+                    <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                        {renderEditableCard('budgetLimit')}
+                    </Grid>
+                    <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                        {renderEditableCard('totalBalance')}
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid item xs={12} md={12} lg={12}>
+                <Grid container >
+                    <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
+                        <Paper
+                            sx={{
+                                p: 2,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: 380,
+                            }}
+                        >
+                            {selectedSchool && schoolData[selectedSchool] ? (
+                                <ApexChart data={schoolData[selectedSchool]} />
+                            ) : null}
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                        {renderSummaryCard()}
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Container>
+);
 }
+
 const styles = {
     header: {
         overflow: 'auto',
