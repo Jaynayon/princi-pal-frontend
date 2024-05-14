@@ -8,12 +8,11 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { RecordsProvider } from '../Context/RecordsProvider';
-import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
-import DocumentTable from '../Components/Table/DocumentTable';
+import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolFilters'
+import DocumentTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
 import { useSchoolContext } from '../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
-import RestService from '../Services/RestService';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import JEVTable from '../Components/Table/JEVTable';
 
@@ -51,11 +50,11 @@ function a11yProps(index) {
 }
 
 function Schools(props) {
-    const { year, month, setIsAdding, currentDocument, currentSchool, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
+    const { year, month, setIsAdding, currentDocument, exportDocument, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
     //const { selected } = useNavigationContext();
 
     const exportDocumentOnClick = async () => {
-        await RestService.getExcelFromLr(currentDocument.id, currentSchool.id, year, month);
+        await exportDocument();
     }
 
     console.log("Schools renders")
