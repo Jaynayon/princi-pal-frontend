@@ -241,13 +241,14 @@ const NavigationSearchBar = () => {
             <br />
             Provide information to request access to this organization.
           </DialogContentText>
-          <FormControl sx={{ m: 1, minWidth: 80 }} size="small">
+          <FormControl sx={{ m: 1, minWidth: 100 }} size="small">
             <Select
               labelId="demo-simple-select-autowidth-label"
               id="demo-simple-select-autowidth"
               value={select}
               onChange={handleChange}
               autoWidth
+              variant="standard"
               label="Select"
             >
               {POSITIONS.map((position, index) => (

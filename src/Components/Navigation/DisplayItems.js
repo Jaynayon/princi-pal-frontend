@@ -27,6 +27,7 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
+import { Typography } from '@mui/material';
 
 export function DisplayItems() {
     const theme = useTheme();
@@ -190,13 +191,30 @@ export const ProfileTab = ({ user }) => {
 
                 </ListItemIcon>
 
-                <ListItemText
-                    primary={currentUser.fname + ' ' + currentUser.lname}
-                    secondary={currentUser.email}
-                    primaryTypographyProps={{ fontWeight: 'bold', color: theme.navStyle.color }}
-                    secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
-                />
-
+                <Typography
+                    component="div"
+                    style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        width: '100%', // Ensure it takes up the full width of the container
+                    }}
+                >
+                    <ListItemText
+                        primary={`${currentUser.fname} ${currentUser.lname}`}
+                        secondary={currentUser.email}
+                        primaryTypographyProps={{
+                            fontWeight: 'bold',
+                            color: theme.navStyle.color,
+                            style: {
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            },
+                        }}
+                        secondaryTypographyProps={adjustSecondaryTypography()}
+                    />
+                </Typography>
             </ListItemButton>
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
                 <DialogTitle>My Profile</DialogTitle>

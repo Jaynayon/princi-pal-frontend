@@ -14,16 +14,26 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UacsDateFilter from '../Filters/UacsDateFilter';
 
 function RecordsRow(props) {
-    const { rows, setRows, page, rowsPerPage } = props;
+    const { page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { displayFields, isAdding, currentDocument, lr, fetchDocumentData, setReload,
-        reload, value, createNewDocument, jev, updateJev } = useSchoolContext();
-
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
-    const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
+
+    const {
+        displayFields,
+        isAdding,
+        currentDocument,
+        lr,
+        setLr,
+        fetchDocumentData,
+        setReload,
+        reload,
+        value,
+        createNewDocument,
+        jev
+    } = useSchoolContext();
 
     useEffect(() => {
         console.log("RecordsRow useEffect")
@@ -46,7 +56,6 @@ function RecordsRow(props) {
     };
 
     const handleMenuClose = () => {
-        setDropdownAnchorEl(null);
         setDeleteAnchorEl(null);
         setSelectedIndex(null);
     };
@@ -115,27 +124,27 @@ function RecordsRow(props) {
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
         console.log("accept");
-        const rowIndex = rows.findIndex(row => row.id === rowId);
+        const rowIndex = lr.findIndex(row => row.id === rowId);
         // jev length upon initialization will always be > 2
         if (jev.length < 2) { //if there's no current document or it's not yet existing
-            createNewDocument(rows[rowIndex]);
+            createNewDocument(lr[rowIndex]);
         }
-        await createLrByDocumentId(currentDocument.id, rows[rowIndex]);
+        await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
     }
 
     const handleInputChange = (colId, rowId, event) => {
         // Find the index of the object with matching id
-        const rowIndex = rows.findIndex(row => row.id === rowId);
+        const rowIndex = lr.findIndex(row => row.id === rowId);
 
         if (rowIndex !== -1) {
             // Copy the array to avoid mutating state directly
-            const updatedRows = [...rows];
+            const updatedRows = [...lr];
 
             // Update the specific property of the object
             updatedRows[rowIndex][colId] = event.target.value;
 
             // Update the state with the modified rows
-            setRows(updatedRows);
+            setLr(updatedRows);
             setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
         } else {
             console.error(`Row with id ${rowId} not found`);
@@ -157,7 +166,7 @@ function RecordsRow(props) {
 
     return (
         <React.Fragment>
-            {rows
+            {lr
                 .slice(page * rowsPerPage, page * props.rowsPerPage + props.rowsPerPage)
                 .map((row, index) => {
                     const uniqueKey = `row_${row.id}_${index}`;
