@@ -23,6 +23,7 @@ const RegistrationPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [usernameError, setUsernameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
+  const [emailExistsError, setEmailExistsError] = useState(false); // Separate state for email existence check
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
   const [registrationError, setRegistrationError] = useState('');
@@ -74,6 +75,9 @@ const RegistrationPage = () => {
     switch (key) {
       case 'email':
         setEmailError(value !== '' && !validateEmail(value));
+        if (!emailExistsError) {
+          setEmailExistsError(false);
+        }
         break;
       case 'password':
         setPasswordError(value !== '' && !validatePassword(value));
@@ -87,7 +91,7 @@ const RegistrationPage = () => {
         setConfirmPasswordError(value !== '' && value !== formData.password);
         break;
       default:
-        break; 
+        break;
     }
   };
 
@@ -96,39 +100,35 @@ const RegistrationPage = () => {
       ...formData,
       position: event.target.value
     });
-    console.log(formData.position)
   };
 
   const handleExistingEmail = async (event) => {
-    try {
-      const exists = await RestService.validateUsernameEmail(event.target.value); //returns boolean
-      //return exists ? setEmailError(true) :setEmailError(false);
-      setEmailError(exists);
-      console.log("email: " + exists);
-    } catch (error) {
-      console.error(error);
+    const value = event.target.value;
+    if (value && validateEmail(value)) {
+      try {
+        const exists = await RestService.validateUsernameEmail(value); // returns boolean
+        setEmailExistsError(exists);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      setEmailExistsError(false); // Clear email existence error if email is invalid or empty
     }
   };
-
-  const getEmail = async (email) => {
-    try {
-      const exists = await RestService.validateUsernameEmail(email); //returns boolean
-      return exists ? true : false;
-      //setEmailError(exists);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
 
   const handleExistingUsername = async (event) => {
-    try {
-      const exists = await RestService.validateUsernameEmail(event.target.value)
-      exists ? setUsernameError(true) : setUsernameError(false)
-    } catch (error) {
-      console.log(error)
+    const value = event.target.value;
+    if (value) {
+      try {
+        const exists = await RestService.validateUsernameEmail(value);
+        setUsernameError(exists);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      setUsernameError(false); // Clear username error if username is empty
     }
-  }
+  };
 
   const handleSubmit = async () => {
     const { email, password, username, firstName, middleName, lastName, position } = formData;
@@ -140,7 +140,7 @@ const RegistrationPage = () => {
     }
 
     // Further validation logic for email, password, and confirmPassword
-    if (!emailError && !passwordError && !confirmPasswordError) {
+    if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
       try {
         const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
         if (response) {
@@ -171,37 +171,40 @@ const RegistrationPage = () => {
     }
   };
 
-  function getErrorCondition(item, event) {
+  function getErrorCondition(item) {
     const { key } = item;
     if (key === 'email') {
+      if (formData.email === '') {
+        return false; // No error if email field is empty
+      }
       let message;
       if (formData.email && !validateEmail(formData.email)) {
         message = "Invalid email address";
-      } else if(emailError){
+      } else if (emailExistsError) {
         message = "Email address already exists";
       }
-      return emailError ? message : false;
+      return emailError || emailExistsError ? message : false;
     }
-  
+
     if (key === 'username') {
       return usernameError ? "Existing or invalid username" : false;
     }
-  
+
     if (key === 'password') {
       return passwordError ? "Password must contain at least 8 characters and one special character" : false;
     }
-  
+
     if (key === 'confirmPassword') {
       return confirmPasswordError ? "Passwords don't match" : false;
     }
-  
+
     if (!formValid && !formData[key]) {
       return "This field is required";
     }
-  
+
     return false;
   }
-  
+
   return (
     <Container
       maxWidth={false}
@@ -251,15 +254,15 @@ const RegistrationPage = () => {
             style={{ marginBottom: "1rem", width: "100%" }}
             color="primary"
             onBlur={(event) => {
-              item.key === 'email' && handleExistingEmail(event)
-              item.key === 'username' && handleExistingUsername(event)
+              if (item.key === 'email') handleExistingEmail(event);
+              if (item.key === 'username') handleExistingUsername(event);
             }}
             label={item.label}
             variant="outlined"
             type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
             value={formData[item.key]}
             onChange={(e) => handleInputChange(item.key, e.target.value)}
-            error={getErrorCondition(item) ? true : false}
+            error={!!getErrorCondition(item)}
             helperText={getErrorCondition(item)}
             InputProps={{
               startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
@@ -275,7 +278,6 @@ const RegistrationPage = () => {
             sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set background color and outline color
           />
         ))}
-
 
         <FormControl required sx={{ minWidth: 120 }} variant="outlined" fullWidth style={{ marginBottom: "1rem", textAlign: "left", backgroundColor: "#DBF0FD", }}>
           <InputLabel id="position-select-label" color="primary">Position</InputLabel>
@@ -299,7 +301,7 @@ const RegistrationPage = () => {
             backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem", padding: "15px", borderRadius: "1.5px", cursor: "pointer", transition: "background-color 0.3s", "&:hover": { backgroundColor: "#474bca", },
           }}
           disabled={
-            (usernameError || emailError || passwordError || confirmPasswordError) ||
+            (usernameError || emailError || emailExistsError || passwordError || confirmPasswordError) ||
             (formData.email === '' || formData.username === '' || formData.password === '' || formData.confirmPassword === '')
           }
           disableElevation
