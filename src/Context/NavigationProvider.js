@@ -55,18 +55,18 @@ export const NavigationProvider = ({ children }) => {
                     setUserId(data)
                     if (!currentUser) {
                         const user = await RestService.getUserById(data.id);
-                        setCurrentUser({
-                            ...user,
-                            schools: [{
-                                id: "6634e7fc43d8096920d765ff",
-                                name: 'Jaclupan ES'
-                            }, {
-                                id: "66354cb59de52335e7ad78ab",
-                                name: 'Talisay ES'
-                            }
-                            ]
-                        })
-
+                        // setCurrentUser({
+                        //     ...user,
+                        //     schools: [{
+                        //         id: "6634e7fc43d8096920d765ff",
+                        //         name: 'Jaclupan ES'
+                        //     }, {
+                        //         id: "66354cb59de52335e7ad78ab",
+                        //         name: 'Talisay ES'
+                        //     }
+                        //     ]
+                        // })
+                        setCurrentUser(user);
                     }
                 }
                 if (currentUser) { // if current user is not null or undefined, set school
