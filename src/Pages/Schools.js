@@ -1,5 +1,5 @@
 import '../App.css'
-import React, { useState, useCallback } from 'react';
+import React, { } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -11,10 +11,11 @@ import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolDateFilter'
 import DocumentTable from '../Components/Table/DocumentTable';
 import Button from '@mui/material/Button';
-import { SchoolProvider, useSchoolContext } from '../Context/SchoolProvider';
-import { useNavigationContext } from '../Context/NavigationProvider';
+import { useSchoolContext } from '../Context/SchoolProvider';
+// import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
+import JEVTable from '../Components/Table/JEVTable';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -50,30 +51,37 @@ function a11yProps(index) {
 }
 
 function Schools(props) {
-    const { year, month, setIsAdding, currentDocument, reload, updateLr } = useSchoolContext();
-    const { selected } = useNavigationContext();
-    const [value, setValue] = React.useState(0);
+    const { year, month, setIsAdding, currentDocument, currentSchool, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
+    //const { selected } = useNavigationContext();
+
     const exportDocumentOnClick = async () => {
-        await RestService.getExcelFromLr(currentDocument.id);
+        await RestService.getExcelFromLr(currentDocument.id, currentSchool.id, year, month);
     }
 
     console.log("Schools renders")
 
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
-        console.log("Schools useEffect: document updated");
+        console.log("Schools useEffect: lr updated");
+        // if (value === 0) {
+        //     updateLr(); //update or fetch lr data on load
+        // } else if (value === 1) {
+        //     updateJev();
+        // }
 
-        updateLr(); //update lr
+        updateLr();
+        updateJev();
         setIsAdding(false); //reset state to allow displayFields again
-    }, [year, month, value, reload, updateLr]);
 
-    if (!currentDocument) {
-        return null;
-    }
+    }, [value, year, month, reload, updateLr, updateJev, setIsAdding]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    if (!currentDocument) { //returns null until there's value
+        return null;
+    }
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -150,9 +158,8 @@ function Schools(props) {
                                             value={value}
                                             onChange={handleChange}
                                             aria-label="basic tabs example">
-                                            <Tab sx={styles.tab} label="LR" {...a11yProps(0)} />
-                                            <Tab sx={styles.tab} label="RCD" {...a11yProps(1)} />
-                                            <Tab sx={styles.tab} label="JEV" {...a11yProps(2)} />
+                                            <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
+                                            <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
                                         </Tabs>
                                     </Box>
                                 </Grid>
@@ -163,10 +170,7 @@ function Schools(props) {
                                         <DocumentTable />
                                     </CustomTabPanel>
                                     <CustomTabPanel value={value} index={1}>
-                                        <DocumentTable />
-                                    </CustomTabPanel>
-                                    <CustomTabPanel value={value} index={2}>
-                                        Item Three
+                                        <JEVTable />
                                     </CustomTabPanel>
                                 </Grid>
                             </Grid>
