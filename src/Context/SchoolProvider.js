@@ -30,7 +30,7 @@ const years = [
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool, selected } = useNavigationContext();
+    const { currentSchool } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -53,6 +53,41 @@ export const SchoolProvider = ({ children }) => {
 
     const prevMonthRef = useRef(monthIndex === 0 ? 11 : monthIndex);
     const prevYearRef = useRef(monthIndex === 0 ? (yearIndex === 0 ? years.length - 1 : yearIndex - 1) : yearIndex);
+
+    const exportDocument = async () => {
+        try {
+            if (currentSchool) {
+                const blobData = await RestService.getExcelFromLr(
+                    currentDocument.id,
+                    currentSchool.id,
+                    year,
+                    month
+                );
+
+                if (blobData) {
+                    console.log("Successfully exported document")
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    };
+
+    const fetchLRByKeyword = useCallback(async (keyword) => {
+        try {
+            if (currentSchool) {
+                const getLr = await RestService.getLrByKeyword(
+                    keyword
+                );
+
+                if (getLr) {
+                    setLr(getLr);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }, [currentSchool]);
 
     const fetchDocumentData = useCallback(async () => {
         try {
@@ -162,7 +197,8 @@ export const SchoolProvider = ({ children }) => {
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, setCurrentDocument, currentDocument,
             displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev, createNewDocument
+            currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev, createNewDocument,
+            fetchLRByKeyword, exportDocument
         }}>
             {children}
         </SchoolContext.Provider>

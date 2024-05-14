@@ -2,6 +2,18 @@ import React from "react";
 import { Typography, Container, Box, Button, Grid } from "@mui/material";
 
 const WelcomePage = () => {
+  const loginButtonActionListener = () => {
+    // Logic for handling login button click
+    // Redirect to the login page
+    window.location.href = "/login";
+  };
+
+  const registerButtonActionListener = () => {
+    // Logic for handling register button click
+    // Redirect to the registration page
+    window.location.href = "/register";
+  };
+
   return (
     <Box
       sx={{
@@ -106,7 +118,7 @@ const WelcomePage = () => {
                   disableElevation
                   color="primary"
                   variant="contained"
-                  href="/register"
+                  onClick={registerButtonActionListener}
                 >
                   Register
                 </Button>
@@ -122,7 +134,7 @@ const WelcomePage = () => {
                   disableElevation
                   color="primary"
                   variant="contained"
-                  href="/login"
+                  onClick={loginButtonActionListener}
                 >
                   Log in
                 </Button>

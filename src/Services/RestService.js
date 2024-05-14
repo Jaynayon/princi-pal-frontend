@@ -207,6 +207,28 @@ const RestService = (() => {
         }
     };
 
+    const getLrByKeyword = async (keyword) => {
+        try {
+            const response = await instance.get(`http://localhost:4000/lr/keyword/${keyword}`)
+                .then(response => {
+                    console.log(response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error(error.response.data)
+                })
+
+            if (response) {
+                return response;
+            }
+        } catch (error) {
+            console.log(error.resonse.data)
+            //console.error('Error fetching lrs by document id:', error.message);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
     const getExcelFromLr = async (docId, schoolId, year, month) => {
         try {
             const response = await instance.post('http://localhost:4000/downloadExcel', {
@@ -452,7 +474,8 @@ const RestService = (() => {
         updateDocumentById,
         getJevByDocumentId,
         updateJevById,
-        createDocBySchoolId
+        createDocBySchoolId,
+        getLrByKeyword
     };
 })();
 

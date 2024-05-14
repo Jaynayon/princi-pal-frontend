@@ -120,6 +120,7 @@ const NavigationSearchBar = () => {
             boxShadow: "0px 8px 16px 0px rgba(0,0,0,0.2)",
             color: "#424242",
             textAlign: "start",
+            zIndex: 999,
           }}
         >
           <li
@@ -240,13 +241,14 @@ const NavigationSearchBar = () => {
             <br />
             Provide information to request access to this organization.
           </DialogContentText>
-          <FormControl sx={{ m: 1, minWidth: 80 }} size="small">
+          <FormControl sx={{ m: 1, minWidth: 100 }} size="small">
             <Select
               labelId="demo-simple-select-autowidth-label"
               id="demo-simple-select-autowidth"
               value={select}
               onChange={handleChange}
               autoWidth
+              variant="standard"
               label="Select"
             >
               {POSITIONS.map((position, index) => (
