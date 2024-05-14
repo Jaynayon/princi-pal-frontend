@@ -24,6 +24,7 @@ import Divider from '@mui/material/Divider';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import Avatar from '@mui/material/Avatar';
 
 // Custom imports
 import { styling } from "./styling";
@@ -342,7 +343,7 @@ export default function Navigation({ children }) {
                     >
                       <Typography variant="subtitle1" sx={{ paddingLeft: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
                         Notifications
-                        <DeleteOutlineIcon sx={{ ml: 60 }} onClick={handleClearOptions} />
+                        <DeleteOutlineIcon sx={{ ml: 25 }} onClick={handleClearOptions} />
                       </Typography>
 
                       <Tabs
