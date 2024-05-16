@@ -109,8 +109,8 @@ class LRTable extends Component {
             {
                 id: 'natureOfPayment',
                 label: 'Nature of Payment',
-                minWidth: 100,
-                maxWidth: 100,
+                minWidth: 110,
+                maxWidth: 110,
                 align: 'left',
                 format: (value) => value.toLocaleString('en-US'),
             },
@@ -139,7 +139,13 @@ class LRTable extends Component {
                                             maxWidth: column.maxWidth,
                                         }}
                                     >
-                                        {column.label}
+                                        <Typography
+                                            variant="inherit"
+                                            // noWrap
+                                            sx={{ ml: 1.5 }}
+                                        >
+                                            {column.label}
+                                        </Typography>
                                     </TableCell>
                                 ))}
                             </TableRow>
