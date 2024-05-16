@@ -133,15 +133,21 @@ function RecordsRow(props) {
     }
 
     const handleInputChange = (colId, rowId, event) => {
+        let modifiedValue = event.target.value
         // Find the index of the object with matching id
         const rowIndex = lr.findIndex(row => row.id === rowId);
+
+        if (colId === "amount") {
+            // Replace any characters that are not digits or periods
+            modifiedValue = modifiedValue.replace(/[^0-9.]/g, '');
+        }
 
         if (rowIndex !== -1) {
             // Copy the array to avoid mutating state directly
             const updatedRows = [...lr];
 
             // Update the specific property of the object
-            updatedRows[rowIndex][colId] = event.target.value;
+            updatedRows[rowIndex][colId] = modifiedValue;
 
             // Update the state with the modified rows
             setLr(updatedRows);
@@ -220,8 +226,9 @@ function RecordsRow(props) {
                                                 }
                                             >
                                                 <TextField
-                                                    value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
                                                     //variant='standard'
+                                                    value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
+
                                                     sx={{
                                                         "& fieldset": { border: row.id !== 3 && 'none' }
                                                     }}
