@@ -165,9 +165,9 @@ function RecordsRow(props) {
     };
 
     // Function to format a number with commas and two decimal places
-    const formatNumber = (number, colId) => {
+    const formatNumber = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
-        if (editingCell?.colId === colId)
+        if (editingCell?.colId === colId && editingCell?.rowId === rowId)
             return number;
         return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
@@ -220,7 +220,7 @@ function RecordsRow(props) {
                                                 }
                                             >
                                                 <TextField
-                                                    value={column.id === "amount" ? formatNumber(value, column.id) : value}
+                                                    value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
                                                     //variant='standard'
                                                     sx={{
                                                         "& fieldset": { border: row.id !== 3 && 'none' }
