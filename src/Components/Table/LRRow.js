@@ -164,6 +164,14 @@ function RecordsRow(props) {
         }
     };
 
+    // Function to format a number with commas and two decimal places
+    const formatNumber = (number, colId) => {
+        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
+        if (editingCell?.colId === colId)
+            return number;
+        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
     return (
         <React.Fragment>
             {lr
@@ -200,8 +208,8 @@ function RecordsRow(props) {
                                                     handleInputChange={handleInputChange} //handle input change on current row
                                                 />
                                             </Box>
-
-                                            : <Box
+                                            :
+                                            <Box
                                                 style={
                                                     editingCell &&
                                                         editingCell.colId === column.id &&
@@ -212,7 +220,7 @@ function RecordsRow(props) {
                                                 }
                                             >
                                                 <TextField
-                                                    value={value}
+                                                    value={column.id === "amount" ? formatNumber(value, column.id) : value}
                                                     //variant='standard'
                                                     sx={{
                                                         "& fieldset": { border: row.id !== 3 && 'none' }
