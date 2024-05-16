@@ -20,7 +20,7 @@ const LoginPage = () => {
         try {
             const emailValue = getEmailorUsername(); // Get email or username
             const passwordValue = getPassword(); // Get password
-
+    
             if (!emailValue.trim() || !passwordValue.trim()) {
                 if (!emailValue.trim() && !passwordValue.trim()) {
                     setLoginError('Email or password cannot be empty.');
@@ -31,10 +31,10 @@ const LoginPage = () => {
                 }
                 return;
             }
-
+    
             // Make a POST request to the backend to validate the credentials
             const response = await RestService.authenticateUser(emailValue, passwordValue);
-
+    
             if (response) {
                 // Credentials are valid, set isLoggedIn to true
                 window.location.href = "http://localhost:3000/dashboard";
@@ -44,13 +44,14 @@ const LoginPage = () => {
             }
         } catch (error) {
             console.error('Error:', error);
-            if (error.message.includes('404')) {
+            if (error.response && error.response.status === 404) {
                 setLoginError('Endpoint not found. Please check the server configuration.');
             } else {
-                setLoginError('An error occurred while logging in. Please try again later.');
+                setLoginError('Incorrect email or password.');
             }
         }
     };
+    
 
     const getEmailorUsername = () => {
         // Logic to get email or username from the input field
