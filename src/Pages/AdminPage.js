@@ -139,7 +139,7 @@ function AdminPage(props) {
                 const response = await RestService.createUserPrincipal(currentUser.id, firstName, middleName, lastName, username, email, password);
                 if (response) {
                     console.log("Registration successful");
-                    setRegistrationError('');
+
                     // Clear form fields after successful registration
                     setFormData({
                         email: '',
@@ -150,6 +150,7 @@ function AdminPage(props) {
                         lastName: '',
                         confirmPassword: ''
                     });
+                    setRegistrationError('');
                     // Redirect to login page or display a success message
                     //window.location.href = "/login"; // Change this to the correct URL if needed
                 } else {
