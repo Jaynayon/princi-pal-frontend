@@ -354,15 +354,22 @@ export default function Navigation({ children }) {
                       >
                         <Tab label="All" />
                       </Tabs>
-                      {options.map((option, index) => (
-                      <React.Fragment key={option}>
-                          <MenuItem onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
-                          <Avatar sx={{ marginRight: '8px' }}> </Avatar>
+                      {options.flatMap((option, index) => (
+                        index !== options.length - 1
+                          ? [
+                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                              <Avatar sx={{ marginRight: '8px' }} />
                               {option}
-                          </MenuItem>
-                          {index !== options.length - 1 && <Divider />}
-                      </React.Fragment>
-                  ))}
+                            </MenuItem>,
+                            <Divider key={`divider-${index}`} />
+                          ]
+                          : [
+                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                              <Avatar sx={{ marginRight: '8px' }} />
+                              {option}
+                            </MenuItem>
+                          ]
+                      ))}
                     </Menu>
                   </Box>
                 </Toolbar>
