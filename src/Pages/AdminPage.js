@@ -2,18 +2,13 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import Typography from "@mui/material/Typography";
-import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import {
     Container,
     TextField,
     IconButton,
     Button,
-    Select,
-    InputLabel,
-    MenuItem,
-    FormControl,
     InputAdornment
 } from "@mui/material";
 import {
@@ -23,9 +18,10 @@ import {
     Email as EmailIcon,
 } from '@mui/icons-material';
 import RestService from "../Services/RestService";
-
+import { useNavigationContext } from '../Context/NavigationProvider';
 
 function AdminPage(props) {
+    const { currentUser } = useNavigationContext();
     const [showPassword, setShowPassword] = useState(false);
     const [usernameError, setUsernameError] = useState(false);
     const [emailError, setEmailError] = useState(false);
@@ -129,9 +125,9 @@ function AdminPage(props) {
     };
 
     const handleSubmit = async () => {
-        const { email, password, username, firstName, middleName, lastName, position } = formData;
+        const { email, password, username, firstName, middleName, lastName } = formData;
 
-        if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
+        if (!email || !password || !username || !firstName || !middleName || !lastName) {
             console.log("All fields are required");
             setFormValid(false); // Set form validity to false immediately
             return; // Exit the function
@@ -140,7 +136,7 @@ function AdminPage(props) {
         // Further validation logic for email, password, and confirmPassword
         if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
             try {
-                const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
+                const response = await RestService.createUserPrincipal(currentUser.id, firstName, middleName, lastName, username, email, password);
                 if (response) {
                     console.log("Registration successful");
                     setRegistrationError('');
@@ -152,11 +148,10 @@ function AdminPage(props) {
                         firstName: '',
                         middleName: '',
                         lastName: '',
-                        confirmPassword: '',
-                        position: ''
+                        confirmPassword: ''
                     });
                     // Redirect to login page or display a success message
-                    window.location.href = "/login"; // Change this to the correct URL if needed
+                    //window.location.href = "/login"; // Change this to the correct URL if needed
                 } else {
                     setRegistrationError("Registration failed");
                 }
