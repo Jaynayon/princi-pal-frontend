@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import Box from '@mui/material/Box';
@@ -11,14 +11,7 @@ function JEVRow(props) {
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { fetchDocumentData, jev, setJev, value } = useSchoolContext();
-
-    useEffect(() => {
-        console.log("RecordsRow useEffect")
-        // if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
-        //     displayFields(isAdding);
-        // }
-    }, [value]);
+    const { fetchDocumentData, jev, setJev } = useSchoolContext();
 
     const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });
@@ -71,6 +64,14 @@ function JEVRow(props) {
         console.log('Value saved:', inputValue);
     };
 
+    // Function to format a number with commas and two decimal places
+    const formatNumber = (number, colId, rowId) => {
+        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
+        if (editingCell?.colId === colId && editingCell?.rowId === rowId)
+            return number;
+        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
     return (
         <React.Fragment>
             {jev
@@ -108,7 +109,8 @@ function JEVRow(props) {
                                                 }
                                             >
                                                 <TextField
-                                                    value={value}
+                                                    // value={value}
+                                                    value={formatNumber(value, column.id, row.id)}
                                                     sx={{
                                                         "& fieldset": { border: row.id !== 3 && 'none' }
                                                     }}
