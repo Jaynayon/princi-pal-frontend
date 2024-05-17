@@ -347,25 +347,15 @@ function AdminPage(props) {
                             </Container>
                         </Grid>
                         <Grid item xs={12} md={6} lg={6}>
+                            {/*Create School*/}
                             <Paper>
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: "column",
-                                    padding: 3
-                                }}>
+                                <Box sx={styles.container}>
                                     <Typography
                                         component="h1"
                                         variant="h6"
                                         color="inherit"
                                         noWrap
-                                        sx={{
-                                            flexGrow: 1,
-                                            textAlign: "left",
-                                            color: "#252733",
-                                            fontWeight: "bold",
-                                            alignSelf: "flex-start",
-                                            pl: 1
-                                        }}
+                                        sx={styles.title}
                                     >
                                         Create School
                                     </Typography>
@@ -374,16 +364,7 @@ function AdminPage(props) {
                                         variant="h6"
                                         color="inherit"
                                         noWrap
-                                        sx={{
-                                            flexGrow: 1,
-                                            textAlign: "left",
-                                            color: "#9FA2B4",
-                                            fontWeight: "bold",
-                                            alignSelf: "flex-start",
-                                            fontSize: 12,
-                                            pb: 1,
-                                            pl: 1
-                                        }}
+                                        sx={styles.description}
                                     >
                                         Create a new school to manipulate documents
                                     </Typography>
@@ -391,72 +372,35 @@ function AdminPage(props) {
                                         variant='outlined'
                                         label='School Name'
                                         sx={{ m: 1 }}
-                                        InputLabelProps={{
-                                            style: {
-                                                fontSize: 14,
-                                                color: 'black', // Adjust color if needed
-                                                marginTop: -4, // Adjust vertical positioning
-                                            }
-                                        }}
-                                        InputProps={{
-                                            style: {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontSize: 14,
-                                                height: 40
-                                            }
-                                        }}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
                                     />
                                     <TextField
                                         variant='outlined'
                                         label='School Full Name'
                                         sx={{ m: 1 }}
-                                        InputLabelProps={{
-                                            style: {
-                                                fontSize: 14,
-                                                color: 'black', // Adjust color if needed
-                                                marginTop: -4, // Adjust vertical positioning
-                                            }
-                                        }}
-                                        InputProps={{
-                                            style: {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontSize: 14,
-                                                height: 40
-                                            }
-                                        }}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
                                     />
                                     <Button
                                         variant="contained"
                                         color="primary"
                                         disabled
-                                        onClick={() => logoutUser('jwt')}
+                                        onClick={() => console.log("test")}
                                     >
                                         Create School
                                     </Button>
                                 </Box>
                             </Paper>
+                            {/*Integrate Principal*/}
                             <Paper>
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: "column",
-                                    padding: 3,
-                                    mt: 2
-                                }}>
+                                <Box sx={[styles.container, { mt: 2 }]}>
                                     <Typography
                                         component="h1"
                                         variant="h6"
                                         color="inherit"
                                         noWrap
-                                        sx={{
-                                            flexGrow: 1,
-                                            textAlign: "left",
-                                            color: "#252733",
-                                            fontWeight: "bold",
-                                            alignSelf: "flex-start",
-                                            pl: 1
-                                        }}
+                                        sx={styles.title}
                                     >
                                         Integrate Principal
                                     </Typography>
@@ -465,16 +409,7 @@ function AdminPage(props) {
                                         variant="h6"
                                         color="inherit"
                                         noWrap
-                                        sx={{
-                                            flexGrow: 1,
-                                            textAlign: "left",
-                                            color: "#9FA2B4",
-                                            fontWeight: "bold",
-                                            alignSelf: "flex-start",
-                                            fontSize: 12,
-                                            pb: 1,
-                                            pl: 1
-                                        }}
+                                        sx={styles.description}
                                     >
                                         Integrate principal to an existing school
                                     </Typography>
@@ -482,41 +417,15 @@ function AdminPage(props) {
                                         variant='outlined'
                                         label='School Name or Full Name'
                                         sx={{ m: 1 }}
-                                        InputLabelProps={{
-                                            style: {
-                                                fontSize: 14,
-                                                color: 'black', // Adjust color if needed
-                                                marginTop: -4, // Adjust vertical positioning
-                                            }
-                                        }}
-                                        InputProps={{
-                                            style: {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontSize: 14,
-                                                height: 40
-                                            }
-                                        }}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
                                     />
                                     <TextField
                                         variant='outlined'
                                         label='Email or Username'
                                         sx={{ m: 1 }}
-                                        InputLabelProps={{
-                                            style: {
-                                                fontSize: 14,
-                                                color: 'black', // Adjust color if needed
-                                                marginTop: -4, // Adjust vertical positioning
-                                            }
-                                        }}
-                                        InputProps={{
-                                            style: {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontSize: 14,
-                                                height: 40
-                                            }
-                                        }}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
                                     />
                                     <Button
                                         variant="contained"
@@ -537,6 +446,46 @@ function AdminPage(props) {
     );
 }
 
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: "column",
+        padding: 3
+    },
+    title: {
+        flexGrow: 1,
+        textAlign: "left",
+        color: "#252733",
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        pl: 1
+    },
+    description: {
+        flexGrow: 1,
+        textAlign: "left",
+        color: "#9FA2B4",
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        fontSize: 12,
+        pb: 1,
+        pl: 1
+    },
+    InputLabelProps: {
+        style: {
+            fontSize: 14,
+            color: 'black', // Adjust color if needed
+            marginTop: -4, // Adjust vertical positioning
+        }
+    },
+    InputProps: {
+        style: {
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 14,
+            height: 40
+        }
+    }
+}
 
 
 
