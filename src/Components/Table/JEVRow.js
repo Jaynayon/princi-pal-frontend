@@ -7,11 +7,11 @@ import { TextField } from '@mui/material';
 import RestService from '../../Services/RestService';
 
 function JEVRow(props) {
-    const { rows, setRows, page, rowsPerPage } = props;
+    const { page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { currentDocument, fetchDocumentData, setReload, reload, value } = useSchoolContext();
+    const { fetchDocumentData, jev, setJev, value } = useSchoolContext();
 
     useEffect(() => {
         console.log("RecordsRow useEffect")
@@ -44,17 +44,17 @@ function JEVRow(props) {
 
     const handleInputChange = (colId, rowId, event) => {
         // Find the index of the object with matching id
-        const rowIndex = rows.findIndex(row => row.id === rowId);
+        const rowIndex = jev.findIndex(row => row.id === rowId);
 
         if (rowIndex !== -1) {
             // Copy the array to avoid mutating state directly
-            const updatedRows = [...rows];
+            const updatedRows = [...jev];
 
             // Update the specific property of the object
             updatedRows[rowIndex][colId] = event.target.value;
 
             // Update the state with the modified rows
-            setRows(updatedRows);
+            setJev(updatedRows);
             setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
         } else {
             console.error(`Row with id ${rowId} not found`);
@@ -73,7 +73,7 @@ function JEVRow(props) {
 
     return (
         <React.Fragment>
-            {rows
+            {jev
                 .slice(page * rowsPerPage, page * props.rowsPerPage + props.rowsPerPage)
                 .map((row, index) => {
                     const uniqueKey = `row_${row.id}_${index}`;

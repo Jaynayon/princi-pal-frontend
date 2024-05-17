@@ -106,8 +106,6 @@ class JEVTable extends Component {
                                 </TableHead>
                                 <TableBody>
                                     <JEVRow
-                                        rows={jev}
-                                        setRows={setJev}
                                         page={page}
                                         rowsPerPage={rowsPerPage}
                                         columns={columns}
