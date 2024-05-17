@@ -40,6 +40,71 @@ function AdminPage(props) {
     });
     const [formValid, setFormValid] = useState(true); // Track form validity
 
+    const [schoolNameError, setSchoolNameError] = useState(false);
+    const [schoolFullNameError, setSchoolFullNameError] = useState(false);
+    const [schoolFormData, setSchoolFormData] = useState({
+        name: '',
+        fullName: ''
+    })
+
+    const handleSchoolInputChange = (key, value) => {
+        setSchoolFormData({
+            ...schoolFormData,
+            [key]: value
+        });
+        console.log(schoolFormData.fullName)
+    }
+
+    const schoolOnBlur = async (key, value) => {
+        let nameExists
+        if (key === "name" && schoolFormData.name !== "") {
+            nameExists = await RestService.getSchoolName(value);
+            nameExists ? setSchoolNameError(true) : setSchoolNameError(false);
+        } else if (key === "fullName" && schoolFormData.fullName !== "") {
+            nameExists = await RestService.getSchoolFullName(value);
+            nameExists ? setSchoolFullNameError(true) : setSchoolFullNameError(false);
+        }
+    }
+
+    const handleSchoolSubmit = async () => {
+        const { name, fullName } = schoolFormData;
+
+        if (!name || !fullName) {
+            // console.log("All fields are required");
+            // setFormValid(false); // Set form validity to false immediately
+            return; // Exit the function
+        }
+
+        // Further validation logic for email, password, and confirmPassword
+        if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
+            try {
+                const response = await RestService.createSchool(name, fullName);
+                if (response) {
+                    console.log("School creation successful");
+
+                    // Clear form fields after successful registration
+                    setSchoolFormData({
+                        name: '',
+                        fullName: ''
+                    });
+                    setSchoolFullNameError(false);
+                    setSchoolNameError(false);
+                    // Redirect to login page or display a success message
+                    //window.location.href = "/login"; // Change this to the correct URL if needed
+                } else {
+                    setRegistrationError("Registration failed");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                setRegistrationError("Registration failed");
+            }
+        } else {
+            console.log("Form contains errors");
+        }
+    };
+
+
+
     const handleShowPasswordClick = () => {
         setShowPassword(!showPassword);
     };
@@ -372,21 +437,34 @@ function AdminPage(props) {
                                         variant='outlined'
                                         label='School Name'
                                         sx={{ m: 1 }}
+                                        value={schoolFormData["name"]}
+                                        error={schoolNameError}
+                                        helperText={schoolNameError && "School name already exists"}
                                         InputLabelProps={styles.InputLabelProps}
                                         InputProps={styles.InputProps}
+                                        onBlur={(event) => schoolOnBlur("name", event.target.value)}
+                                        onChange={(event) => handleSchoolInputChange("name", event.target.value)}
                                     />
                                     <TextField
                                         variant='outlined'
                                         label='School Full Name'
                                         sx={{ m: 1 }}
+                                        value={schoolFormData["fullName"]}
+                                        error={schoolFullNameError}
+                                        helperText={schoolFullNameError && "School full name already exists"}
                                         InputLabelProps={styles.InputLabelProps}
                                         InputProps={styles.InputProps}
+                                        onBlur={(event) => schoolOnBlur("fullName", event.target.value)}
+                                        onChange={(event) => handleSchoolInputChange("fullName", event.target.value)}
                                     />
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        disabled
-                                        onClick={() => console.log("test")}
+                                        disabled={
+                                            (schoolFullNameError || schoolNameError) ||
+                                            (schoolFormData.name === "" || schoolFormData.fullName === "")
+                                        }
+                                        onClick={() => handleSchoolSubmit()}
                                     >
                                         Create School
                                     </Button>
