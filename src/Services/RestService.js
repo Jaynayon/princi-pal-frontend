@@ -11,7 +11,7 @@ const RestService = (() => {
 
     const createUser = async (fname, mname, lname, username, email, password, position) => {
         try {
-            const response = await instance.post('http://localhost:4000/users', {
+            const response = await instance.post('http://localhost:4000/users/create', {
                 fname,
                 mname,
                 lname,
