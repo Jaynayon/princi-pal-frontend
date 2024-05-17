@@ -2,18 +2,13 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import Typography from "@mui/material/Typography";
-import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import {
     Container,
     TextField,
     IconButton,
     Button,
-    Select,
-    InputLabel,
-    MenuItem,
-    FormControl,
     InputAdornment
 } from "@mui/material";
 import {
@@ -23,9 +18,10 @@ import {
     Email as EmailIcon,
 } from '@mui/icons-material';
 import RestService from "../Services/RestService";
-
+import { useNavigationContext } from '../Context/NavigationProvider';
 
 function AdminPage(props) {
+    const { currentUser } = useNavigationContext();
     const [showPassword, setShowPassword] = useState(false);
     const [usernameError, setUsernameError] = useState(false);
     const [emailError, setEmailError] = useState(false);
@@ -129,9 +125,9 @@ function AdminPage(props) {
     };
 
     const handleSubmit = async () => {
-        const { email, password, username, firstName, middleName, lastName, position } = formData;
+        const { email, password, username, firstName, middleName, lastName } = formData;
 
-        if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
+        if (!email || !password || !username || !firstName || !middleName || !lastName) {
             console.log("All fields are required");
             setFormValid(false); // Set form validity to false immediately
             return; // Exit the function
@@ -140,10 +136,10 @@ function AdminPage(props) {
         // Further validation logic for email, password, and confirmPassword
         if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
             try {
-                const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
+                const response = await RestService.createUserPrincipal(currentUser.id, firstName, middleName, lastName, username, email, password);
                 if (response) {
                     console.log("Registration successful");
-                    setRegistrationError('');
+
                     // Clear form fields after successful registration
                     setFormData({
                         email: '',
@@ -152,11 +148,11 @@ function AdminPage(props) {
                         firstName: '',
                         middleName: '',
                         lastName: '',
-                        confirmPassword: '',
-                        position: ''
+                        confirmPassword: ''
                     });
+                    setRegistrationError('');
                     // Redirect to login page or display a success message
-                    window.location.href = "/login"; // Change this to the correct URL if needed
+                    //window.location.href = "/login"; // Change this to the correct URL if needed
                 } else {
                     setRegistrationError("Registration failed");
                 }
@@ -351,25 +347,15 @@ function AdminPage(props) {
                             </Container>
                         </Grid>
                         <Grid item xs={12} md={6} lg={6}>
+                            {/*Create School*/}
                             <Paper>
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: "column",
-                                    padding: 3
-                                }}>
+                                <Box sx={styles.container}>
                                     <Typography
                                         component="h1"
                                         variant="h6"
                                         color="inherit"
                                         noWrap
-                                        sx={{
-                                            flexGrow: 1,
-                                            textAlign: "left",
-                                            color: "#252733",
-                                            fontWeight: "bold",
-                                            alignSelf: "flex-start",
-                                            pl: 1
-                                        }}
+                                        sx={styles.title}
                                     >
                                         Create School
                                     </Typography>
@@ -378,16 +364,7 @@ function AdminPage(props) {
                                         variant="h6"
                                         color="inherit"
                                         noWrap
-                                        sx={{
-                                            flexGrow: 1,
-                                            textAlign: "left",
-                                            color: "#9FA2B4",
-                                            fontWeight: "bold",
-                                            alignSelf: "flex-start",
-                                            fontSize: 12,
-                                            pb: 1,
-                                            pl: 1
-                                        }}
+                                        sx={styles.description}
                                     >
                                         Create a new school to manipulate documents
                                     </Typography>
@@ -395,72 +372,35 @@ function AdminPage(props) {
                                         variant='outlined'
                                         label='School Name'
                                         sx={{ m: 1 }}
-                                        InputLabelProps={{
-                                            style: {
-                                                fontSize: 14,
-                                                color: 'black', // Adjust color if needed
-                                                marginTop: -4, // Adjust vertical positioning
-                                            }
-                                        }}
-                                        InputProps={{
-                                            style: {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontSize: 14,
-                                                height: 40
-                                            }
-                                        }}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
                                     />
                                     <TextField
                                         variant='outlined'
                                         label='School Full Name'
                                         sx={{ m: 1 }}
-                                        InputLabelProps={{
-                                            style: {
-                                                fontSize: 14,
-                                                color: 'black', // Adjust color if needed
-                                                marginTop: -4, // Adjust vertical positioning
-                                            }
-                                        }}
-                                        InputProps={{
-                                            style: {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontSize: 14,
-                                                height: 40
-                                            }
-                                        }}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
                                     />
                                     <Button
                                         variant="contained"
                                         color="primary"
                                         disabled
-                                        onClick={() => logoutUser('jwt')}
+                                        onClick={() => console.log("test")}
                                     >
                                         Create School
                                     </Button>
                                 </Box>
                             </Paper>
+                            {/*Integrate Principal*/}
                             <Paper>
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: "column",
-                                    padding: 3,
-                                    mt: 2
-                                }}>
+                                <Box sx={[styles.container, { mt: 2 }]}>
                                     <Typography
                                         component="h1"
                                         variant="h6"
                                         color="inherit"
                                         noWrap
-                                        sx={{
-                                            flexGrow: 1,
-                                            textAlign: "left",
-                                            color: "#252733",
-                                            fontWeight: "bold",
-                                            alignSelf: "flex-start",
-                                            pl: 1
-                                        }}
+                                        sx={styles.title}
                                     >
                                         Integrate Principal
                                     </Typography>
@@ -469,16 +409,7 @@ function AdminPage(props) {
                                         variant="h6"
                                         color="inherit"
                                         noWrap
-                                        sx={{
-                                            flexGrow: 1,
-                                            textAlign: "left",
-                                            color: "#9FA2B4",
-                                            fontWeight: "bold",
-                                            alignSelf: "flex-start",
-                                            fontSize: 12,
-                                            pb: 1,
-                                            pl: 1
-                                        }}
+                                        sx={styles.description}
                                     >
                                         Integrate principal to an existing school
                                     </Typography>
@@ -486,41 +417,15 @@ function AdminPage(props) {
                                         variant='outlined'
                                         label='School Name or Full Name'
                                         sx={{ m: 1 }}
-                                        InputLabelProps={{
-                                            style: {
-                                                fontSize: 14,
-                                                color: 'black', // Adjust color if needed
-                                                marginTop: -4, // Adjust vertical positioning
-                                            }
-                                        }}
-                                        InputProps={{
-                                            style: {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontSize: 14,
-                                                height: 40
-                                            }
-                                        }}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
                                     />
                                     <TextField
                                         variant='outlined'
                                         label='Email or Username'
                                         sx={{ m: 1 }}
-                                        InputLabelProps={{
-                                            style: {
-                                                fontSize: 14,
-                                                color: 'black', // Adjust color if needed
-                                                marginTop: -4, // Adjust vertical positioning
-                                            }
-                                        }}
-                                        InputProps={{
-                                            style: {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontSize: 14,
-                                                height: 40
-                                            }
-                                        }}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
                                     />
                                     <Button
                                         variant="contained"
@@ -541,6 +446,46 @@ function AdminPage(props) {
     );
 }
 
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: "column",
+        padding: 3
+    },
+    title: {
+        flexGrow: 1,
+        textAlign: "left",
+        color: "#252733",
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        pl: 1
+    },
+    description: {
+        flexGrow: 1,
+        textAlign: "left",
+        color: "#9FA2B4",
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        fontSize: 12,
+        pb: 1,
+        pl: 1
+    },
+    InputLabelProps: {
+        style: {
+            fontSize: 14,
+            color: 'black', // Adjust color if needed
+            marginTop: -4, // Adjust vertical positioning
+        }
+    },
+    InputProps: {
+        style: {
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 14,
+            height: 40
+        }
+    }
+}
 
 
 

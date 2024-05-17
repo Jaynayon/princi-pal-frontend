@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import { RecordsProvider } from '../Context/RecordsProvider';
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolFilters'
 import DocumentTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
@@ -104,77 +103,75 @@ function Schools(props) {
                     </Paper>
                 </Grid>
                 <Grid item xs={12} md={12} lg={12}>
-                    <RecordsProvider>
-                        <Grid item xs={12} md={12} lg={12}>
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                            }}
-                            >
-                                <Grid container>
-                                    <Grid item xs={12} sm={8} md={8} lg={6}>
-                                        <Box sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            height: "100%",
-                                            //backgroundColor: 'green'
-                                        }}
-                                        >
-                                            <DocumentSummary />
-                                        </Box>
-                                    </Grid>
-                                    <Grid item xs={12} sm={4} md={4} lg={6}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                justifyContent: 'flex-end',
-                                                alignItems: 'center',
-                                                height: '100%', // Ensure Box fills the height of the Grid item
-                                                pr: 2
-                                            }}
-                                        >
-                                            <Button variant="contained"
-                                                sx={{ backgroundColor: '#4A99D3' }}
-                                                onClick={() => exportDocumentOnClick()}
-                                            >Export
-                                            </Button>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        </Grid>
-                        <Paper sx={[styles.container, { mt: 1 }]}>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                        }}
+                        >
                             <Grid container>
-                                <Grid item xs={12} md={12} lg={12}>
+                                <Grid item xs={12} sm={8} md={8} lg={6}>
                                     <Box sx={{
-                                        overflow: 'auto', //if overflow, hide it
-                                        overflowWrap: "break-word",
-                                    }}>
-                                        <Tabs sx={{ minHeight: '10px' }}
-                                            value={value}
-                                            onChange={handleChange}
-                                            aria-label="basic tabs example">
-                                            <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
-                                            <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
-                                        </Tabs>
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        height: "100%",
+                                        //backgroundColor: 'green'
+                                    }}
+                                    >
+                                        <DocumentSummary />
                                     </Box>
                                 </Grid>
-
-                                {/*Document Tables*/}
-                                <Grid item xs={12} md={12} lg={12}>
-                                    <CustomTabPanel value={value} index={0}>
-                                        <DocumentTable />
-                                    </CustomTabPanel>
-                                    <CustomTabPanel value={value} index={1}>
-                                        <JEVTable />
-                                    </CustomTabPanel>
+                                <Grid item xs={12} sm={4} md={4} lg={6}>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            justifyContent: 'flex-end',
+                                            alignItems: 'center',
+                                            height: '100%', // Ensure Box fills the height of the Grid item
+                                            pr: 2
+                                        }}
+                                    >
+                                        <Button variant="contained"
+                                            sx={{ backgroundColor: '#4A99D3' }}
+                                            onClick={() => exportDocumentOnClick()}
+                                        >Export
+                                        </Button>
+                                    </Box>
                                 </Grid>
                             </Grid>
-                        </Paper>
-                    </RecordsProvider>
+                        </Box>
+                    </Grid>
+                    <Paper sx={[styles.container, { mt: 1 }]}>
+                        <Grid container>
+                            <Grid item xs={12} md={12} lg={12}>
+                                <Box sx={{
+                                    overflow: 'auto', //if overflow, hide it
+                                    overflowWrap: "break-word",
+                                }}>
+                                    <Tabs sx={{ minHeight: '10px' }}
+                                        value={value}
+                                        onChange={handleChange}
+                                        aria-label="basic tabs example">
+                                        <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
+                                        <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
+                                    </Tabs>
+                                </Box>
+                            </Grid>
+
+                            {/*Document Tables*/}
+                            <Grid item xs={12} md={12} lg={12}>
+                                <CustomTabPanel value={value} index={0}>
+                                    <DocumentTable />
+                                </CustomTabPanel>
+                                <CustomTabPanel value={value} index={1}>
+                                    <JEVTable />
+                                </CustomTabPanel>
+                            </Grid>
+                        </Grid>
+                    </Paper>
                 </Grid>
             </Grid>
         </Container >

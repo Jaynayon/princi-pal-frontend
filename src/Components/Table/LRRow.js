@@ -11,7 +11,7 @@ import RestService from '../../Services/RestService';
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import UacsDateFilter from '../Filters/UacsDateFilter';
+import UacsFilter from '../Filters/UacsFilter';
 
 function RecordsRow(props) {
     const { page, rowsPerPage } = props;
@@ -208,7 +208,7 @@ function RecordsRow(props) {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                             }}>
-                                                <UacsDateFilter
+                                                <UacsFilter
                                                     value={value} // objectCode value
                                                     rowId={row.id} // lr id
                                                     handleInputChange={handleInputChange} //handle input change on current row
