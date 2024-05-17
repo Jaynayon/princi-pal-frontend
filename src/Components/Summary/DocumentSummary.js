@@ -58,9 +58,15 @@ function DocumentSummary(props) {
 
 function BudgetSummary(props) {
     const { title, amount, total = false } = props
+    let amountNumber = parseInt(amount);
 
     return (
-        <Paper sx={{ minWidth: 150, height: 65, m: 1, backgroundColor: total ? '#0077B6' : undefined }} variant='outlined'>
+        <Paper sx={{
+            minWidth: 150, height: 65, m: 1, backgroundColor: total ? '#0077B6' : undefined,
+
+            border: title === "Balance" && amountNumber < 0 && "1px solid red",
+            //borderColor: title === "Balance" && amount < 0 ? "red" : undefined,
+        }} variant='outlined'>
             <Box
                 style={{
                     display: 'flex',
@@ -71,10 +77,21 @@ function BudgetSummary(props) {
                     height: '100%',
                 }}
             >
-                <Typography variant="body2" align="center" sx={{ fontWeight: 'bold', color: total ? '#ffff' : '#9FA2B4' }}>
+                <Typography variant="body2" align="center"
+                    sx={{
+                        fontWeight: 'bold',
+                        color: title === "Balance" && amountNumber < 0 ? "red" :
+                            total ? '#ffff' : '#9FA2B4'
+                    }}
+                >
                     {title}
                 </Typography>
-                <Typography variant="body2" align="center" sx={{ fontWeight: 'bold', color: total && '#ffff' }}>
+                <Typography variant="body2" align="center"
+                    sx={{
+                        fontWeight: 'bold',
+                        color: title === "Balance" && amountNumber < 0 ? "red" : total && '#ffff'
+                    }}
+                >
                     Php {amount}
                 </Typography>
             </Box>
