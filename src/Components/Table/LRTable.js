@@ -209,7 +209,7 @@ export default LRTable;
 const DocumentTextFields = (props) => {
     // const { } = useSchoolContext();
     const { description, value, id } = props;
-    const [input, setInput] = React.useState(value !== null ? value : "");
+    const [input, setInput] = React.useState(value);
     const [prevInput, setPrevInput] = React.useState('initial state');
 
     React.useEffect(() => {
