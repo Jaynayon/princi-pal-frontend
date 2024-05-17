@@ -495,6 +495,70 @@ const RestService = (() => {
         }
     };
 
+    const getSchoolName = async (name) => {
+        try {
+            const response = await instance.post('http://localhost:4000/schools/name', {
+                name
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error retrieving school:', error);
+            return null;
+        }
+    };
+
+    const getSchoolFullName = async (fullName) => {
+        try {
+            const response = await instance.post('http://localhost:4000/schools/fullname', {
+                fullName
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error retrieving school:', error);
+            return null;
+        }
+    };
+
+    const createSchool = async (name, fullName) => {
+        try {
+            const response = await instance.post('http://localhost:4000/schools/create', {
+                name,
+                fullName
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
@@ -513,7 +577,10 @@ const RestService = (() => {
         updateJevById,
         createDocBySchoolId,
         getLrByKeyword,
-        createUserPrincipal
+        createUserPrincipal,
+        getSchoolName,
+        getSchoolFullName,
+        createSchool
     };
 })();
 
