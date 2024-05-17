@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // Material-UI imports
 import { Link } from 'react-router-dom';
@@ -26,7 +26,6 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
-import { blue } from '@mui/material/colors';
 import { Typography } from '@mui/material';
 
 export function DisplayItems() {
@@ -223,8 +222,8 @@ export const ProfileTab = ({ user }) => {
                         <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
                             <TextField disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " " } margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " " } margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " "} margin="normal" />
+                            <TextField disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " "} margin="normal" />
                             <TextField disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" />
                             <TextField disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
                             <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" />
