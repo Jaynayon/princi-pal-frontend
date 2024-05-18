@@ -18,9 +18,12 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { ListItemAvatar } from '@mui/material';
-
+import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemAvatar, ListItemText } from '@mui/material';
+import PropTypes from 'prop-types'; 
+import Typography from '@mui/material/Typography';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 
 function People(props) {
     const [member, setMember] = useState('');
@@ -32,6 +35,27 @@ function People(props) {
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false); // State for confirmation dialog
     const [selectedRole, setSelectedRole] = useState(''); // State for selected role
     const [deleteConfirmationDialogOpen, setDeleteConfirmationDialogOpen] = useState(false); // State for delete confirmation dialog
+    const [open, setOpen] = useState(false);
+    const [selectedValue, setSelectedValue] = useState('');
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = (value) => {
+        setOpen(false);
+        setSelectedValue(value);
+    };
+
+    const schoolAvatar = (
+        <Avatar>
+            <SchoolIcon />
+        </Avatar>
+    );
+
+    const handleAccept = () => {
+        handleClose('accepted');
+    };
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);
@@ -96,6 +120,7 @@ function People(props) {
         setInviteEmail('');
     };
 
+    //for the static members
     const rows = [
         { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
         { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
@@ -162,41 +187,62 @@ function People(props) {
                         Invite
                     </Button>
                 </Grid>
-                <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '-5px' }}>
-                    <FormControl sx={{ m: 1, minWidth: 150 }} >
-                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
-                        <Select
-                            labelId="demo-select-small-label"
-                            id="demo-select-small"
-                            value={member}
-                            label="Member"
-                            onChange={(event) => setMember(event.target.value)}
-                        >
-                            <MenuItem value="">
-                                <em>None</em>
-                            </MenuItem>
-                            <MenuItem value="Cebu Institute of Technology - University">
-                    <ListItemAvatar>
+                <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px' }}>
+    <FormControl sx={{ m: 1, minWidth: 150 }} >
+        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+        <Select
+            labelId="demo-select-small-label"
+            id="demo-select-small"
+            value={member}
+            label="Member"
+            onChange={(event) => setMember(event.target.value)}
+        >
+            <MenuItem value="">
+                <em>None</em>
+            </MenuItem>
+            <MenuItem value="Cebu Institute of Technology - University">
+                <ListItemAvatar>
                     <Avatar src="../downloads/cit.png" />
-                    </ListItemAvatar>
-                    Cebu Institute of Technology - University
-                </MenuItem>
-                <MenuItem value="Asian College of Technology">
-                    <ListItemAvatar>
+                </ListItemAvatar>
+                <ListItemText primary="Cebu Institute of Technology - University" />
+            </MenuItem>
+            <MenuItem value="Asian College of Technology">
+                <ListItemAvatar>
                     <Avatar src="../downloads/act.png" />
-                    </ListItemAvatar>
-                    Asian College of Technology
-                </MenuItem>
-                <MenuItem value="University of Cebu">
-                    <ListItemAvatar>
+                </ListItemAvatar>
+                <ListItemText primary="Asian College of Technology" />
+            </MenuItem>
+            <MenuItem value="University of Cebu">
+                <ListItemAvatar>
                     <Avatar src="/downloads/uc.jpg" />
-                    </ListItemAvatar>
-                    University of Cebu
-                </MenuItem>
-                            <MenuItem></MenuItem>
-                        </Select>
-                    </FormControl>
-                </Grid>
+                </ListItemAvatar>
+                <ListItemText primary="University of Cebu" />
+            </MenuItem>
+        </Select>
+    </FormControl>
+</Grid>
+<Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px' }}>
+    <FormControl sx={{ m: 1, minWidth: 150 }} >
+        {/* Application Dialog */}
+        <br />
+        <Button variant="outlined" onClick={handleClickOpen}>
+            Open Application Dialog
+        </Button>
+        <Dialog onClose={handleClose} open={open}>
+            <DialogTitle>Application for School</DialogTitle>
+            <List>
+                <ListItem disableGutters>
+                    <ListItemAvatar>{schoolAvatar}</ListItemAvatar>
+                    <ListItemText primary="Kiki Kiki" />
+                    <Button onClick={handleAccept} variant="contained" color="primary">
+                Accept
+            </Button>
+                </ListItem>
+            </List>
+        </Dialog>
+    </FormControl>
+</Grid>
+
                 <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px', marginTop: '-5px' }}>
                     <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
                         <Table md={{ display: 'flex', height: '100%', width: '100%' }} aria-label="simple table">
