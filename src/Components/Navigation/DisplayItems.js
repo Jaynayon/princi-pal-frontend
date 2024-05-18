@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // Material-UI imports
 import { Link } from 'react-router-dom';
@@ -14,6 +14,13 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
+import InputAdornment from '@mui/material/InputAdornment';
+import {
+    VisibilityOff as VisibilityOffIcon,
+    Lock as LockIcon,
+    Person as PersonIcon,
+    Email as EmailIcon,
+  } from '@mui/icons-material';
 
 // Custom component import
 import DisplaySchools from './DisplaySchools';
@@ -26,15 +33,17 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
-import { blue } from '@mui/material/colors';
+import { Typography } from '@mui/material';
 
 export function DisplayItems() {
     const theme = useTheme();
     const { list, selected, setSelected } = useNavigationContext();
 
-    useEffect(() => {
-        console.log(selected);
-    }, [selected]);
+    console.log("display items rendered");
+
+    // useEffect(() => {
+    //     console.log(selected);
+    // }, [selected]);
 
     const styles = {
         icon: {
@@ -180,7 +189,7 @@ export const ProfileTab = ({ user }) => {
 
                     <AccountCircleIcon
                         sx={{
-                            color: theme.navStyle.color,
+                            color: currentUser.avatar,
                             fontSize: '35px',
                             width: '100%',
                         }}
@@ -188,30 +197,92 @@ export const ProfileTab = ({ user }) => {
 
                 </ListItemIcon>
 
-                <ListItemText
-                    primary={currentUser.fname + ' ' + currentUser.lname}
-                    secondary={currentUser.email}
-                    primaryTypographyProps={{ fontWeight: 'bold', color: theme.navStyle.color }}
-                    secondaryTypographyProps={adjustSecondaryTypography()} // Call the adjustSecondaryTypography function
-                />
-
+                <Typography
+                    component="div"
+                    style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        width: '100%', // Ensure it takes up the full width of the container
+                    }}
+                >
+                    <ListItemText
+                        primary={`${currentUser.fname} ${currentUser.lname}`}
+                        secondary={currentUser.email}
+                        primaryTypographyProps={{
+                            fontWeight: 'bold',
+                            color: theme.navStyle.color,
+                            style: {
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            },
+                        }}
+                        secondaryTypographyProps={adjustSecondaryTypography()}
+                    />
+                </Typography>
             </ListItemButton>
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
                 <DialogTitle>My Profile</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
-                        <Avatar sx={{ bgcolor: blue[500], width: 90, height: 90, bottom: 165 }} alt="User Avatar"> </Avatar>
+                        <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
-                            <TextField disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="Fullname" defaultValue={currentUser.fname + ' ' + currentUser.mname + ' ' + currentUser.lname} margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Number" defaultValue="0935 256 2584" margin="normal" />
+                        <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " " } margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " " } margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
+                                    InputProps={{
+                                        startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailIcon />
+                                        </InputAdornment>
+                                        ),
+                                    }}
+                                    />
+                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <EmailIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}
+                            />
                         </Stack>
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                <Button onClick={handleDialogClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
+                    <Button onClick={handleDialogClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

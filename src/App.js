@@ -2,18 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, Outlet, RouterProvider } from 'react-router-dom';
 import Navigation from './Components/Navigation/Navigation.js';
 import Dashboard from './Pages/Dashboard.js';
-import Schools from './Pages/Schools.js';
+import SchoolPage from './Pages/SchoolPage.js';
 import People from './Pages/People.js';
 import Settings from './Pages/Settings.js';
 import Login from './Pages/Login.js';
+import AdminPage from './Pages/AdminPage.js';
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
+import { SchoolProvider } from './Context/SchoolProvider.js';
 import WelcomePage from './Pages/WelcomePage.js';
 import Registration from './Pages/Registration.js';
 import RestService from './Services/RestService.js';
 
+
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,7 +33,9 @@ function App() {
           // Call RestService to validate the token
           const data = await RestService.validateToken(token);
 
-          if (data) { //data.decodedToken
+          if (data) { // access data.id
+            const user = await RestService.getUserById(data.id);
+            user.position === "Super administrator" && setIsSuperAdmin(true); //is admin
             setIsLoggedIn(true)
           } else {
             setIsLoggedIn(false)
@@ -46,29 +52,57 @@ function App() {
     };
 
     fetchData();
-  }, []);
+
+  }, [isSuperAdmin]);
+
+  const getElement = (Component) => {
+    if (!isLoggedIn) {
+      return <Login />;
+    }
+    return isSuperAdmin ? <AdminPage /> : <PageWithNavigation page={<Component />} />;
+  };
+
+  const getWelcomeElement = (WelcomeModule, Component) => {
+    if (!isLoggedIn) {
+      return <WelcomeModule />;
+    }
+    return isSuperAdmin ? <AdminPage /> : <PageWithNavigation page={<Component />} />;
+  };
 
   const innerModuleRouter = createBrowserRouter(
     createRoutesFromElements(
       <Route element={<Root />}>
-        <Route index
-          element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <WelcomePage />}
+        <Route
+          index
+          //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <WelcomePage />}
+          element={getWelcomeElement(WelcomePage, Dashboard)}
         />
-        <Route path="/login"
-          element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Login />}
+        <Route
+          path="/login"
+          //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Login />}
+          element={getWelcomeElement(Login, Dashboard)}
         />
-        <Route path="/register"
-          element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Registration />} />
+        <Route
+          path="/register"
+          //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Registration />}
+          element={getWelcomeElement(Registration, Dashboard)}
+        />
         <Route
           path="/dashboard/*"
-          element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Login />}
+          element={getElement(Dashboard)}
         />
-        <Route path="/schools/*"
-          element={isLoggedIn ? <PageWithNavigation page={<Schools />} /> : <Login />} />
-        <Route path="/people/*"
-          element={isLoggedIn ? <PageWithNavigation page={<People />} /> : <Login />} />
-        <Route path="/settings/*"
-          element={isLoggedIn ? <PageWithNavigation page={<Settings />} /> : <Login />} />
+        <Route
+          path="/schools/*"
+          element={getElement(SchoolPage)}
+        />
+        <Route
+          path="/people/*"
+          element={getElement(People)}
+        />
+        <Route
+          path="/settings/*"
+          element={getElement(Settings)}
+        />
       </Route>
     )
   );
@@ -91,9 +125,11 @@ const Root = ({ setIsLoggedIn, isLoggedIn }) => {
 const PageWithNavigation = ({ page, setIsLoggedIn }) => {
   return (
     <NavigationProvider>
-      <Navigation>
-        {page}
-      </Navigation>
+      <SchoolProvider>
+        <Navigation>
+          {page}
+        </Navigation>
+      </SchoolProvider>
     </NavigationProvider>
   );
 };

@@ -1,11 +1,10 @@
 import { useState } from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { TextField, InputAdornment, IconButton, Button, Typography, Paper, Container, Grid } from "@mui/material";
+import { TextField, InputAdornment, IconButton, Button, Typography, Container, Grid } from "@mui/material";
 import RestService from "../Services/RestService";
 import { Link } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Box from '@mui/material/Box';
-
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -13,60 +12,59 @@ const LoginPage = () => {
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
 
-    const handleEmailFieldClick = () => {
-        setLoginError('');
-    };
-
-    const handlePasswordFieldClick = () => {
-        setLoginError('');
-    };
-
     const handleShowPasswordClick = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
     };
 
     const handleLogin = async () => {
         try {
-            if (!email.trim() || !password.trim()) {
-                if (!email.trim() && !password.trim()) {
+            const emailValue = getEmailorUsername(); // Get email or username
+            const passwordValue = getPassword(); // Get password
+    
+            if (!emailValue.trim() || !passwordValue.trim()) {
+                if (!emailValue.trim() && !passwordValue.trim()) {
                     setLoginError('Email or password cannot be empty.');
-                } else if (!email.trim()) {
+                } else if (!emailValue.trim()) {
                     setLoginError('Please enter your email.');
                 } else {
                     setLoginError('Please enter your password.');
                 }
-                setTimeout(() => setLoginError(''), 800); // Clear error after 0.8 seconds
                 return;
             }
-
-            // Email format validation
-            /*const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email.trim())) {
-                setLoginError('Invalid Email.');
-                setTimeout(() => setLoginError(''), 2000); // Clear error after 2 seconds
-                return;
-            }*/
-
+    
             // Make a POST request to the backend to validate the credentials
-            const response = await RestService.authenticateUser(email, password);
-
+            const response = await RestService.authenticateUser(emailValue, passwordValue);
+    
             if (response) {
                 // Credentials are valid, set isLoggedIn to true
                 window.location.href = "http://localhost:3000/dashboard";
             } else {
                 // Invalid credentials, display error message
                 setLoginError('Incorrect email or password.');
-                setTimeout(() => setLoginError(''), 2000); // Clear error after 2 seconds
             }
         } catch (error) {
             console.error('Error:', error);
-            if (error.message.includes('404')) {
+            if (error.response && error.response.status === 404) {
                 setLoginError('Endpoint not found. Please check the server configuration.');
             } else {
-                setLoginError('An error occurred while logging in. Please try again later.');
+                setLoginError('Incorrect email or password.');
             }
-            setTimeout(() => setLoginError(''), 800); // Clear error after 0.8 seconds
         }
+    };
+    
+
+    const getEmailorUsername = () => {
+        // Logic to get email or username from the input field
+        return email;
+    };
+
+    const getPassword = () => {
+        // Logic to get password from the input field
+        return password;
+    };
+
+    const loginButtonActionListener = () => {
+        handleLogin();
     };
 
     return (
@@ -106,7 +104,6 @@ const LoginPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         fullWidth
-                        onClick={handleEmailFieldClick}
                         sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -134,7 +131,6 @@ const LoginPage = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         fullWidth
                         sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
-                        onClick={handlePasswordFieldClick}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 handleLogin(); // Invoke handleLogin on Enter key press
@@ -142,7 +138,7 @@ const LoginPage = () => {
                         }}
                     />
                     {loginError && <Typography color="error" sx={{ fontSize: "14px", mt: 2 }}>{loginError}</Typography>}
-                    <Button onClick={handleLogin} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
+                    <Button onClick={loginButtonActionListener} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
                     <Typography variant="body1" sx={{ mt: 2, marginLeft: '25%' }}>
                         Not registered yet? <span style={{ color: '#6C6FD5' }}>Create an account </span>
                         <Link to="/register" style={{ color: '#6EADDC', textDecoration: 'none', fontWeight: 'bold', borderBottom: '1px solid' }}>Signup</Link>
@@ -160,5 +156,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-
