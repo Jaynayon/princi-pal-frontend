@@ -39,6 +39,174 @@ function AdminPage(props) {
         confirmPassword: ''
     });
     const [formValid, setFormValid] = useState(true); // Track form validity
+    const [isTyping, setIsTyping] = useState(false);
+
+    const [schoolNameError, setSchoolNameError] = useState(false);
+    const [schoolFullNameError, setSchoolFullNameError] = useState(false);
+    const [schoolFormData, setSchoolFormData] = useState({
+        name: '',
+        fullName: ''
+    })
+
+    const [integrateSchoolError, setIntegrateSchoolError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [emailUsernameError, setEmailUsernameError] = useState(false);
+    const [integrateFormData, setIntegrateFormData] = useState({
+        name: '',
+        email: ''
+    })
+    const [school, setSchool] = useState('');
+    const [user, setUser] = useState('');
+
+    const handleIntegrateInputChange = (key, value) => {
+        setIsTyping(true);
+        setIntegrateFormData({
+            ...integrateFormData,
+            [key]: value
+        });
+        console.log(integrateFormData.email)
+    }
+
+    const integrateOnBlur = async (key, value) => {
+        let nameExists
+        // Check if school exists
+        if (key === "name" && integrateFormData.name !== "") {
+            nameExists = await RestService.getSchoolName(value);
+
+            //!nameExists ? setIntegrateSchoolError(true) : setIntegrateSchoolError(false);
+            if (!nameExists) {
+                setIntegrateSchoolError(true)
+                setErrorMessage("School doesn't exist");
+            } else {
+                // Check if school already has a principal integrated
+                const principal = await RestService.getPrincipal(nameExists.id);
+                if (principal) {
+                    setIntegrateSchoolError(true)
+                    setErrorMessage("A principal already exists in this school");
+                } else {
+                    setSchool(nameExists) //set school
+                    setIntegrateSchoolError(false);
+                }
+                console.log(principal);
+            }
+
+            //Check if user exists
+        } else if (key === "email" && integrateFormData.email !== "") {
+            const userExists = await RestService.getUserByEmailUsername(value);
+
+            if (!userExists) {
+                setEmailUsernameError(true)
+                setErrorMessage("User doesn't exist");
+            } else {
+                if (userExists.position !== "Principal") {
+                    setEmailUsernameError(true)
+                    setErrorMessage("User is not a principal");
+                } else {
+                    if (userExists.schools.length > 0) {
+                        setEmailUsernameError(true)
+                        setErrorMessage("User already has an association");
+                    } else {
+                        setUser(userExists); //set current user
+                        setEmailUsernameError(false)
+                    }
+                }
+            }
+            //nameExists ? setSchoolFullNameError(true) : setSchoolFullNameError(false);
+        } else if (integrateFormData.name === "" || integrateFormData.email === "") {
+            integrateFormData.name === "" ? setIntegrateSchoolError(false) : setEmailUsernameError(false);
+        }
+        setIsTyping(false);
+    }
+
+    //insertUserAssociation
+    const handleIntegrateSubmit = async () => {
+        // Further validation logic for email, password, and confirmPassword
+        if (!integrateSchoolError && !emailUsernameError) {
+            try {
+                const response = await RestService.insertUserAssociation(user.id, school.id);
+                if (response) {
+                    console.log("Insert association creation successful");
+
+                    // Clear form fields after successful registration
+                    setIntegrateFormData({
+                        name: '',
+                        email: ''
+                    });
+                    setIntegrateSchoolError(false);
+                    setEmailUsernameError(false);
+                    // Redirect to login page or display a success message
+                    //window.location.href = "/login"; // Change this to the correct URL if needed
+                } else {
+                    setRegistrationError("Registration failed");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                setRegistrationError("Registration failed");
+            }
+        } else {
+            console.log("Form contains errors");
+        }
+    };
+
+    const handleSchoolInputChange = (key, value) => {
+        setIsTyping(true);
+        setSchoolFormData({
+            ...schoolFormData,
+            [key]: value
+        });
+        console.log(schoolFormData.fullName)
+    }
+
+    const schoolOnBlur = async (key, value) => {
+        let nameExists
+        if (key === "name" && schoolFormData.name !== "") {
+            nameExists = await RestService.getSchoolName(value);
+            nameExists ? setSchoolNameError(true) : setSchoolNameError(false);
+        } else if (key === "fullName" && schoolFormData.fullName !== "") {
+            nameExists = await RestService.getSchoolName(value);
+            nameExists ? setSchoolFullNameError(true) : setSchoolFullNameError(false);
+        } else if (schoolFormData.name === "" || schoolFormData.fullName === "") {
+            schoolFormData.name === "" ? setSchoolNameError(false) : setSchoolFullNameError(false);
+        }
+        setIsTyping(false);
+    }
+
+    const handleSchoolSubmit = async () => {
+        const { name, fullName } = schoolFormData;
+
+        if (!name || !fullName) {
+            // console.log("All fields are required");
+            // setFormValid(false); // Set form validity to false immediately
+            return; // Exit the function
+        }
+
+        // Further validation logic for email, password, and confirmPassword
+        if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
+            try {
+                const response = await RestService.createSchool(name, fullName);
+                if (response) {
+                    console.log("School creation successful");
+
+                    // Clear form fields after successful registration
+                    setSchoolFormData({
+                        name: '',
+                        fullName: ''
+                    });
+                    setSchoolFullNameError(false);
+                    setSchoolNameError(false);
+                    // Redirect to login page or display a success message
+                    //window.location.href = "/login"; // Change this to the correct URL if needed
+                } else {
+                    setRegistrationError("Registration failed");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                setRegistrationError("Registration failed");
+            }
+        } else {
+            console.log("Form contains errors");
+        }
+    };
 
     const handleShowPasswordClick = () => {
         setShowPassword(!showPassword);
@@ -372,21 +540,35 @@ function AdminPage(props) {
                                         variant='outlined'
                                         label='School Name'
                                         sx={{ m: 1 }}
+                                        value={schoolFormData["name"]}
+                                        error={schoolFormData.name === "" ? false : schoolNameError}
+                                        helperText={schoolNameError && "School name already exists"}
                                         InputLabelProps={styles.InputLabelProps}
                                         InputProps={styles.InputProps}
+                                        onBlur={(event) => schoolOnBlur("name", event.target.value)}
+                                        onChange={(event) => handleSchoolInputChange("name", event.target.value)}
                                     />
                                     <TextField
                                         variant='outlined'
                                         label='School Full Name'
                                         sx={{ m: 1 }}
+                                        value={schoolFormData["fullName"]}
+                                        error={schoolFormData.fullName === "" ? false : schoolFullNameError}
+                                        helperText={schoolFullNameError && "School full name already exists"}
                                         InputLabelProps={styles.InputLabelProps}
                                         InputProps={styles.InputProps}
+                                        onBlur={(event) => schoolOnBlur("fullName", event.target.value)}
+                                        onChange={(event) => handleSchoolInputChange("fullName", event.target.value)}
                                     />
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        disabled
-                                        onClick={() => console.log("test")}
+                                        disabled={
+                                            (schoolFullNameError || schoolNameError) ||
+                                            (schoolFormData.name === "" || schoolFormData.fullName === "") ||
+                                            isTyping
+                                        }
+                                        onClick={() => handleSchoolSubmit()}
                                     >
                                         Create School
                                     </Button>
@@ -417,21 +599,35 @@ function AdminPage(props) {
                                         variant='outlined'
                                         label='School Name or Full Name'
                                         sx={{ m: 1 }}
+                                        value={integrateFormData["name"]}
+                                        error={integrateFormData.name === "" ? false : integrateSchoolError}
+                                        helperText={integrateSchoolError && errorMessage}
                                         InputLabelProps={styles.InputLabelProps}
                                         InputProps={styles.InputProps}
+                                        onBlur={(event) => integrateOnBlur("name", event.target.value)}
+                                        onChange={(event) => handleIntegrateInputChange("name", event.target.value)}
                                     />
                                     <TextField
                                         variant='outlined'
                                         label='Email or Username'
                                         sx={{ m: 1 }}
+                                        value={integrateFormData["email"]}
+                                        error={integrateFormData.email === "" ? false : emailUsernameError}
+                                        helperText={emailUsernameError && errorMessage}
                                         InputLabelProps={styles.InputLabelProps}
                                         InputProps={styles.InputProps}
+                                        onBlur={(event) => integrateOnBlur("email", event.target.value)}
+                                        onChange={(event) => handleIntegrateInputChange("email", event.target.value)}
                                     />
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        disabled
-                                        onClick={() => logoutUser('jwt')}
+                                        disabled={
+                                            (integrateSchoolError || emailUsernameError) ||
+                                            (integrateFormData.name === "" || integrateFormData.email === "") ||
+                                            isTyping
+                                        }
+                                        onClick={() => handleIntegrateSubmit()}
                                     >
                                         Integrate User
                                     </Button>
