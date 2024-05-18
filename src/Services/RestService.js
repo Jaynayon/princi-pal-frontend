@@ -46,44 +46,6 @@ const RestService = (() => {
         }
     };
 
-    const createUserPrincipal = async (adminId, fname, mname, lname, username, email, password) => {
-        try {
-            const response = await instance.post('http://localhost:4000/users/create/principal', {
-                adminId,
-                fname,
-                mname,
-                lname,
-                username,
-                email,
-                password,
-                position: "Principal"
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error validating user:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-
-            console.log(response);
-
-            return true;
-        } catch (error) {
-            console.error('Error creating user:', error);
-            if (error.response && error.response.status === 409) {
-                throw new Error("User with the same email or username already exists.");
-            } else {
-                throw new Error("Registration failed. Please try again later.");
-            }
-        }
-    };
-
     const authenticateUser = async (email, password) => {
         try {
             const response = await instance.post('http://localhost:4000/authenticate/login', {
@@ -469,7 +431,10 @@ const RestService = (() => {
             obj = { sds: value };
         } else if (description === "Head. Accounting Div. Unit") {
             obj = { headAccounting: value };
+        } else if (description =="Budget Limit"){
+            obj = { budgetLimit: value };
         }
+        
 
         try {
             const response = await instance.patch(`http://localhost:4000/documents/${docId}`, obj, {
@@ -495,6 +460,19 @@ const RestService = (() => {
         }
     };
 
+
+    const getSchools = async () => {
+        try {
+            const response = await instance.get('/schools/all'); // Adjust endpoint as needed
+            console.log('Fetched schools:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching schools:', error);
+            throw new Error('Failed to fetch schools. Please try again later.');
+        }
+    };
+
+
     return {
         createUser,
         authenticateUser,
@@ -513,7 +491,7 @@ const RestService = (() => {
         updateJevById,
         createDocBySchoolId,
         getLrByKeyword,
-        createUserPrincipal
+        getSchools,
     };
 })();
 

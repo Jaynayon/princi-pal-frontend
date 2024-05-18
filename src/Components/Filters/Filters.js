@@ -13,6 +13,7 @@ import FormControl from '@mui/material/FormControl';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import IconButton from '@mui/material/IconButton';
+import { useSchoolContext } from '../../Context/SchoolProvider';
 
 export function FieldsFilter() {
     return (
@@ -29,9 +30,10 @@ export function DateFilter({ onApply }) {
     const theme = useTheme();
     const [button, setButton] = useState(false);
     const [date, setDate] = useState('');
-    const [year, setYear] = useState('');
+    //const [year, setYear] = useState('');
     const [selectedMonth, setSelectedMonth] = useState('');
     const [selectedYear, setSelectedYear] = useState('');
+    const { prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years } = useSchoolContext();
 
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -48,17 +50,17 @@ export function DateFilter({ onApply }) {
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
-    const years = [
+    /*const years = [
         '2023', '2024'
-    ];
+    ];*/
 
     
-    const handleApply = () => {
+    /*const handleApply = () => {
         setSelectedMonth(date);
         setSelectedYear(year);
         onApply(`${date} ${year}`);
         setButton(false); // Hide the filter box after applying
-    };
+    };*/
 
     const getStyles = (name, personName) => ({
         fontWeight: "650",
