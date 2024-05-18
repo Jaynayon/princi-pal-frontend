@@ -55,6 +55,8 @@ function AdminPage(props) {
         name: '',
         email: ''
     })
+    const [school, setSchool] = useState('');
+    const [user, setUser] = useState('');
 
     const handleIntegrateInputChange = (key, value) => {
         setIsTyping(true);
@@ -70,6 +72,7 @@ function AdminPage(props) {
         // Check if school exists
         if (key === "name" && integrateFormData.name !== "") {
             nameExists = await RestService.getSchoolName(value);
+
             //!nameExists ? setIntegrateSchoolError(true) : setIntegrateSchoolError(false);
             if (!nameExists) {
                 setIntegrateSchoolError(true)
@@ -81,6 +84,7 @@ function AdminPage(props) {
                     setIntegrateSchoolError(true)
                     setErrorMessage("A principal already exists in this school");
                 } else {
+                    setSchool(nameExists) //set school
                     setIntegrateSchoolError(false);
                 }
                 console.log(principal);
@@ -89,7 +93,7 @@ function AdminPage(props) {
             //Check if user exists
         } else if (key === "email" && integrateFormData.email !== "") {
             const userExists = await RestService.getUserByEmailUsername(value);
-            console.log(userExists);
+
             if (!userExists) {
                 setEmailUsernameError(true)
                 setErrorMessage("User doesn't exist");
@@ -102,17 +106,47 @@ function AdminPage(props) {
                         setEmailUsernameError(true)
                         setErrorMessage("User already has an association");
                     } else {
+                        setUser(userExists); //set current user
                         setEmailUsernameError(false)
                     }
                 }
-                //setEmailUsernameError(false)
             }
             //nameExists ? setSchoolFullNameError(true) : setSchoolFullNameError(false);
-        } else if (schoolFormData.name === "" || schoolFormData.fullName === "") {
-            schoolFormData.name === "" ? setSchoolNameError(false) : setSchoolFullNameError(false);
+        } else if (integrateFormData.name === "" || integrateFormData.email === "") {
+            integrateFormData.name === "" ? setIntegrateSchoolError(false) : setEmailUsernameError(false);
         }
         setIsTyping(false);
     }
+
+    //insertUserAssociation
+    const handleIntegrateSubmit = async () => {
+        // Further validation logic for email, password, and confirmPassword
+        if (!integrateSchoolError && !emailUsernameError) {
+            try {
+                const response = await RestService.insertUserAssociation(user.id, school.id);
+                if (response) {
+                    console.log("Insert association creation successful");
+
+                    // Clear form fields after successful registration
+                    setIntegrateFormData({
+                        name: '',
+                        email: ''
+                    });
+                    setIntegrateSchoolError(false);
+                    setEmailUsernameError(false);
+                    // Redirect to login page or display a success message
+                    //window.location.href = "/login"; // Change this to the correct URL if needed
+                } else {
+                    setRegistrationError("Registration failed");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                setRegistrationError("Registration failed");
+            }
+        } else {
+            console.log("Form contains errors");
+        }
+    };
 
     const handleSchoolInputChange = (key, value) => {
         setIsTyping(true);
@@ -588,8 +622,12 @@ function AdminPage(props) {
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        disabled
-                                        onClick={() => logoutUser('jwt')}
+                                        disabled={
+                                            (integrateSchoolError || emailUsernameError) ||
+                                            (integrateFormData.name === "" || integrateFormData.email === "") ||
+                                            isTyping
+                                        }
+                                        onClick={() => handleIntegrateSubmit()}
                                     >
                                         Integrate User
                                     </Button>

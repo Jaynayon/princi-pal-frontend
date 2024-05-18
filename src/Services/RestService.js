@@ -601,6 +601,28 @@ const RestService = (() => {
         }
     };
 
+    const insertUserAssociation = async (userId, schoolId) => {
+        try {
+            const response = await instance.post('http://localhost:4000/associations/insert', {
+                userId,
+                schoolId
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
@@ -624,7 +646,8 @@ const RestService = (() => {
         getSchoolFullName,
         createSchool,
         getPrincipal,
-        getUserByEmailUsername
+        getUserByEmailUsername,
+        insertUserAssociation
     };
 })();
 
