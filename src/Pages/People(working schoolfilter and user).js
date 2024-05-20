@@ -25,8 +25,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 import axios from 'axios'; // Import Axios for making HTTP requests
-import { useSchoolContext } from '../Context/SchoolProvider';
-import { useNavigationContext } from '../Context/NavigationProvider';
 
 function People(props) {
     const [member, setMember] = useState('');
@@ -42,10 +40,7 @@ function People(props) {
     const [selectedValue, setSelectedValue] = useState('');
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
-    const {currentUser} = useNavigationContext();
 
-    //currentUser association, which will change per school
-    
     
     /*([
         { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
@@ -95,8 +90,7 @@ function People(props) {
     
         // Fetch schools when component mounts
         useEffect(() => {
-            //fetchSchools();
-            setSchools(currentUser?.schools)
+            fetchSchools();
         }, []); // Empty dependency array ensures the effect runs only once
     
 
@@ -232,6 +226,9 @@ function People(props) {
                             label="Member"
                             onChange={(event) => setMember(event.target.value)}
                         >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
                             <MenuItem>Member</MenuItem>
                             <MenuItem>Guess</MenuItem>
                             <MenuItem>Admin</MenuItem>
@@ -285,7 +282,10 @@ function People(props) {
                     label="Member"
                     onChange={handleMemberChange}
                 >
-                    {schools?.map((school) => (
+                    <MenuItem value="">
+                        <em>None</em>
+                    </MenuItem>
+                    {schools.map((school) => (
                         <MenuItem key={school.id} value={school.id}>
                             {school.name}
                         </MenuItem>
