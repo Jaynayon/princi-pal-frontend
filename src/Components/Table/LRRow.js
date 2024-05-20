@@ -127,13 +127,19 @@ function RecordsRow(props) {
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
         console.log("accept");
+        const rowIndex = lr.findIndex(row => row.id === rowId);
         if (!dateError) {
-            const rowIndex = lr.findIndex(row => row.id === rowId);
-            // jev length upon initialization will always be > 2
-            if (jev.length < 2) { //if there's no current document or it's not yet existing
-                createNewDocument(lr[rowIndex]);
+            if (lr[rowIndex]["date"] === "") {
+                setDateError(true)
+            } else {
+                const rowIndex = lr.findIndex(row => row.id === rowId);
+                // jev length upon initialization will always be > 2
+                if (jev.length < 2) { //if there's no current document or it's not yet existing
+                    createNewDocument(lr[rowIndex]);
+                }
+                await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
             }
-            await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+
         }
     }
 
@@ -191,7 +197,11 @@ function RecordsRow(props) {
     };
 
     const displayError = (colId, rowId) => {
+        const rowIndex = lr.findIndex(row => row.id === rowId);
         if (colId === "date" && rowId === 3 && dateError) {
+            if (lr[rowIndex]["date"] === "") {
+                return "Empty field"
+            }
             return "Invalid format";
         }
     }
