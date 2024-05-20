@@ -20,6 +20,8 @@ function RecordsRow(props) {
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
+    const [dateError, setDateError] = useState(false);
+    const [uacsError, setUacsError] = useState(false);
 
     const {
         displayFields,
@@ -119,17 +121,20 @@ function RecordsRow(props) {
         } else {
             setReload(!reload); //just to reload school.js to fetch lr data
         }
+        setDateError(false); //reset date error state
     }
 
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
         console.log("accept");
-        const rowIndex = lr.findIndex(row => row.id === rowId);
-        // jev length upon initialization will always be > 2
-        if (jev.length < 2) { //if there's no current document or it's not yet existing
-            createNewDocument(lr[rowIndex]);
+        if (!dateError) {
+            const rowIndex = lr.findIndex(row => row.id === rowId);
+            // jev length upon initialization will always be > 2
+            if (jev.length < 2) { //if there's no current document or it's not yet existing
+                createNewDocument(lr[rowIndex]);
+            }
+            await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
         }
-        await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
     }
 
     const handleInputChange = (colId, rowId, event) => {
@@ -168,6 +173,13 @@ function RecordsRow(props) {
             }
             console.log('Value saved:', inputValue);
         }
+        // Perform validation for new row/displayField/ add row feature
+        else {
+            if (colId === "date") {
+                const result = isValidDateFormat(inputValue);
+                setDateError(!result);
+            }
+        }
     };
 
     // Function to format a number with commas and two decimal places
@@ -177,6 +189,27 @@ function RecordsRow(props) {
             return number;
         return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
+
+    const displayError = (colId, rowId) => {
+        if (colId === "date" && rowId === 3 && dateError) {
+            return "Invalid format";
+        }
+    }
+
+    const isError = (colId, rowId) => {
+        if (colId === "date" && rowId === 3 && dateError) {
+            return true;
+        }
+        return false;
+    }
+
+    function isValidDateFormat(dateString) {
+        // Define the regex pattern for m/d/yyyy or mm/dd/yyyy
+        const regexPattern = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+
+        // Check if the date string matches the regex pattern
+        return regexPattern.test(dateString);
+    }
 
     return (
         <React.Fragment>
@@ -228,10 +261,12 @@ function RecordsRow(props) {
                                                 <TextField
                                                     //variant='standard'
                                                     value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
-
+                                                    error={isError(column.id, row.id)}
+                                                    helperText={displayError(column.id, row.id)}
                                                     sx={{
                                                         "& fieldset": { border: row.id !== 3 && 'none' }
                                                     }}
+                                                    FormHelperTextProps={{ style: { position: "absolute", bottom: "-20px" } }}
                                                     InputProps={{
                                                         //disableUnderline: true,
                                                         style: {
