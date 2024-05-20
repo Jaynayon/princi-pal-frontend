@@ -176,7 +176,7 @@ export const SchoolProvider = ({ children }) => {
             orsBursNo: '',
             particulars: '',
             amount: 0,
-            objectCode: '',
+            objectCode: '5020502001', //predefined option
             payee: '',
             natureOfPayment: 'Cash'
         }
