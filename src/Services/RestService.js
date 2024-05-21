@@ -46,6 +46,44 @@ const RestService = (() => {
         }
     };
 
+    const createUserPrincipal = async (adminId, fname, mname, lname, username, email, password) => {
+        try {
+            const response = await instance.post('http://localhost:4000/users/create/principal', {
+                adminId,
+                fname,
+                mname,
+                lname,
+                username,
+                email,
+                password,
+                position: "Principal"
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log('Response data:', response.data);
+                    return response.data;
+                })
+                .catch(error => {
+                    console.error('Error validating user:', error);
+                    // Handle errors here (e.g., display error message)
+                });
+
+            console.log(response);
+
+            return true;
+        } catch (error) {
+            console.error('Error creating user:', error);
+            if (error.response && error.response.status === 409) {
+                throw new Error("User with the same email or username already exists.");
+            } else {
+                throw new Error("Registration failed. Please try again later.");
+            }
+        }
+    };
+
     const authenticateUser = async (email, password) => {
         try {
             const response = await instance.post('http://localhost:4000/authenticate/login', {
@@ -617,7 +655,7 @@ const RestService = (() => {
         updateJevById,
         createDocBySchoolId,
         getLrByKeyword,
-        //createUserPrincipal,
+        createUserPrincipal,
         getSchoolName,
         getSchoolFullName,
         createSchool,
