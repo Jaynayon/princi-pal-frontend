@@ -469,7 +469,10 @@ const RestService = (() => {
             obj = { sds: value };
         } else if (description === "Head. Accounting Div. Unit") {
             obj = { headAccounting: value };
+        } else if (description === "Budget Limit"){
+            obj = { budgetLimit: value };
         }
+        
 
         try {
             const response = await instance.patch(`http://localhost:4000/documents/${docId}`, obj, {
@@ -623,6 +626,17 @@ const RestService = (() => {
         }
     };
 
+    const getSchools = async () => {
+        try {
+            const response = await instance.get('/schools/all'); // Adjust endpoint as needed
+            console.log('Fetched schools:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching schools:', error);
+            throw new Error('Failed to fetch schools. Please try again later.');
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
@@ -647,7 +661,8 @@ const RestService = (() => {
         createSchool,
         getPrincipal,
         getUserByEmailUsername,
-        insertUserAssociation
+        insertUserAssociation,
+        getSchools
     };
 })();
 
