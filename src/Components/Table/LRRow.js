@@ -136,10 +136,10 @@ function RecordsRow(props) {
                 // jev length upon initialization will always be > 2
                 if (jev.length < 2) { //if there's no current document or it's not yet existing
                     createNewDocument(lr[rowIndex]);
+                } else {
+                    await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
                 }
-                await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
             }
-
         }
     }
 
