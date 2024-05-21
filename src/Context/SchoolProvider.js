@@ -109,6 +109,26 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
+    const fetchDocumentDataBySchooId = useCallback(async (id) => {
+        try {
+            if (currentSchool) {
+                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
+                    id,
+                    year,
+                    month
+                );
+
+                if (getDocument) {
+                    setCurrentDocument(getDocument);
+                } else {
+                    setCurrentDocument(emptyDocument);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }, [currentSchool, setCurrentDocument, year, month]);
+
     const createNewDocument = useCallback(async (obj) => {
         try {
             if (currentSchool) {
@@ -198,7 +218,7 @@ export const SchoolProvider = ({ children }) => {
             lr, setLr, setCurrentDocument, currentDocument,
             addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
             currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev, createNewDocument,
-            fetchLRByKeyword, exportDocument
+            fetchLRByKeyword, exportDocument, fetchDocumentDataBySchooId
         }}>
             {children}
         </SchoolContext.Provider>
