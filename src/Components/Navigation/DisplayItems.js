@@ -14,6 +14,13 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
+import InputAdornment from '@mui/material/InputAdornment';
+import {
+    VisibilityOff as VisibilityOffIcon,
+    Lock as LockIcon,
+    Person as PersonIcon,
+    Email as EmailIcon,
+  } from '@mui/icons-material';
 
 // Custom component import
 import DisplaySchools from './DisplaySchools';
@@ -221,12 +228,56 @@ export const ProfileTab = ({ user }) => {
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
                         <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
-                            <TextField disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " "} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " "} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" />
+                        <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " " } margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " " } margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PersonIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}/>
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
+                                    InputProps={{
+                                        startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailIcon />
+                                        </InputAdornment>
+                                        ),
+                                    }}
+                                    />
+                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" 
+                                InputProps={{
+                                    startAdornment: (
+                                    <InputAdornment position="start">
+                                        <EmailIcon />
+                                    </InputAdornment>
+                                    ),
+                                }}
+                            />
                         </Stack>
                     </Stack>
                 </DialogContent>

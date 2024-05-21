@@ -18,13 +18,44 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu } from '@mui/material';
+import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemAvatar, ListItemText } from '@mui/material';
+import PropTypes from 'prop-types'; 
+import Typography from '@mui/material/Typography';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 
 function People(props) {
     const [member, setMember] = useState('');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
+    const [searchValue, setSearchValue] = useState('');
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false); // State for confirmation dialog
+    const [selectedRole, setSelectedRole] = useState(''); // State for selected role
+    const [deleteConfirmationDialogOpen, setDeleteConfirmationDialogOpen] = useState(false); // State for delete confirmation dialog
+    const [open, setOpen] = useState(false);
+    const [selectedValue, setSelectedValue] = useState('');
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = (value) => {
+        setOpen(false);
+        setSelectedValue(value);
+    };
+
+    const schoolAvatar = (
+        <Avatar>
+            <SchoolIcon />
+        </Avatar>
+    );
+
+    const handleAccept = () => {
+        handleClose('accepted');
+    };
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);
@@ -43,19 +74,53 @@ function People(props) {
     };
 
     const handleDelete = () => {
+        // Open confirmation dialog before deleting
+        setDeleteConfirmationDialogOpen(true);
+    };
+
+    const confirmDelete = () => {
         // Implement delete functionality here
         console.log("Delete button clicked for row at index:", selectedIndex);
         // Close the menu after delete
         handleMenuClose();
+        // Close delete confirmation dialog
+        setDeleteConfirmationDialogOpen(false);
+    };
+
+    const cancelDelete = () => {
+        // Close delete confirmation dialog without deleting
+        setDeleteConfirmationDialogOpen(false);
     };
 
     const handleRoleChange = (newRole) => {
-        // Implement role change functionality here
-        console.log(`Role changed to ${newRole} for row at index:`, selectedIndex);
-        // Close the menu after role change
-        handleMenuClose();
+        setSelectedRole(newRole); // Set the selected role
+        // Open confirmation dialog before changing role
+        setConfirmationDialogOpen(true);
     };
 
+    const confirmRoleChange = () => {
+        // Implement role change functionality here
+        console.log(`Role changed to ${selectedRole} for row at index:`, selectedIndex);
+        // Close the menu after role change
+        handleMenuClose();
+        // Close confirmation dialog
+        setConfirmationDialogOpen(false);
+    };
+
+    const cancelRoleChange = () => {
+        // Close confirmation dialog without changing role
+        setConfirmationDialogOpen(false);
+    };
+
+    const handleInvite = () => {
+        // Implement invite functionality here
+        console.log("Inviting email:", inviteEmail);
+        // You can send an invitation using the inviteEmail value
+        // Reset inviteEmail state after sending invitation if needed
+        setInviteEmail('');
+    };
+
+    //for the static members
     const rows = [
         { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
         { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
@@ -63,6 +128,12 @@ function People(props) {
         { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
         { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
     ];
+
+    // Filtered rows based on search value
+    const filteredRows = rows.filter(row =>
+        row.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        row.email.toLowerCase().includes(searchValue.toLowerCase())
+    );
 
     return (
         <Container className="test" maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -77,6 +148,8 @@ function People(props) {
                         label="Search by name or email"
                         variant="outlined"
                         className="searchTextField"
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
                     />
                     <TextField
                         sx={{ margin: '5px', marginTop: '-5px', marginLeft: '50px' , width: '30%' }}
@@ -84,6 +157,8 @@ function People(props) {
                         label="Invite by email"
                         variant="outlined"
                         className="inviteTextField"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
                     />
                     <FormControl sx={{ minWidth: 120 }} size="53px">
                         <InputLabel sx={{ margin: '5px', marginTop: '-5px'}} id="demo-select-small-label">Member</InputLabel>
@@ -107,29 +182,67 @@ function People(props) {
                         sx={{ margin: '5px', marginTop: '-5px', width: '10%'}}
                         variant="contained"
                         className="inviteButton"
+                        onClick={handleInvite}
                     >
                         Invite
                     </Button>
                 </Grid>
-                <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '-5px' }}>
-                    <FormControl sx={{ m: 1, minWidth: 150 }} >
-                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
-                        <Select
-                            labelId="demo-select-small-label"
-                            id="demo-select-small"
-                            value={member}
-                            label="Member"
-                            onChange={(event) => setMember(event.target.value)}
-                        >
-                            <MenuItem value="">
-                                <em>None</em>
-                            </MenuItem>
-                            <MenuItem>CIT</MenuItem>
-                            <MenuItem>ACT</MenuItem>
-                            <MenuItem>SM CITY</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Grid>
+                <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px' }}>
+    <FormControl sx={{ m: 1, minWidth: 150 }} >
+        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+        <Select
+            labelId="demo-select-small-label"
+            id="demo-select-small"
+            value={member}
+            label="Member"
+            onChange={(event) => setMember(event.target.value)}
+        >
+            <MenuItem value="">
+                <em>None</em>
+            </MenuItem>
+            <MenuItem value="Cebu Institute of Technology - University">
+                <ListItemAvatar>
+                    <Avatar src="../downloads/cit.png" />
+                </ListItemAvatar>
+                <ListItemText primary="Cebu Institute of Technology - University" />
+            </MenuItem>
+            <MenuItem value="Asian College of Technology">
+                <ListItemAvatar>
+                    <Avatar src="../downloads/act.png" />
+                </ListItemAvatar>
+                <ListItemText primary="Asian College of Technology" />
+            </MenuItem>
+            <MenuItem value="University of Cebu">
+                <ListItemAvatar>
+                    <Avatar src="/downloads/uc.jpg" />
+                </ListItemAvatar>
+                <ListItemText primary="University of Cebu" />
+            </MenuItem>
+        </Select>
+    </FormControl>
+</Grid>
+<Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px' }}>
+    <FormControl sx={{ m: 1, minWidth: 150 }} >
+        {/* Application Dialog */}
+        <br />
+        <Button variant="outlined" onClick={handleClickOpen}>
+            Open Application Dialog
+        </Button>
+        <Dialog onClose={handleClose} open={open}>
+            <DialogTitle>Application for School</DialogTitle>
+            <List>
+                <ListItem disableGutters>
+                    <ListItemAvatar>{schoolAvatar}</ListItemAvatar>
+                    <ListItemText primary="Kiki Kiki" />
+                    <Button onClick={handleAccept} variant="contained" color="primary">
+                Accept
+            </Button>
+                </ListItem>
+            </List>
+        </Dialog>
+    </FormControl>
+</Grid>
+
                 <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px', marginTop: '-5px' }}>
                     <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
                         <Table md={{ display: 'flex', height: '100%', width: '100%' }} aria-label="simple table">
@@ -143,7 +256,7 @@ function People(props) {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {rows.map((row, index) => (
+                                {filteredRows.map((row, index) => (
                                     <TableRow key={index}>
                                         <TableCell>
                                             <Grid container alignItems="center" spacing={1}>
@@ -199,6 +312,28 @@ function People(props) {
                     </TableContainer>
                 </Grid>
             </Grid>
+            {/* Confirmation dialog for role change */}
+            <Dialog open={confirmationDialogOpen} onClose={() => setConfirmationDialogOpen(false)}>
+                <DialogTitle>Confirmation</DialogTitle>
+                <DialogContent>
+                    Are you sure you want to change?
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={confirmRoleChange}>Cancel</Button>
+                    <Button onClick={cancelRoleChange}>Save Changes</Button>
+                </DialogActions>
+            </Dialog>
+            {/* Confirmation dialog for delete */}
+            <Dialog open={deleteConfirmationDialogOpen} onClose={() => setDeleteConfirmationDialogOpen(false)}>
+                <DialogTitle>Confirmation</DialogTitle>
+                <DialogContent>
+                    Are you sure you want to delete?
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={confirmDelete}>Delete</Button>
+                    <Button onClick={cancelDelete}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 }
