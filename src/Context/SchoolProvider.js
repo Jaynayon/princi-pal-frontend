@@ -169,7 +169,7 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentDocument, setLr]);
 
-    const displayFields = useCallback((isAdding) => {
+    const addFields = useCallback((isAdding) => {
         let newLr = {
             id: 3,
             date: '',
@@ -196,7 +196,7 @@ export const SchoolProvider = ({ children }) => {
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, setCurrentDocument, currentDocument,
-            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
+            addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
             currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev, createNewDocument,
             fetchLRByKeyword, exportDocument
         }}>

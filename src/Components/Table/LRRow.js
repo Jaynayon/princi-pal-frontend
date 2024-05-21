@@ -24,7 +24,7 @@ function RecordsRow(props) {
     const [uacsError, setUacsError] = useState(false);
 
     const {
-        displayFields,
+        addFields,
         isAdding,
         currentDocument,
         lr,
@@ -40,9 +40,9 @@ function RecordsRow(props) {
     useEffect(() => {
         console.log("RecordsRow useEffect")
         if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
-            displayFields(isAdding);
+            addFields(isAdding);
         }
-    }, [isAdding, displayFields, value]);
+    }, [isAdding, addFields, value]);
 
     const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });
@@ -179,7 +179,7 @@ function RecordsRow(props) {
             }
             console.log('Value saved:', inputValue);
         }
-        // Perform validation for new row/displayField/ add row feature
+        // Perform validation for new row/addFields/ add row feature
         else {
             if (colId === "date") {
                 const result = isValidDateFormat(inputValue);
