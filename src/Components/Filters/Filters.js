@@ -215,7 +215,7 @@ export function DateFilter({ onApply }) {
                 >
                     <ChevronRightIcon color='inherit' />
                 </IconButton>
-                <Button onClick={handleApply}>Apply</Button>
+                
             </Paper>
         </Box>
     );

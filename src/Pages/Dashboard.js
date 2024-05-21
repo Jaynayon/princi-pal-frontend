@@ -15,84 +15,36 @@ import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService'; // Adjust the path as needed
 import { useSchoolContext } from '../Context/SchoolProvider'; 
-import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolFilters'
+import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolFilters';
 
 
-/*const ApexChart = ({ data }) => {
-    const [options] = useState({
-        chart: {
-            height: 350,
-            type: 'line',
-            zoom: {
-                enabled: false
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'straight'
-        },
-        title: {
-            text: 'Line Chart',
-            align: 'left',
-            style: {
-                fontFamily: 'Mulish-Regular',
-                fontSize: '20px',
-            }
-        },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'],
-                opacity: 0.5
-            },
-        },
-        xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-        }
-    });
-
-    const [series] = useState([{
-        name: "Budget",
-        data: data.budgetData
-    }]);
-
-    return (
-        <div>
-            <div id="chart">
-                <ReactApexChart options={options} series={series} type="line" height={350} />
-            </div>
-            <div id="html-dist"></div>
-        </div>
-    );
-};*/
 
 function Dashboard(props) {
     // State declarations
-    const { currentUser } = useNavigationContext()
+    const { currentUser } = useNavigationContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
-    const [selectedMonthYear, setSelectedMonthYear] = useState('');
     const [applyButtonClicked, setApplyButtonClicked] = useState(false);
     const [schoolMenuAnchor, setSchoolMenuAnchor] = useState(null);
     const [schools, setSchools] = useState([]);
     const [loadingSchools, setLoadingSchools] = useState(false);
     const [schoolBudget, setSchoolBudget] = useState(null);
-
-    const { currentDocument } = useSchoolContext(); // Use the useSchoolContext hook to access the currentDocument
-
-    // Check if currentDocument exists before accessing its properties
+    const { currentDocument, fetchDocumentBySchoolId, year, month, setCurrentDocument } = useSchoolContext(); // Use the useSchoolContext hook to access the currentDocument
     const currentBudget = currentDocument ? currentDocument.budget : null;
+    const [dateString, setDateString] = useState('');
+    
+
+
     // Effects
     useEffect(() => {
-        if (!applyButtonClicked) {
-            setSelectedMonthYear(getCurrentMonthYear());
+        if (month && year) {
+            setDateString(`${month} ${year}`);
         }
-    }, [applyButtonClicked]);
-
+    }, [month, year]);
+    
     useEffect(() => {
         const fetchSchools = async () => {
             setLoadingSchools(true);
@@ -108,13 +60,47 @@ function Dashboard(props) {
     
         fetchSchools();
     }, []);
-    // Event handlers
     
+    useEffect(() => {
+        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
+            setSelectedSchool(currentUser.schools[0].id);
+        }
+    }, [currentUser]);
 
-    const handleDateFilterApply = (selectedMonthYear) => {
-        setSelectedMonthYear(selectedMonthYear);
+
+    // Event handlers
+    const handleSchoolSelect = (event) => {
+        setSelectedSchool(event.target.value);
+        console.log('Selected school:', event.target.value);
     };
 
+   
+    const updateDocumentById = async (docId, value) => {
+        try {
+            const response = await fetch(`http://localhost:4000/documents/${docId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ budgetLimit: value })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log('Budget limit updated successfully:', data);
+                return true;
+            } else {
+                console.error('Failed to update budget limit:', data);
+                return false;
+            }
+        } catch (error) {
+            console.error('Error updating budget limit:', error);
+            return false;
+        }
+    };
+
+    
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
         const monthNames = [
@@ -152,26 +138,21 @@ function Dashboard(props) {
         }
     };
 
-    const handleSubmit = async (event, documentId) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const updatedAmount = editableAmounts[clickedButton];
-        const requestData = {
-            budgetLimit: updatedAmount.amount // Assuming the amount entered by the user is stored in updatedAmount.amount
-        };
-        
+        console.log('Document ID:', currentDocument.id); // Log the documentId
+    
         try {
-            const response = await fetch(`/documents/update-budget-limit/${documentId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            });
+            const isUpdated = await updateDocumentById(currentDocument.id, updatedAmount.amount);
             
-            if (response.ok) {
-                // Budget limit saved successfully, you can display a success message or update the UI
+            if (isUpdated) {
                 console.log('Budget limit saved successfully');
-                // Optionally, you can reset the form or update the UI as needed
+                // Update the currentDocument to reflect the new budget limit
+                setCurrentDocument({
+                    ...currentDocument,
+                    budgetLimit: parseFloat(updatedAmount.amount)
+                });
                 setEditableAmounts({
                     ...editableAmounts,
                     [clickedButton]: { ...editableAmounts[clickedButton], amount: '' }
@@ -179,21 +160,16 @@ function Dashboard(props) {
                 setError('');
                 setOpen(false); // Close the modal after saving
             } else {
-                // Handle errors if the request fails
-                console.error('Failed to save budget limit:', response.statusText);
-                // Optionally, display an error message to the user
+                console.error('Failed to save budget limit');
                 setError('Failed to save budget limit. Please try again later.');
             }
         } catch (error) {
-            // Handle network errors or other exceptions
-            console.error('Error saving budget limit:', error.message);
+            console.error('Error saving budget limit:', error);
+            setError('Failed to save budget limit. Please try again later.');
         }
     };
     
-    const handleSelectSchool = (school) => {
-        setSelectedSchool(school);
-        setSchoolMenuAnchor(null);
-    };
+    
 
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
@@ -205,66 +181,68 @@ function Dashboard(props) {
         if (!currentDocument){
             return null;
         }
-
-
+    
         return (
             <Paper
-            sx={{
-                position: 'relative',
-                p: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                height: 160,
-                textAlign: 'left',
-                paddingLeft: (displayTitle === 'Monthly Budget' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
-            }}
-        >
-            {displayTitle}
-            {displayTitle === 'Monthly Budget' && (
-                <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{currentDocument?.budget || 'N/A'}</p>
-            )}
-            <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>{amountData.currency} {currentDocument?.budgetLimit}</p>
-            {displayTitle === 'Budget Limit' && (
-                <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                    <EditIcon sx={{ width: '30px', height: '30px' }} />
-                </Button>
-            )}
-            <Modal
-                open={open && clickedButton === title}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
+                sx={{
+                    position: 'relative',
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 160,
+                    textAlign: 'left',
+                    paddingLeft: (displayTitle === 'Monthly Budget' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
+                }}
             >
-                <Box sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    p: 4,
-                    width: 400,
-                    borderRadius: '15px',
-                    textAlign: 'center',
-                }}>
-                    <Button onClick={handleClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
-                    <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Edit {displayTitle}</h2>
-                    <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-                        <TextField
-                            type="text"
-                            value={amountData.amount}
-                            onChange={handleChange}
-                            label="Input New Amount"
-                        />
-                    </form>
-                    <div style={{ marginBottom: '20px' }}>
-                        <Button onClick={handleSubmit} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Save</Button>
-                    </div>
-                </Box>
-            </Modal>
-        </Paper>
-    );
-}
+                {displayTitle}
+                {displayTitle === 'Monthly Budget' && (
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
+
+                )}
+                {displayTitle === 'Budget Limit' && (
+                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00' }</p>
+                )}
+                {displayTitle === 'Budget Limit' && (
+                    <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
+                        <EditIcon sx={{ width: '30px', height: '30px' }} />
+                    </Button>
+                )}
+                <Modal
+                    open={open && clickedButton === title}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                        width: 400,
+                        borderRadius: '15px',
+                        textAlign: 'center',
+                    }}>
+                        <Button onClick={handleClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
+                        <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Edit {displayTitle}</h2>
+                        <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+                            <TextField
+                                type="text"
+                                value={amountData.amount}
+                                onChange={handleChange}
+                                label="Input New Amount"
+                            />
+                        </form>
+                        <div style={{ marginBottom: '20px' }}>
+                            <Button onClick={handleSubmit} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Save</Button>
+                        </div>
+                    </Box>
+                </Modal>
+            </Paper>
+        );
+    }
     
     const renderSummaryCard = () => {
         const budgetLimitData = editableAmounts['Budget Limit'] || { currency: '', amount: '' };
@@ -280,15 +258,16 @@ function Dashboard(props) {
                 }}
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
-                <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{selectedMonthYear}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget Limit: {budgetLimitData.currency} {budgetLimitData.amount}</p>
+                <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{dateString}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget : Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p> 
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Budget Limit: Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00' }</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Balance: {budgetLimitData.currency} {budgetLimitData.amount}</p>
             </Paper>
         );
     };
-    
 
     if (!currentUser) {
-        return null
+        return null;
     }
 
     return (
@@ -308,29 +287,24 @@ function Dashboard(props) {
                         variant='outlined'
                     >
                         <SchoolDateFilter />
-
-                    <Box style={{ paddingRight: '10px' }}> 
-                    <Select
-                    value={selectedSchool} // Use selectedSchool as the value
-                    onChange={(event) => handleSelectSchool(event.target.value)} // Update selectedSchool on change
-                    displayEmpty
-                    inputProps={{ 'aria-label': 'Select School' }}
-                    >
-                    {loadingSchools ? (
-                    <MenuItem disabled>Loading...</MenuItem>
-                    ) : [
-                   
-        <MenuItem key="" value="" disabled>
-            Select School
-        </MenuItem>,
-        schools.map((school) => (
-            <MenuItem key={school.id} value={school.id}>
-                {school.name}
-            </MenuItem>
-        ))
-    ]}
-</Select>
-
+                        <Box style={{ paddingRight: '10px' }}>
+                            <Select
+                                value={selectedSchool}
+                                onChange={handleSchoolSelect}
+                                displayEmpty
+                                inputProps={{ 'aria-label': 'Select School' }}
+                                style={{ width: '100%', height: '40px' }} 
+                            >
+                                {loadingSchools ? (
+                                    <MenuItem disabled>Loading...</MenuItem>
+                                ) : (
+                                    currentUser.schools.map((school) => (
+                                        <MenuItem key={school.id} value={school.id}>
+                                            {school.name}
+                                        </MenuItem>
+                                    ))
+                                )}
+                            </Select>
                         </Box>
                     </Paper>
                 </Grid>
@@ -354,7 +328,7 @@ function Dashboard(props) {
                             color="inherit"
                             noWrap
                         >
-                            {selectedMonthYear}
+                            {dateString}
                         </Typography>
                     </Box>
                 </Grid>
@@ -367,7 +341,6 @@ function Dashboard(props) {
                     <Grid container >
                         <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                             {renderEditableCard('monthlyBudget')}
-                            
                         </Grid>
                         <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                             {renderEditableCard('budgetLimit')}

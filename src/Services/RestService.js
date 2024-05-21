@@ -431,7 +431,7 @@ const RestService = (() => {
             obj = { sds: value };
         } else if (description === "Head. Accounting Div. Unit") {
             obj = { headAccounting: value };
-        } else if (description =="Budget Limit"){
+        } else if (description === "Budget Limit"){
             obj = { budgetLimit: value };
         }
         
