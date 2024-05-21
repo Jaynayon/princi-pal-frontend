@@ -103,7 +103,7 @@ function Dashboard(props) {
                 setSchools(response);
                 if (response && response.length > 0) {
                     setDefaultSchool(response[0].id);
-                    setSelectedSchool(response[0].id);
+                    //setSelectedSchool(response[0].id);
                 }
             } catch (error) {
                 console.error(error);
@@ -145,12 +145,21 @@ function Dashboard(props) {
     
         try {
             const document = await RestService.getDocumentBySchoolIdYearMonth(schoolId, year, month);
-            setCurrentDocument({
-                budget: document.budget,
-                budgetLimit: document.budgetLimit,
-                schoolId: schoolId,
-                id: document.id // assuming `document` has an `id` field
-            });
+            if (!document){
+                setCurrentDocument({
+                    budget: 0.0,
+                    budgetLimit:  0.0,
+                    schoolId: schoolId,
+                    id: document.id // assuming `document` has an `id` field
+                });
+            } else {
+                setCurrentDocument({
+                    budget: document.budget,
+                    budgetLimit: document.budgetLimit,
+                    schoolId: schoolId,
+                    id: document.id // assuming `document` has an `id` field
+                });
+            }
         } catch (error) {
             console.error('Error fetching document:', error);
         }
