@@ -44,17 +44,7 @@ function People(props) {
     const [rows, setRows] = useState([]);
     const {currentUser} = useNavigationContext();
 
-    //currentUser association, which will change per school
-    
-    
-    /*([
-        { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
-        { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
-        { name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
-        { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
-        { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Admin' },
-    ]);*/
-
+        //currentUser association, which will change per school
         //to fetch the user from the school she belong
         // Function to fetch users by school ID
         const fetchUsers = async () => {
@@ -75,30 +65,36 @@ function People(props) {
 
             useEffect(() => {
                 // Fetch users when the component mounts or when the selected school changes
-                fetchUsers();
+                if (selectedValue) {
+                    fetchUsers(selectedValue);
+                }
             }, [selectedValue]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
-            
+
 
         // Function to fetch schools from backend
         const fetchSchools = async () => {
-            try {
-                const response = await fetch('http://localhost:4000/schools/all');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch schools');
-                }
-                const data = await response.json();
-                setSchools(data); // Set the fetched schools to the state
-            } catch (error) {
-                console.error('Error fetching schools:', error);
+        try {
+            const response = await fetch('http://localhost:4000/schools/all');
+            if (!response.ok) {
+                throw new Error('Failed to fetch schools');
             }
-        };
-    
+            const data = await response.json();
+            setSchools(data); // Set the fetched schools to the state
+
+            // Set the default selected school value and fetch users
+            if (data.length > 0) {
+                setSelectedValue(data[0].id); // Set to the first school's ID as default
+            }
+        } catch (error) {
+            console.error('Error fetching schools:', error);
+        }
+    };
         // Fetch schools when component mounts
         useEffect(() => {
-            //fetchSchools();
-            setSchools(currentUser?.schools)
+            fetchSchools();
+            // If you have a predefined list of schools in currentUser, you can use it instead
+            // setSchools(currentUser?.schools || []);
         }, []); // Empty dependency array ensures the effect runs only once
-    
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -182,15 +178,6 @@ function People(props) {
         setInviteEmail('');
     };
 
-    //for the static members
-   /* const rows = [
-        { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
-        { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
-        { name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
-        { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
-        { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
-    ];*/
-
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
         (row && row.name && row.name.toLowerCase().includes(searchValue.toLowerCase())) ||
@@ -249,35 +236,6 @@ function People(props) {
                 <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px' }}>
     <FormControl sx={{ m: 1, minWidth: 150 }} >
         <InputLabel id="demo-select-small-label">School Filter</InputLabel>
-        {/*<Select
-            labelId="demo-select-small-label"
-            id="demo-select-small"
-            value={member}
-            label="Member"
-            onChange={(event) => setMember(event.target.value)}
-        >
-            <MenuItem value="">
-                <em>None</em>
-            </MenuItem>
-            <MenuItem value="Cebu Institute of Technology - University">
-                <ListItemAvatar>
-                    <Avatar src="../downloads/cit.png" />
-                </ListItemAvatar>
-                <ListItemText primary="Cebu Institute of Technology - University" />
-            </MenuItem>
-            <MenuItem value="Asian College of Technology">
-                <ListItemAvatar>
-                    <Avatar src="../downloads/act.png" />
-                </ListItemAvatar>
-                <ListItemText primary="Asian College of Technology" />
-            </MenuItem>
-            <MenuItem value="University of Cebu">
-                <ListItemAvatar>
-                    <Avatar src="/downloads/uc.jpg" />
-                </ListItemAvatar>
-                <ListItemText primary="University of Cebu" />
-            </MenuItem>
-                </Select>*/}
                 <Select
                     labelId="demo-select-small-label"
                     id="demo-select-small"
