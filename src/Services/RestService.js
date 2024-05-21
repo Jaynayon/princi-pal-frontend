@@ -460,19 +460,6 @@ const RestService = (() => {
         }
     };
 
-
-    const getSchools = async () => {
-        try {
-            const response = await instance.get('/schools/all'); // Adjust endpoint as needed
-            console.log('Fetched schools:', response.data);
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching schools:', error);
-            throw new Error('Failed to fetch schools. Please try again later.');
-        }
-    };
-
-
     return {
         createUser,
         authenticateUser,
@@ -491,7 +478,7 @@ const RestService = (() => {
         updateJevById,
         createDocBySchoolId,
         getLrByKeyword,
-        getSchools,
+    
     };
 })();
 
