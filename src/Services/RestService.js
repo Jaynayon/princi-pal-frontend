@@ -617,7 +617,7 @@ const RestService = (() => {
         updateJevById,
         createDocBySchoolId,
         getLrByKeyword,
-        createUserPrincipal,
+        //createUserPrincipal,
         getSchoolName,
         getSchoolFullName,
         createSchool,

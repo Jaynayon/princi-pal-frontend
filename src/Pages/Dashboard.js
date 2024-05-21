@@ -17,12 +17,64 @@ import RestService from '../Services/RestService'; // Adjust the path as needed
 import { useSchoolContext } from '../Context/SchoolProvider'; 
 import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolFilters';
 
+//Apex Chart
+const ApexChart = ({ totalBudget }) => {
+    const [options] = useState({
+        chart: {
+            height: 350,
+            type: 'line',
+            zoom: {
+                enabled: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'straight'
+        },
+        title: {
+            text: 'Line Chart',
+            align: 'left',
+            style: {
+                fontFamily: 'Mulish-Regular',
+                fontSize: '20px',
+            }
+        },
+        grid: {
+            row: {
+                colors: ['#f3f3f3', 'transparent'],
+                opacity: 0.5
+            },
+        },
+        xaxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+        }
+    });
+
+    const [series] = useState([{
+        name: "Budget",
+        data: [totalBudget] // Use totalBudget as the data for the series
+    }]);
+
+    return (
+        <div>
+            <div id="chart">
+                <ReactApexChart options={options} series={series} type="line" height={350} />
+            </div>
+            <div id="html-dist"></div>
+        </div>
+    );
+};
+
+
+
 
 
 function Dashboard(props) {
-    // State declarations
     const { currentUser } = useNavigationContext();
     const [selectedSchool, setSelectedSchool] = useState('');
+    const [defaultSchool, setDefaultSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
@@ -32,25 +84,27 @@ function Dashboard(props) {
     const [schools, setSchools] = useState([]);
     const [loadingSchools, setLoadingSchools] = useState(false);
     const [schoolBudget, setSchoolBudget] = useState(null);
-    const { currentDocument, fetchDocumentBySchoolId, year, month, setCurrentDocument } = useSchoolContext(); // Use the useSchoolContext hook to access the currentDocument
+    const { currentDocument, fetchDocumentBySchoolId, year, month, setCurrentDocument } = useSchoolContext(); 
     const currentBudget = currentDocument ? currentDocument.budget : null;
     const [dateString, setDateString] = useState('');
-    
 
-
-    // Effects
+    //Effects
     useEffect(() => {
         if (month && year) {
             setDateString(`${month} ${year}`);
         }
     }, [month, year]);
-    
+
     useEffect(() => {
         const fetchSchools = async () => {
             setLoadingSchools(true);
             try {
                 const response = await RestService.getSchools();
                 setSchools(response);
+                if (response && response.length > 0) {
+                    setDefaultSchool(response[0].id);
+                    setSelectedSchool(response[0].id);
+                }
             } catch (error) {
                 console.error(error);
             } finally {
@@ -60,21 +114,48 @@ function Dashboard(props) {
     
         fetchSchools();
     }, []);
-    
+
     useEffect(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
+            setDefaultSchool(currentUser.schools[0].id);
             setSelectedSchool(currentUser.schools[0].id);
         }
     }, [currentUser]);
 
+    useEffect(() => {
+        const fetchAllDocuments = async () => {
+            setLoadingSchools(true);
+            try {
+                const allDocuments = await RestService.getAllDocuments();
+                const totalBudget = allDocuments.reduce((acc, doc) => acc + doc.budget, 0);
+                setSchoolBudget(totalBudget);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoadingSchools(false);
+            }
+        };
+    
+        fetchAllDocuments();
+    }, []);
 
-    // Event handlers
-    const handleSchoolSelect = (event) => {
-        setSelectedSchool(event.target.value);
-        console.log('Selected school:', event.target.value);
+    const handleSchoolSelect = async (schoolId) => {
+        setSelectedSchool(schoolId);
+        console.log('Selected school:', schoolId);
+    
+        try {
+            const document = await RestService.getDocumentBySchoolIdYearMonth(schoolId, year, month);
+            setCurrentDocument({
+                budget: document.budget,
+                budgetLimit: document.budgetLimit,
+                schoolId: schoolId,
+                id: document.id // assuming `document` has an `id` field
+            });
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
     };
 
-   
     const updateDocumentById = async (docId, value) => {
         try {
             const response = await fetch(`http://localhost:4000/documents/${docId}`, {
@@ -100,7 +181,6 @@ function Dashboard(props) {
         }
     };
 
-    
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
         const monthNames = [
@@ -141,14 +221,13 @@ function Dashboard(props) {
     const handleSubmit = async (event) => {
         event.preventDefault();
         const updatedAmount = editableAmounts[clickedButton];
-        console.log('Document ID:', currentDocument.id); // Log the documentId
+        console.log('Document ID:', currentDocument.id);
     
         try {
             const isUpdated = await updateDocumentById(currentDocument.id, updatedAmount.amount);
             
             if (isUpdated) {
                 console.log('Budget limit saved successfully');
-                // Update the currentDocument to reflect the new budget limit
                 setCurrentDocument({
                     ...currentDocument,
                     budgetLimit: parseFloat(updatedAmount.amount)
@@ -158,7 +237,7 @@ function Dashboard(props) {
                     [clickedButton]: { ...editableAmounts[clickedButton], amount: '' }
                 });
                 setError('');
-                setOpen(false); // Close the modal after saving
+                setOpen(false);
             } else {
                 console.error('Failed to save budget limit');
                 setError('Failed to save budget limit. Please try again later.');
@@ -168,8 +247,6 @@ function Dashboard(props) {
             setError('Failed to save budget limit. Please try again later.');
         }
     };
-    
-    
 
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
@@ -178,7 +255,7 @@ function Dashboard(props) {
         else if (title === 'budgetLimit') displayTitle = 'Budget Limit';
         else if (title === 'totalBalance') displayTitle = 'Total Balance';
     
-        if (!currentDocument){
+        if (!currentDocument) {
             return null;
         }
     
@@ -196,17 +273,21 @@ function Dashboard(props) {
             >
                 {displayTitle}
                 {displayTitle === 'Monthly Budget' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) :'0.00'}</p>
 
                 )}
                 {displayTitle === 'Budget Limit' && (
-                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00' }</p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00' }</p>
                 )}
                 {displayTitle === 'Budget Limit' && (
                     <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
                         <EditIcon sx={{ width: '30px', height: '30px' }} />
                     </Button>
                 )}
+                {displayTitle === 'Total Balance' && (
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)).toFixed(2)}</p>
+                )}      
+
                 <Modal
                     open={open && clickedButton === title}
                     onClose={handleClose}
@@ -242,8 +323,8 @@ function Dashboard(props) {
                 </Modal>
             </Paper>
         );
-    }
-    
+    };
+
     const renderSummaryCard = () => {
         const budgetLimitData = editableAmounts['Budget Limit'] || { currency: '', amount: '' };
     
@@ -261,7 +342,7 @@ function Dashboard(props) {
                 <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{dateString}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget : Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p> 
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Budget Limit: Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00' }</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Balance: {budgetLimitData.currency} {budgetLimitData.amount}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Balance: Php {((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)).toFixed(2)}</p>
             </Paper>
         );
     };
@@ -290,7 +371,7 @@ function Dashboard(props) {
                         <Box style={{ paddingRight: '10px' }}>
                             <Select
                                 value={selectedSchool}
-                                onChange={handleSchoolSelect}
+                                onChange={(event) => handleSchoolSelect(event.target.value)}
                                 displayEmpty
                                 inputProps={{ 'aria-label': 'Select School' }}
                                 style={{ width: '100%', height: '40px' }} 
@@ -361,7 +442,7 @@ function Dashboard(props) {
                                     height: 380,
                                 }}
                             >
-                            
+                           <ApexChart totalBudget={schoolBudget} />
                             </Paper>
                         </Grid>
                         <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
