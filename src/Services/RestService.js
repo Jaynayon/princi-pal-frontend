@@ -425,10 +425,17 @@ const RestService = (() => {
 
     const createDocBySchoolId = async (schoolId, month, year, obj) => {
         try {
+            // Troubleshooting: year and month passed is an array
+            // Extracting the year value from the array
+            const yearValue = Array.isArray(year) ? year[0] : year;
+
+            // Extracting the month value from the array
+            const monthValue = Array.isArray(month) ? month[0] : month;
+
             const response = await instance.post('http://localhost:4000/documents/create', {
                 schoolId,
-                month,
-                year
+                month: monthValue,
+                year: yearValue
             }, {
                 headers: {
                     'Content-Type': 'application/json'
@@ -469,10 +476,10 @@ const RestService = (() => {
             obj = { sds: value };
         } else if (description === "Head. Accounting Div. Unit") {
             obj = { headAccounting: value };
-        } else if (description === "Budget Limit"){
+        } else if (description === "Budget Limit") {
             obj = { budgetLimit: value };
         }
-        
+
 
         try {
             const response = await instance.patch(`http://localhost:4000/documents/${docId}`, obj, {
