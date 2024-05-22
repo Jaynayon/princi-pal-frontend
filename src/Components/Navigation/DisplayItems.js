@@ -273,7 +273,7 @@ export const ProfileTab = ({ user }) => {
                                 InputProps={{
                                     startAdornment: (
                                     <InputAdornment position="start">
-                                        <EmailIcon />
+                                        <PersonIcon />
                                     </InputAdornment>
                                     ),
                                 }}

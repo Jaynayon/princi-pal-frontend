@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
@@ -25,11 +25,12 @@ import Stack from '@mui/material/Stack';
 import InputAdornment from '@mui/material/InputAdornment';
 import {
     VisibilityOff as VisibilityOffIcon,
+    Visibility as VisibilityIcon,
     Lock as LockIcon,
     Person as PersonIcon,
     Email as EmailIcon,
   } from '@mui/icons-material';
-//import RestService from '../Services/RestService'
+import RestService from '../Services/RestService'
 import { useNavigationContext } from '../Context/NavigationProvider';
 
 const DemoPaper = styled(Paper)(({ theme }) => ({
@@ -86,12 +87,19 @@ const ButtonWrapper = styled('div')({
 });
 
 function Settings() {
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const { currentUser } = useNavigationContext()
+    const [anchorEl, setAnchorEl] = useState(null);
+    const { currentUser } = useNavigationContext();
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [message, setMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState(''); // State for error message
+    const [showPassword, setShowPassword] = useState(false);
 
     if (!currentUser) {
-        return null
+        return null;
     }
+
+    const userId = currentUser.id; // Ensure userId is correctly defined
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -103,12 +111,51 @@ function Settings() {
 
     const handleColorChange = (color) => {
         setAnchorEl(null);
-        handleClick(false);
         currentUser.avatar = color;
     };
-    
+
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
+
+      const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+      };
+
+      const validatePassword = (input) => {
+        const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return regex.test(input);
+      };
+      
+      const handlePasswordChange = (setter, value) => {
+        const isValid = validatePassword(value);
+        setErrorMessage(isValid ? '' : 'Password does not meet requirements');
+        setter(value);
+      };
+
+    const handlePasswordUpdate = async () => {
+        if (newPassword !== confirmPassword) {
+          // Set a message for password mismatch
+          setMessage("Passwords do not match");
+          return;
+        }
+      
+        try {
+          const success = await RestService.updateUserPassword(userId, newPassword);
+          if (success) {
+            // Set a success message
+            setMessage("Password updated successfully");
+            setNewPassword('');
+            setConfirmPassword('');
+          } else {
+            // Set a message for failed update (consider using backend error message)
+            setMessage("Failed to update password");
+          }
+        } catch (error) {
+          console.error("Error updating password:", error);
+          // Set a generic error message
+          setMessage("An error occurred while updating password");
+        }
+      };
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -205,25 +252,58 @@ function Settings() {
                                     </InputAdornment>
                                     ),
                                 }}/>
-                            <TextField sx={{ width: '100%' }} required id="outlined-required" label="Password" margin="normal" 
-                                InputProps={{
-                                    startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockIcon />
-                                    </InputAdornment>
-                                    ),
-                                }}/>
-                            <TextField sx={{ width: '100%' }} required id="outlined-required" label="Re-Type Password" margin="normal" 
-                                InputProps={{
-                                    startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockIcon />
-                                    </InputAdornment>
-                                    ),
-                                }}/>
+                                <TextField
+                                    sx={{ width: '100%' }}
+                                    required
+                                    type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
+                                    label="New Password"
+                                    margin="normal"
+                                    value={newPassword}
+                                    onChange={(e) => handlePasswordChange(setNewPassword, e.target.value)}
+                                    InputProps={{
+                                        startAdornment: (
+                                        <InputAdornment position="start">
+                                            <LockIcon />
+                                        </InputAdornment>
+                                        ),
+                                        endAdornment: (
+                                        <InputAdornment position="end">
+                                            {showPassword ? <VisibilityIcon onClick={togglePasswordVisibility} /> : <VisibilityOffIcon onClick={togglePasswordVisibility} />}
+                                        </InputAdornment>
+                                        ),
+                                    }}
+                                    />
+                                    {errorMessage && <Typography variant="caption" color="error">{errorMessage}</Typography>}
+
+                                    <TextField
+                                    sx={{ width: '100%' }}
+                                    required
+                                    type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
+                                    label="Retype Password"
+                                    margin="normal"
+                                    value={confirmPassword}
+                                    onChange={(e) => handlePasswordChange(setConfirmPassword, e.target.value)}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <LockIcon />
+                                            </InputAdornment>
+                                            ),
+                                            endAdornment: (
+                                            <InputAdornment position="end">
+                                                {showPassword ? <VisibilityIcon onClick={togglePasswordVisibility} /> : <VisibilityOffIcon onClick={togglePasswordVisibility} />}
+                                            </InputAdornment>
+                                            ),
+                                    }}
+                                    />
+                            {message && (
+                                <div className="message" style={{ color: 'red' }}>
+                                {message}
+                                </div>
+                            )}
                         </TextFieldWrapper>
                         <ButtonWrapper>
-                            <Button variant="contained">Save</Button>
+                            <Button variant="contained" onClick={handlePasswordUpdate}>Save</Button>
                         </ButtonWrapper>
                     </Grid>
                 </Grid>
