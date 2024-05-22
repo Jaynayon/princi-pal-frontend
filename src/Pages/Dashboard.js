@@ -84,7 +84,7 @@ function Dashboard(props) {
     const [schools, setSchools] = useState([]);
     const [loadingSchools, setLoadingSchools] = useState(false);
     const [schoolBudget, setSchoolBudget] = useState(null);
-    const { currentDocument, fetchDocumentBySchoolId, year, month, setCurrentDocument } = useSchoolContext();
+    const { currentDocument, currentSchool, year, month, setCurrentDocument } = useSchoolContext();
     const currentBudget = currentDocument ? currentDocument.budget : null;
     const [dateString, setDateString] = useState('');
 
@@ -96,6 +96,30 @@ function Dashboard(props) {
     }, [month, year]);
 
     useEffect(() => {
+
+        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
+            // setDefaultSchool(currentUser.schools[0].id);
+            // setSelectedSchool(currentUser.schools[0].id);
+            //setDefaultSchool(currentUser.schools[0].id);
+            setSelectedSchool(currentSchool?.id);
+        }
+
+    }, [currentUser, currentSchool]);
+
+    useEffect(() => {
+        // const fetchAllDocuments = async () => {
+        //     setLoadingSchools(true);
+        //     try {
+        //         const allDocuments = await RestService.getAllDocuments();
+        //         const totalBudget = allDocuments.reduce((acc, doc) => acc + doc.budget, 0);
+        //         setSchoolBudget(totalBudget);
+        //     } catch (error) {
+        //         console.error(error);
+        //     } finally {
+        //         setLoadingSchools(false);
+        //     }
+        // };
+
         const fetchSchools = async () => {
             setLoadingSchools(true);
             try {
@@ -112,31 +136,9 @@ function Dashboard(props) {
             }
         };
 
+
+        // fetchAllDocuments();
         fetchSchools();
-    }, []);
-
-    useEffect(() => {
-        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
-            setDefaultSchool(currentUser.schools[0].id);
-            setSelectedSchool(currentUser.schools[0].id);
-        }
-    }, [currentUser]);
-
-    useEffect(() => {
-        const fetchAllDocuments = async () => {
-            setLoadingSchools(true);
-            try {
-                const allDocuments = await RestService.getAllDocuments();
-                const totalBudget = allDocuments.reduce((acc, doc) => acc + doc.budget, 0);
-                setSchoolBudget(totalBudget);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoadingSchools(false);
-            }
-        };
-
-        fetchAllDocuments();
     }, []);
 
     const handleSchoolSelect = async (schoolId) => {
