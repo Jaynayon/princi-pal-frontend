@@ -50,6 +50,7 @@ function AdminPage(props) {
 
     const [integrateSchoolError, setIntegrateSchoolError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [userErrorMessage, setUserErrorMessage] = useState("");
     const [emailUsernameError, setEmailUsernameError] = useState(false);
     const [integrateFormData, setIntegrateFormData] = useState({
         name: '',
@@ -96,15 +97,15 @@ function AdminPage(props) {
 
             if (!userExists) {
                 setEmailUsernameError(true)
-                setErrorMessage("User doesn't exist");
+                setUserErrorMessage("User doesn't exist");
             } else {
                 if (userExists.position !== "Principal") {
                     setEmailUsernameError(true)
-                    setErrorMessage("User is not a principal");
+                    setUserErrorMessage("User is not a principal");
                 } else {
                     if (userExists.schools.length > 0) {
                         setEmailUsernameError(true)
-                        setErrorMessage("User already has an association");
+                        setUserErrorMessage("User already has an association");
                     } else {
                         setUser(userExists); //set current user
                         setEmailUsernameError(false)
@@ -113,7 +114,8 @@ function AdminPage(props) {
             }
             //nameExists ? setSchoolFullNameError(true) : setSchoolFullNameError(false);
         } else if (integrateFormData.name === "" || integrateFormData.email === "") {
-            integrateFormData.name === "" ? setIntegrateSchoolError(false) : setEmailUsernameError(false);
+            integrateFormData.name === "" && setIntegrateSchoolError(false);
+            integrateFormData.email === "" && setEmailUsernameError(false);
         }
         setIsTyping(false);
     }
@@ -613,7 +615,7 @@ function AdminPage(props) {
                                         sx={{ m: 1 }}
                                         value={integrateFormData["email"]}
                                         error={integrateFormData.email === "" ? false : emailUsernameError}
-                                        helperText={emailUsernameError && errorMessage}
+                                        helperText={emailUsernameError && userErrorMessage}
                                         InputLabelProps={styles.InputLabelProps}
                                         InputProps={styles.InputProps}
                                         onBlur={(event) => integrateOnBlur("email", event.target.value)}

@@ -69,7 +69,7 @@ function Schools(props) {
 
         updateLr();
         updateJev();
-        setIsAdding(false); //reset state to allow displayFields again
+        setIsAdding(false); //reset state to allow addFields again
 
     }, [value, year, month, reload, updateLr, updateJev, setIsAdding]);
 
