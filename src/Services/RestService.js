@@ -425,10 +425,17 @@ const RestService = (() => {
 
     const createDocBySchoolId = async (schoolId, month, year, obj) => {
         try {
+            // Troubleshooting: year and month passed is an array
+            // Extracting the year value from the array
+            const yearValue = Array.isArray(year) ? year[0] : year;
+
+            // Extracting the month value from the array
+            const monthValue = Array.isArray(month) ? month[0] : month;
+
             const response = await instance.post('http://localhost:4000/documents/create', {
                 schoolId,
-                month,
-                year
+                month: monthValue,
+                year: yearValue
             }, {
                 headers: {
                     'Content-Type': 'application/json'
@@ -469,7 +476,10 @@ const RestService = (() => {
             obj = { sds: value };
         } else if (description === "Head. Accounting Div. Unit") {
             obj = { headAccounting: value };
+        } else if (description === "Budget Limit") {
+            obj = { budgetLimit: value };
         }
+
 
         try {
             const response = await instance.patch(`http://localhost:4000/documents/${docId}`, obj, {
@@ -495,6 +505,145 @@ const RestService = (() => {
         }
     };
 
+    const getSchoolName = async (name) => {
+        try {
+            const response = await instance.post('http://localhost:4000/schools/name', {
+                name
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error retrieving school:', error);
+            return null;
+        }
+    };
+
+    const getSchoolFullName = async (fullName) => {
+        try {
+            const response = await instance.post('http://localhost:4000/schools/fullname', {
+                fullName
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error retrieving school:', error);
+            return null;
+        }
+    };
+
+    const createSchool = async (name, fullName) => {
+        try {
+            const response = await instance.post('http://localhost:4000/schools/create', {
+                name,
+                fullName
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
+    const getPrincipal = async (schoolId) => {
+        try {
+            const response = await instance.post('http://localhost:4000/schools/users/principal', {
+                schoolId
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
+    const getUserByEmailUsername = async (email) => {
+        try {
+            const response = await instance.post('http://localhost:4000/users/schools', {
+                emailOrUsername: email
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
+    const insertUserAssociation = async (userId, schoolId) => {
+        try {
+            const response = await instance.post('http://localhost:4000/associations/insert', {
+                userId,
+                schoolId
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response) {
+                return response.data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
+    const getSchools = async () => {
+        try {
+            const response = await instance.get('/schools/all'); // Adjust endpoint as needed
+            console.log('Fetched schools:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching schools:', error);
+            throw new Error('Failed to fetch schools. Please try again later.');
+        }
+    };
+
     return {
         createUser,
         authenticateUser,
@@ -513,7 +662,14 @@ const RestService = (() => {
         updateJevById,
         createDocBySchoolId,
         getLrByKeyword,
-        createUserPrincipal
+        createUserPrincipal,
+        getSchoolName,
+        getSchoolFullName,
+        createSchool,
+        getPrincipal,
+        getUserByEmailUsername,
+        insertUserAssociation,
+        getSchools
     };
 })();
 
