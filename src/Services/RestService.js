@@ -644,6 +644,27 @@ const RestService = (() => {
         }
     };
 
+    const updateUserPassword = async (userId, newPassword) => {
+        try {
+            const response = await instance.patch(`http://localhost:4000/users/${userId}/password`, {
+                newPassword,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            if (response.status === 200) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error updating password:', error);
+            return false;
+        }
+    };
+
+
     return {
         createUser,
         authenticateUser,
@@ -669,7 +690,8 @@ const RestService = (() => {
         getPrincipal,
         getUserByEmailUsername,
         insertUserAssociation,
-        getSchools
+        getSchools,
+        updateUserPassword
     };
 })();
 
