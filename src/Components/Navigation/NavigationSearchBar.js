@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import Box from "@mui/material/Box";
@@ -15,6 +15,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import CloseIcon from "@mui/icons-material/Close";
 import MenuItem from "@mui/material/MenuItem";
+import axios from "axios";
 
 const SCHOOLS = [
   "University of San Carlos",
@@ -41,6 +42,7 @@ const NavigationSearchBar = () => {
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
   const [select, setSelect] = useState("ADAS");
   const [appliedSchools, setAppliedSchools] = useState([]);
+  const [schools, setSchools] = useState([])
 
   const handleApplySchool = () => {
     if (selectedSchool && !appliedSchools.includes(selectedSchool)) {
@@ -84,6 +86,20 @@ const NavigationSearchBar = () => {
   const filteredSchools = SCHOOLS.filter((school) =>
     school.toLowerCase().includes(query.toLowerCase())
   );
+
+  useEffect(() => {
+    const getAllSchools = async () => {
+      try {
+        const response = await axios.get("http://localhost:4000/schools/all");
+
+        console.log("Schools: ", response.data);
+
+      } catch (error) {
+        console.error(error);
+      }
+    } 
+    getAllSchools();
+  }, [schools])
   return (
     <Box style={{ width: "400px", position: "relative" }}>
       <Box
