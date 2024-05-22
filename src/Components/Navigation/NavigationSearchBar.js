@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
@@ -17,23 +16,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import MenuItem from "@mui/material/MenuItem";
 import axios from "axios";
 
-const SCHOOLS = [
-  "University of San Carlos",
-  "University of the Philippines Cebu",
-  "Cebu Institute of Technology - University",
-  "University of Cebu",
-  "Southwestern University",
-  "Cebu Doctors' University",
-  "University of San Jose - Recoletos",
-  "Cebu Normal University",
-  "University of Southern Philippines Foundation",
-  "Asian College of Technology",
-];
-
 const POSITIONS = [
   "ADAS",
   "ADOF"
-]
+];
 
 const NavigationSearchBar = () => {
   const [query, setQuery] = useState("");
@@ -42,11 +28,22 @@ const NavigationSearchBar = () => {
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
   const [select, setSelect] = useState("ADAS");
   const [appliedSchools, setAppliedSchools] = useState([]);
-  const [schools, setSchools] = useState([])
+  const [schools, setSchools] = useState([]);
+
+  useEffect(() => {
+    // Fetch school data from the API when the component mounts
+    axios.get('http://localhost:4000/schools/all')
+      .then(response => {
+        setSchools(response.data); // Assuming the API returns an array of school objects with a `fullName` property
+      })
+      .catch(error => {
+        console.error("There was an error fetching the school data!", error);
+      });
+  }, []);
 
   const handleApplySchool = () => {
-    if (selectedSchool && !appliedSchools.includes(selectedSchool)) {
-      setAppliedSchools([...appliedSchools, selectedSchool]);
+    if (selectedSchool && !appliedSchools.includes(selectedSchool.fullName)) {
+      setAppliedSchools([...appliedSchools, selectedSchool.fullName]);
     }
     setOpen(false);
   };
@@ -83,23 +80,10 @@ const NavigationSearchBar = () => {
     setQuery(event.target.value);
   };
 
-  const filteredSchools = SCHOOLS.filter((school) =>
-    school.toLowerCase().includes(query.toLowerCase())
+  const filteredSchools = schools.filter((school) =>
+    school.fullName && school.fullName.toLowerCase().includes(query.toLowerCase())
   );
 
-  useEffect(() => {
-    const getAllSchools = async () => {
-      try {
-        const response = await axios.get("http://localhost:4000/schools/all");
-
-        console.log("Schools: ", response.data);
-
-      } catch (error) {
-        console.error(error);
-      }
-    } 
-    getAllSchools();
-  }, [schools])
   return (
     <Box style={{ width: "400px", position: "relative" }}>
       <Box
@@ -231,7 +215,7 @@ const NavigationSearchBar = () => {
               onClick={() => handleClickOpen(school)}
             >
               <Avatar>C</Avatar>
-              {school}
+              {school.fullName}
             </li>
           ))}
         </ul>
@@ -253,7 +237,7 @@ const NavigationSearchBar = () => {
         >
           <Avatar>C</Avatar>
           <DialogContentText id="alert-dialog-description">
-            <span style={{ fontWeight: "bold" }}>{selectedSchool}</span>
+            <span style={{ fontWeight: "bold" }}>{selectedSchool.fullName}</span>
             <br />
             Provide information to request access to this organization.
           </DialogContentText>
