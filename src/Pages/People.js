@@ -55,12 +55,10 @@ function People(props) {
                 console.error('Error fetching users:', error);
             }
         };
-
-        
                     // Function to handle school selection change
             const handleMemberChange = (event) => {
                 setSelectedValue(event.target.value); // Update selected school
-                fetchUsers(); // Fetch users belonging to the selected school
+                //fetchUsers(); // Fetch users belonging to the selected school
             };
 
             useEffect(() => {
@@ -121,28 +119,47 @@ function People(props) {
     };
 
     const handleDeleteOpen = (event, index) => {
+        // Open delete confirmation dialog when "Delete" button is clicked
+        setDeleteConfirmationDialogOpen(true);
+        // Also set the deleteAnchorEl and selectedIndex
+        setDeleteAnchorEl(event.currentTarget);
+        setSelectedIndex(index);
+    };
+    
+    const handleMenuClose = () => {
+        // Close delete menu and reset selectedIndex
+        setDeleteAnchorEl(null);
+        setSelectedIndex(null);
+    };
+    
+    const handleDelete = (event, index) => {
+        // Open delete confirmation dialog when "Delete" button is clicked
+        setDeleteConfirmationDialogOpen(true);
+        // Also set the deleteAnchorEl and selectedIndex
         setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
     };
 
-    const handleMenuClose = () => {
-        setDropdownAnchorEl(null);
-        setDeleteAnchorEl(null);
-        setSelectedIndex(null);
-    };
-
-    const handleDelete = () => {
-        // Open confirmation dialog before deleting
-        setDeleteConfirmationDialogOpen(true);
-    };
-
-    const confirmDelete = () => {
-        // Implement delete functionality here
-        console.log("Delete button clicked for row at index:", selectedIndex);
-        // Close the menu after delete
-        handleMenuClose();
-        // Close delete confirmation dialog
-        setDeleteConfirmationDialogOpen(false);
+    const confirmDelete = async () => {
+        try {
+            if (selectedIndex !== null && rows[selectedIndex]) {
+                const userId = rows[selectedIndex].userId; // Get userId of the selected user
+                const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
+                // Make an API call to delete the user association
+                await axios.delete(`http://localhost:4000/associations/${userId}/${schoolId}`);
+                console.log("User deleted successfully.");
+                // Remove the deleted row from the state
+                setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
+            }
+            // Close the delete confirmation dialog
+            setDeleteConfirmationDialogOpen(false);
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            // Handle error scenario
+        } finally {
+            // Close the delete menu and reset selectedIndex
+            handleMenuClose();
+        }
     };
 
     const cancelDelete = () => {
@@ -363,7 +380,7 @@ function People(props) {
                     Are you sure you want to delete?
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={confirmDelete}>Delete</Button>
+                    <Button onClick={confirmDelete}>Yes</Button>
                     <Button onClick={cancelDelete}>Cancel</Button>
                 </DialogActions>
             </Dialog>
