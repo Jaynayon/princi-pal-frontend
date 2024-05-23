@@ -9,13 +9,12 @@ import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
-import { DateFilter } from '../Components/Filters/Filters';
+import { FilterDate } from '../Components/Filters/FilterDate';
 import Select from '@mui/material/Select';
 import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService'; // Adjust the path as needed
 import { useSchoolContext } from '../Context/SchoolProvider';
-import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolFilters';
 
 //Apex Chart
 const ApexChart = ({ totalBudget }) => {
@@ -394,7 +393,7 @@ function Dashboard(props) {
                             elevation={0}
                             variant='outlined'
                         >
-                            <SchoolDateFilter />
+                            <FilterDate />
                             <Box style={{ paddingRight: '10px' }}>
                                 <Select
                                     value={selectedSchool}
