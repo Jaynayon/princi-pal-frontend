@@ -9,13 +9,12 @@ import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
-import { DateFilter } from '../Components/Filters/Filters';
+import { FilterDate } from '../Components/Filters/FilterDate';
 import Select from '@mui/material/Select';
 import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService'; // Adjust the path as needed
-import { useSchoolContext } from '../Context/SchoolProvider'; 
-import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolFilters';
+import { useSchoolContext } from '../Context/SchoolProvider';
 
 //Apex Chart
 const ApexChart = ({ totalBudget }) => {
@@ -84,7 +83,7 @@ function Dashboard(props) {
     const [schools, setSchools] = useState([]);
     const [loadingSchools, setLoadingSchools] = useState(false);
     const [schoolBudget, setSchoolBudget] = useState(null);
-    const { currentDocument, fetchDocumentBySchoolId, year, month, setCurrentDocument } = useSchoolContext(); 
+    const { currentDocument, currentSchool, year, month, setCurrentDocument } = useSchoolContext();
     const currentBudget = currentDocument ? currentDocument.budget : null;
     const [dateString, setDateString] = useState('');
 
@@ -96,6 +95,30 @@ function Dashboard(props) {
     }, [month, year]);
 
     useEffect(() => {
+
+        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
+            // setDefaultSchool(currentUser.schools[0].id);
+            // setSelectedSchool(currentUser.schools[0].id);
+            //setDefaultSchool(currentUser.schools[0].id);
+            setSelectedSchool(currentSchool?.id);
+        }
+
+    }, [currentUser, currentSchool]);
+
+    useEffect(() => {
+        // const fetchAllDocuments = async () => {
+        //     setLoadingSchools(true);
+        //     try {
+        //         const allDocuments = await RestService.getAllDocuments();
+        //         const totalBudget = allDocuments.reduce((acc, doc) => acc + doc.budget, 0);
+        //         setSchoolBudget(totalBudget);
+        //     } catch (error) {
+        //         console.error(error);
+        //     } finally {
+        //         setLoadingSchools(false);
+        //     }
+        // };
+
         const fetchSchools = async () => {
             setLoadingSchools(true);
             try {
@@ -111,44 +134,22 @@ function Dashboard(props) {
                 setLoadingSchools(false);
             }
         };
-    
+
+
+        // fetchAllDocuments();
         fetchSchools();
-    }, []);
-
-    useEffect(() => {
-        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
-            setDefaultSchool(currentUser.schools[0].id);
-            setSelectedSchool(currentUser.schools[0].id);
-        }
-    }, [currentUser]);
-
-    useEffect(() => {
-        const fetchAllDocuments = async () => {
-            setLoadingSchools(true);
-            try {
-                const allDocuments = await RestService.getAllDocuments();
-                const totalBudget = allDocuments.reduce((acc, doc) => acc + doc.budget, 0);
-                setSchoolBudget(totalBudget);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoadingSchools(false);
-            }
-        };
-    
-        fetchAllDocuments();
     }, []);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
         console.log('Selected school:', schoolId);
-    
+
         try {
             const document = await RestService.getDocumentBySchoolIdYearMonth(schoolId, year, month);
-            if (!document){
+            if (!document) {
                 setCurrentDocument({
                     budget: 0.0,
-                    budgetLimit:  0.0,
+                    budgetLimit: 0.0,
                     schoolId: schoolId,
                     id: document.id // assuming `document` has an `id` field
                 });
@@ -231,10 +232,10 @@ function Dashboard(props) {
         event.preventDefault();
         const updatedAmount = editableAmounts[clickedButton];
         console.log('Document ID:', currentDocument.id);
-    
+
         try {
             const isUpdated = await updateDocumentById(currentDocument.id, updatedAmount.amount);
-            
+
             if (isUpdated) {
                 console.log('Budget limit saved successfully');
                 setCurrentDocument({
@@ -263,11 +264,11 @@ function Dashboard(props) {
         if (title === 'monthlyBudget') displayTitle = 'Monthly Budget';
         else if (title === 'budgetLimit') displayTitle = 'Budget Limit';
         else if (title === 'totalBalance') displayTitle = 'Total Balance';
-    
+
         if (!currentDocument) {
             return null;
         }
-    
+
         return (
             <Paper
                 sx={{
@@ -282,11 +283,11 @@ function Dashboard(props) {
             >
                 {displayTitle}
                 {displayTitle === 'Monthly Budget' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) :'0.00'}</p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
 
                 )}
                 {displayTitle === 'Budget Limit' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00' }</p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 )}
                 {displayTitle === 'Budget Limit' && (
                     <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
@@ -295,7 +296,7 @@ function Dashboard(props) {
                 )}
                 {displayTitle === 'Total Balance' && (
                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)).toFixed(2)}</p>
-                )}      
+                )}
 
                 <Modal
                     open={open && clickedButton === title}
@@ -336,7 +337,7 @@ function Dashboard(props) {
 
     const renderSummaryCard = () => {
         const budgetLimitData = editableAmounts['Budget Limit'] || { currency: '', amount: '' };
-    
+
         return (
             <Paper
                 sx={{
@@ -349,8 +350,8 @@ function Dashboard(props) {
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
                 <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{dateString}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget : Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p> 
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Budget Limit: Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00' }</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget : Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Budget Limit: Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Balance: Php {((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)).toFixed(2)}</p>
             </Paper>
         );
@@ -361,108 +362,124 @@ function Dashboard(props) {
     }
 
     return (
-        <Container className="test" maxWidth="lg">
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={12} lg={12}>
-                    <Paper
-                        sx={[
-                            styles.header, {
-                                p: 2,
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between', 
-                            }
-                        ]}
-                        elevation={0}
-                        variant='outlined'
-                    >
-                        <SchoolDateFilter />
-                        <Box style={{ paddingRight: '10px' }}>
-                            <Select
-                                value={selectedSchool}
-                                onChange={(event) => handleSchoolSelect(event.target.value)}
-                                displayEmpty
-                                inputProps={{ 'aria-label': 'Select School' }}
-                                style={{ width: '100%', height: '40px' }} 
-                            >
-                                {loadingSchools ? (
-                                    <MenuItem disabled>Loading...</MenuItem>
-                                ) : (
-                                    currentUser.schools.map((school) => (
-                                        <MenuItem key={school.id} value={school.id}>
-                                            {school.name}
-                                        </MenuItem>
-                                    ))
-                                )}
-                            </Select>
-                        </Box>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={12} lg={12}>
-                    <Box style={{
-                        display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
-                        marginLeft: '10px', marginRight: '10px' 
-                    }}>
-                        <Typography
-                            component="h1"
-                            variant="h6"
-                            color="inherit"
-                            noWrap
-                            sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
-                        >
-                            Analytics
+        /*User has no school/s*/
+        !currentUser.schools || currentUser.schools.length === 0 ?
+            <Container maxWidth="lg">
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <Typography variant="h5" gutterBottom>
+                            Currently, you are not assigned to a school.
                         </Typography>
-                        <Typography
-                            component="h1"
-                            variant="h6"
-                            color="inherit"
-                            noWrap
-                        >
-                            {dateString}
+                        <Typography variant="body1">
+                            Once assigned, available data will be displayed here.
                         </Typography>
-                    </Box>
-                </Grid>
-                <Grid item xs={12} md={12} lg={12}
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginTop: "-15px",
-                    }}>
-                    <Grid container >
-                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                            {renderEditableCard('monthlyBudget')}
-                        </Grid>
-                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                            {renderEditableCard('budgetLimit')}
-                        </Grid>
-                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                            {renderEditableCard('totalBalance')}
-                        </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} md={12} lg={12}>
-                    <Grid container >
-                        <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
-                            <Paper
-                                sx={{
+            </Container>
+            :
+            /*User has school/s*/
+            <Container className="test" maxWidth="lg">
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Paper
+                            sx={[
+                                styles.header, {
                                     p: 2,
                                     display: 'flex',
-                                    flexDirection: 'column',
-                                    height: 380,
-                                }}
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }
+                            ]}
+                            elevation={0}
+                            variant='outlined'
+                        >
+                            <FilterDate />
+                            <Box style={{ paddingRight: '10px' }}>
+                                <Select
+                                    value={selectedSchool}
+                                    onChange={(event) => handleSchoolSelect(event.target.value)}
+                                    displayEmpty
+                                    inputProps={{ 'aria-label': 'Select School' }}
+                                    style={{ width: '100%', height: '40px' }}
+                                >
+                                    {loadingSchools ? (
+                                        <MenuItem disabled>Loading...</MenuItem>
+                                    ) : (
+                                        currentUser.schools.map((school) => (
+                                            <MenuItem key={school.id} value={school.id}>
+                                                {school.name}
+                                            </MenuItem>
+                                        ))
+                                    )}
+                                </Select>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Box style={{
+                            display: 'flex', justifyContent: 'space-between', marginBottom: '1rem',
+                            marginLeft: '10px', marginRight: '10px'
+                        }}>
+                            <Typography
+                                component="h1"
+                                variant="h6"
+                                color="inherit"
+                                noWrap
+                                sx={{ flexGrow: 1, textAlign: 'left', color: '#252733', fontWeight: 'bold' }}
                             >
-                           <ApexChart totalBudget={schoolBudget} />
-                            </Paper>
+                                Analytics
+                            </Typography>
+                            <Typography
+                                component="h1"
+                                variant="h6"
+                                color="inherit"
+                                noWrap
+                            >
+                                {dateString}
+                            </Typography>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            marginTop: "-15px",
+                        }}>
+                        <Grid container >
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                {renderEditableCard('monthlyBudget')}
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                {renderEditableCard('budgetLimit')}
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                {renderEditableCard('totalBalance')}
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                            {renderSummaryCard()}
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Grid container >
+                            <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
+                                <Paper
+                                    sx={{
+                                        p: 2,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        height: 380,
+                                    }}
+                                >
+                                    <ApexChart totalBudget={schoolBudget} />
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                {renderSummaryCard()}
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-        </Container>
+            </Container>
     );
-}    
+}
 
 const styles = {
     header: {

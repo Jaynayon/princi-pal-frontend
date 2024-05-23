@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import { SchoolDateFilter, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/SchoolFilters'
+import { FilterDate, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/FilterDate'
 import DocumentTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
 import { useSchoolContext } from '../Context/SchoolProvider';
@@ -96,7 +96,7 @@ function Schools(props) {
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
-                            <SchoolDateFilter />
+                            <FilterDate />
                             <SchoolFieldsFilter />
                             <SchoolSearchFilter />
                         </Box>

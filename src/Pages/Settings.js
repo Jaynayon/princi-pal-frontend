@@ -29,7 +29,7 @@ import {
     Lock as LockIcon,
     Person as PersonIcon,
     Email as EmailIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import RestService from '../Services/RestService'
 import { useNavigationContext } from '../Context/NavigationProvider';
 
@@ -117,45 +117,45 @@ function Settings() {
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
 
-      const togglePasswordVisibility = () => {
+    const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
-      };
+    };
 
-      const validatePassword = (input) => {
+    const validatePassword = (input) => {
         const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         return regex.test(input);
-      };
-      
-      const handlePasswordChange = (setter, value) => {
+    };
+
+    const handlePasswordChange = (setter, value) => {
         const isValid = validatePassword(value);
         setErrorMessage(isValid ? '' : 'Password does not meet requirements');
         setter(value);
-      };
+    };
 
     const handlePasswordUpdate = async () => {
         if (newPassword !== confirmPassword) {
-          // Set a message for password mismatch
-          setMessage("Passwords do not match");
-          return;
+            // Set a message for password mismatch
+            setMessage("Passwords do not match");
+            return;
         }
-      
+
         try {
-          const success = await RestService.updateUserPassword(userId, newPassword);
-          if (success) {
-            // Set a success message
-            setMessage("Password updated successfully");
-            setNewPassword('');
-            setConfirmPassword('');
-          } else {
-            // Set a message for failed update (consider using backend error message)
-            setMessage("Failed to update password");
-          }
+            const success = await RestService.updateUserPassword(userId, newPassword);
+            if (success) {
+                // Set a success message
+                setMessage("Password updated successfully");
+                setNewPassword('');
+                setConfirmPassword('');
+            } else {
+                // Set a message for failed update (consider using backend error message)
+                setMessage("Failed to update password");
+            }
         } catch (error) {
-          console.error("Error updating password:", error);
-          // Set a generic error message
-          setMessage("An error occurred while updating password");
+            console.error("Error updating password:", error);
+            // Set a generic error message
+            setMessage("An error occurred while updating password");
         }
-      };
+    };
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -163,7 +163,7 @@ function Settings() {
                 <Grid container>
                     <Grid item xs={12} md={6} lg={6} sx={{ padding: '10px' }}>
                         <AvatarContainer>
-                        <Avatar sx={{ bgcolor: currentUser.avatar, width: 130, height: 130, marginBottom: '15px' }} > </Avatar>
+                            <Avatar sx={{ bgcolor: currentUser.avatar, width: 130, height: 130, marginBottom: '15px' }} > </Avatar>
                             <FabWrapper>
                                 <Fab size="small" color="black" aria-label="add">
                                     <AddIcon aria-describedby={id} variant="contained" onClick={handleClick} />
@@ -185,23 +185,23 @@ function Settings() {
                                     >
                                         <Typography sx={{ p: 2 }}>Avatar colors</Typography>
                                         <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                        {[lightGreen[500], red[500], grey[900], blueGrey[500], deepPurple[500]].map((color, index) => (
-                                            <Avatar
-                                                key={index}
-                                                sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
-                                                onClick={() => handleColorChange(color)}
-                                            > </Avatar>
-                                        ))}
-                                    </Stack>
-                                    <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                        {[brown[500], deepOrange[500], yellow[500], indigo[500], pink[500]].map((color, index) => (
-                                            <Avatar
-                                                key={index}
-                                                sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
-                                                onClick={() => handleColorChange(color)}
-                                            > </Avatar>
-                                        ))}
-                                    </Stack>
+                                            {[lightGreen[500], red[500], grey[900], blueGrey[500], deepPurple[500]].map((color, index) => (
+                                                <Avatar
+                                                    key={index}
+                                                    sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
+                                                    onClick={() => handleColorChange(color)}
+                                                > </Avatar>
+                                            ))}
+                                        </Stack>
+                                        <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+                                            {[brown[500], deepOrange[500], yellow[500], indigo[500], pink[500]].map((color, index) => (
+                                                <Avatar
+                                                    key={index}
+                                                    sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
+                                                    onClick={() => handleColorChange(color)}
+                                                > </Avatar>
+                                            ))}
+                                        </Stack>
                                     </Popover>
                                 </Fab>
                             </FabWrapper>
@@ -211,94 +211,94 @@ function Settings() {
                     </Grid>
                     <Grid item xs={12} md={6} lg={5.5} sx={{ padding: '2px' }}>
                         <TextFieldWrapper>
-                        <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
-                                    InputProps={{
-                                        startAdornment: (
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
+                                InputProps={{
+                                    startAdornment: (
                                         <InputAdornment position="start">
                                             <EmailIcon />
                                         </InputAdornment>
-                                        ),
-                                    }}
-                                    />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal" 
+                                    ),
+                                }}
+                            />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
-                                }}/>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " " } margin="normal" 
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " "} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
-                                }}/>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " " } margin="normal" 
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " "} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
-                                }}/>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" 
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
-                                }}/>
-                                <TextField
-                                    sx={{ width: '100%' }}
-                                    required
-                                    type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
-                                    label="New Password"
-                                    margin="normal"
-                                    value={newPassword}
-                                    onChange={(e) => handlePasswordChange(setNewPassword, e.target.value)}
-                                    InputProps={{
-                                        startAdornment: (
+                                }} />
+                            <TextField
+                                sx={{ width: '100%' }}
+                                required
+                                type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
+                                label="New Password"
+                                margin="normal"
+                                value={newPassword}
+                                onChange={(e) => handlePasswordChange(setNewPassword, e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
                                         <InputAdornment position="start">
                                             <LockIcon />
                                         </InputAdornment>
-                                        ),
-                                        endAdornment: (
+                                    ),
+                                    endAdornment: (
                                         <InputAdornment position="end">
                                             {showPassword ? <VisibilityIcon onClick={togglePasswordVisibility} /> : <VisibilityOffIcon onClick={togglePasswordVisibility} />}
                                         </InputAdornment>
-                                        ),
-                                    }}
-                                    />
-                                    {errorMessage && <Typography variant="caption" color="error">{errorMessage}</Typography>}
+                                    ),
+                                }}
+                            />
+                            {errorMessage && <Typography variant="caption" color="error">{errorMessage}</Typography>}
 
-                                    <TextField
-                                    sx={{ width: '100%' }}
-                                    required
-                                    type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
-                                    label="Retype Password"
-                                    margin="normal"
-                                    value={confirmPassword}
-                                    onChange={(e) => handlePasswordChange(setConfirmPassword, e.target.value)}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <LockIcon />
-                                            </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                            <InputAdornment position="end">
-                                                {showPassword ? <VisibilityIcon onClick={togglePasswordVisibility} /> : <VisibilityOffIcon onClick={togglePasswordVisibility} />}
-                                            </InputAdornment>
-                                            ),
-                                    }}
-                                    />
+                            <TextField
+                                sx={{ width: '100%' }}
+                                required
+                                type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
+                                label="Retype Password"
+                                margin="normal"
+                                value={confirmPassword}
+                                onChange={(e) => handlePasswordChange(setConfirmPassword, e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <LockIcon />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            {showPassword ? <VisibilityIcon onClick={togglePasswordVisibility} /> : <VisibilityOffIcon onClick={togglePasswordVisibility} />}
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
                             {message && (
                                 <div className="message" style={{ color: 'red' }}>
-                                {message}
+                                    {message}
                                 </div>
                             )}
                         </TextFieldWrapper>

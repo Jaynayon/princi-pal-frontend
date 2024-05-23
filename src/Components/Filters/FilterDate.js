@@ -32,7 +32,7 @@ export function SchoolFieldsFilter() {
     )
 }
 
-export function SchoolDateFilter() {
+export function FilterDate() {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const { prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years } = useSchoolContext();
