@@ -25,8 +25,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 import axios from 'axios'; // Import Axios for making HTTP requests
-import { useSchoolContext } from '../Context/SchoolProvider';
-import { useNavigationContext } from '../Context/NavigationProvider';
 
 function People(props) {
     const [member, setMember] = useState('');
@@ -42,9 +40,16 @@ function People(props) {
     const [selectedValue, setSelectedValue] = useState('');
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
-    const {currentUser} = useNavigationContext();
 
-        //currentUser association, which will change per school
+    
+    /*([
+        { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
+        { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
+        { name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
+        { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
+        { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Admin' },
+    ]);*/
+
         //to fetch the user from the school she belong
         // Function to fetch users by school ID
         const fetchUsers = async () => {
@@ -55,44 +60,39 @@ function People(props) {
                 console.error('Error fetching users:', error);
             }
         };
+
+        
                     // Function to handle school selection change
             const handleMemberChange = (event) => {
                 setSelectedValue(event.target.value); // Update selected school
-                //fetchUsers(); // Fetch users belonging to the selected school
+                fetchUsers(); // Fetch users belonging to the selected school
             };
 
             useEffect(() => {
                 // Fetch users when the component mounts or when the selected school changes
-                if (selectedValue) {
-                    fetchUsers(selectedValue);
-                }
+                fetchUsers();
             }, [selectedValue]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
-
+            
 
         // Function to fetch schools from backend
         const fetchSchools = async () => {
-        try {
-            const response = await fetch('http://localhost:4000/schools/all');
-            if (!response.ok) {
-                throw new Error('Failed to fetch schools');
+            try {
+                const response = await fetch('http://localhost:4000/schools/all');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch schools');
+                }
+                const data = await response.json();
+                setSchools(data); // Set the fetched schools to the state
+            } catch (error) {
+                console.error('Error fetching schools:', error);
             }
-            const data = await response.json();
-            setSchools(data); // Set the fetched schools to the state
-
-            // Set the default selected school value and fetch users
-            if (data.length > 0) {
-                setSelectedValue(data[0].id); // Set to the first school's ID as default
-            }
-        } catch (error) {
-            console.error('Error fetching schools:', error);
-        }
-    };
+        };
+    
         // Fetch schools when component mounts
         useEffect(() => {
             fetchSchools();
-            // If you have a predefined list of schools in currentUser, you can use it instead
-            // setSchools(currentUser?.schools || []);
         }, []); // Empty dependency array ensures the effect runs only once
+    
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -119,47 +119,28 @@ function People(props) {
     };
 
     const handleDeleteOpen = (event, index) => {
-        // Open delete confirmation dialog when "Delete" button is clicked
-        setDeleteConfirmationDialogOpen(true);
-        // Also set the deleteAnchorEl and selectedIndex
-        setDeleteAnchorEl(event.currentTarget);
-        setSelectedIndex(index);
-    };
-    
-    const handleMenuClose = () => {
-        // Close delete menu and reset selectedIndex
-        setDeleteAnchorEl(null);
-        setSelectedIndex(null);
-    };
-    
-    const handleDelete = (event, index) => {
-        // Open delete confirmation dialog when "Delete" button is clicked
-        setDeleteConfirmationDialogOpen(true);
-        // Also set the deleteAnchorEl and selectedIndex
         setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
     };
 
-    const confirmDelete = async () => {
-        try {
-            if (selectedIndex !== null && rows[selectedIndex]) {
-                const userId = rows[selectedIndex].userId; // Get userId of the selected user
-                const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
-                // Make an API call to delete the user association
-                await axios.delete(`http://localhost:4000/associations/${userId}/${schoolId}`);
-                console.log("User deleted successfully.");
-                // Remove the deleted row from the state
-                setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
-            }
-            // Close the delete confirmation dialog
-            setDeleteConfirmationDialogOpen(false);
-        } catch (error) {
-            console.error("Error deleting user:", error);
-            // Handle error scenario
-        } finally {
-            // Close the delete menu and reset selectedIndex
-            handleMenuClose();
-        }
+    const handleMenuClose = () => {
+        setDropdownAnchorEl(null);
+        setDeleteAnchorEl(null);
+        setSelectedIndex(null);
+    };
+
+    const handleDelete = () => {
+        // Open confirmation dialog before deleting
+        setDeleteConfirmationDialogOpen(true);
+    };
+
+    const confirmDelete = () => {
+        // Implement delete functionality here
+        console.log("Delete button clicked for row at index:", selectedIndex);
+        // Close the menu after delete
+        handleMenuClose();
+        // Close delete confirmation dialog
+        setDeleteConfirmationDialogOpen(false);
     };
 
     const cancelDelete = () => {
@@ -194,6 +175,15 @@ function People(props) {
         // Reset inviteEmail state after sending invitation if needed
         setInviteEmail('');
     };
+
+    //for the static members
+   /* const rows = [
+        { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
+        { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
+        { name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
+        { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
+        { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
+    ];*/
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
@@ -236,6 +226,9 @@ function People(props) {
                             label="Member"
                             onChange={(event) => setMember(event.target.value)}
                         >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
                             <MenuItem>Member</MenuItem>
                             <MenuItem>Guess</MenuItem>
                             <MenuItem>Admin</MenuItem>
@@ -253,6 +246,35 @@ function People(props) {
                 <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px' }}>
     <FormControl sx={{ m: 1, minWidth: 150 }} >
         <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+        {/*<Select
+            labelId="demo-select-small-label"
+            id="demo-select-small"
+            value={member}
+            label="Member"
+            onChange={(event) => setMember(event.target.value)}
+        >
+            <MenuItem value="">
+                <em>None</em>
+            </MenuItem>
+            <MenuItem value="Cebu Institute of Technology - University">
+                <ListItemAvatar>
+                    <Avatar src="../downloads/cit.png" />
+                </ListItemAvatar>
+                <ListItemText primary="Cebu Institute of Technology - University" />
+            </MenuItem>
+            <MenuItem value="Asian College of Technology">
+                <ListItemAvatar>
+                    <Avatar src="../downloads/act.png" />
+                </ListItemAvatar>
+                <ListItemText primary="Asian College of Technology" />
+            </MenuItem>
+            <MenuItem value="University of Cebu">
+                <ListItemAvatar>
+                    <Avatar src="/downloads/uc.jpg" />
+                </ListItemAvatar>
+                <ListItemText primary="University of Cebu" />
+            </MenuItem>
+                </Select>*/}
                 <Select
                     labelId="demo-select-small-label"
                     id="demo-select-small"
@@ -260,7 +282,10 @@ function People(props) {
                     label="Member"
                     onChange={handleMemberChange}
                 >
-                    {schools?.map((school) => (
+                    <MenuItem value="">
+                        <em>None</em>
+                    </MenuItem>
+                    {schools.map((school) => (
                         <MenuItem key={school.id} value={school.id}>
                             {school.name}
                         </MenuItem>
@@ -380,7 +405,7 @@ function People(props) {
                     Are you sure you want to delete?
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={confirmDelete}>Yes</Button>
+                    <Button onClick={confirmDelete}>Delete</Button>
                     <Button onClick={cancelDelete}>Cancel</Button>
                 </DialogActions>
             </Dialog>
