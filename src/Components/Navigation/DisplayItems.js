@@ -15,12 +15,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 import InputAdornment from '@mui/material/InputAdornment';
-import {
-    VisibilityOff as VisibilityOffIcon,
-    Lock as LockIcon,
-    Person as PersonIcon,
-    Email as EmailIcon,
-  } from '@mui/icons-material';
+import { Person as PersonIcon, Email as EmailIcon } from '@mui/icons-material';
 
 // Custom component import
 import DisplaySchools from './DisplaySchools';
@@ -38,6 +33,7 @@ import { Typography } from '@mui/material';
 export function DisplayItems() {
     const theme = useTheme();
     const { list, selected, setSelected } = useNavigationContext();
+    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // State to manage logout dialog
 
     console.log("display items rendered");
 
@@ -96,44 +92,72 @@ export function DisplayItems() {
         }
     }
 
-    return (
-        list.map((item, index) => (
-            <React.Fragment key={index}>
-                {index > 3 && <Divider sx={styles.divider} /> /*Render divider after the Testing tab*/}
+    const handleLogout = (e) => {
+        e.preventDefault();
+        logoutUser('jwt');
+    };
 
-                {index === 1 ? (
-                    <DisplaySchools />
-                ) : (
-                    <ListItemButton
-                        key={index}
-                        component={Link}
-                        to={index < 4 ? `/${item.toLowerCase()}` : '/'} //Logout route has not yet been implemented
-                        selected={selected === item}
-                        value={item}
-                        onClick={() => {
-                            setSelected(item)
-                            !(index < 4) && logoutUser('jwt')
-                        }}
-                        sx={theme.navStyle.button}
-                    >
-                        <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
-                            {renderIcon(index, selected, item)}
-                        </ListItemIcon>
-                        <ListItemText
-                            primary={item}
-                            primaryTypographyProps={{
-                                ...styles.text,
-                                ...(selected === item
-                                    ? { color: theme.navStyle.bold, fontWeight: 'bold' }
-                                    : { color: theme.navStyle.color }
-                                )
+    return (
+        <>
+            {list.map((item, index) => (
+                <React.Fragment key={index}>
+                    {index > 3 && <Divider sx={styles.divider} /> /*Render divider after the Testing tab*/}
+
+                    {index === 1 ? (
+                        <DisplaySchools />
+                    ) : (
+                        <ListItemButton
+                            key={index}
+                            component={Link}
+                            to={index < 4 ? `/${item.toLowerCase()}` : '#'} // Logout route has not yet been implemented
+                            selected={selected === item}
+                            value={item}
+                            onClick={() => {
+                                if (index < 4) {
+                                    setSelected(item);
+                                } else {
+                                    setLogoutDialogOpen(true); // Open logout dialog on logout button click
+                                }
                             }}
-                        />
-                    </ListItemButton>
-                )}
-            </React.Fragment>
-        ))
-    )
+                            sx={theme.navStyle.button}
+                        >
+                            {renderIcon(index, selected, item)}
+                            <ListItemText
+                                primary={item}
+                                primaryTypographyProps={{
+                                    ...styles.text,
+                                    ...(selected === item
+                                        ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                        : { color: theme.navStyle.color }
+                                    )
+                                }}
+                            />
+                        </ListItemButton>
+                    )}
+                </React.Fragment>
+            ))}
+            {/* Logout confirmation dialog */}
+            <Dialog
+                open={logoutDialogOpen}
+                onClose={() => setLogoutDialogOpen(false)}
+                aria-labelledby="logout-dialog-title"
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
+                <DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleLogout} color="primary">
+                            Logout
+                        </Button>
+                    </DialogActions>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
 }
 
 export const ProfileTab = ({ user }) => {
