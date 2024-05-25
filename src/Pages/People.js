@@ -69,30 +69,36 @@ function People(props) {
     }, [selectedValue]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
 
 
-    // Function to fetch schools from backend
-    const fetchSchools = async () => {
-        try {
-            const response = await fetch('http://localhost:4000/schools/all');
-            if (!response.ok) {
-                throw new Error('Failed to fetch schools');
-            }
-            const data = await response.json();
-            setSchools(data); // Set the fetched schools to the state
+    // // Function to fetch schools from backend
+    // const fetchSchools = async () => {
+    //     try {
+    //         const response = await fetch('http://localhost:4000/schools/all');
+    //         if (!response.ok) {
+    //             throw new Error('Failed to fetch schools');
+    //         }
+    //         const data = await response.json();
+    //         setSchools(data); // Set the fetched schools to the state
 
-            // Set the default selected school value and fetch users
-            if (data.length > 0) {
-                setSelectedValue(data[0].id); // Set to the first school's ID as default
-            }
-        } catch (error) {
-            console.error('Error fetching schools:', error);
-        }
-    };
+    //         // Set the default selected school value and fetch users
+    //         if (data.length > 0) {
+    //             setSelectedValue(data[0].id); // Set to the first school's ID as default
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching schools:', error);
+    //     }
+    // };
     // Fetch schools when component mounts
     useEffect(() => {
-        fetchSchools();
+        // fetchSchools();
         // If you have a predefined list of schools in currentUser, you can use it instead
         // setSchools(currentUser?.schools || []);
-    }, []); // Empty dependency array ensures the effect runs only once
+        if (currentUser && currentUser.schools) {
+            setSchools(currentUser.schools);
+            if (currentUser.schools.length > 0) {
+                setSelectedValue(currentUser.schools[0].id);
+            }
+        }
+    }, [currentUser]); // Empty dependency array ensures the effect runs only once
 
     const handleClickOpen = () => {
         setOpen(true);
