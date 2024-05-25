@@ -135,6 +135,7 @@ function People(props) {
     const handleMenuClose = () => {
         // Close delete menu and reset selectedIndex
         setDeleteAnchorEl(null);
+        setDropdownAnchorEl(null);
         setSelectedIndex(null);
     };
 
