@@ -106,7 +106,7 @@ function People(props) {
 
     const handleClose = (value) => {
         setOpen(false);
-        setSelectedValue(value);
+        //setSelectedValue(value);
     };
 
     const schoolAvatar = (
