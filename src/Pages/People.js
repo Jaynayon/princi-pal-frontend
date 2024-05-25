@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
@@ -47,51 +47,24 @@ function People(props) {
     //currentUser association, which will change per school
     //to fetch the user from the school she belong
     // Function to fetch users by school ID
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             const response = await axios.post('http://localhost:4000/schools/users', { schoolId: selectedValue });
             setRows(response.data); // Update the state with the fetched data
         } catch (error) {
             console.error('Error fetching users:', error);
         }
-    };
-    // Function to handle school selection change
-    const handleMemberChange = (event) => {
-        setSelectedValue(event.target.value); // Update selected school
-        //fetchUsers(); // Fetch users belonging to the selected school
-    };
+    }, [selectedValue]);
 
     useEffect(() => {
         // Fetch users when the component mounts or when the selected school changes
         if (selectedValue) {
             fetchUsers(selectedValue);
         }
-    }, [selectedValue]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
+    }, [selectedValue, fetchUsers, currentUser]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
 
-
-    // // Function to fetch schools from backend
-    // const fetchSchools = async () => {
-    //     try {
-    //         const response = await fetch('http://localhost:4000/schools/all');
-    //         if (!response.ok) {
-    //             throw new Error('Failed to fetch schools');
-    //         }
-    //         const data = await response.json();
-    //         setSchools(data); // Set the fetched schools to the state
-
-    //         // Set the default selected school value and fetch users
-    //         if (data.length > 0) {
-    //             setSelectedValue(data[0].id); // Set to the first school's ID as default
-    //         }
-    //     } catch (error) {
-    //         console.error('Error fetching schools:', error);
-    //     }
-    // };
     // Fetch schools when component mounts
     useEffect(() => {
-        // fetchSchools();
-        // If you have a predefined list of schools in currentUser, you can use it instead
-        // setSchools(currentUser?.schools || []);
         if (currentUser && currentUser.schools) {
             setSchools(currentUser.schools);
             if (currentUser.schools.length > 0) {
@@ -99,6 +72,12 @@ function People(props) {
             }
         }
     }, [currentUser]); // Empty dependency array ensures the effect runs only once
+
+    // Function to handle school selection change
+    const handleMemberChange = (event) => {
+        setSelectedValue(event.target.value); // Update selected school
+        //fetchUsers(); // Fetch users belonging to the selected school
+    };
 
     const handleClickOpen = () => {
         setOpen(true);
