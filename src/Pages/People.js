@@ -334,7 +334,6 @@ function People(props) {
                                                 <MenuItem onClick={() => handleRoleChange("OWNER")}>OWNER</MenuItem>
                                             </Menu>
                                         </TableCell>
-                                        <TableCell>{row.lastActivity}</TableCell>
                                         <TableCell>
                                             {/* Delete button */}
                                             <Button
