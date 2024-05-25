@@ -126,7 +126,7 @@ function People(props) {
 
     const handleDeleteOpen = (event, index) => {
         // Open delete confirmation dialog when "Delete" button is clicked
-        setDeleteConfirmationDialogOpen(true);
+        //setDeleteConfirmationDialogOpen(true);
         // Also set the deleteAnchorEl and selectedIndex
         setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
