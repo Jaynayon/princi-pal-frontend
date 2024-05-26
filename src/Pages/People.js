@@ -305,20 +305,30 @@ function People(props) {
                                         <TableCell>
                                             {/* Role with dropdown arrow */}
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span>{row.role}</span>
-                                                <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />
+                                                {row.admin === true ?
+                                                    row.position === "Principal" ?
+                                                        <span>Principal</span>
+                                                        :
+                                                        <span>Admin</span>
+                                                    :
+                                                    <span>Member</span>
+                                                }
+                                                {row.position !== "Principal" && <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
                                             </div>
                                             {/* Dropdown menu for role options */}
-                                            <Menu
-                                                id={`menu-dropdown-${index}`}
-                                                anchorEl={dropdownAnchorEl}
-                                                open={Boolean(dropdownAnchorEl && selectedIndex === index)}
-                                                onClose={handleMenuClose}
-                                            >
-                                                {/* Role options */}
-                                                <MenuItem onClick={() => handleRoleChange("ADMIN")}>ADMIN</MenuItem>
-                                                <MenuItem onClick={() => handleRoleChange("OWNER")}>OWNER</MenuItem>
-                                            </Menu>
+                                            {row.position !== "Principal" &&
+                                                <Menu
+                                                    id={`menu-dropdown-${index}`}
+                                                    anchorEl={dropdownAnchorEl}
+                                                    open={Boolean(dropdownAnchorEl && selectedIndex === index)}
+                                                    onClose={handleMenuClose}
+                                                >
+                                                    {/* Role options */}
+                                                    <MenuItem onClick={() => handleRoleChange("ADMIN")}>ADMIN</MenuItem>
+                                                    <MenuItem onClick={() => handleRoleChange("OWNER")}>OWNER</MenuItem>
+                                                </Menu>
+                                            }
+
                                         </TableCell>
                                         <TableCell>
                                             {/* Delete button */}
