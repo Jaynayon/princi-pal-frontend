@@ -301,7 +301,7 @@ function People(props) {
                                                         </Avatar>
                                                     )}
                                                 </Grid>
-                                                <Grid item>{row.name || row.email}</Grid>
+                                                <Grid item>{`${row.fname} ${row.mname.charAt(0) + "."} ${row.lname}`}</Grid>
                                             </Grid>
                                         </TableCell>
                                         <TableCell>{row.email}</TableCell>
@@ -331,7 +331,6 @@ function People(props) {
                                                     <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
                                                 </Menu>
                                             }
-
                                         </TableCell>
                                         <TableCell>
                                             {/* Delete button */}
