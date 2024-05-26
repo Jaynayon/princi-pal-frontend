@@ -27,6 +27,7 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import { Typography } from '@mui/material';
 
@@ -145,14 +146,21 @@ export function DisplayItems() {
                 fullWidth
             >
                 <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: " flex-end",
+                    p: 0
+                }}>
                     <DialogActions>
-                        <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleLogout} color="primary">
-                            Logout
-                        </Button>
+                        <Box>
+                            <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
+                                Cancel
+                            </Button>
+                            <Button onClick={handleLogout} color="primary">
+                                Logout
+                            </Button>
+                        </Box>
                     </DialogActions>
                 </DialogContent>
             </Dialog>
@@ -252,53 +260,53 @@ export const ProfileTab = ({ user }) => {
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
                         <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
-                        <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal" 
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
-                                }}/>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " " } margin="normal" 
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " "} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
-                                }}/>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " " } margin="normal" 
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " "} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
-                                }}/>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" 
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
-                                }}/>
+                                }} />
                             <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
-                                    InputProps={{
-                                        startAdornment: (
+                                InputProps={{
+                                    startAdornment: (
                                         <InputAdornment position="start">
                                             <EmailIcon />
                                         </InputAdornment>
-                                        ),
-                                    }}
-                                    />
-                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" 
+                                    ),
+                                }}
+                            />
+                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal"
                                 InputProps={{
                                     startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
                                     ),
                                 }}
                             />

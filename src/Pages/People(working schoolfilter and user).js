@@ -19,7 +19,7 @@ import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemAvatar, ListItemText } from '@mui/material';
-import PropTypes from 'prop-types'; 
+import PropTypes from 'prop-types';
 import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -41,7 +41,7 @@ function People(props) {
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
 
-    
+
     /*([
         { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
         { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
@@ -50,49 +50,49 @@ function People(props) {
         { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Admin' },
     ]);*/
 
-        //to fetch the user from the school she belong
-        // Function to fetch users by school ID
-        const fetchUsers = async () => {
-            try {
-                const response = await axios.post('http://localhost:4000/schools/users', { schoolId: selectedValue });
-                setRows(response.data); // Update the state with the fetched data
-            } catch (error) {
-                console.error('Error fetching users:', error);
+    //to fetch the user from the school she belong
+    // Function to fetch users by school ID
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.post('http://localhost:4000/schools/users', { schoolId: selectedValue });
+            setRows(response.data); // Update the state with the fetched data
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
+
+
+    // Function to handle school selection change
+    const handleMemberChange = (event) => {
+        setSelectedValue(event.target.value); // Update selected school
+        fetchUsers(); // Fetch users belonging to the selected school
+    };
+
+    useEffect(() => {
+        // Fetch users when the component mounts or when the selected school changes
+        fetchUsers();
+    }, [selectedValue]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
+
+
+    // Function to fetch schools from backend
+    const fetchSchools = async () => {
+        try {
+            const response = await fetch('http://localhost:4000/schools/all');
+            if (!response.ok) {
+                throw new Error('Failed to fetch schools');
             }
-        };
+            const data = await response.json();
+            setSchools(data); // Set the fetched schools to the state
+        } catch (error) {
+            console.error('Error fetching schools:', error);
+        }
+    };
 
-        
-                    // Function to handle school selection change
-            const handleMemberChange = (event) => {
-                setSelectedValue(event.target.value); // Update selected school
-                fetchUsers(); // Fetch users belonging to the selected school
-            };
+    // Fetch schools when component mounts
+    useEffect(() => {
+        fetchSchools();
+    }, []); // Empty dependency array ensures the effect runs only once
 
-            useEffect(() => {
-                // Fetch users when the component mounts or when the selected school changes
-                fetchUsers();
-            }, [selectedValue]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
-            
-
-        // Function to fetch schools from backend
-        const fetchSchools = async () => {
-            try {
-                const response = await fetch('http://localhost:4000/schools/all');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch schools');
-                }
-                const data = await response.json();
-                setSchools(data); // Set the fetched schools to the state
-            } catch (error) {
-                console.error('Error fetching schools:', error);
-            }
-        };
-    
-        // Fetch schools when component mounts
-        useEffect(() => {
-            fetchSchools();
-        }, []); // Empty dependency array ensures the effect runs only once
-    
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -177,19 +177,19 @@ function People(props) {
     };
 
     //for the static members
-   /* const rows = [
-        { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
-        { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
-        { name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
-        { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
-        { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
-    ];*/
+    /* const rows = [
+         { name: 'Deriel Magallanes', email: 'derielgwapsmagallanes@cit.edu', role: 'Member', lastActivity: 'Nov 2' },
+         { name: 'Ellain J', email: 'ellaine@cit.edu', role: 'Member', lastActivity: 'Dec 3' },
+         { name: 'Janicka Ngeps', email: 'janickangepert@cit.edu', role: 'Owner' },
+         { name: 'Brian Despi', email: 'briandespirads@cit.edu', role: 'Member' },
+         { name: 'Luff D', email: 'luffyd@cit.edu', role: 'Member' },
+     ];*/
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
         (row && row.name && row.name.toLowerCase().includes(searchValue.toLowerCase())) ||
         (row && row.email && row.email.toLowerCase().includes(searchValue.toLowerCase()))
-    );    
+    );
 
     return (
         <Container className="test" maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -208,7 +208,7 @@ function People(props) {
                         onChange={(e) => setSearchValue(e.target.value)}
                     />
                     <TextField
-                        sx={{ margin: '5px', marginTop: '-5px', marginLeft: '50px' , width: '30%' }}
+                        sx={{ margin: '5px', marginTop: '-5px', marginLeft: '50px', width: '30%' }}
                         id="invite"
                         label="Invite by email"
                         variant="outlined"
@@ -217,7 +217,7 @@ function People(props) {
                         onChange={(e) => setInviteEmail(e.target.value)}
                     />
                     <FormControl sx={{ minWidth: 120 }} size="53px">
-                        <InputLabel sx={{ margin: '5px', marginTop: '-5px'}} id="demo-select-small-label">Member</InputLabel>
+                        <InputLabel sx={{ margin: '5px', marginTop: '-5px' }} id="demo-select-small-label">Member</InputLabel>
                         <Select
                             sx={{ margin: '-5px', marginTop: '-5px' }}
                             labelId="demo-select-small-label"
@@ -235,7 +235,7 @@ function People(props) {
                         </Select>
                     </FormControl>
                     <Button
-                        sx={{ margin: '5px', marginTop: '-5px', width: '10%'}}
+                        sx={{ margin: '5px', marginTop: '-5px', width: '10%' }}
                         variant="contained"
                         className="inviteButton"
                         onClick={handleInvite}
@@ -244,9 +244,9 @@ function People(props) {
                     </Button>
                 </Grid>
                 <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px' }}>
-    <FormControl sx={{ m: 1, minWidth: 150 }} >
-        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
-        {/*<Select
+                    <FormControl sx={{ m: 1, minWidth: 150 }} >
+                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+                        {/*<Select
             labelId="demo-select-small-label"
             id="demo-select-small"
             value={member}
@@ -275,45 +275,45 @@ function People(props) {
                 <ListItemText primary="University of Cebu" />
             </MenuItem>
                 </Select>*/}
-                <Select
-                    labelId="demo-select-small-label"
-                    id="demo-select-small"
-                    value={selectedValue}
-                    label="Member"
-                    onChange={handleMemberChange}
-                >
-                    <MenuItem value="">
-                        <em>None</em>
-                    </MenuItem>
-                    {schools.map((school) => (
-                        <MenuItem key={school.id} value={school.id}>
-                            {school.name}
-                        </MenuItem>
-                    ))}
-                </Select>
-    </FormControl>
-</Grid>
-<Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px', }}>
-    <FormControl sx={{ m: 1, minWidth: 150 }} >
-        {/* Application Dialog */}
-        <br />
-        <Button variant="outlined" onClick={handleClickOpen}>
-            Open Application Dialog
-        </Button>
-        <Dialog onClose={handleClose} open={open} sx={{'& .MuiDialog-paper': {minWidth: 400} }}>
-            <DialogTitle sx={{textAlign: 'center'}}>Application for School</DialogTitle>
-            <List>
-                <ListItem disableGutters sx={{paddingRight: '20px'}}>
-                    <ListItemAvatar sx={{paddingLeft: '10px'}}>{schoolAvatar}</ListItemAvatar>
-                    <ListItemText primary="Kiki Kiki" />
-                    <Button onClick={handleAccept} variant="contained" color="primary">
-                Accept
-            </Button>
-                </ListItem>
-            </List>
-        </Dialog>
-    </FormControl>
-</Grid>
+                        <Select
+                            labelId="demo-select-small-label"
+                            id="demo-select-small"
+                            value={selectedValue}
+                            label="Member"
+                            onChange={handleMemberChange}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            {schools.map((school) => (
+                                <MenuItem key={school.id} value={school.id}>
+                                    {school.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Grid>
+                <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px', }}>
+                    <FormControl sx={{ m: 1, minWidth: 150 }} >
+                        {/* Application Dialog */}
+                        <br />
+                        <Button variant="outlined" onClick={handleClickOpen}>
+                            Open Application Dialog
+                        </Button>
+                        <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
+                            <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
+                            <List>
+                                <ListItem disableGutters sx={{ paddingRight: '20px' }}>
+                                    <ListItemAvatar sx={{ paddingLeft: '10px' }}>{schoolAvatar}</ListItemAvatar>
+                                    <ListItemText primary="Kiki Kiki" />
+                                    <Button onClick={handleAccept} variant="contained" color="primary">
+                                        Accept
+                                    </Button>
+                                </ListItem>
+                            </List>
+                        </Dialog>
+                    </FormControl>
+                </Grid>
                 <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px', marginTop: '-5px' }}>
                     <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
                         <Table md={{ display: 'flex', height: '100%', width: '100%' }} aria-label="simple table">
@@ -322,7 +322,6 @@ function People(props) {
                                     <TableCell>Name</TableCell>
                                     <TableCell>Email</TableCell>
                                     <TableCell>Role</TableCell>
-                                    <TableCell>Last Activity</TableCell>
                                     <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -330,17 +329,17 @@ function People(props) {
                                 {filteredRows.map((row, index) => (
                                     <TableRow key={index}>
                                         <TableCell>
-                                        <Grid container alignItems="center" spacing={1}>
-                                            <Grid item>
-                                                {row.name && (
-                                                    <Avatar sx={{ bgcolor: blue[900] }}>
-                                                        {row.name.charAt(0)}
-                                                    </Avatar>
-                                                )}
+                                            <Grid container alignItems="center" spacing={1}>
+                                                <Grid item>
+                                                    {row.name && (
+                                                        <Avatar sx={{ bgcolor: blue[900] }}>
+                                                            {row.name.charAt(0)}
+                                                        </Avatar>
+                                                    )}
+                                                </Grid>
+                                                <Grid item>{row.name || row.email}</Grid>
                                             </Grid>
-                                            <Grid item>{row.name || row.email}</Grid>
-                                        </Grid>
-                                    </TableCell>
+                                        </TableCell>
                                         <TableCell>{row.email}</TableCell>
                                         <TableCell>
                                             {/* Role with dropdown arrow */}
@@ -360,7 +359,6 @@ function People(props) {
                                                 <MenuItem onClick={() => handleRoleChange("OWNER")}>OWNER</MenuItem>
                                             </Menu>
                                         </TableCell>
-                                        <TableCell>{row.lastActivity}</TableCell>
                                         <TableCell>
                                             {/* Delete button */}
                                             <Button
