@@ -20,13 +20,10 @@ import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemAvatar, ListItemText } from '@mui/material';
-import PropTypes from 'prop-types';
-import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 import axios from 'axios'; // Import Axios for making HTTP requests
-import { useSchoolContext } from '../Context/SchoolProvider';
 import { useNavigationContext } from '../Context/NavigationProvider';
 
 function People(props) {
@@ -78,7 +75,6 @@ function People(props) {
             fetchUsers();
             fetchAssociation();
         }
-        console.log(currentAssocation)
     }, [selectedValue, fetchUsers, currentUser, fetchAssociation]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
 
     // Fetch schools when component mounts
@@ -196,6 +192,8 @@ function People(props) {
                     userId: rows[selectedIndex].id,
                     schoolId: selectedValue
                 });
+
+                console.log(response)
 
                 // Update role in frontend state if successful
                 const updatedRows = [...rows];
