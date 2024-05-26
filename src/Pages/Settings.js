@@ -157,6 +157,13 @@ function Settings() {
         }
     };
 
+    const isSaveButtonDisabled = !(
+        validatePassword(newPassword) &&
+        newPassword === confirmPassword &&
+        newPassword.length > 0 &&
+        confirmPassword.length > 0
+    );
+
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
             <DemoPaper square={false}>
@@ -303,7 +310,28 @@ function Settings() {
                             )}
                         </TextFieldWrapper>
                         <ButtonWrapper>
-                            <Button variant="contained" onClick={handlePasswordUpdate}>Save</Button>
+                        <Button
+                                sx={{
+                                    backgroundColor: "#4a99d3",
+                                    color: "#fff",
+                                    textTransform: "none",
+                                    width: "100%",
+                                    marginBottom: "1rem",
+                                    padding: "15px",
+                                    borderRadius: "1.5px",
+                                    cursor: "pointer",
+                                    transition: "background-color 0.3s",
+                                    "&:hover": {
+                                        backgroundColor: "#474bca",
+                                    },
+                                }}
+                                disabled={isSaveButtonDisabled}
+                                disableElevation
+                                variant="contained"
+                                onClick={handlePasswordUpdate}
+                            >
+                                Save
+                            </Button>
                         </ButtonWrapper>
                     </Grid>
                 </Grid>
