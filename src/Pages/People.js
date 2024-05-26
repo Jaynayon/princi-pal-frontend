@@ -3,6 +3,7 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
@@ -42,7 +43,21 @@ function People(props) {
     const [selectedValue, setSelectedValue] = useState('');
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
+
     const { currentUser } = useNavigationContext();
+    const [currentAssocation, setCurrentAssociation] = useState('');
+
+    const fetchAssociation = useCallback(async () => {
+        try {
+            const response = await axios.post('http://localhost:4000/associations/user', {
+                userId: currentUser.id,
+                schoolId: selectedValue
+            });
+            setCurrentAssociation(response.data); // Update the state with the fetched data
+        } catch (error) {
+            console.error('Error fetching association:', error);
+        }
+    }, [currentUser, selectedValue]);
 
     //currentUser association, which will change per school
     //to fetch the user from the school she belong
@@ -58,15 +73,19 @@ function People(props) {
 
     useEffect(() => {
         // Fetch users when the component mounts or when the selected school changes
+        console.log(selectedValue)
         if (selectedValue) {
-            fetchUsers(selectedValue);
+            fetchUsers();
+            fetchAssociation();
         }
-    }, [selectedValue, fetchUsers, currentUser]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
+        console.log(currentAssocation)
+    }, [selectedValue, fetchUsers, currentUser, fetchAssociation]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
 
     // Fetch schools when component mounts
     useEffect(() => {
         if (currentUser && currentUser.schools) {
             setSchools(currentUser.schools);
+            //fetchAssociation();
             if (currentUser.schools.length > 0) {
                 setSelectedValue(currentUser.schools[0].id);
             }
@@ -191,94 +210,131 @@ function People(props) {
     );
 
     return (
-        <Container className="test" maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Container className="test" maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
             <Grid container spacing={2}>
-                <Grid item xs={12} md={12} lg={12}
-                    sx={{
-                        display: 'flex',
-                    }}>
-                    <TextField
-                        sx={{ margin: '11px', marginTop: '-5px', height: '20px', width: '40%' }}
-                        id="search"
-                        label="Search by name or email"
-                        variant="outlined"
-                        className="searchTextField"
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                    />
-                    <TextField
-                        sx={{ margin: '5px', marginTop: '-5px', marginLeft: '50px', width: '30%' }}
-                        id="invite"
-                        label="Invite by email"
-                        variant="outlined"
-                        className="inviteTextField"
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                    />
-                    <FormControl sx={{ minWidth: 120 }} size="53px">
-                        <InputLabel sx={{ margin: '5px', marginTop: '-5px' }} id="demo-select-small-label">Member</InputLabel>
-                        <Select
-                            sx={{ margin: '-5px', marginTop: '-5px' }}
-                            labelId="demo-select-small-label"
-                            id="demo-select-small"
-                            value={member}
-                            label="Member"
-                            onChange={(event) => setMember(event.target.value)}
-                        >
-                            <MenuItem>Member</MenuItem>
-                            <MenuItem>Guess</MenuItem>
-                            <MenuItem>Admin</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <Button
-                        sx={{ margin: '5px', marginTop: '-5px', width: '10%' }}
-                        variant="contained"
-                        className="inviteButton"
-                        onClick={handleInvite}
-                    >
-                        Invite
-                    </Button>
-                </Grid>
-                <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px' }}>
-                    <FormControl sx={{ m: 1, minWidth: 150 }} >
-                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
-                        <Select
-                            labelId="demo-select-small-label"
-                            id="demo-select-small"
-                            value={selectedValue}
-                            label="Member"
-                            onChange={handleMemberChange}
-                        >
-                            {schools?.map((school) => (
-                                <MenuItem key={school.id} value={school.id}>
-                                    {school.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={5} md={12} lg={12} sx={{ display: 'flex', margin: '5px', marginTop: '0px', }}>
-                    <FormControl sx={{ m: 1, minWidth: 150 }} >
-                        {/* Application Dialog */}
-                        <br />
-                        <Button variant="outlined" onClick={handleClickOpen}>
-                            Open Application Dialog
-                        </Button>
-                        <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
-                            <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
-                            <List>
-                                <ListItem disableGutters sx={{ paddingRight: '20px' }}>
-                                    <ListItemAvatar sx={{ paddingLeft: '10px' }}>{schoolAvatar}</ListItemAvatar>
-                                    <ListItemText primary="Kiki Kiki" />
-                                    <Button onClick={handleAccept} variant="contained" color="primary">
-                                        Accept
-                                    </Button>
-                                </ListItem>
-                            </List>
-                        </Dialog>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={12} lg={12} sx={{ margin: '5px', marginTop: '-5px' }}>
+
+                {currentAssocation.admin === true ?
+                    <React.Fragment>
+                        <Grid item xs={12} md={6} lg={6}>
+                            <Box sx={{ height: '55px' }}>
+                                <TextField
+                                    sx={{ height: '20px', width: "100%" }}
+                                    id="search"
+                                    label="Search by name or email"
+                                    variant="outlined"
+                                    className="searchTextField"
+                                    value={searchValue}
+                                    onChange={(e) => setSearchValue(e.target.value)}
+                                />
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={6}>
+                            <TextField
+                                sx={{ width: '50%' }}
+                                id="invite"
+                                label="Invite by email"
+                                variant="outlined"
+                                className="inviteTextField"
+                                value={inviteEmail}
+                                onChange={(e) => setInviteEmail(e.target.value)}
+                            />
+                            <FormControl sx={{ minWidth: 120 }} size="53px">
+                                <InputLabel sx={{}} id="demo-select-small-label">Member</InputLabel>
+                                <Select
+                                    sx={{}}
+                                    labelId="demo-select-small-label"
+                                    id="demo-select-small"
+                                    value={member}
+                                    label="Member"
+                                    onChange={(event) => setMember(event.target.value)}
+                                >
+                                    <MenuItem>Member</MenuItem>
+                                    <MenuItem>Guess</MenuItem>
+                                    <MenuItem>Admin</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <Button
+                                sx={{ width: "20%", height: "55px" }}
+                                variant="contained"
+                                className="inviteButton"
+                                onClick={handleInvite}
+                            >
+                                Invite
+                            </Button>
+                        </Grid>
+                        <Grid item xs={6} md={6} lg={12} sx={{ display: 'flex', alignSelf: "center" }}>
+                            <FormControl sx={{ minWidth: 150 }} >
+                                <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+                                <Select
+                                    labelId="demo-select-small-label"
+                                    id="demo-select-small"
+                                    value={selectedValue}
+                                    label="Member"
+                                    onChange={handleMemberChange}
+                                >
+                                    {schools?.map((school) => (
+                                        <MenuItem key={school.id} value={school.id}>
+                                            {school.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6} md={6} lg={12} sx={{ display: 'flex', alignSelf: "center" }}>
+                            <FormControl sx={{ minWidth: 150 }} >
+                                {/* Application Dialog */}
+                                <Button variant="outlined" onClick={handleClickOpen}>
+                                    Open Application Dialog
+                                </Button>
+                                <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
+                                    <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
+                                    <List>
+                                        <ListItem disableGutters sx={{ paddingRight: '20px' }}>
+                                            <ListItemAvatar sx={{ paddingLeft: '10px' }}>{schoolAvatar}</ListItemAvatar>
+                                            <ListItemText primary="Kiki Kiki" />
+                                            <Button onClick={handleAccept} variant="contained" color="primary">
+                                                Accept
+                                            </Button>
+                                        </ListItem>
+                                    </List>
+                                </Dialog>
+                            </FormControl>
+                        </Grid>
+                    </React.Fragment>
+                    :
+                    <React.Fragment>
+                        <Grid item xs={12} md={12} lg={12} sx={{ display: "flex", flexDirection: "row" }}>
+                            <Box sx={{ height: '55px' }}>
+                                <FormControl sx={{ minWidth: 150 }} >
+                                    <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+                                    <Select
+                                        labelId="demo-select-small-label"
+                                        id="demo-select-small"
+                                        value={selectedValue}
+                                        label="Member"
+                                        onChange={handleMemberChange}
+                                    >
+                                        {schools?.map((school) => (
+                                            <MenuItem key={school.id} value={school.id}>
+                                                {school.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+                            <TextField
+                                sx={{ height: '20px', width: "350px", ml: 2 }}
+                                id="search"
+                                label="Search by name or email"
+                                variant="outlined"
+                                className="searchTextField"
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                            />
+                        </Grid>
+                    </React.Fragment>
+                }
+                <Grid item xs={12} md={12} lg={12} sx={{}}>
                     <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
                         <Table md={{ display: 'flex', height: '100%', width: '100%' }} aria-label="simple table">
                             <TableHead>
@@ -286,7 +342,7 @@ function People(props) {
                                     <TableCell>Name</TableCell>
                                     <TableCell>Email</TableCell>
                                     <TableCell>Role</TableCell>
-                                    <TableCell>Actions</TableCell>
+                                    {currentAssocation.admin === "true" && <TableCell>Actions</TableCell>}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -316,10 +372,13 @@ function People(props) {
                                                     :
                                                     <span>Member</span>
                                                 }
-                                                {row.position !== "Principal" && <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
+                                                {row.position !== "Principal" &&
+                                                    currentAssocation.admin === true &&
+                                                    currentAssocation.position === "Principal" &&
+                                                    <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
                                             </div>
                                             {/* Dropdown menu for role options */}
-                                            {row.position !== "Principal" &&
+                                            {row.position === "Principal" &&
                                                 <Menu
                                                     id={`menu-dropdown-${index}`}
                                                     anchorEl={dropdownAnchorEl}
@@ -332,25 +391,27 @@ function People(props) {
                                                 </Menu>
                                             }
                                         </TableCell>
-                                        <TableCell>
-                                            {/* Delete button */}
-                                            <Button
-                                                aria-controls={`menu-delete-${index}`}
-                                                aria-haspopup="true"
-                                                onClick={(event) => handleDeleteOpen(event, index)}
-                                            >
-                                                <MoreHorizIcon />
-                                            </Button>
-                                            {/* Delete menu */}
-                                            <Menu
-                                                id={`menu-delete-${index}`}
-                                                anchorEl={deleteAnchorEl}
-                                                open={Boolean(deleteAnchorEl && selectedIndex === index)}
-                                                onClose={handleMenuClose}
-                                            >
-                                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                                            </Menu>
-                                        </TableCell>
+                                        {currentAssocation.admin === true && row.position !== "Principal" &&
+                                            <TableCell>
+                                                {/* Delete button */}
+                                                <Button
+                                                    aria-controls={`menu-delete-${index}`}
+                                                    aria-haspopup="true"
+                                                    onClick={(event) => handleDeleteOpen(event, index)}
+                                                >
+                                                    <MoreHorizIcon />
+                                                </Button>
+                                                {/* Delete menu */}
+                                                <Menu
+                                                    id={`menu-delete-${index}`}
+                                                    anchorEl={deleteAnchorEl}
+                                                    open={Boolean(deleteAnchorEl && selectedIndex === index)}
+                                                    onClose={handleMenuClose}
+                                                >
+                                                    <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                                                </Menu>
+                                            </TableCell>
+                                        }
                                     </TableRow>
                                 ))}
                             </TableBody>
