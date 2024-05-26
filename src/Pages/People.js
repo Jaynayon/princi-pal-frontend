@@ -122,8 +122,8 @@ function People(props) {
         // Open delete confirmation dialog when "Delete" button is clicked
         setDeleteConfirmationDialogOpen(true);
         // Also set the deleteAnchorEl and selectedIndex
-        setDeleteAnchorEl(event.currentTarget);
-        setSelectedIndex(index);
+        // setDeleteAnchorEl(event.currentTarget);
+        // setSelectedIndex(index);
     };
 
     const confirmDelete = async () => {
@@ -151,6 +151,8 @@ function People(props) {
     const cancelDelete = () => {
         // Close delete confirmation dialog without deleting
         setDeleteConfirmationDialogOpen(false);
+        setDropdownAnchorEl(null);
+        setDeleteAnchorEl(null);
     };
 
     const handleRoleChange = (newRole) => {
@@ -171,6 +173,7 @@ function People(props) {
     const cancelRoleChange = () => {
         // Close confirmation dialog without changing role
         setConfirmationDialogOpen(false);
+        setDropdownAnchorEl(null);
     };
 
     const handleInvite = () => {
@@ -357,7 +360,7 @@ function People(props) {
                 </Grid>
             </Grid>
             {/* Confirmation dialog for role change */}
-            <Dialog open={confirmationDialogOpen} onClose={() => setConfirmationDialogOpen(false)}>
+            <Dialog open={confirmationDialogOpen} onClose={cancelRoleChange}>
                 <DialogTitle>Confirmation</DialogTitle>
                 <DialogContent>
                     Are you sure you want to change?
@@ -368,7 +371,7 @@ function People(props) {
                 </DialogActions>
             </Dialog>
             {/* Confirmation dialog for delete */}
-            <Dialog open={deleteConfirmationDialogOpen} onClose={() => setDeleteConfirmationDialogOpen(false)}>
+            <Dialog open={deleteConfirmationDialogOpen} onClose={cancelDelete}>
                 <DialogTitle>Confirmation</DialogTitle>
                 <DialogContent>
                     Are you sure you want to delete?
