@@ -378,7 +378,9 @@ function People(props) {
                                                     <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
                                             </div>
                                             {/* Dropdown menu for role options */}
-                                            {row.position === "Principal" &&
+                                            {row.position !== "Principal" &&
+                                                currentAssocation.admin === true &&
+                                                currentAssocation.position === "Principal" &&
                                                 <Menu
                                                     id={`menu-dropdown-${index}`}
                                                     anchorEl={dropdownAnchorEl}
