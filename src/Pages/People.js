@@ -327,8 +327,8 @@ function People(props) {
                                                     onClose={handleMenuClose}
                                                 >
                                                     {/* Role options */}
-                                                    <MenuItem onClick={() => handleRoleChange("ADMIN")}>ADMIN</MenuItem>
-                                                    <MenuItem onClick={() => handleRoleChange("OWNER")}>OWNER</MenuItem>
+                                                    <MenuItem onClick={() => handleRoleChange("Admin")}>Admin</MenuItem>
+                                                    <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
                                                 </Menu>
                                             }
 
