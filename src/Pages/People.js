@@ -175,20 +175,43 @@ function People(props) {
     };
 
     const handleRoleChange = (newRole) => {
-        setSelectedRole(newRole); // Set the selected role
-        // Open confirmation dialog before changing role
-        setConfirmationDialogOpen(true);
+        setSelectedRole(newRole);
+        setConfirmationDialogOpen(true); // Open confirmation dialog
     };
-
-    const confirmRoleChange = () => {
-        // Implement role change functionality here
-        console.log(`Role changed to ${selectedRole} for row at index:`, selectedIndex);
-        // Close the menu after role change
-        handleMenuClose();
-        // Close confirmation dialog
-        setConfirmationDialogOpen(false);
+    
+    const confirmRoleChange = async () => {
+        try {
+            let endpoint = '';
+            let newRole = '';
+    
+            if (rows[selectedIndex].admin) {
+                endpoint = 'http://localhost:4000/associations/demote';
+                newRole = false;
+            } else {
+                endpoint = 'http://localhost:4000/associations/promote';
+                newRole = true;
+            }
+    
+            const response = await axios.patch(endpoint, {
+                userId: rows[selectedIndex].id,
+                schoolId: selectedValue
+            });
+    
+            // Update role in frontend state if successful
+            const updatedRows = [...rows];
+            updatedRows[selectedIndex].admin = newRole;
+            setRows(updatedRows);
+        } catch (error) {
+            console.error('Error changing role:', error);
+            // Handle error scenario
+        } finally {
+            // Close confirmation dialog
+            setConfirmationDialogOpen(false);
+            // Close delete menu and reset selectedIndex
+            handleMenuClose();
+        }
     };
-
+    
     const cancelRoleChange = () => {
         // Close confirmation dialog without changing role
         setConfirmationDialogOpen(false);
@@ -390,6 +413,7 @@ function People(props) {
                                                     {/* Role options */}
                                                     <MenuItem onClick={() => handleRoleChange("Admin")}>Admin</MenuItem>
                                                     <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
+
                                                 </Menu>
                                             }
                                         </TableCell>
@@ -428,8 +452,8 @@ function People(props) {
                     Are you sure you want to change?
                 </DialogContent>
                 <DialogActions>
+                    <Button onClick={confirmRoleChange}>Save Changes</Button>
                     <Button onClick={confirmRoleChange}>Cancel</Button>
-                    <Button onClick={cancelRoleChange}>Save Changes</Button>
                 </DialogActions>
             </Dialog>
             {/* Confirmation dialog for delete */}
