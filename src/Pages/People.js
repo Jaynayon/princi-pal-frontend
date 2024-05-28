@@ -89,7 +89,7 @@ function People(props) {
     }, [currentUser]); // Empty dependency array ensures the effect runs only once
 
     // Function to handle school selection change
-    const handleMemberChange = (event) => {
+    const handleSchoolChange = (event) => {
         setSelectedValue(event.target.value); // Update selected school
         //fetchUsers(); // Fetch users belonging to the selected school
     };
@@ -292,7 +292,7 @@ function People(props) {
                                     id="demo-select-small"
                                     value={selectedValue}
                                     label="Member"
-                                    onChange={handleMemberChange}
+                                    onChange={handleSchoolChange}
                                 >
                                     {schools?.map((school) => (
                                         <MenuItem key={school.id} value={school.id}>
@@ -334,7 +334,7 @@ function People(props) {
                                         id="demo-select-small"
                                         value={selectedValue}
                                         label="Member"
-                                        onChange={handleMemberChange}
+                                        onChange={handleSchoolChange}
                                     >
                                         {schools?.map((school) => (
                                             <MenuItem key={school.id} value={school.id}>
