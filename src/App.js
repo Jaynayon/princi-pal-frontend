@@ -30,17 +30,17 @@ function App() {
           const token = jwtCookie.split('=')[1];
           console.log('JWT Token:', token);
 
-          // Call RestService to validate the token: returns User
-          const user = await RestService.validateToken(token);
+          // Call RestService to validate the token
+          const data = await RestService.validateToken(token);
 
-          if (user) { // access data.id
-            //const user = await RestService.getUserById(data.id);
+          if (data) { // access data.id
+            const user = await RestService.getUserById(data.id);
             user.position === "Super administrator" && setIsSuperAdmin(true); //is admin
             setIsLoggedIn(true)
           } else {
             setIsLoggedIn(false)
           }
-          console.log(user)
+          console.log(data)
           // Handle response as needed
         } else {
           setIsLoggedIn(false)
