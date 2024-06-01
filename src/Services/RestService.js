@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 
+//Function that allows us to accept credentials
 const instance = axios.create({
     baseURL: 'http://localhost:4000', // Set your backend URL
     withCredentials: true, // Enable sending cookies with cross-origin requests
@@ -653,7 +654,7 @@ const RestService = (() => {
                     'Content-Type': 'application/json'
                 }
             });
-    
+
             if (response.status === 200) {
                 return true;
             }
