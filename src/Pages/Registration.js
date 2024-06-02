@@ -43,6 +43,12 @@ const RegistrationPage = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleBtnLogin = () => {
+    // Logic for handling register button click
+    // Redirect to the registration page
+    window.location.href = "http://localhost:3000/login";
+  }
+
   const validateEmail = (input) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(input);
@@ -310,7 +316,8 @@ const RegistrationPage = () => {
         >
           Create Account
         </Button>
-        <Link to="/login" className="signInLink" style={{ textDecoration: "none", color: "#3048c1" }}>
+        <Link className="signInLink" style={{ textDecoration: "none", color: "#3048c1" }}
+          onClick={() => handleBtnLogin()}>
           <span>{`Do you have an account? `}</span>
           <b>Sign in</b>
         </Link>
