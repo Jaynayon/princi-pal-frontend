@@ -1,6 +1,8 @@
 import React from 'react';
-import BudgetSummary from './BudgetSummary';
+import Paper from '@mui/material/Paper';
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
 import IconButton from "@mui/material/IconButton";
@@ -51,6 +53,49 @@ function DocumentSummary(props) {
                 </Grid>
             </Grid>
         </React.Fragment>
+    );
+}
+
+function BudgetSummary(props) {
+    const { title, amount, total = false } = props
+    let amountNumber = parseInt(amount);
+
+    return (
+        <Paper sx={{
+            minWidth: 150, height: 65, m: 1, backgroundColor: total ? '#0077B6' : undefined,
+
+            border: title === "Balance" && amountNumber < 0 && "1px solid red",
+            //borderColor: title === "Balance" && amount < 0 ? "red" : undefined,
+        }} variant='outlined'>
+            <Box
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontWeight: 'bold',
+                    height: '100%',
+                }}
+            >
+                <Typography variant="body2" align="center"
+                    sx={{
+                        fontWeight: 'bold',
+                        color: title === "Balance" && amountNumber < 0 ? "red" :
+                            total ? '#ffff' : '#9FA2B4'
+                    }}
+                >
+                    {title}
+                </Typography>
+                <Typography variant="body2" align="center"
+                    sx={{
+                        fontWeight: 'bold',
+                        color: title === "Balance" && amountNumber < 0 ? "red" : total && '#ffff'
+                    }}
+                >
+                    Php {amount}
+                </Typography>
+            </Box>
+        </Paper>
     );
 }
 

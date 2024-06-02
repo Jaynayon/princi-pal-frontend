@@ -1,5 +1,5 @@
 // React imports
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 
 // Material-UI imports
 import Box from '@mui/material/Box';

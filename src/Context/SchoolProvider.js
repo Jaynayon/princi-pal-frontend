@@ -109,6 +109,26 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
+    const fetchDocumentDataBySchooId = useCallback(async (id) => {
+        try {
+            if (currentSchool) {
+                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
+                    id,
+                    year,
+                    month
+                );
+
+                if (getDocument) {
+                    setCurrentDocument(getDocument);
+                } else {
+                    setCurrentDocument(emptyDocument);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }, [currentSchool, setCurrentDocument, year, month]);
+
     const createNewDocument = useCallback(async (obj) => {
         try {
             if (currentSchool) {
@@ -169,14 +189,14 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentDocument, setLr]);
 
-    const displayFields = useCallback((isAdding) => {
+    const addFields = useCallback((isAdding) => {
         let newLr = {
             id: 3,
             date: '',
             orsBursNo: '',
             particulars: '',
             amount: 0,
-            objectCode: '',
+            objectCode: '5020502001', //predefined option
             payee: '',
             natureOfPayment: 'Cash'
         }
@@ -196,9 +216,9 @@ export const SchoolProvider = ({ children }) => {
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, setCurrentDocument, currentDocument,
-            displayFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
+            addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
             currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev, createNewDocument,
-            fetchLRByKeyword, exportDocument
+            fetchLRByKeyword, exportDocument, fetchDocumentDataBySchooId
         }}>
             {children}
         </SchoolContext.Provider>

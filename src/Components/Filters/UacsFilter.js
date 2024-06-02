@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useState } from 'react'
 import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -68,7 +68,7 @@ function UacsDateFilter(props) {
         );
 
         // updates the row state in RecordsRow
-        // mainly used in displayFields feature where a new object is inserted
+        // mainly used in addFields feature where a new object is inserted
         // with the id == 3
         handleInputChange("objectCode", rowId, event);
 

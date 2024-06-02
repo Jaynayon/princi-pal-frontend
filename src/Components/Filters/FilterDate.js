@@ -32,7 +32,7 @@ export function SchoolFieldsFilter() {
     )
 }
 
-export function SchoolDateFilter() {
+export function FilterDate() {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const { prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years } = useSchoolContext();
@@ -94,25 +94,15 @@ export function SchoolDateFilter() {
     }
 
     const handleChangeMonth = (event) => {
-        const {
-            target: { value },
-        } = event;
-        prevMonthRef.current = months.indexOf(value)
-        setMonth(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+        const { value } = event.target;
+        prevMonthRef.current = months.indexOf(value);
+        setMonth(value); // Set the value directly
     };
 
     const handleChangeYear = (event) => {
-        const {
-            target: { value },
-        } = event;
-        prevYearRef.current = years.indexOf(value)
-        setYear(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+        const { value } = event.target;
+        prevYearRef.current = years.indexOf(value);
+        setYear(value); // Set the value directly
     };
 
     return (

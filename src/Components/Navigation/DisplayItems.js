@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // Material-UI imports
 import { Link } from 'react-router-dom';
@@ -14,6 +14,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
+import InputAdornment from '@mui/material/InputAdornment';
+import { Person as PersonIcon, Email as EmailIcon } from '@mui/icons-material';
 
 // Custom component import
 import DisplaySchools from './DisplaySchools';
@@ -25,13 +27,14 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
-import { blue } from '@mui/material/colors';
 import { Typography } from '@mui/material';
 
 export function DisplayItems() {
     const theme = useTheme();
     const { list, selected, setSelected } = useNavigationContext();
+    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // State to manage logout dialog
 
     console.log("display items rendered");
 
@@ -90,44 +93,79 @@ export function DisplayItems() {
         }
     }
 
-    return (
-        list.map((item, index) => (
-            <React.Fragment key={index}>
-                {index > 3 && <Divider sx={styles.divider} /> /*Render divider after the Testing tab*/}
+    const handleLogout = (e) => {
+        e.preventDefault();
+        logoutUser('jwt');
+    };
 
-                {index === 1 ? (
-                    <DisplaySchools />
-                ) : (
-                    <ListItemButton
-                        key={index}
-                        component={Link}
-                        to={index < 4 ? `/${item.toLowerCase()}` : '/'} //Logout route has not yet been implemented
-                        selected={selected === item}
-                        value={item}
-                        onClick={() => {
-                            setSelected(item)
-                            !(index < 4) && logoutUser('jwt')
-                        }}
-                        sx={theme.navStyle.button}
-                    >
-                        <ListItemIcon sx={{ width: 'auto', minWidth: '40px' }}>
-                            {renderIcon(index, selected, item)}
-                        </ListItemIcon>
-                        <ListItemText
-                            primary={item}
-                            primaryTypographyProps={{
-                                ...styles.text,
-                                ...(selected === item
-                                    ? { color: theme.navStyle.bold, fontWeight: 'bold' }
-                                    : { color: theme.navStyle.color }
-                                )
+    return (
+        <>
+            {list.map((item, index) => (
+                <React.Fragment key={index}>
+                    {index > 3 && <Divider sx={styles.divider} /> /*Render divider after the Testing tab*/}
+
+                    {index === 1 ? (
+                        <DisplaySchools />
+                    ) : (
+                        <ListItemButton
+                            key={index}
+                            component={Link}
+                            to={index < 4 ? `/${item.toLowerCase()}` : '#'} // Logout route has not yet been implemented
+                            selected={selected === item}
+                            value={item}
+                            onClick={() => {
+                                if (index < 4) {
+                                    setSelected(item);
+                                } else {
+                                    setLogoutDialogOpen(true); // Open logout dialog on logout button click
+                                }
                             }}
-                        />
-                    </ListItemButton>
-                )}
-            </React.Fragment>
-        ))
-    )
+                            sx={theme.navStyle.button}
+                        >
+                            {renderIcon(index, selected, item)}
+                            <ListItemText
+                                primary={item}
+                                primaryTypographyProps={{
+                                    ...styles.text,
+                                    ...(selected === item
+                                        ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                        : { color: theme.navStyle.color }
+                                    )
+                                }}
+                            />
+                        </ListItemButton>
+                    )}
+                </React.Fragment>
+            ))}
+            {/* Logout confirmation dialog */}
+            <Dialog
+                open={logoutDialogOpen}
+                onClose={() => setLogoutDialogOpen(false)}
+                aria-labelledby="logout-dialog-title"
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
+                <DialogContent sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: " flex-end",
+                    p: 0
+                }}>
+                    <DialogActions>
+                        <Box>
+                            <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
+                                Cancel
+                            </Button>
+                            <Button onClick={handleLogout} color="primary">
+                                Logout
+                            </Button>
+                        </Box>
+                    </DialogActions>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
 }
 
 export const ProfileTab = ({ user }) => {
@@ -222,12 +260,56 @@ export const ProfileTab = ({ user }) => {
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
                         <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
-                            <TextField disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="dense" />
-                            <TextField disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " " } margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " " } margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal" />
-                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal" />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " "} margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " "} margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }} />
+                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
                         </Stack>
                     </Stack>
                 </DialogContent>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import Box from '@mui/material/Box';
@@ -7,18 +7,11 @@ import { TextField } from '@mui/material';
 import RestService from '../../Services/RestService';
 
 function JEVRow(props) {
-    const { rows, setRows, page, rowsPerPage } = props;
+    const { page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
-    const { currentDocument, fetchDocumentData, setReload, reload, value } = useSchoolContext();
-
-    useEffect(() => {
-        console.log("RecordsRow useEffect")
-        // if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
-        //     displayFields(isAdding);
-        // }
-    }, [value]);
+    const { fetchDocumentData, jev, setJev } = useSchoolContext();
 
     const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });
@@ -44,17 +37,17 @@ function JEVRow(props) {
 
     const handleInputChange = (colId, rowId, event) => {
         // Find the index of the object with matching id
-        const rowIndex = rows.findIndex(row => row.id === rowId);
+        const rowIndex = jev.findIndex(row => row.id === rowId);
 
         if (rowIndex !== -1) {
             // Copy the array to avoid mutating state directly
-            const updatedRows = [...rows];
+            const updatedRows = [...jev];
 
             // Update the specific property of the object
             updatedRows[rowIndex][colId] = event.target.value;
 
             // Update the state with the modified rows
-            setRows(updatedRows);
+            setJev(updatedRows);
             setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
         } else {
             console.error(`Row with id ${rowId} not found`);
@@ -71,9 +64,17 @@ function JEVRow(props) {
         console.log('Value saved:', inputValue);
     };
 
+    // Function to format a number with commas and two decimal places
+    const formatNumber = (number, colId, rowId) => {
+        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
+        if (editingCell?.colId === colId && editingCell?.rowId === rowId)
+            return number;
+        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
     return (
         <React.Fragment>
-            {rows
+            {jev
                 .slice(page * rowsPerPage, page * props.rowsPerPage + props.rowsPerPage)
                 .map((row, index) => {
                     const uniqueKey = `row_${row.id}_${index}`;
@@ -108,7 +109,8 @@ function JEVRow(props) {
                                                 }
                                             >
                                                 <TextField
-                                                    value={value}
+                                                    // value={value}
+                                                    value={formatNumber(value, column.id, row.id)}
                                                     sx={{
                                                         "& fieldset": { border: row.id !== 3 && 'none' }
                                                     }}
