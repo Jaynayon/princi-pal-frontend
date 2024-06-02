@@ -70,7 +70,7 @@ const ApexChart = ({ totalBudget }) => {
 
 
 
-function Dashboard(props) {
+function DashboardPage(props) {
     const { currentUser } = useNavigationContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [defaultSchool, setDefaultSchool] = useState('');
@@ -495,4 +495,4 @@ const styles = {
     },
 }
 
-export default Dashboard;
+export default DashboardPage;

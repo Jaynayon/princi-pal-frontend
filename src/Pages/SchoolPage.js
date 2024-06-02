@@ -48,7 +48,7 @@ function a11yProps(index) {
     };
 }
 
-function Schools(props) {
+function SchoolPage(props) {
     const { year, month, setIsAdding, currentDocument, exportDocument, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
     //const { selected } = useNavigationContext();
 
@@ -205,4 +205,4 @@ const styles = {
     },
 }
 
-export default Schools;
+export default SchoolPage;
