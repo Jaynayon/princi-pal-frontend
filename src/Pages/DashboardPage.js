@@ -396,7 +396,7 @@ function DashboardPage(props) {
                             <FilterDate />
                             <Box style={{ paddingRight: '10px' }}>
                                 <Select
-                                    value={selectedSchool}
+                                    value={selectedSchool || ''}
                                     onChange={(event) => handleSchoolSelect(event.target.value)}
                                     displayEmpty
                                     inputProps={{ 'aria-label': 'Select School' }}
