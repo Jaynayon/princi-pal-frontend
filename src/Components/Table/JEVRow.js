@@ -75,7 +75,7 @@ function JEVRow(props) {
     return (
         <React.Fragment>
             {jev
-                .slice(page * rowsPerPage, page * props.rowsPerPage + props.rowsPerPage)
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                     const uniqueKey = `row_${row.id}_${index}`;
                     return (
