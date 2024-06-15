@@ -21,7 +21,6 @@ function RecordsRow(props) {
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [dateError, setDateError] = useState(false);
-    const [uacsError, setUacsError] = useState(false);
 
     const {
         addFields,
