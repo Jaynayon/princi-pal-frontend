@@ -7,7 +7,7 @@ import { TextField } from '@mui/material';
 import RestService from '../../Services/RestService';
 
 function JEVRow(props) {
-    const { page, rowsPerPage } = props;
+    const { page, rowsPerPage, columns } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
@@ -80,7 +80,7 @@ function JEVRow(props) {
                     const uniqueKey = `row_${row.id}_${index}`;
                     return (
                         <TableRow key={uniqueKey} hover role="checkbox" tabIndex={-1}>
-                            {props.columns.map((column) => {
+                            {columns.map((column) => {
                                 const value = row[column.id];
 
                                 return (
