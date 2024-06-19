@@ -24,10 +24,6 @@ export const NavigationProvider = ({ children }) => {
         });
     };
 
-    const setLocalSelected = useCallback(() => {
-        window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
-    }, [selected]);
-
     const updateMobileMode = () => {
         const { innerWidth } = window;
         if (innerWidth < 600) {
