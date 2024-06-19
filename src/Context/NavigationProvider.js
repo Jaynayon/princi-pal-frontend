@@ -24,6 +24,10 @@ export const NavigationProvider = ({ children }) => {
         });
     };
 
+    const setLocalSelected = useCallback(() => {
+        window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
+    }, [selected]);
+
     const updateMobileMode = () => {
         const { innerWidth } = window;
         if (innerWidth < 600) {
@@ -84,8 +88,15 @@ export const NavigationProvider = ({ children }) => {
     }, [currentUser]);
 
     useEffect(() => {
-        console.log("Navigation Provider useEffect render");
+        const data = window.localStorage.getItem("LOCAL_STORAGE_SELECTED");
+        if (data !== null) setSelected(JSON.parse(data));
+    }, [])
 
+    useEffect(() => {
+        window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
+    }, [selected])
+
+    useEffect(() => {
 
         fetchUser();
 
