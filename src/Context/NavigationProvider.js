@@ -69,9 +69,34 @@ export const NavigationProvider = ({ children }) => {
     }, [currentUser]);
 
     useEffect(() => {
-        const data = window.localStorage.getItem("LOCAL_STORAGE_SELECTED");
-        if (data !== null) setSelected(JSON.parse(data));
-    }, [])
+        if (currentUser) {
+            const data = JSON.parse(window.localStorage.getItem("LOCAL_STORAGE_SELECTED"));
+
+            const path = window.location.pathname;
+
+            // Define a mapping between paths and the desired local storage values
+            const pathToLocalStorageValue = {
+                '/dashboard': 'Dashboard',
+                '/schools': data !== "Dashboard" &&
+                    data !== "People" &&
+                    data !== "Settings" &&
+                    data !== currentUser.schools[0].name ? data : currentUser.schools[0].name,
+                '/people': 'People',
+                '/settings': 'Settings',
+            };
+
+            // Get the local storage value based on the current path
+            const localStorageValue = pathToLocalStorageValue[path];
+
+            // Update local storage
+            if (localStorageValue !== data) {
+                window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(localStorageValue));
+            }
+
+            // Set the state with the current local storage value
+            setSelected(localStorageValue);
+        }
+    }, [currentUser])
 
     useEffect(() => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
