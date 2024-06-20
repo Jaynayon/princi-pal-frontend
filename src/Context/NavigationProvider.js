@@ -34,10 +34,6 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
-    console.log("Navigation Provider render");
-    console.log(selected)
-    console.log(openSub)
-
     const fetchUser = useCallback(async () => {
         try {
             const jwtCookie = document.cookie
@@ -55,17 +51,6 @@ export const NavigationProvider = ({ children }) => {
                     setUserId(data)
                     if (!currentUser) {
                         const user = await RestService.getUserById(data.id);
-                        // setCurrentUser({
-                        //     ...user,
-                        //     schools: [{
-                        //         id: "6634e7fc43d8096920d765ff",
-                        //         name: 'Jaclupan ES'
-                        //     }, {
-                        //         id: "66354cb59de52335e7ad78ab",
-                        //         name: 'Talisay ES'
-                        //     }
-                        //     ]
-                        // })
                         setCurrentUser(user);
                     }
                 }
