@@ -69,18 +69,16 @@ export const NavigationProvider = ({ children }) => {
     }, [currentUser]);
 
     useEffect(() => {
-        if (currentUser) {
+        if (currentUser && currentUser.position !== "Super administrator") {
             const data = JSON.parse(window.localStorage.getItem("LOCAL_STORAGE_SELECTED"));
+            console.log(data)
 
             const path = window.location.pathname;
 
             // Define a mapping between paths and the desired local storage values
             const pathToLocalStorageValue = {
                 '/dashboard': 'Dashboard',
-                '/schools': data !== "Dashboard" &&
-                    data !== "People" &&
-                    data !== "Settings" &&
-                    data !== currentUser.schools[0].name ? data : currentUser.schools[0].name,
+                '/schools': currentUser.schools.includes(data) ? data : currentUser.schools[0].name,
                 '/people': 'People',
                 '/settings': 'Settings',
             };
@@ -94,7 +92,7 @@ export const NavigationProvider = ({ children }) => {
             }
 
             // Set the state with the current local storage value
-            setSelected(localStorageValue);
+            data !== null || data !== undefined ? setSelected(localStorageValue) : setSelected("Dashboard")
         }
     }, [currentUser])
 
@@ -103,7 +101,7 @@ export const NavigationProvider = ({ children }) => {
     }, [selected])
 
     useEffect(() => {
-
+        // Fetch current user details
         fetchUser();
 
         // Call the function to set initial mobileMode state
