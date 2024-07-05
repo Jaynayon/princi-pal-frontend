@@ -7,6 +7,8 @@ import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
+import Typography from '@mui/material/Typography';
 import { FilterDate, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/FilterDate'
 import DocumentTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
@@ -157,10 +159,10 @@ function SchoolPage(props) {
                                         aria-label="basic tabs example">
                                         <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
                                         <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
+                                        <BudgetModal />
                                     </Tabs>
                                 </Box>
                             </Grid>
-
                             {/*Document Tables*/}
                             <Grid item xs={12} md={12} lg={12}>
                                 <CustomTabPanel value={value} index={0}>
@@ -175,6 +177,50 @@ function SchoolPage(props) {
                 </Grid>
             </Grid>
         </Container >
+    );
+}
+
+function BudgetModal() {
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+    const test = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+
+    };
+    return (
+        <React.Fragment>
+            <Button
+                sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
+                onClick={handleOpen}
+            >
+                Budget
+            </Button>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={test}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                        Text in a modal
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+                    </Typography>
+                </Box>
+            </Modal>
+        </React.Fragment>
     );
 }
 
