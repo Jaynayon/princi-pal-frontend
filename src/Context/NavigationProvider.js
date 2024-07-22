@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import RestService from "../Services/RestService"
 
 const NavigationContext = createContext();
@@ -16,6 +17,7 @@ export const NavigationProvider = ({ children }) => {
     const [currentSchool, setCurrentSchool] = useState(null);
     const [userId, setUserId] = useState(null)
     const prevOpenRef = useRef(false);
+    const location = useLocation();
 
     const toggleDrawer = () => {
         setOpen(prevOpen => {
@@ -68,23 +70,50 @@ export const NavigationProvider = ({ children }) => {
         }
     }, [currentUser]);
 
+
+
+    // useEffect(() => {
+    //     // Your code to run when URL changes
+    //     console.log('URL changed:', location.pathname);
+    // }, [location]);
+
     useEffect(() => {
         if (currentUser && currentUser.position !== "Super administrator") {
             const data = JSON.parse(window.localStorage.getItem("LOCAL_STORAGE_SELECTED"));
             console.log(data)
-
+            console.log('URL changed:', location.pathname);
             const path = window.location.pathname;
 
             // Define a mapping between paths and the desired local storage values
             const pathToLocalStorageValue = {
                 '/dashboard': 'Dashboard',
-                '/schools': currentUser.schools.includes(data) ? data : currentUser.schools[0].name,
                 '/people': 'People',
                 '/settings': 'Settings',
             };
 
+            // RegEx that transform route text to school name
+            function transformText(input) {
+                return input
+                    .split('-') // Split the string at the hyphen
+                    .map((word, index) => index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word.toUpperCase())
+                    .join(' '); // Join the parts with a space
+            }
+
             // Get the local storage value based on the current path
-            const localStorageValue = pathToLocalStorageValue[path];
+            let localStorageValue = pathToLocalStorageValue[path];
+
+            if (!localStorageValue) {
+                // Extract the route if it's the /schools route
+                const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
+                // Extract the school name
+                const schoolName = location.pathname.split('/')[2];
+
+                if (extractRoute === "/schools") {
+                    localStorageValue = transformText(schoolName); // Set school name as local storage value
+                } else {
+                    localStorageValue = "Dashboard"
+                }
+            }
 
             // Update local storage
             if (localStorageValue !== data) {
@@ -94,7 +123,7 @@ export const NavigationProvider = ({ children }) => {
             // Set the state with the current local storage value
             data !== null || data !== undefined ? setSelected(localStorageValue) : setSelected("Dashboard")
         }
-    }, [currentUser])
+    }, [currentUser, location])
 
     useEffect(() => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
