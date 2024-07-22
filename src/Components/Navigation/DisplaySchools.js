@@ -30,6 +30,10 @@ export default function DisplaySchools() {
         }
     }, [open, setOpenSub]);
 
+    const transformSchoolNameText = (text) => {
+        return text.toLowerCase().replace(/\s+/g, '-');
+    }
+
     const handleSelectedSingle = () => {
         setSelected(currentUser.schools[0].name)
         setCurrentSchool(currentUser.schools[0]);
@@ -122,7 +126,7 @@ export default function DisplaySchools() {
                                         <ListItemButton
                                             key={index}
                                             component={Link}
-                                            to={'/schools'}
+                                            to={'/schools/' + transformSchoolNameText(item.name)}
                                             selected={selected === item.name}
                                             onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(index)}
                                             sx={theme.navStyle.button}
@@ -147,7 +151,7 @@ export default function DisplaySchools() {
                 <React.Fragment>
                     <ListItemButton
                         component={Link}
-                        to={'/schools'}
+                        to={'/schools/' + transformSchoolNameText(currentUser.schools[0].name)}
                         sx={theme.navStyle.button}
                         selected={selected === currentUser.schools[0].name}
                         onClick={/*() => { setSelected(currentUser.schools[0].name) }*/() => handleSelectedSingle()}
