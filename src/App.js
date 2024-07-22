@@ -7,6 +7,7 @@ import PeoplePage from './Pages/PeoplePage.js';
 import SettingsPage from './Pages/SettingsPage.js';
 import LoginPage from './Pages/LoginPage.js';
 import AdminPage from './Pages/AdminPage.js';
+import NoMatchPage from './Pages/NoMatchPage.js';
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
 import { SchoolProvider } from './Context/SchoolProvider.js';
@@ -87,7 +88,7 @@ function App() {
           element={getWelcomeElement(RegistrationPage, DashboardPage)}
         />
         <Route
-          path="/dashboard/*"
+          path="/dashboard"
           element={getElement(DashboardPage)}
         />
         <Route
@@ -95,12 +96,16 @@ function App() {
           element={getElement(SchoolPage)}
         />
         <Route
-          path="/people/*"
+          path="/people"
           element={getElement(PeoplePage)}
         />
         <Route
-          path="/settings/*"
+          path="/settings"
           element={getElement(SettingsPage)}
+        />
+        <Route
+          path="*"
+          element={<NoMatchPage />}
         />
       </Route>
     )
