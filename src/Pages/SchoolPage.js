@@ -8,6 +8,9 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
+import Backdrop from '@mui/material/Backdrop';
+import Fade from '@mui/material/Fade';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { FilterDate, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/FilterDate'
 import DocumentTable from '../Components/Table/LRTable';
@@ -49,6 +52,26 @@ function a11yProps(index) {
         'aria-controls': `simple-tabpanel-${index}`,
     };
 }
+
+// const theme = createTheme({
+//     components: {
+//         MuiButton: {
+//             styleOverrides: {
+//                 root: {
+//                     backgroundColor: '#19B4E5', // Default background color for enabled button
+//                     color: 'white', // Default text color for enabled button
+//                     '&:hover': {
+//                         backgroundColor: '#19a2e5', // Background color on hover
+//                     },
+//                     '&.Mui-disabled': {
+//                         backgroundColor: "#e0e0e0", // Background color when disabled
+//                         color: '#c4c4c4', // Text color when disabled
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// });
 
 function SchoolPage(props) {
     const { year, month, setIsAdding, currentDocument, exportDocument, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
@@ -181,22 +204,11 @@ function SchoolPage(props) {
 }
 
 function BudgetModal() {
+    const { month, currentSchool } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const test = {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 400,
-        bgcolor: 'background.paper',
-        border: '2px solid #000',
-        boxShadow: 24,
-        p: 4,
-
-    };
     return (
         <React.Fragment>
             <Button
@@ -210,15 +222,37 @@ function BudgetModal() {
                 onClose={handleClose}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
+                closeAfterTransition
+                slots={{ backdrop: Backdrop }}
+            // slotProps={{
+            //     backdrop: {
+            //         timeout: 500,
+            //     },
+            // }}
             >
-                <Box sx={test}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Text in a modal
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                    </Typography>
-                </Box>
+                <Fade in={open}>
+                    <Paper sx={styles.paper}>
+                        <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
+                            Budget
+                            <span style={{ color: "grey" }}> (Cash Advance)</span>
+                        </Typography>
+                        <Typography id="modal-modal-description" sx={{ mt: 1 }}>
+                            Set the budget required or delegated for the month of
+                            <span style={{ fontWeight: 'bold' }}> {month}</span> in
+                            <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
+                        </Typography>
+                        <TextField
+                            sx={{ alignSelf: "center", mt: 2, width: "100%" }}
+                            type="text"
+                            //value={amountData.amount}
+                            //onChange={handleChange}
+                            label="Input New Amount"
+                        />
+                        <Button sx={styles.button} variant="contained" >
+                            Save
+                        </Button>
+                    </Paper>
+                </Fade>
             </Modal>
         </React.Fragment>
     );
@@ -249,6 +283,35 @@ const styles = {
             fontWeight: 'bold', // Font weight of selected tab
         },
     },
+    paper: {
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        boxShadow: 24,
+        p: 4.5,
+        width: 400,
+        borderRadius: '15px',
+        //textAlign: 'center',
+    },
+    button: {
+        mt: 2,
+        borderRadius: '10px',
+        width: '160px',
+        padding: '10px 0',
+        alignSelf: "center",
+        backgroundColor: '#19B4E5', // Default background color for enabled button
+        color: 'white', // Default text color for enabled button
+        '&:hover': {
+            backgroundColor: '#19a2e5', // Background color on hover
+        },
+        '&.Mui-disabled': {
+            backgroundColor: '#e0e0e0', // Background color when disabled
+            color: '#c4c4c4', // Text color when disabled
+        }
+    }
 }
 
 export default SchoolPage;
