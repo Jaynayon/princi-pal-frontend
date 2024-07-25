@@ -77,8 +77,8 @@ class LRTable extends Component {
             {
                 id: 'orsBursNo',
                 label: 'ORS/BURS No.',
-                minWidth: 140,
-                maxWidth: 140,
+                minWidth: 150,
+                maxWidth: 150,
                 align: 'left',
                 format: (value) => value.toLocaleString('en-US'),
             },
