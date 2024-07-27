@@ -57,9 +57,9 @@ export const NavigationProvider = ({ children }) => {
                         setCurrentUser(user);
                     }
                 }
-                if (currentUser) { // if current user is not null or undefined, set school
-                    setCurrentSchool(currentUser.schools[0]);
-                }
+                // if (currentUser) { // if current user is not null or undefined, set school
+                //     setCurrentSchool(currentUser.schools[0]);
+                // }
                 console.log(currentUser)
                 // Handle response as needed
             } else {
