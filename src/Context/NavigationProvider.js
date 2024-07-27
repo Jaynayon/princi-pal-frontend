@@ -38,6 +38,8 @@ export const NavigationProvider = ({ children }) => {
     };
 
     const fetchUser = useCallback(async () => {
+        // Extract the root route if it's the /schools route
+        const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
         try {
             const jwtCookie = document.cookie
                 .split('; ')
@@ -57,9 +59,11 @@ export const NavigationProvider = ({ children }) => {
                         setCurrentUser(user);
                     }
                 }
-                // if (currentUser) { // if current user is not null or undefined, set school
-                //     setCurrentSchool(currentUser.schools[0]);
-                // }
+                // Note: A default school will be presented upon load if the user is not in /schools route
+                // should the user be in /schools, the currentSchool is set on their school of choice.
+                if (currentUser && extractRoute !== "/schools") { // if current user is not null or undefined, or in /schools, set school
+                    setCurrentSchool(currentUser.schools[0]);
+                }
                 console.log(currentUser)
                 // Handle response as needed
             } else {
@@ -69,7 +73,7 @@ export const NavigationProvider = ({ children }) => {
         } catch (error) {
             console.error('Error validating token:', error);
         }
-    }, [currentUser]);
+    }, [currentUser, location.pathname]);
 
     useEffect(() => {
         if (currentUser && currentUser.position !== "Super administrator") {
