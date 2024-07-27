@@ -204,7 +204,7 @@ function SchoolPage(props) {
 }
 
 function BudgetModal() {
-    const { month, currentSchool } = useSchoolContext();
+    const { month, currentSchool, currentDocument } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -244,11 +244,13 @@ function BudgetModal() {
                         <TextField
                             sx={{ alignSelf: "center", mt: 2, width: "100%" }}
                             type="text"
+                            value={currentDocument?.cashAdvance}
+                            disabled={currentDocument?.cashAdvance} // Disabled if cash advance already set
                             //value={amountData.amount}
                             //onChange={handleChange}
-                            label="Input New Amount"
+                            label="Input Amount"
                         />
-                        <Button sx={styles.button} variant="contained" >
+                        <Button sx={styles.button} variant="contained" disabled={currentDocument?.cashAdvance} >
                             Save
                         </Button>
                     </Paper>
