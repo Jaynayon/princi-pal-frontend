@@ -245,12 +245,12 @@ function BudgetModal() {
                             sx={{ alignSelf: "center", mt: 2, width: "100%" }}
                             type="text"
                             value={currentDocument?.cashAdvance}
-                            disabled={currentDocument?.cashAdvance} // Disabled if cash advance already set
+                            disabled={!!currentDocument?.cashAdvance} // Convert to boolean; Disabled if cash advance already set
                             //value={amountData.amount}
                             //onChange={handleChange}
                             label="Input Amount"
                         />
-                        <Button sx={styles.button} variant="contained" disabled={currentDocument?.cashAdvance} >
+                        <Button sx={styles.button} variant="contained" disabled={!!currentDocument?.cashAdvance} >
                             Save
                         </Button>
                     </Paper>
