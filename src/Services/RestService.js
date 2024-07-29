@@ -405,15 +405,9 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                console.log('Response data:', response.data);
-                return response.data;
-            })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response.status === 200) {
+            });
+
+            if (response.status === 201) {
                 return true;
             }
             return false;
@@ -447,13 +441,16 @@ const RestService = (() => {
             if (response) {
                 const newDocumentId = response.data.id;
 
-                // Insert new LR using the newly created document's ID
-                const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
+                // If a payload (obj) is passed, create document and lr, else only document.
+                if (obj) {
+                    // Insert new LR using the newly created document's ID
+                    const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
 
-                if (lrCreationResponse) {
-                    console.log('LR created successfully');
-                } else {
-                    console.error('Failed to create LR');
+                    if (lrCreationResponse) {
+                        console.log('LR created successfully');
+                    } else {
+                        console.error('Failed to create LR');
+                    }
                 }
 
                 return response.data; // Return the created document data
