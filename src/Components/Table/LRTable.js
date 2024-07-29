@@ -117,8 +117,8 @@ class LRTable extends Component {
             {
                 id: 'amount',
                 label: 'Amount',
-                minWidth: 120,
-                maxWidth: 120,
+                minWidth: 140,
+                maxWidth: 140,
                 align: 'left',
                 format: (value) => value.toLocaleString('en-US'),
             },

@@ -192,7 +192,7 @@ function RecordsRow(props) {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
         if (editingCell?.colId === colId && editingCell?.rowId === rowId)
             return number;
-        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return "₱" + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
     const displayError = (colId, rowId) => {
