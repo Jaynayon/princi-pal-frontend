@@ -129,14 +129,15 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
-    const createNewDocument = useCallback(async (obj) => {
+    const createNewDocument = useCallback(async (obj, cashAdvanceValue) => {
         try {
             if (currentSchool) {
                 const getDocument = await RestService.createDocBySchoolId(
                     currentSchool.id,
                     month,
                     year,
-                    obj
+                    obj,
+                    cashAdvanceValue
                 );
 
                 if (getDocument) {

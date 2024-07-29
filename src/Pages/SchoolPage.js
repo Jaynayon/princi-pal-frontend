@@ -205,7 +205,7 @@ function SchoolPage(props) {
 }
 
 function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
-    const { currentDocument, fetchDocumentData } = useSchoolContext();
+    const { currentDocument, fetchDocumentData, createNewDocument, jev } = useSchoolContext();
 
     const updateDocumentById = async (newValue) => {
         try {
@@ -222,7 +222,15 @@ function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
     }
 
     const handleOnClick = async () => {
-        await updateDocumentById(value); //update field in db
+        let obj = {}
+        obj = { cashAdvance: value }
+        // jev length upon initialization will always be > 2
+        if (jev.length < 2) { //if there's no current document or it's not yet existing
+            await createNewDocument(obj, value);
+        } else {
+            await updateDocumentById(value); //update field in db
+        }
+
         handleClose();
         handleCloseParent();
     }
@@ -318,7 +326,7 @@ function BudgetModal() {
                         <TextField
                             sx={{ alignSelf: "center", mt: 2, width: "100%" }}
                             type="text"
-                            value={amount}
+                            value={amount || 0}
                             disabled={!!currentDocument?.cashAdvance} // Convert to boolean; Disabled if cash advance already set
                             onChange={(event) => handleChange(event)}
                             label="Input Amount"
@@ -333,7 +341,7 @@ function BudgetModal() {
                             open={confirmOpen}
                             handleClose={handleConfirmClose}
                             handleCloseParent={handleClose}
-                            value={amount} />
+                            value={amount || 0} />
                     </Paper>
                 </Fade>
             </Modal>

@@ -418,7 +418,7 @@ const RestService = (() => {
         }
     };
 
-    const createDocBySchoolId = async (schoolId, month, year, obj) => {
+    const createDocBySchoolId = async (schoolId, month, year, obj, cashAdvanceValue) => {
         try {
             // Troubleshooting: year and month passed is an array
             // Extracting the year value from the array
@@ -443,13 +443,23 @@ const RestService = (() => {
 
                 // If a payload (obj) is passed, create document and lr, else only document.
                 if (obj) {
-                    // Insert new LR using the newly created document's ID
-                    const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
+                    if (obj.cashAdvance) {
+                        const setDocumentBudget = await updateDocumentById(newDocumentId, "Cash Advance", obj.cashAdvance);
 
-                    if (lrCreationResponse) {
-                        console.log('LR created successfully');
+                        if (setDocumentBudget) {
+                            console.log("Budget set successfully");
+                        } else {
+                            console.error('Failed to set budget')
+                        }
                     } else {
-                        console.error('Failed to create LR');
+                        // Insert new LR using the newly created document's ID
+                        const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
+
+                        if (lrCreationResponse) {
+                            console.log('LR created successfully');
+                        } else {
+                            console.error('Failed to create LR');
+                        }
                     }
                 }
 
@@ -486,14 +496,8 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                console.log('Response data:', response.data);
-                return response.data;
             })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
+
             if (response.status === 200) {
                 return true;
             }
