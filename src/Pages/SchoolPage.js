@@ -19,6 +19,7 @@ import { useSchoolContext } from '../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import JEVTable from '../Components/Table/JEVTable';
+import RestService from '../Services/RestService';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -203,11 +204,89 @@ function SchoolPage(props) {
     );
 }
 
+function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
+    const { currentDocument, fetchDocumentData } = useSchoolContext();
+
+    const updateDocumentById = async (newValue) => {
+        try {
+            const response = await RestService.updateDocumentById(currentDocument?.id, "Cash Advance", newValue);
+            if (response) {
+                console.log(`Document with id: ${currentDocument?.id} is updated`);
+            } else {
+                console.log("Document not updated");
+            }
+            fetchDocumentData(); //fetch data changes
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }
+
+    const handleOnClick = async () => {
+        await updateDocumentById(value); //update field in db
+        handleClose();
+        handleCloseParent();
+    }
+
+    return (
+        <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            closeAfterTransition
+            slots={{ backdrop: Backdrop }}
+        >
+            <Fade in={open}>
+                <Paper sx={[styles.paper, { p: 3, pb: 2 }]}> {/*Overload padding component*/}
+                    <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
+                        Are you sure you want to set the desired amount?
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 1 }}>
+                        You can only set your budget
+                        <span style={{ fontWeight: 'bold' }}> once </span>
+                        per month for each school. This action cannot be undone.
+                    </Typography>
+                    <Box sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: " flex-end",
+                        pt: 1
+                    }}>
+                        <Button onClick={handleClose} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={() => handleOnClick()} color="primary">
+                            Save
+                        </Button>
+                    </Box>
+                </Paper>
+            </Fade>
+        </Modal>
+    )
+}
+
 function BudgetModal() {
     const { month, currentSchool, currentDocument } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
+    const [amount, setAmount] = React.useState(0)
+    const [confirmOpen, setConfirmOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const handleConfirmClose = () => setConfirmOpen(false)
+    const handleChange = (event) => {
+        const value = event.target.value;
+        const regex = /^[0-9]*$/;
+
+        if (regex.test(value)) {
+            setAmount(value);
+        }
+    }
+
+    React.useEffect(() => {
+        if (currentDocument) {
+            setAmount(currentDocument?.cashAdvance)
+        }
+    }, [currentDocument])
 
     return (
         <React.Fragment>
@@ -224,11 +303,6 @@ function BudgetModal() {
                 aria-describedby="modal-modal-description"
                 closeAfterTransition
                 slots={{ backdrop: Backdrop }}
-            // slotProps={{
-            //     backdrop: {
-            //         timeout: 500,
-            //     },
-            // }}
             >
                 <Fade in={open}>
                     <Paper sx={styles.paper}>
@@ -244,15 +318,22 @@ function BudgetModal() {
                         <TextField
                             sx={{ alignSelf: "center", mt: 2, width: "100%" }}
                             type="text"
-                            value={currentDocument?.cashAdvance}
+                            value={amount}
                             disabled={!!currentDocument?.cashAdvance} // Convert to boolean; Disabled if cash advance already set
-                            //value={amountData.amount}
-                            //onChange={handleChange}
+                            onChange={(event) => handleChange(event)}
                             label="Input Amount"
                         />
-                        <Button sx={styles.button} variant="contained" disabled={!!currentDocument?.cashAdvance} >
+                        <Button sx={styles.button}
+                            onClick={() => setConfirmOpen(true)}
+                            variant="contained"
+                            disabled={!!currentDocument?.cashAdvance} >
                             Save
                         </Button>
+                        <ConfirmModal
+                            open={confirmOpen}
+                            handleClose={handleConfirmClose}
+                            handleCloseParent={handleClose}
+                            value={amount} />
                     </Paper>
                 </Fade>
             </Modal>

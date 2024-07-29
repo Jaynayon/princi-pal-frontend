@@ -479,6 +479,8 @@ const RestService = (() => {
             obj = { headAccounting: value };
         } else if (description === "Budget Limit") {
             obj = { budgetLimit: value };
+        } else if (description === "Cash Advance") {
+            obj = { cashAdvance: value }
         }
 
 
