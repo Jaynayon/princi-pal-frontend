@@ -184,17 +184,19 @@ const RestService = (() => {
 
     const getLrByDocumentId = async (doc_id) => {
         try {
-            const response = await instance.get(`${process.env.REACT_APP_API_URL_LR}/documents/${doc_id}`)
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response) {
-                return response;
+            if (doc_id) {
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_LR}/documents/${doc_id}`)
+                    .then(response => {
+                        console.log('Response data:', response.data);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error('Error getting document:', error);
+                        // Handle errors here (e.g., display error message)
+                    });
+                if (response) {
+                    return response;
+                }
             }
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
@@ -205,18 +207,21 @@ const RestService = (() => {
 
     const getJevByDocumentId = async (doc_id) => {
         try {
-            const response = await instance.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${doc_id}`)
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response) {
-                return response;
+            if (doc_id) {
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${doc_id}`)
+                    .then(response => {
+                        console.log('Response data:', response.data);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error('Error getting document:', error);
+                        // Handle errors here (e.g., display error message)
+                    });
+                if (response) {
+                    return response;
+                }
             }
+
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
@@ -226,17 +231,19 @@ const RestService = (() => {
 
     const getDocumentBySchoolIdYearMonth = async (school_id, year, month) => {
         try {
-            const response = await instance.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}/${month}`)
-                .then(response => {
-                    console.log(response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error(error.response.data)
-                })
+            if (school_id) {
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}/${month}`)
+                    .then(response => {
+                        console.log(response.data);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error(error.response.data)
+                    })
 
-            if (response) {
-                return response;
+                if (response) {
+                    return response;
+                }
             }
         } catch (error) {
             console.log(error.resonse.data)
