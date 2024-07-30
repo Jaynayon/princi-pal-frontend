@@ -166,19 +166,19 @@ class LRTable extends Component {
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <DocumentTextFields
                                     id={currentDocument?.id} //pass by value
-                                    value={currentDocument?.claimant}
+                                    value={currentDocument?.claimant || "None"}
                                     description="Claimant"
                                 />
                                 <DocumentTextFields
                                     id={currentDocument?.id}
-                                    value={currentDocument?.sds}
+                                    value={currentDocument?.sds || "None"}
                                     description="SDS"
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6} md={6} lg={6}>
                                 <DocumentTextFields
                                     id={currentDocument?.id}
-                                    value={currentDocument?.headAccounting}
+                                    value={currentDocument?.headAccounting || "None"}
                                     description="Head. Accounting Div. Unit"
                                 />
                             </Grid>
@@ -229,6 +229,9 @@ const DocumentTextFields = (props) => {
     }
 
     const handleInputOnClick = (event) => {
+        if (value === "None" || value === "none") {
+            setInput("")
+        }
         setPrevInput(event.target.value);
     }
 
