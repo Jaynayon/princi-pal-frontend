@@ -639,7 +639,7 @@ const RestService = (() => {
 
     const getSchools = async () => {
         try {
-            const response = await instance.get('/schools/all'); // Adjust endpoint as needed
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`); // Adjust endpoint as needed
             console.log('Fetched schools:', response.data);
             return response.data;
         } catch (error) {
