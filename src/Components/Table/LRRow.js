@@ -269,6 +269,7 @@ function RecordsRow(props) {
                                             >
                                                 <TextField
                                                     //variant='standard'
+                                                    id={lr?.id}
                                                     value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
                                                     error={isError(column.id, row.id)}
                                                     helperText={displayError(column.id, row.id)}
