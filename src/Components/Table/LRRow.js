@@ -21,7 +21,6 @@ function RecordsRow(props) {
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [dateError, setDateError] = useState(false);
-    const [uacsError, setUacsError] = useState(false);
 
     const {
         addFields,
@@ -193,7 +192,7 @@ function RecordsRow(props) {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
         if (editingCell?.colId === colId && editingCell?.rowId === rowId)
             return number;
-        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return "₱" + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
     const displayError = (colId, rowId) => {
@@ -270,6 +269,7 @@ function RecordsRow(props) {
                                             >
                                                 <TextField
                                                     //variant='standard'
+                                                    id={lr?.id}
                                                     value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
                                                     error={isError(column.id, row.id)}
                                                     helperText={displayError(column.id, row.id)}

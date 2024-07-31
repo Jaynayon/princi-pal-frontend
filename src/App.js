@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, Outlet, RouterProvider } from 'react-router-dom';
 import Navigation from './Components/Navigation/Navigation.js';
-import Dashboard from './Pages/Dashboard.js';
+import DashboardPage from './Pages/DashboardPage.js';
 import SchoolPage from './Pages/SchoolPage.js';
-import People from './Pages/People.js';
-import Settings from './Pages/Settings.js';
-import Login from './Pages/Login.js';
+import PeoplePage from './Pages/PeoplePage.js';
+import SettingsPage from './Pages/SettingsPage.js';
+import LoginPage from './Pages/LoginPage.js';
 import AdminPage from './Pages/AdminPage.js';
+import NoMatchPage from './Pages/NoMatchPage.js';
 import './App.css';
 import { NavigationProvider } from './Context/NavigationProvider.js';
 import { SchoolProvider } from './Context/SchoolProvider.js';
 import WelcomePage from './Pages/WelcomePage.js';
-import Registration from './Pages/Registration.js';
+import RegistrationPage from './Pages/RegistrationPage.js';
 import RestService from './Services/RestService.js';
-
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -57,7 +57,7 @@ function App() {
 
   const getElement = (Component) => {
     if (!isLoggedIn) {
-      return <Login />;
+      return <LoginPage />;
     }
     return isSuperAdmin ? <AdminPage /> : <PageWithNavigation page={<Component />} />;
   };
@@ -75,33 +75,37 @@ function App() {
         <Route
           index
           //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <WelcomePage />}
-          element={getWelcomeElement(WelcomePage, Dashboard)}
+          element={getWelcomeElement(WelcomePage, DashboardPage)}
         />
         <Route
           path="/login"
           //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Login />}
-          element={getWelcomeElement(Login, Dashboard)}
+          element={getWelcomeElement(LoginPage, DashboardPage)}
         />
         <Route
           path="/register"
           //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Registration />}
-          element={getWelcomeElement(Registration, Dashboard)}
+          element={getWelcomeElement(RegistrationPage, DashboardPage)}
         />
         <Route
-          path="/dashboard/*"
-          element={getElement(Dashboard)}
+          path="/dashboard"
+          element={getElement(DashboardPage)}
         />
         <Route
           path="/schools/*"
           element={getElement(SchoolPage)}
         />
         <Route
-          path="/people/*"
-          element={getElement(People)}
+          path="/people"
+          element={getElement(PeoplePage)}
         />
         <Route
-          path="/settings/*"
-          element={getElement(Settings)}
+          path="/settings"
+          element={getElement(SettingsPage)}
+        />
+        <Route
+          path="*"
+          element={<NoMatchPage />}
         />
       </Route>
     )

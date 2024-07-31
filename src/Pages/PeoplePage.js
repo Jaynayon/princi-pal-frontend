@@ -26,7 +26,7 @@ import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI i
 import axios from 'axios'; // Import Axios for making HTTP requests
 import { useNavigationContext } from '../Context/NavigationProvider';
 
-function People(props) {
+function PeoplePage(props) {
     const [member, setMember] = useState('');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
@@ -469,7 +469,7 @@ function People(props) {
     );
 }
 
-export default People;
+export default PeoplePage;
 
 
 

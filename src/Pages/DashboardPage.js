@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import Container from '@mui/material/Container';
@@ -70,10 +70,9 @@ const ApexChart = ({ totalBudget }) => {
 
 
 
-function Dashboard(props) {
+function DashboardPage(props) {
     const { currentUser } = useNavigationContext();
     const [selectedSchool, setSelectedSchool] = useState('');
-    const [defaultSchool, setDefaultSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
@@ -87,58 +86,19 @@ function Dashboard(props) {
     const currentBudget = currentDocument ? currentDocument.budget : null;
     const [dateString, setDateString] = useState('');
 
-    //Effects
+    // This function only runs when dependencies: currentSchool & currentUser are changed
+    const initializeSelectedSchool = useCallback(() => {
+        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
+            setSelectedSchool(currentSchool?.id || currentUser.schools[0].id); // Ensure a valid value
+        }
+    }, [currentSchool, currentUser])
+
     useEffect(() => {
         if (month && year) {
             setDateString(`${month} ${year}`);
         }
-    }, [month, year]);
-
-    useEffect(() => {
-
-        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
-            // setDefaultSchool(currentUser.schools[0].id);
-            // setSelectedSchool(currentUser.schools[0].id);
-            //setDefaultSchool(currentUser.schools[0].id);
-            setSelectedSchool(currentSchool?.id);
-        }
-
-    }, [currentUser, currentSchool]);
-
-    useEffect(() => {
-        // const fetchAllDocuments = async () => {
-        //     setLoadingSchools(true);
-        //     try {
-        //         const allDocuments = await RestService.getAllDocuments();
-        //         const totalBudget = allDocuments.reduce((acc, doc) => acc + doc.budget, 0);
-        //         setSchoolBudget(totalBudget);
-        //     } catch (error) {
-        //         console.error(error);
-        //     } finally {
-        //         setLoadingSchools(false);
-        //     }
-        // };
-
-        const fetchSchools = async () => {
-            setLoadingSchools(true);
-            try {
-                const response = await RestService.getSchools();
-                setSchools(response);
-                if (response && response.length > 0) {
-                    setDefaultSchool(response[0].id);
-                    //setSelectedSchool(response[0].id);
-                }
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoadingSchools(false);
-            }
-        };
-
-
-        // fetchAllDocuments();
-        fetchSchools();
-    }, []);
+        initializeSelectedSchool();
+    }, [month, year, initializeSelectedSchool]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
@@ -495,4 +455,4 @@ const styles = {
     },
 }
 
-export default Dashboard;
+export default DashboardPage;

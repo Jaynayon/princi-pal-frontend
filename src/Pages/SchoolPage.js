@@ -7,6 +7,11 @@ import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
+import Backdrop from '@mui/material/Backdrop';
+import Fade from '@mui/material/Fade';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { FilterDate, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/FilterDate'
 import DocumentTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
@@ -14,6 +19,7 @@ import { useSchoolContext } from '../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import JEVTable from '../Components/Table/JEVTable';
+import RestService from '../Services/RestService';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -48,7 +54,27 @@ function a11yProps(index) {
     };
 }
 
-function Schools(props) {
+// const theme = createTheme({
+//     components: {
+//         MuiButton: {
+//             styleOverrides: {
+//                 root: {
+//                     backgroundColor: '#19B4E5', // Default background color for enabled button
+//                     color: 'white', // Default text color for enabled button
+//                     '&:hover': {
+//                         backgroundColor: '#19a2e5', // Background color on hover
+//                     },
+//                     '&.Mui-disabled': {
+//                         backgroundColor: "#e0e0e0", // Background color when disabled
+//                         color: '#c4c4c4', // Text color when disabled
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// });
+
+function SchoolPage(props) {
     const { year, month, setIsAdding, currentDocument, exportDocument, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
     //const { selected } = useNavigationContext();
 
@@ -157,10 +183,10 @@ function Schools(props) {
                                         aria-label="basic tabs example">
                                         <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
                                         <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
+                                        <BudgetModal />
                                     </Tabs>
                                 </Box>
                             </Grid>
-
                             {/*Document Tables*/}
                             <Grid item xs={12} md={12} lg={12}>
                                 <CustomTabPanel value={value} index={0}>
@@ -175,6 +201,151 @@ function Schools(props) {
                 </Grid>
             </Grid>
         </Container >
+    );
+}
+
+function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
+    const { currentDocument, fetchDocumentData, createNewDocument, jev } = useSchoolContext();
+
+    const updateDocumentById = async (newValue) => {
+        try {
+            const response = await RestService.updateDocumentById(currentDocument?.id, "Cash Advance", newValue);
+            if (response) {
+                console.log(`Document with id: ${currentDocument?.id} is updated`);
+            } else {
+                console.log("Document not updated");
+            }
+            fetchDocumentData(); //fetch data changes
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }
+
+    const handleOnClick = async () => {
+        let obj = {}
+        obj = { cashAdvance: value }
+        // jev length upon initialization will always be > 2
+        if (jev.length < 2) { //if there's no current document or it's not yet existing
+            await createNewDocument(obj, value);
+        } else {
+            await updateDocumentById(value); //update field in db
+        }
+
+        handleClose();
+        handleCloseParent();
+    }
+
+    return (
+        <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            closeAfterTransition
+            slots={{ backdrop: Backdrop }}
+        >
+            <Fade in={open}>
+                <Paper sx={[styles.paper, { p: 3, pb: 2 }]}> {/*Overload padding component*/}
+                    <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
+                        Are you sure you want to set the desired amount?
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 1 }}>
+                        You can only set your budget
+                        <span style={{ fontWeight: 'bold' }}> once </span>
+                        per month for each school. This action cannot be undone.
+                    </Typography>
+                    <Box sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: " flex-end",
+                        pt: 1
+                    }}>
+                        <Button onClick={handleClose} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={() => handleOnClick()} color="primary">
+                            Save
+                        </Button>
+                    </Box>
+                </Paper>
+            </Fade>
+        </Modal>
+    )
+}
+
+function BudgetModal() {
+    const { month, currentSchool, currentDocument } = useSchoolContext();
+    const [open, setOpen] = React.useState(false);
+    const [amount, setAmount] = React.useState(0)
+    const [confirmOpen, setConfirmOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+    const handleConfirmClose = () => setConfirmOpen(false)
+    const handleChange = (event) => {
+        const value = event.target.value;
+        const regex = /^[0-9]*$/;
+
+        if (regex.test(value)) {
+            setAmount(value);
+        }
+    }
+
+    React.useEffect(() => {
+        if (currentDocument) {
+            setAmount(currentDocument?.cashAdvance)
+        }
+    }, [currentDocument])
+
+    return (
+        <React.Fragment>
+            <Button
+                sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
+                onClick={handleOpen}
+            >
+                Budget
+            </Button>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+                closeAfterTransition
+                slots={{ backdrop: Backdrop }}
+            >
+                <Fade in={open}>
+                    <Paper sx={styles.paper}>
+                        <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
+                            Budget
+                            <span style={{ color: "grey" }}> (Cash Advance)</span>
+                        </Typography>
+                        <Typography id="modal-modal-description" sx={{ mt: 1 }}>
+                            Set the budget required or delegated for the month of
+                            <span style={{ fontWeight: 'bold' }}> {month}</span> in
+                            <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
+                        </Typography>
+                        <TextField
+                            sx={{ alignSelf: "center", mt: 2, width: "100%" }}
+                            type="text"
+                            value={amount || 0}
+                            disabled={!!currentDocument?.cashAdvance} // Convert to boolean; Disabled if cash advance already set
+                            onChange={(event) => handleChange(event)}
+                            label="Input Amount"
+                        />
+                        <Button sx={styles.button}
+                            onClick={() => setConfirmOpen(true)}
+                            variant="contained"
+                            disabled={!!currentDocument?.cashAdvance} >
+                            Save
+                        </Button>
+                        <ConfirmModal
+                            open={confirmOpen}
+                            handleClose={handleConfirmClose}
+                            handleCloseParent={handleClose}
+                            value={amount || 0} />
+                    </Paper>
+                </Fade>
+            </Modal>
+        </React.Fragment>
     );
 }
 
@@ -203,6 +374,35 @@ const styles = {
             fontWeight: 'bold', // Font weight of selected tab
         },
     },
+    paper: {
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        boxShadow: 24,
+        p: 4.5,
+        width: 400,
+        borderRadius: '15px',
+        //textAlign: 'center',
+    },
+    button: {
+        mt: 2,
+        borderRadius: '10px',
+        width: '160px',
+        padding: '10px 0',
+        alignSelf: "center",
+        backgroundColor: '#19B4E5', // Default background color for enabled button
+        color: 'white', // Default text color for enabled button
+        '&:hover': {
+            backgroundColor: '#19a2e5', // Background color on hover
+        },
+        '&.Mui-disabled': {
+            backgroundColor: '#e0e0e0', // Background color when disabled
+            color: '#c4c4c4', // Text color when disabled
+        }
+    }
 }
 
-export default Schools;
+export default SchoolPage;

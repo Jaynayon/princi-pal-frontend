@@ -12,7 +12,7 @@ const RestService = (() => {
 
     const createUser = async (fname, mname, lname, username, email, password, position) => {
         try {
-            const response = await instance.post('http://localhost:4000/users/create', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/create`, {
                 fname,
                 mname,
                 lname,
@@ -49,7 +49,7 @@ const RestService = (() => {
 
     const createUserPrincipal = async (adminId, fname, mname, lname, username, email, password) => {
         try {
-            const response = await instance.post('http://localhost:4000/users/create/principal', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/create/principal`, {
                 adminId,
                 fname,
                 mname,
@@ -87,7 +87,7 @@ const RestService = (() => {
 
     const authenticateUser = async (email, password) => {
         try {
-            const response = await instance.post('http://localhost:4000/authenticate/login', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_AUTH}/login`, {
                 emailOrUsername: email,
                 password,
             }, {
@@ -114,7 +114,7 @@ const RestService = (() => {
 
     const validateUsernameEmail = async (email) => {
         try {
-            const response = await instance.post('http://localhost:4000/users/exists', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/exists`, {
                 emailOrUsername: email
             }, {
                 headers: {
@@ -141,7 +141,7 @@ const RestService = (() => {
     const validateToken = async (token) => {
         try {
             if (token) {
-                const response = await instance.get(`http://localhost:4000/authenticate/verify/?token=${token}`)
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_AUTH}/verify/?token=${token}`)
                     .then(response => {
                         console.log('Response data:', response.data);
                         return response.data;
@@ -164,7 +164,7 @@ const RestService = (() => {
 
     const getUserById = async (user_id) => {
         try {
-            const response = await instance.get(`http://localhost:4000/users/${user_id}`)
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_USER}/${user_id}`)
                 .then(response => {
                     console.log('Response data:', response.data);
                     return response.data;
@@ -184,17 +184,19 @@ const RestService = (() => {
 
     const getLrByDocumentId = async (doc_id) => {
         try {
-            const response = await instance.get(`http://localhost:4000/lr/documents/${doc_id}`)
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response) {
-                return response;
+            if (doc_id) {
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_LR}/documents/${doc_id}`)
+                    .then(response => {
+                        console.log('Response data:', response.data);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error('Error getting document:', error);
+                        // Handle errors here (e.g., display error message)
+                    });
+                if (response) {
+                    return response;
+                }
             }
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
@@ -205,18 +207,21 @@ const RestService = (() => {
 
     const getJevByDocumentId = async (doc_id) => {
         try {
-            const response = await instance.get(`http://localhost:4000/jev/documents/${doc_id}`)
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response) {
-                return response;
+            if (doc_id) {
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${doc_id}`)
+                    .then(response => {
+                        console.log('Response data:', response.data);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error('Error getting document:', error);
+                        // Handle errors here (e.g., display error message)
+                    });
+                if (response) {
+                    return response;
+                }
             }
+
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
@@ -226,17 +231,19 @@ const RestService = (() => {
 
     const getDocumentBySchoolIdYearMonth = async (school_id, year, month) => {
         try {
-            const response = await instance.get(`http://localhost:4000/documents/school/${school_id}/${year}/${month}`)
-                .then(response => {
-                    console.log(response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error(error.response.data)
-                })
+            if (school_id) {
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}/${month}`)
+                    .then(response => {
+                        console.log(response.data);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error(error.response.data)
+                    })
 
-            if (response) {
-                return response;
+                if (response) {
+                    return response;
+                }
             }
         } catch (error) {
             console.log(error.resonse.data)
@@ -248,7 +255,7 @@ const RestService = (() => {
 
     const getLrByKeyword = async (keyword) => {
         try {
-            const response = await instance.get(`http://localhost:4000/lr/keyword/${keyword}`)
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_LR}/keyword/${keyword}`)
                 .then(response => {
                     console.log(response.data);
                     return response.data;
@@ -270,7 +277,7 @@ const RestService = (() => {
 
     const getExcelFromLr = async (docId, schoolId, year, month) => {
         try {
-            const response = await instance.post('http://localhost:4000/downloadExcel', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_DOWNLOAD}`, {
                 documentId: docId,
                 schoolId: schoolId,
                 year,
@@ -294,7 +301,7 @@ const RestService = (() => {
 
     const deleteLrById = async (lr_id) => {
         try {
-            const response = await instance.delete(`http://localhost:4000/lr/${lr_id}`)
+            const response = await instance.delete(`${process.env.REACT_APP_API_URL_LR}/${lr_id}`)
                 .then(response => {
                     console.log('Response data:', response.data);
                     return response.data;
@@ -335,7 +342,7 @@ const RestService = (() => {
         }
 
         try {
-            const response = await instance.patch(`http://localhost:4000/lr/${rowId}`, obj, {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_LR}/${rowId}`, obj, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -367,7 +374,7 @@ const RestService = (() => {
         }
 
         try {
-            const response = await instance.patch(`http://localhost:4000/jev/${rowId}`, obj, {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_JEV}/${rowId}`, obj, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -392,7 +399,7 @@ const RestService = (() => {
 
     const createLrByDocId = async (doc_id, obj) => {
         try {
-            const response = await instance.post('http://localhost:4000/lr/create', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_LR}/create`, {
                 documentsId: doc_id,
                 date: obj.date,
                 orsBursNo: obj.orsBursNo,
@@ -405,15 +412,9 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                console.log('Response data:', response.data);
-                return response.data;
-            })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response.status === 200) {
+            });
+
+            if (response.status === 201) {
                 return true;
             }
             return false;
@@ -424,7 +425,7 @@ const RestService = (() => {
         }
     };
 
-    const createDocBySchoolId = async (schoolId, month, year, obj) => {
+    const createDocBySchoolId = async (schoolId, month, year, obj, cashAdvanceValue) => {
         try {
             // Troubleshooting: year and month passed is an array
             // Extracting the year value from the array
@@ -433,7 +434,7 @@ const RestService = (() => {
             // Extracting the month value from the array
             const monthValue = Array.isArray(month) ? month[0] : month;
 
-            const response = await instance.post('http://localhost:4000/documents/create', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_DOC}/create`, {
                 schoolId,
                 month: monthValue,
                 year: yearValue
@@ -447,13 +448,26 @@ const RestService = (() => {
             if (response) {
                 const newDocumentId = response.data.id;
 
-                // Insert new LR using the newly created document's ID
-                const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
+                // If a payload (obj) is passed, create document and lr, else only document.
+                if (obj) {
+                    if (obj.cashAdvance) {
+                        const setDocumentBudget = await updateDocumentById(newDocumentId, "Cash Advance", obj.cashAdvance);
 
-                if (lrCreationResponse) {
-                    console.log('LR created successfully');
-                } else {
-                    console.error('Failed to create LR');
+                        if (setDocumentBudget) {
+                            console.log("Budget set successfully");
+                        } else {
+                            console.error('Failed to set budget')
+                        }
+                    } else {
+                        // Insert new LR using the newly created document's ID
+                        const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
+
+                        if (lrCreationResponse) {
+                            console.log('LR created successfully');
+                        } else {
+                            console.error('Failed to create LR');
+                        }
+                    }
                 }
 
                 return response.data; // Return the created document data
@@ -479,22 +493,18 @@ const RestService = (() => {
             obj = { headAccounting: value };
         } else if (description === "Budget Limit") {
             obj = { budgetLimit: value };
+        } else if (description === "Cash Advance") {
+            obj = { cashAdvance: value }
         }
 
 
         try {
-            const response = await instance.patch(`http://localhost:4000/documents/${docId}`, obj, {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, obj, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                console.log('Response data:', response.data);
-                return response.data;
             })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
+
             if (response.status === 200) {
                 return true;
             }
@@ -508,7 +518,7 @@ const RestService = (() => {
 
     const getSchoolName = async (name) => {
         try {
-            const response = await instance.post('http://localhost:4000/schools/name', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_SCHOOL}/name`, {
                 name
             }, {
                 headers: {
@@ -529,7 +539,7 @@ const RestService = (() => {
 
     const getSchoolFullName = async (fullName) => {
         try {
-            const response = await instance.post('http://localhost:4000/schools/fullname', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_SCHOOL}/fullname`, {
                 fullName
             }, {
                 headers: {
@@ -550,7 +560,7 @@ const RestService = (() => {
 
     const createSchool = async (name, fullName) => {
         try {
-            const response = await instance.post('http://localhost:4000/schools/create', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_SCHOOL}/create`, {
                 name,
                 fullName
             }, {
@@ -572,7 +582,7 @@ const RestService = (() => {
 
     const getPrincipal = async (schoolId) => {
         try {
-            const response = await instance.post('http://localhost:4000/schools/users/principal', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_SCHOOL}/principal`, {
                 schoolId
             }, {
                 headers: {
@@ -593,7 +603,7 @@ const RestService = (() => {
 
     const getUserByEmailUsername = async (email) => {
         try {
-            const response = await instance.post('http://localhost:4000/users/schools', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/schools`, {
                 emailOrUsername: email
             }, {
                 headers: {
@@ -614,7 +624,7 @@ const RestService = (() => {
 
     const insertUserAssociation = async (userId, schoolId) => {
         try {
-            const response = await instance.post('http://localhost:4000/associations/insert', {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_ASSOC}/insert`, {
                 userId,
                 schoolId
             }, {
@@ -636,7 +646,7 @@ const RestService = (() => {
 
     const getSchools = async () => {
         try {
-            const response = await instance.get('/schools/all'); // Adjust endpoint as needed
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`); // Adjust endpoint as needed
             console.log('Fetched schools:', response.data);
             return response.data;
         } catch (error) {
@@ -647,7 +657,7 @@ const RestService = (() => {
 
     const updateUserPassword = async (userId, newPassword) => {
         try {
-            const response = await instance.patch(`http://localhost:4000/users/${userId}/password`, {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_USER}/${userId}/password`, {
                 newPassword,
             }, {
                 headers: {

@@ -7,7 +7,7 @@ import { TextField } from '@mui/material';
 import RestService from '../../Services/RestService';
 
 function JEVRow(props) {
-    const { page, rowsPerPage } = props;
+    const { page, rowsPerPage, columns } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
@@ -72,15 +72,20 @@ function JEVRow(props) {
         return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
+    const formatNumberDisplay = (number, colId, rowId) => {
+        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
+        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     return (
         <React.Fragment>
             {jev
-                .slice(page * rowsPerPage, page * props.rowsPerPage + props.rowsPerPage)
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                     const uniqueKey = `row_${row.id}_${index}`;
                     return (
                         <TableRow key={uniqueKey} hover role="checkbox" tabIndex={-1}>
-                            {props.columns.map((column) => {
+                            {columns.map((column) => {
                                 const value = row[column.id];
 
                                 return (
@@ -99,16 +104,24 @@ function JEVRow(props) {
                                         {/*Amount field*/}
                                         {column.id === "amount" ?
                                             <Box
-                                                style={
-                                                    editingCell &&
-                                                        editingCell.colId === column.id &&
-                                                        editingCell.rowId === row.id &&
-                                                        row.id !== 3
-                                                        ? styles.divInput
-                                                        : null
-                                                }
+                                                // style={
+                                                //     editingCell &&
+                                                //         editingCell.colId === column.id &&
+                                                //         editingCell.rowId === row.id &&
+                                                //         row.id !== 3
+                                                //         ? styles.divInput
+                                                //         : null
+                                                // }
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    flexDirection: 'row',
+                                                    justifyContent: "flex-start",
+                                                    fontSize: 14,
+                                                    height: 40
+                                                }}
                                             >
-                                                <TextField
+                                                {/* <TextField
                                                     // value={value}
                                                     value={formatNumber(value, column.id, row.id)}
                                                     sx={{
@@ -134,7 +147,8 @@ function JEVRow(props) {
                                                             e.target.blur(); // Invoke handleLogin on Enter key press
                                                         }
                                                     }}
-                                                />
+                                                /> */}
+                                                {formatNumberDisplay(value, column.id, row.id)}
                                             </Box>
                                             :
                                             /*Account Type field*/
@@ -166,7 +180,7 @@ function JEVRow(props) {
 const styles = {
     cell: {
         fontFamily: "Mulish",
-        fontWeight: "bold",
+        //fontWeight: "bold",
         height: "35px",
     },
     inputStyling: {

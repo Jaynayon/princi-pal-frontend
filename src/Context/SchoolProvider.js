@@ -129,14 +129,15 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
-    const createNewDocument = useCallback(async (obj) => {
+    const createNewDocument = useCallback(async (obj, cashAdvanceValue) => {
         try {
             if (currentSchool) {
                 const getDocument = await RestService.createDocBySchoolId(
                     currentSchool.id,
                     month,
                     year,
-                    obj
+                    obj,
+                    cashAdvanceValue
                 );
 
                 if (getDocument) {
@@ -174,7 +175,7 @@ export const SchoolProvider = ({ children }) => {
         try {
             if (currentDocument) {
                 // Call RestService to fetch lr by document id
-                const data = await RestService.getLrByDocumentId(currentDocument.id);
+                const data = await RestService.getLrByDocumentId(currentDocument?.id);
                 console.log("lr")
                 if (data) { //data.decodedToken
                     setLr(data)
