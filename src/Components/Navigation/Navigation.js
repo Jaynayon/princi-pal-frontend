@@ -144,26 +144,7 @@ export default function Navigation({ children }) {
     setAnchorEl(null);
   };
 
-  const [options, setOptions] = React.useState([
-    'CIT-U is inviting you to be a part of the organization',
-    'Your application at CTU has been cancelled',
-    'Budget limit exceeded; urgent action required to align expenses with allocated funds',
-    'Congratulations, you have passed the first phase of the application process',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-  ]);
+  const [options, setOptions] = React.useState([]);
 
   const handleClearOptions = () => {
     setOptions([]); // Clear options by setting it to an empty array
@@ -324,7 +305,7 @@ export default function Navigation({ children }) {
                   <NavigationSearchBar />
                   <Box>
                     <IconButton color="inherit" onClick={handleMenuOpen}>
-                      <Badge badgeContent={5} color="secondary">
+                      <Badge badgeContent={options.length} color="secondary">
                         <NotificationsIcon />
                       </Badge>
                     </IconButton>
