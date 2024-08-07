@@ -75,17 +75,23 @@ export const NavigationProvider = ({ children }) => {
         }
     }, [currentUser, location.pathname]);
 
+
     useEffect(() => {
         if (currentUser && currentUser.position !== "Super administrator") {
             //const localStorageData = window.localStorage.getItem("LOCAL_STORAGE_SELECTED");
             //const data = "localStorageData ? JSON.parse(localStorageData) : null;"
 
             // RegEx that transform route text to school name
+            // function transformText(input) {
+            //     return input
+            //         .split('-') // Split the string at the hyphen
+            //         .map((word, index) => index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word.toUpperCase())
+            //         .join(' '); // Join the parts with a space
+            // }
             function transformText(input) {
                 return input
-                    .split('-') // Split the string at the hyphen
-                    .map((word, index) => index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word.toUpperCase())
-                    .join(' '); // Join the parts with a space
+                    .replace(/-/g, ' ')  // Replace all hyphens with spaces
+                    .toUpperCase();      // Convert all letters to uppercase
             }
 
             // Define a mapping between paths and the desired local storage values
