@@ -13,6 +13,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { Link } from 'react-router-dom';
+import { transformSchoolText } from './Navigation';
 
 // Custom imports
 import { VerticalLine } from './DisplayItems';
@@ -132,7 +133,7 @@ export default function DisplaySchools() {
                                             sx={theme.navStyle.button}
                                         >
                                             <ListItemText
-                                                primary={item.name}
+                                                primary={transformSchoolText(item.name)}
                                                 primaryTypographyProps={{
                                                     ...styles.text,
                                                     ...(selected === item.name

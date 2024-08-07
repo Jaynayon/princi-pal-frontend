@@ -114,6 +114,17 @@ const Drawer = styled(MuiDrawer, {
   };
 });
 
+export function transformSchoolText(input) {
+  let words = input.split(' ');
+  return words.map((word, index) => {
+    if (index === words.length - 1) {
+      return word.toUpperCase();
+    } else {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }
+  }).join(' ');
+}
+
 const displayTitle = (selected) => {
   if (
     selected === "Dashboard" ||
@@ -127,7 +138,7 @@ const displayTitle = (selected) => {
   return (
     <>
       <span>School </span>
-      <span style={{ color: "grey" }}>({selected})</span>
+      <span style={{ color: "grey" }}>({transformSchoolText(selected)})</span>
     </>
   );
 };
