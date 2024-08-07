@@ -209,16 +209,10 @@ const RestService = (() => {
         try {
             if (doc_id) {
                 const response = await instance.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${doc_id}`)
-                    .then(response => {
-                        console.log('Response data:', response.data);
-                        return response.data;
-                    })
-                    .catch(error => {
-                        console.error('Error getting document:', error);
-                        // Handle errors here (e.g., display error message)
-                    });
+
+                console.log(response);
                 if (response) {
-                    return response;
+                    return response.data
                 }
             }
 
@@ -231,22 +225,14 @@ const RestService = (() => {
 
     const getDocumentBySchoolIdYearMonth = async (school_id, year, month) => {
         try {
-            if (school_id) {
-                const response = await instance.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}/${month}`)
-                    .then(response => {
-                        console.log(response.data);
-                        return response.data;
-                    })
-                    .catch(error => {
-                        console.error(error.response.data)
-                    })
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}/${month}`)
 
-                if (response) {
-                    return response;
-                }
+            console.log(response);
+            if (response) {
+                return response.data
             }
         } catch (error) {
-            console.log(error.resonse.data)
+            console.log(error.response.data)
             //console.error('Error fetching lrs by document id:', error.message);
             //throw new Error("Get lr failed. Please try again later.");
             return null;

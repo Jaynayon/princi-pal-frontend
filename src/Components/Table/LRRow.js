@@ -132,8 +132,8 @@ function RecordsRow(props) {
                 setDateError(true)
             } else {
                 const rowIndex = lr.findIndex(row => row.id === rowId);
-                // jev length upon initialization will always be > 2
-                if (jev.length < 2) { //if there's no current document or it's not yet existing
+                // jev length upon initialization will always be > 2 or not null/undefined
+                if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
                     createNewDocument(lr[rowIndex]);
                 } else {
                     await createLrByDocumentId(currentDocument.id, lr[rowIndex]);

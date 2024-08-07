@@ -82,12 +82,6 @@ export const NavigationProvider = ({ children }) => {
             //const data = "localStorageData ? JSON.parse(localStorageData) : null;"
 
             // RegEx that transform route text to school name
-            // function transformText(input) {
-            //     return input
-            //         .split('-') // Split the string at the hyphen
-            //         .map((word, index) => index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word.toUpperCase())
-            //         .join(' '); // Join the parts with a space
-            // }
             function transformText(input) {
                 return input
                     .replace(/-/g, ' ')  // Replace all hyphens with spaces
@@ -114,7 +108,7 @@ export const NavigationProvider = ({ children }) => {
                     const schoolName = transformText(schoolNameRoute); // Set school name as local storage value
 
                     // Check if schoolName is present in the name property of any object in currentUser.schools
-                    const isSchoolValid = currentUser.schools.some(school => school.name === schoolName);
+                    const isSchoolValid = currentUser.schools.some(school => school?.name === schoolName);
 
                     const matchedSchool = currentUser.schools.find(school => school?.name === schoolName)
 

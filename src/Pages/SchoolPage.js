@@ -224,8 +224,9 @@ function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
     const handleOnClick = async () => {
         let obj = {}
         obj = { cashAdvance: value }
+        console.log(jev)
         // jev length upon initialization will always be > 2
-        if (jev.length < 2) { //if there's no current document or it's not yet existing
+        if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
             await createNewDocument(obj, value);
         } else {
             await updateDocumentById(value); //update field in db

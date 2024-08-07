@@ -7,6 +7,7 @@ export const SchoolContext = createContext();
 export const useSchoolContext = () => useContext(SchoolContext);
 
 const emptyDocument = {
+    id: 0,
     budget: 0,
     cashAdvance: 0,
     claimant: "",
@@ -98,9 +99,12 @@ export const SchoolProvider = ({ children }) => {
                     month
                 );
 
+                console.log(getDocument)
+
                 if (getDocument) {
                     setCurrentDocument(getDocument);
                 } else {
+                    console.log("this was invoked")
                     setCurrentDocument(emptyDocument);
                 }
             }
@@ -210,6 +214,8 @@ export const SchoolProvider = ({ children }) => {
         console.log("SchoolProvider useEffect: update document");
         // console.log(currentSchool.name+ "with id: "+currentSchool);
         fetchDocumentData();
+        console.log(month)
+        console.log(year)
 
     }, [month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
 
