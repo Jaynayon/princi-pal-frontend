@@ -138,7 +138,7 @@ const displayTitle = (selected) => {
   return (
     <>
       <span>School </span>
-      <span style={{ color: "grey" }}>({transformSchoolText(selected)})</span>
+      <span style={{ color: "grey" }}>({transformSchoolText(selected || "None")})</span>
     </>
   );
 };
