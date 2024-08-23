@@ -15,11 +15,20 @@ import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService'; // Adjust the path as needed
 import { useSchoolContext } from '../Context/SchoolProvider';
-import { transformSchoolText } from '../Components/Navigation/Navigation';
+
 
 //Apex Chart
-const ApexChart = ({ totalBudget }) => {
-    const [options] = useState({
+const ApexChart = ({ uacsData = [], budgetLimit }) => {
+    const [selectedCategory, setSelectedCategory] = useState(uacsData[0]?.code || '');
+
+    const generateSeries = (expenses) => [
+        {
+            name: "Actual Expenses",
+            data: expenses
+        }
+    ];
+
+    const generateOptions = (budget, maxExpense) => ({
         chart: {
             height: 350,
             type: 'line',
@@ -33,14 +42,6 @@ const ApexChart = ({ totalBudget }) => {
         stroke: {
             curve: 'straight'
         },
-        title: {
-            text: 'Line Chart',
-            align: 'left',
-            style: {
-                fontFamily: 'Mulish-Regular',
-                fontSize: '20px',
-            }
-        },
         grid: {
             row: {
                 colors: ['#f3f3f3', 'transparent'],
@@ -48,27 +49,135 @@ const ApexChart = ({ totalBudget }) => {
             },
         },
         xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+            categories: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+        },
+        yaxis: {
+            title: {
+                text: 'Amount (PHP)'
+            },
+            max: Math.max(budget, maxExpense), // Ensure Y-axis is high enough to show the budget
+        },
+        annotations: {
+            yaxis: [
+                {
+                    y: budget,
+                    borderColor: '#FF0000',
+                    label: {
+                        borderColor: '#FF0000',
+                        style: {
+                            color: '#fff',
+                            background: '#FF0000'
+                        },
+                        text: 'Budget Limit'
+                    }
+                }
+            ]
         }
     });
 
-    const [series] = useState([{
-        name: "Budget",
-        data: [totalBudget] // Use totalBudget as the data for the series
-    }]);
+    // Get the selected UACS data based on the selected category
+    const selectedUacs = uacsData.find(uacs => uacs.code === selectedCategory);
+
+    // Handle the case where selectedUacs is undefined
+    if (!selectedUacs) {
+        return <Typography variant="body1"></Typography>;
+    }
+
+    // Check if the selected category is "Total"
+    const budgetToUse = selectedCategory === '19901020000' ? budgetLimit : selectedUacs.budget;
+    const maxExpense = Math.max(...selectedUacs.expenses);
 
     return (
         <div>
-            <div id="chart">
-                <ReactApexChart options={options} series={series} type="line" height={350} />
-            </div>
-            <div id="html-dist"></div>
+            {uacsData.length === 0 ? (
+                <Typography variant="body1">No data available.</Typography>
+            ) : (
+                <div style={{ position: 'relative', marginBottom: '40px' }}>
+                    {/* Render the line chart based on selected category */}
+                    <div>
+                        <ReactApexChart
+                            options={generateOptions(budgetToUse, maxExpense)}
+                            series={generateSeries(selectedUacs.expenses)}
+                            type="line"
+                            height={350}
+                        />
+                        {/* Container for x-axis labels and dropdown */}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                            <div style={{ marginLeft: '10px' }}>
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    style={{
+                                        width: '100px', // Set the width to make it smaller
+                                        padding: '5px'
+                                    }}
+                                >
+                                    {uacsData.map((uacs) => (
+                                        <option key={uacs.code} value={uacs.code}>
+                                            {uacs.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
-
-
+// Sample data
+const sampleUacsData = [
+    {
+        code: '5020502001',
+        name: 'Communication Expenses',
+        budget: 10000, //jev property: documentId, jev.budget
+        expenses: [5000, 0, 18000, 20000, 50000]
+    },
+    {
+        code: '5020402000',
+        name: 'Electricity Expenses',
+        budget: 50000,
+        expenses: [1000, 5000, 6000, 47000, 10000 ]
+    },
+    {
+        code: '5020503000',
+        name: 'Internet Subscription Expenses',
+        budget: 10000,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '5029904000',
+        name: 'Transpo/Delivery Expenses',
+        budget: 10000,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '5020201000',
+        name: 'Training Expenses',
+        budget: 10000,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '5020399000',
+        name: 'Other Supplies & Materials Expenses',
+        budget: 10000,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '1990101000',
+        name: 'Advances to Operating Expenses',
+        budget: 10000,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '19901020000',
+        name: 'Total',
+        budget: 500000,
+        expenses: [0, 5000, 7000, 26000, 150000]
+    }
+];
 
 
 function DashboardPage(props) {
@@ -151,6 +260,7 @@ function DashboardPage(props) {
             return false;
         }
     };
+
 
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
@@ -368,7 +478,7 @@ function DashboardPage(props) {
                                     ) : (
                                         currentUser.schools.map((school) => (
                                             <MenuItem key={school.id} value={school.id}>
-                                                {transformSchoolText(school.name)}
+                                                {school.name}
                                             </MenuItem>
                                         ))
                                     )}
@@ -428,7 +538,9 @@ function DashboardPage(props) {
                                         flexDirection: 'column',
                                         height: 380,
                                     }}
+                                    
                                 >
+                                    <ApexChart uacsData={sampleUacsData} budgetLimit={currentDocument?.budgetLimit} />
                                     <ApexChart totalBudget={schoolBudget} />
                                 </Paper>
                             </Grid>
@@ -457,3 +569,5 @@ const styles = {
 }
 
 export default DashboardPage;
+
+
