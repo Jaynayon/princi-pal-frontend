@@ -1,5 +1,5 @@
 import '../App.css'
-import React, { } from 'react';
+import React, { useCallback } from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -279,7 +279,7 @@ function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
 }
 
 function BudgetModal() {
-    const { month, currentSchool, currentDocument, jev } = useSchoolContext();
+    const { month, currentSchool, currentDocument, jev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [amount, setAmount] = React.useState(0)
     const [confirmOpen, setConfirmOpen] = React.useState(false);
@@ -299,6 +299,7 @@ function BudgetModal() {
             setAmount(value);
         }
     }
+
     const handleChangeTab = (event, newTab) => {
         setTab(newTab);
     };
@@ -307,8 +308,11 @@ function BudgetModal() {
         if (currentDocument) {
             setAmount(currentDocument?.cashAdvance)
         }
-        console.log(jev)
-    }, [currentDocument, jev])
+        // Disable and set to first tab if document/jev not initialized
+        if (Array.isArray(jev) && jev.length === 0 && tab === 1) {
+            setTab(0);
+        }
+    }, [currentDocument, jev, tab, setTab])
 
     return (
         <React.Fragment>
@@ -337,7 +341,12 @@ function BudgetModal() {
                                     aria-label="basic tabs example"
                                 >
                                     <Tab sx={styles.tab} label="Budget" {...a11yProps(0)} />
-                                    <Tab sx={styles.tab} label="UACS" {...a11yProps(1)} />
+                                    <Tab
+                                        sx={styles.tab}
+                                        label="UACS"
+                                        {...a11yProps(1)}
+                                        disabled={(Array.isArray(jev) && jev.length === 0)}
+                                    />
                                     <Tab sx={styles.tab} label="Annual" {...a11yProps(2)} />
                                 </Tabs>
                             </Box>
@@ -362,7 +371,7 @@ function BudgetModal() {
                                     Save
                                 </Button>
                             </CustomTabPanel>
-                            <CustomTabPanel value={tab} index={1}>
+                            <CustomTabPanel value={tab} index={1} sx={{ display: false }}>
                                 <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
                                     Set a projected budget for various expense categories under UACS in
                                     <span style={{ fontWeight: 'bold' }}> {month}</span> at
