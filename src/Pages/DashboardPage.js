@@ -132,7 +132,7 @@ const sampleUacsData = [
     {
         code: '5020502001',
         name: 'Communication Expenses',
-        budget: 10000,
+        budget: 10000, //jev property: documentId, jev.budget
         expenses: [5000, 0, 18000, 20000, 50000]
     },
     {
@@ -221,14 +221,14 @@ function DashboardPage(props) {
                     budget: 0.0,
                     budgetLimit: 0.0,
                     schoolId: schoolId,
-                    id: document.id // assuming document has an id field
+                    id: document.id // assuming `document` has an `id` field
                 });
             } else {
                 setCurrentDocument({
                     budget: document.budget,
                     budgetLimit: document.budgetLimit,
                     schoolId: schoolId,
-                    id: document.id // assuming document has an id field
+                    id: document.id // assuming `document` has an `id` field
                 });
             }
         } catch (error) {
