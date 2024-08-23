@@ -133,10 +133,14 @@ function RecordsRow(props) {
             } else {
                 const rowIndex = lr.findIndex(row => row.id === rowId);
                 // jev length upon initialization will always be > 2 or not null/undefined
-                if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
-                    createNewDocument(lr[rowIndex]);
+                if (!currentDocument?.id || !jev || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
+                    await createNewDocument(lr[rowIndex]);
                 } else {
-                    await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                    try {
+                        await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                    } catch (error) {
+                        console.error('Error creating LR: ', error);
+                    }
                 }
             }
         }

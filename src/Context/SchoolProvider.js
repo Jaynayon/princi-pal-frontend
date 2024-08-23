@@ -144,11 +144,7 @@ export const SchoolProvider = ({ children }) => {
                     cashAdvanceValue
                 );
 
-                if (getDocument) {
-                    setCurrentDocument(getDocument);
-                } else {
-                    setCurrentDocument(emptyDocument);
-                }
+                setCurrentDocument(getDocument || emptyDocument)
                 fetchDocumentData();
             }
         } catch (error) {
