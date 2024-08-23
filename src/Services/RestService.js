@@ -331,6 +331,16 @@ const RestService = (() => {
         } catch (error) {
             console.error('Error creating user by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
+            if (error.response) {
+                // Server responded with a status other than 2xx
+                console.error('Status:', error.response.status);
+                console.error('Data:', error.response.data);
+              } else if (error.request) {
+                // Request was made but no response received
+                console.error('Request:', error.request);
+              }  else {
+              console.error('Non-Axios Error:', error);
+            }
             return null;
         }
     };
@@ -549,6 +559,62 @@ const RestService = (() => {
         }
     };
 
+    const createNotification = async (userId, message, type) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_NOTIFICATION}/create`, {
+                userId,
+                message,
+                type
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response.status === 201;
+        } catch (error) {
+            console.error('Error creating notification:', error);
+            return false;
+        }
+    };
+
+    // Get notifications for a specific user
+    const getNotificationsForUser = async (userId) => {
+        try {
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_NOTIFICATION}/user/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            return null;
+        }
+    };
+
+    // Mark a notification as read
+    const markNotificationAsRead = async (notificationId) => {
+        try {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_NOTIFICATION}/${notificationId}/read`, {}, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+            return false;
+        }
+    };
+
+    // Delete a notification
+    const deleteNotification = async (notificationId) => {
+        try {
+            const response = await instance.delete(`${process.env.REACT_APP_API_URL_NOTIFICATION}/${notificationId}`);
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+            return false;
+        }
+    };
+
 
     return {
         createUser,
@@ -576,7 +642,11 @@ const RestService = (() => {
         getUserByEmailUsername,
         insertUserAssociation,
         getSchools,
-        updateUserPassword
+        updateUserPassword,
+        createNotification,
+        getNotificationsForUser,
+        markNotificationAsRead,
+        deleteNotification
     };
 })();
 
