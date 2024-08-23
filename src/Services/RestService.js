@@ -25,18 +25,12 @@ const RestService = (() => {
                     'Content-Type': 'application/json'
                 }
             })
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error validating user:', error);
-                    // Handle errors here (e.g., display error message)
-                });
 
-            console.log(response);
+            if (response) {
+                console.log(response.data)
+            }
 
-            return true;
+            return response.status === 201;
         } catch (error) {
             console.error('Error creating user:', error);
             if (error.response && error.response.status === 409) {
@@ -63,18 +57,12 @@ const RestService = (() => {
                     'Content-Type': 'application/json'
                 }
             })
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error validating user:', error);
-                    // Handle errors here (e.g., display error message)
-                });
 
-            console.log(response);
+            if (response) {
+                console.log(response.data)
+            }
 
-            return true;
+            return response.status === 201;
         } catch (error) {
             console.error('Error creating user:', error);
             if (error.response && error.response.status === 409) {
@@ -95,17 +83,12 @@ const RestService = (() => {
                     'Content-Type': 'application/json'
                 }
             })
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error validating user:', error);
-                    // Handle errors here (e.g., display error message)
-                });
 
-            isAuthenticated = response.isMatch;
-            return isAuthenticated;
+            if (response) {
+                console.log(response.data)
+            }
+
+            return response.data;
         } catch (error) {
             console.error('Error authenticating user:', error);
             throw new Error("Authentication failed. Please try again later.");
@@ -121,17 +104,12 @@ const RestService = (() => {
                     'Content-Type': 'application/json'
                 }
             })
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error validating user:', error);
-                    // Handle errors here (e.g., display error message)
-                });
+
             if (response) {
-                return response;
+                console.log(response.data);
             }
+
+            return response.data
         } catch (error) {
             console.error('Error validating username/email:', error);
             throw new Error("Validation failed. Please try again later.");
@@ -142,15 +120,10 @@ const RestService = (() => {
         try {
             if (token) {
                 const response = await instance.get(`${process.env.REACT_APP_API_URL_AUTH}/verify/?token=${token}`)
-                    .then(response => {
-                        console.log('Response data:', response.data);
-                        return response.data;
-                    })
-                    .catch(error => {
-                        console.error('Error verifying token:', error);
-                        // Handle errors here (e.g., display error message)
-                    });
-                return response
+                if (response) {
+                    console.log(response.data)
+                }
+                return response.data
             }
         } catch (error) {
             console.error('Error validating token:', error);
@@ -165,17 +138,10 @@ const RestService = (() => {
     const getUserById = async (user_id) => {
         try {
             const response = await instance.get(`${process.env.REACT_APP_API_URL_USER}/${user_id}`)
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error getting user:', error);
-                    // Handle errors here (e.g., display error message)
-                });
             if (response) {
-                return response;
+                console.log(response.data);
             }
+            return response.data;
         } catch (error) {
             console.error('Error fetching user:', error);
             throw new Error("Get user failed. Please try again later.");
@@ -186,17 +152,10 @@ const RestService = (() => {
         try {
             if (doc_id) {
                 const response = await instance.get(`${process.env.REACT_APP_API_URL_LR}/documents/${doc_id}`)
-                    .then(response => {
-                        console.log('Response data:', response.data);
-                        return response.data;
-                    })
-                    .catch(error => {
-                        console.error('Error getting document:', error);
-                        // Handle errors here (e.g., display error message)
-                    });
                 if (response) {
-                    return response;
+                    console.log(response.data);
                 }
+                return response.data;
             }
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
@@ -209,13 +168,11 @@ const RestService = (() => {
         try {
             if (doc_id) {
                 const response = await instance.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${doc_id}`)
-
-                console.log(response);
                 if (response) {
-                    return response.data
+                    console.log(response.data);
                 }
+                return response.data;
             }
-
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
@@ -226,11 +183,10 @@ const RestService = (() => {
     const getDocumentBySchoolIdYearMonth = async (school_id, year, month) => {
         try {
             const response = await instance.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}/${month}`)
-
-            console.log(response);
             if (response) {
-                return response.data
+                console.log(response.data);
             }
+            return response.data
         } catch (error) {
             console.log(error.response.data)
             //console.error('Error fetching lrs by document id:', error.message);
@@ -242,17 +198,10 @@ const RestService = (() => {
     const getLrByKeyword = async (keyword) => {
         try {
             const response = await instance.get(`${process.env.REACT_APP_API_URL_LR}/keyword/${keyword}`)
-                .then(response => {
-                    console.log(response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error(error.response.data)
-                })
-
             if (response) {
-                return response;
+                console.log(response.data);
             }
+            return response.data;
         } catch (error) {
             console.log(error.resonse.data)
             //console.error('Error fetching lrs by document id:', error.message);
@@ -288,18 +237,10 @@ const RestService = (() => {
     const deleteLrById = async (lr_id) => {
         try {
             const response = await instance.delete(`${process.env.REACT_APP_API_URL_LR}/${lr_id}`)
-                .then(response => {
-                    console.log('Response data:', response.data);
-                    return response.data;
-                })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response.status === 200) {
-                return true;
+            if (response) {
+                console.log(response.data)
             }
-            return false;
+            return response.status === 200;
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
@@ -332,18 +273,11 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                console.log('Response data:', response.data);
-                return response.data;
             })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response.status === 200) {
-                return true;
+            if (response) {
+                console.log(response.data);
             }
-            return false;
+            return response.status === 200;
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
@@ -364,18 +298,11 @@ const RestService = (() => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                console.log('Response data:', response.data);
-                return response.data;
             })
-                .catch(error => {
-                    console.error('Error getting document:', error);
-                    // Handle errors here (e.g., display error message)
-                });
-            if (response.status === 200) {
-                return true;
+            if (response) {
+                console.log(response.data);
             }
-            return false;
+            return response.status === 200;
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
@@ -400,18 +327,25 @@ const RestService = (() => {
                 }
             });
 
-            if (response.status === 201) {
-                return true;
-            }
-            return false;
+            return response.status === 201;
         } catch (error) {
             console.error('Error creating user by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
+            if (error.response) {
+                // Server responded with a status other than 2xx
+                console.error('Status:', error.response.status);
+                console.error('Data:', error.response.data);
+              } else if (error.request) {
+                // Request was made but no response received
+                console.error('Request:', error.request);
+              }  else {
+              console.error('Non-Axios Error:', error);
+            }
             return null;
         }
     };
 
-    const createDocBySchoolId = async (schoolId, month, year, obj, cashAdvanceValue) => {
+    const createDocBySchoolId = async (schoolId, month, year, obj) => {
         try {
             // Troubleshooting: year and month passed is an array
             // Extracting the year value from the array
@@ -468,33 +402,24 @@ const RestService = (() => {
     };
 
     const updateDocumentById = async (docId, description, value) => {
-        let obj = {}
-
         // Construct the payload object based on the provided colId
-        if (description === "Claimant") {
-            obj = { claimant: value };
-        } else if (description === "SDS") {
-            obj = { sds: value };
-        } else if (description === "Head. Accounting Div. Unit") {
-            obj = { headAccounting: value };
-        } else if (description === "Budget Limit") {
-            obj = { budgetLimit: value };
-        } else if (description === "Cash Advance") {
-            obj = { cashAdvance: value }
-        }
+        const payload = {
+            "Claimant": { claimant: value },
+            "SDS": { sds: value },
+            "Head. Accounting Div. Unit": { headAccounting: value },
+            "Budget Limit": { budgetLimit: value },
+            "Cash Advance": { cashAdvance: value }
+        }[description] || {};
 
 
         try {
-            const response = await instance.patch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, obj, {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, payload, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
 
-            if (response.status === 200) {
-                return true;
-            }
-            return false;
+            return response.status === 200;
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
             //throw new Error("Get lr failed. Please try again later.");
@@ -512,11 +437,7 @@ const RestService = (() => {
                 }
             });
 
-            if (response) {
-                return response.data;
-            } else {
-                return null;
-            }
+            return response?.data || null;
         } catch (error) {
             console.error('Error retrieving school:', error);
             return null;
@@ -533,11 +454,7 @@ const RestService = (() => {
                 }
             });
 
-            if (response) {
-                return response.data;
-            } else {
-                return null;
-            }
+            return response?.data || null;
         } catch (error) {
             console.error('Error retrieving school:', error);
             return null;
@@ -555,11 +472,7 @@ const RestService = (() => {
                 }
             });
 
-            if (response) {
-                return response.data;
-            } else {
-                return null;
-            }
+            return response?.data || null;
         } catch (error) {
             console.error('Error creating school:', error);
             return null;
@@ -576,11 +489,7 @@ const RestService = (() => {
                 }
             });
 
-            if (response) {
-                return response.data;
-            } else {
-                return null;
-            }
+            return response?.data || null;
         } catch (error) {
             console.error('Error creating school:', error);
             return null;
@@ -597,11 +506,7 @@ const RestService = (() => {
                 }
             });
 
-            if (response) {
-                return response.data;
-            } else {
-                return null;
-            }
+            return response?.data || null;
         } catch (error) {
             console.error('Error creating school:', error);
             return null;
@@ -619,11 +524,7 @@ const RestService = (() => {
                 }
             });
 
-            if (response) {
-                return response.data;
-            } else {
-                return null;
-            }
+            return response?.data || null;
         } catch (error) {
             console.error('Error creating school:', error);
             return null;
@@ -651,12 +552,65 @@ const RestService = (() => {
                 }
             });
 
-            if (response.status === 200) {
-                return true;
-            }
-            return false;
+            return response.status === 200;
         } catch (error) {
             console.error('Error updating password:', error);
+            return false;
+        }
+    };
+
+    const createNotification = async (userId, message, type) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_NOTIFICATION}/create`, {
+                userId,
+                message,
+                type
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response.status === 201;
+        } catch (error) {
+            console.error('Error creating notification:', error);
+            return false;
+        }
+    };
+
+    // Get notifications for a specific user
+    const getNotificationsForUser = async (userId) => {
+        try {
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_NOTIFICATION}/user/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            return null;
+        }
+    };
+
+    // Mark a notification as read
+    const markNotificationAsRead = async (notificationId) => {
+        try {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_NOTIFICATION}/${notificationId}/read`, {}, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+            return false;
+        }
+    };
+
+    // Delete a notification
+    const deleteNotification = async (notificationId) => {
+        try {
+            const response = await instance.delete(`${process.env.REACT_APP_API_URL_NOTIFICATION}/${notificationId}`);
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error deleting notification:', error);
             return false;
         }
     };
@@ -688,7 +642,11 @@ const RestService = (() => {
         getUserByEmailUsername,
         insertUserAssociation,
         getSchools,
-        updateUserPassword
+        updateUserPassword,
+        createNotification,
+        getNotificationsForUser,
+        markNotificationAsRead,
+        deleteNotification
     };
 })();
 

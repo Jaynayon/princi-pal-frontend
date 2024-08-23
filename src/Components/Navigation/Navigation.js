@@ -32,15 +32,15 @@ import { DisplayItems, ProfileTab } from "./DisplayItems";
 import { useNavigationContext } from "../../Context/NavigationProvider";
 import CustomizedSwitches from "./CustomizedSwitches";
 import NavigationSearchBar from "./NavigationSearchBar";
+import { useSchoolContext } from '../../Context/SchoolProvider';
 
-//Static object testing
+// Static object testing
 const User = {
   name: "Jay Nayon",
   email: "jay.nayonjr@cit.edu",
 };
 
 const drawerWidth = 220;
-//const initialWidth = 70;
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -49,11 +49,8 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  paddingLeft: 5, //starts with an initial padding instead of 0
+  paddingLeft: 5,
   ...(open && {
-    //marginLeft: drawerWidth,
-    //paddingLeft: 0, //removes the space and adjust to the drawer
-    //width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin", "padding"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -64,7 +61,7 @@ const AppBar = styled(MuiAppBar, {
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => {
-  const [mobileMode, setMobileMode] = useState(false); // State to track position
+  const [mobileMode, setMobileMode] = useState(false);
 
   const updateMobileMode = () => {
     const { innerWidth } = window;
@@ -72,22 +69,18 @@ const Drawer = styled(MuiDrawer, {
   };
 
   useEffect(() => {
-    // Call the function to set initial mobileMode state
     updateMobileMode();
 
     const handleResize = () => {
-      // Call the function to update mobileMode state on resize
       updateMobileMode();
     };
 
-    // Add event listener for resize
     window.addEventListener('resize', handleResize);
 
-    // Cleanup the event listener on component unmount
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []); // Run effect only on mount and unmount
+  }, []);
 
   return {
     "& .MuiDrawer-paper": {
@@ -132,7 +125,7 @@ const displayTitle = (selected) => {
     selected === "People" ||
     selected === "Logout"
   ) {
-    return selected; // Return selected if it matches any of the specified values
+    return selected;
   }
 
   return (
@@ -145,7 +138,11 @@ const displayTitle = (selected) => {
 
 export default function Navigation({ children }) {
   const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
+  const { currentDocument } = useSchoolContext(); // Get current document state
+
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [options, setOptions] = useState([]);
+  const [previousBalance, setPreviousBalance] = useState(null);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -155,39 +152,51 @@ export default function Navigation({ children }) {
     setAnchorEl(null);
   };
 
-  const [options, setOptions] = React.useState([
-    'CIT-U is inviting you to be a part of the organization',
-    'Your application at CTU has been cancelled',
-    'Budget limit exceeded; urgent action required to align expenses with allocated funds',
-    'Congratulations, you have passed the first phase of the application process',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-    'CIM is inviting you to be a part of the organization',
-  ]);
-
   const handleClearOptions = () => {
     setOptions([]); // Clear options by setting it to an empty array
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications/all');
+      const data = await response.json();
+      setOptions(data);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+  
+  const createNotification = (userId, balance) => {
+    const message = `Alert: Your balance is negative.`;
+    setOptions(prevOptions => [...prevOptions, message]);
+  };
+  
+  useEffect(() => {
+    if (currentDocument) {
+      const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0); 
+
+      if (balance < 0 && previousBalance !== null && previousBalance >= 0) {
+        createNotification(balance);
+      }
+
+      // Update previous balance state
+      setPreviousBalance(balance);
+    }
+  }, [currentDocument]);
+  
+  useEffect(() => {
+    fetchNotifications(); // Fetch notifications when the component mounts
+  }, []);
+  
   const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
     typography: {
       fontFamily: "Mulish",
     },
-    navStyle: styling[navStyle], //default or light
+    navStyle: styling[navStyle],
   });
+
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -209,14 +218,14 @@ export default function Navigation({ children }) {
             sx={{
               display: "flex",
               justifyContent: "center",
-              alignItems: "center", // Center items vertically
+              alignItems: "center",
             }}
           >
             <Box
               sx={{
                 height: "75px",
                 display: "flex",
-                alignItems: "center", // Center items vertically
+                alignItems: "center",
               }}
             >
               <IconButton
@@ -243,7 +252,6 @@ export default function Navigation({ children }) {
               <IconButton
                 onClick={toggleDrawer}
                 sx={{
-                  //justifyContent: 'flex-end',
                   color: (theme) => theme.navStyle.color,
                 }}
               >
@@ -266,7 +274,7 @@ export default function Navigation({ children }) {
             sx={{
               display: "flex",
               flexDirection: "column",
-              justifyContent: "flex-end", // Align items at the bottom
+              justifyContent: "flex-end",
               height: "100%",
               marginBottom: "20px",
             }}
@@ -299,8 +307,8 @@ export default function Navigation({ children }) {
               >
                 <Toolbar
                   sx={{
-                    pr: "24px", // keep right padding when drawer closed
-                    color: "#C5C7CD", //gets inherited
+                    pr: "24px",
+                    color: "#C5C7CD",
                     pl: 1
                   }}
                 >
@@ -310,7 +318,6 @@ export default function Navigation({ children }) {
                     sx={{
                       display: !mobileMode ? "none" : null,
                       color: (theme) => theme.navStyle.color,
-                      //...(open && { display: "none" }),
                     }}
                   >
                     <MenuIcon />
@@ -335,7 +342,7 @@ export default function Navigation({ children }) {
                   <NavigationSearchBar />
                   <Box>
                     <IconButton color="inherit" onClick={handleMenuOpen}>
-                      <Badge badgeContent={5} color="secondary">
+                      <Badge badgeContent={options.length} color="secondary">
                         <NotificationsIcon />
                       </Badge>
                     </IconButton>
