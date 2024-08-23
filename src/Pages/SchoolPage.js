@@ -20,6 +20,10 @@ import { useSchoolContext } from '../Context/SchoolProvider';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import JEVTable from '../Components/Table/JEVTable';
 import RestService from '../Services/RestService';
+import { tableCellClasses } from '@mui/material';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -275,13 +279,18 @@ function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
 }
 
 function BudgetModal() {
-    const { month, currentSchool, currentDocument } = useSchoolContext();
+    const { month, currentSchool, currentDocument, jev } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [amount, setAmount] = React.useState(0)
     const [confirmOpen, setConfirmOpen] = React.useState(false);
+    const [tab, setTab] = React.useState(0);
+
     const handleOpen = () => setOpen(true);
+
     const handleClose = () => setOpen(false);
+
     const handleConfirmClose = () => setConfirmOpen(false)
+
     const handleChange = (event) => {
         const value = event.target.value;
         const regex = /^[0-9]*$/;
@@ -290,12 +299,16 @@ function BudgetModal() {
             setAmount(value);
         }
     }
+    const handleChangeTab = (event, newTab) => {
+        setTab(newTab);
+    };
 
     React.useEffect(() => {
         if (currentDocument) {
             setAmount(currentDocument?.cashAdvance)
         }
-    }, [currentDocument])
+        console.log(jev)
+    }, [currentDocument, jev])
 
     return (
         <React.Fragment>
@@ -314,30 +327,56 @@ function BudgetModal() {
                 slots={{ backdrop: Backdrop }}
             >
                 <Fade in={open}>
-                    <Paper sx={styles.paper}>
-                        <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
-                            Budget
-                            <span style={{ color: "grey" }}> (Cash Advance)</span>
-                        </Typography>
-                        <Typography id="modal-modal-description" sx={{ mt: 1 }}>
-                            Set the budget required or delegated for the month of
-                            <span style={{ fontWeight: 'bold' }}> {month}</span> in
-                            <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
-                        </Typography>
-                        <TextField
-                            sx={{ alignSelf: "center", mt: 2, width: "100%" }}
-                            type="text"
-                            value={amount || 0}
-                            disabled={!!currentDocument?.cashAdvance} // Convert to boolean; Disabled if cash advance already set
-                            onChange={(event) => handleChange(event)}
-                            label="Input Amount"
-                        />
-                        <Button sx={styles.button}
-                            onClick={() => setConfirmOpen(true)}
-                            variant="contained"
-                            disabled={!!currentDocument?.cashAdvance} >
-                            Save
-                        </Button>
+                    <Paper sx={[styles.paper, { paddingTop: 3 }]}>
+                        <Box>
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                <Tabs
+                                    sx={{ minHeight: '10px' }}
+                                    value={tab}
+                                    onChange={handleChangeTab}
+                                    aria-label="basic tabs example"
+                                >
+                                    <Tab sx={styles.tab} label="Budget" {...a11yProps(0)} />
+                                    <Tab sx={styles.tab} label="UACS" {...a11yProps(1)} />
+                                    <Tab sx={styles.tab} label="Annual" {...a11yProps(2)} />
+                                </Tabs>
+                            </Box>
+                            <CustomTabPanel value={tab} index={0}>
+                                <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
+                                    Set the budget required or delegated for the month of
+                                    <span style={{ fontWeight: 'bold' }}> {month}</span> in
+                                    <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
+                                </Typography>
+                                <TextField
+                                    sx={{ alignSelf: "center", mt: 2, mb: .5, width: "100%" }}
+                                    type="text"
+                                    value={amount || 0}
+                                    disabled={!!currentDocument?.cashAdvance} // Convert to boolean; Disabled if cash advance already set
+                                    onChange={(event) => handleChange(event)}
+                                    label="Input Amount"
+                                />
+                                <Button sx={styles.button}
+                                    onClick={() => setConfirmOpen(true)}
+                                    variant="contained"
+                                    disabled={!!currentDocument?.cashAdvance} >
+                                    Save
+                                </Button>
+                            </CustomTabPanel>
+                            <CustomTabPanel value={tab} index={1}>
+                                <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
+                                    Set a projected budget for various expense categories under UACS in
+                                    <span style={{ fontWeight: 'bold' }}> {month}</span> at
+                                    <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
+                                </Typography>
+                                <TextField />
+                            </CustomTabPanel>
+                            <CustomTabPanel value={tab} index={2}>
+                                <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
+                                    Set the budget required or delegated each month of the fiscal year at
+                                    <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
+                                </Typography>
+                            </CustomTabPanel>
+                        </Box>
                         <ConfirmModal
                             open={confirmOpen}
                             handleClose={handleConfirmClose}
