@@ -343,7 +343,6 @@ export default function Navigation({ children }) {
                   <Box>
                     <IconButton color="inherit" onClick={handleMenuOpen}>
                       <Badge badgeContent={options.length} color="secondary">
-                      <Badge badgeContent={options.length} color="secondary">
                         <NotificationsIcon />
                       </Badge>
                     </IconButton>
