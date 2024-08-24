@@ -1,5 +1,5 @@
 import '../App.css'
-import React, { useCallback } from 'react';
+import React from 'react';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -20,10 +20,13 @@ import { useSchoolContext } from '../Context/SchoolProvider';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import JEVTable from '../Components/Table/JEVTable';
 import RestService from '../Services/RestService';
-import { tableCellClasses } from '@mui/material';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -91,16 +94,10 @@ function SchoolPage(props) {
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Schools useEffect: lr updated");
-        // if (value === 0) {
-        //     updateLr(); //update or fetch lr data on load
-        // } else if (value === 1) {
-        //     updateJev();
-        // }
-
         updateLr();
         updateJev();
-        setIsAdding(false); //reset state to allow addFields again
 
+        setIsAdding(false); //reset state to allow addFields again
     }, [value, year, month, reload, updateLr, updateJev, setIsAdding]);
 
     const handleChange = (event, newValue) => {
@@ -279,11 +276,41 @@ function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
 }
 
 function BudgetModal() {
-    const { month, currentSchool, currentDocument, jev, value, setValue } = useSchoolContext();
+    const { month, currentSchool, currentDocument, jev } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [amount, setAmount] = React.useState(0)
     const [confirmOpen, setConfirmOpen] = React.useState(false);
     const [tab, setTab] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(4);
+    const [page, setPage] = React.useState(0);
+
+    const columns = [
+        {
+            id: 'uacsName',
+            label: 'Accounts & Explanations',
+            minWidth: 130,
+            maxWidth: 130,
+            align: 'left',
+            format: (value) => value.toLocaleString('en-US'),
+        },
+        {
+            id: 'uacsCode',
+            label: 'Code',
+            minWidth: 100,
+            maxWidth: 100,
+            fontSize: 13,
+            align: 'left',
+            format: (value) => value.toLocaleString('en-US'),
+        },
+        {
+            id: 'amount',
+            label: 'Budget',
+            minWidth: 70,
+            maxWidth: 70,
+            align: 'left',
+            format: (value) => value.toLocaleString('en-US'),
+        }
+    ];
 
     const handleOpen = () => setOpen(true);
 
@@ -311,8 +338,23 @@ function BudgetModal() {
         // Disable and set to first tab if document/jev not initialized
         if (Array.isArray(jev) && jev.length === 0 && tab === 1) {
             setTab(0);
+            setPage(0);
         }
-    }, [currentDocument, jev, tab, setTab])
+    }, [currentDocument, jev, tab, setTab, setPage])
+
+    const formatNumberDisplay = (number, colId, rowId) => {
+        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
+        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage); // Update the page state with the new page value
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10)); // Update rowsPerPage state with the new value
+        setPage(0); // Reset page to 0 whenever rows per page changes
+    };
 
     return (
         <React.Fragment>
@@ -377,7 +419,120 @@ function BudgetModal() {
                                     <span style={{ fontWeight: 'bold' }}> {month}</span> at
                                     <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
                                 </Typography>
-                                <TextField />
+                                <TableContainer sx={{ mt: 2, maxHeight: 280 }}>
+                                    <Table stickyHeader aria-label="sticky table">
+                                        <TableHead>
+                                            <TableRow>
+                                                {columns.map((column) => (
+                                                    <TableCell
+                                                        key={column.id}
+                                                        align={column.align}
+                                                        style={{
+                                                            minWidth: column.minWidth,
+                                                            maxWidth: column.maxWidth,
+                                                            lineHeight: 1.2,
+                                                            padding: "0px",
+                                                            paddingBottom: "10px"
+                                                        }}
+                                                    >
+                                                        {column.label}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody >
+                                            {jev
+                                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                                .map((row, index) => {
+                                                    const uniqueKey = `row_${row.id}_${index}`;
+                                                    return (
+                                                        <TableRow key={uniqueKey} hover role="checkbox" tabIndex={-1}>
+                                                            {columns.map((column) => {
+                                                                const value = row[column.id];
+
+                                                                return (
+                                                                    <TableCell
+                                                                        key={column.id}
+                                                                        align={column.align}
+                                                                        sx={[
+                                                                            styles.cell,
+                                                                            {
+                                                                                minWidth: column.minWidth,
+                                                                                maxWidth: column.maxWidth,
+                                                                                fontSize: column.fontSize,
+                                                                                padding: "0px",
+                                                                                paddingBottom: "5px",
+                                                                                paddingTop: "5px"
+                                                                            }
+                                                                        ]}
+                                                                    // onClick={(event) => handleCellClick(column.id, row.id, event)}
+                                                                    >
+                                                                        {/*Amount field*/}
+                                                                        {column.id === "amount" ?
+                                                                            <Box
+                                                                                style={{
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    flexDirection: 'row',
+                                                                                    justifyContent: "flex-start",
+                                                                                    height: 40,
+                                                                                }}
+                                                                            >
+                                                                                {formatNumberDisplay(value, column.id, row.id)}
+                                                                            </Box>
+                                                                            :
+                                                                            /*Account Type field*/
+                                                                            column.id === "uacsCode" ?
+                                                                                /*Object Code*/
+                                                                                <Box sx={{
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    padding: "0px",
+                                                                                }}>
+                                                                                    <Box>
+                                                                                        {value}
+                                                                                    </Box>
+                                                                                </Box>
+                                                                                :
+                                                                                /*Accounts and Explanations*/
+                                                                                <Box sx={{
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    padding: "0px",
+                                                                                    paddingRight: "10px"
+                                                                                }}>
+                                                                                    <Box>
+                                                                                        {value}
+                                                                                    </Box>
+                                                                                </Box>
+                                                                        }
+                                                                    </TableCell>
+                                                                );
+                                                            })}
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                        </TableBody>
+                                    </Table>
+
+                                </TableContainer>
+                                <TablePagination
+                                    sx={{
+                                        '& .MuiToolbar-root': {
+                                            padding: 0,
+                                            overflowX: "hidden"
+                                        },
+                                        '& .MuiInputBase-root': { marginLeft: 0 },
+                                        '& .MuiTablePagination-actions': { marginLeft: 2 },
+                                    }}
+                                    rowsPerPageOptions={[4, 10, 25]}
+                                    component="div"
+                                    count={jev.length}
+                                    rowsPerPage={rowsPerPage}
+                                    page={Math.min(page, Math.floor(jev.length / rowsPerPage))}
+                                    onPageChange={handleChangePage}
+                                    onRowsPerPageChange={handleChangeRowsPerPage}
+                                />
                             </CustomTabPanel>
                             <CustomTabPanel value={tab} index={2}>
                                 <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
@@ -394,7 +549,7 @@ function BudgetModal() {
                     </Paper>
                 </Fade>
             </Modal>
-        </React.Fragment>
+        </React.Fragment >
     );
 }
 
