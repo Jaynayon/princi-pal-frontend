@@ -15,6 +15,7 @@ import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import RestService from '../Services/RestService'; // Adjust the path as needed
 import { useSchoolContext } from '../Context/SchoolProvider';
+import { transformSchoolText } from '../Components/Navigation/Navigation';
 
 
 //Apex Chart
@@ -139,7 +140,7 @@ const sampleUacsData = [
         code: '5020402000',
         name: 'Electricity Expenses',
         budget: 50000,
-        expenses: [1000, 5000, 6000, 47000, 10000 ]
+        expenses: [1000, 5000, 6000, 47000, 10000]
     },
     {
         code: '5020503000',
@@ -478,7 +479,7 @@ function DashboardPage(props) {
                                     ) : (
                                         currentUser.schools.map((school) => (
                                             <MenuItem key={school.id} value={school.id}>
-                                                {school.name}
+                                                {transformSchoolText(school.name)}
                                             </MenuItem>
                                         ))
                                     )}
@@ -538,7 +539,7 @@ function DashboardPage(props) {
                                         flexDirection: 'column',
                                         height: 380,
                                     }}
-                                    
+
                                 >
                                     <ApexChart uacsData={sampleUacsData} budgetLimit={currentDocument?.budgetLimit} />
                                     <ApexChart totalBudget={schoolBudget} />
