@@ -31,15 +31,17 @@ import TableRow from '@mui/material/TableRow';
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
 
+    const isHidden = value !== index;
+
     return (
         <Box
             role="tabpanel"
-            hidden={value !== index}
+            hidden={isHidden}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
             {...other}
         >
-            {value === index && (
+            {!isHidden && (
                 <Box sx={{ paddingTop: 1 }}>
                     {children}
                 </Box>
@@ -288,8 +290,8 @@ function BudgetModal() {
         {
             id: 'uacsName',
             label: 'Accounts & Explanations',
-            minWidth: 130,
-            maxWidth: 130,
+            minWidth: 120,
+            maxWidth: 120,
             align: 'left',
             format: (value) => value.toLocaleString('en-US'),
         },
@@ -298,15 +300,15 @@ function BudgetModal() {
             label: 'Code',
             minWidth: 100,
             maxWidth: 100,
-            fontSize: 13,
             align: 'left',
             format: (value) => value.toLocaleString('en-US'),
         },
         {
             id: 'amount',
             label: 'Budget',
-            minWidth: 70,
-            maxWidth: 70,
+            minWidth: 90,
+            maxWidth: 90,
+            fontWeight: "bold",
             align: 'left',
             format: (value) => value.toLocaleString('en-US'),
         }
@@ -430,6 +432,7 @@ function BudgetModal() {
                                                         style={{
                                                             minWidth: column.minWidth,
                                                             maxWidth: column.maxWidth,
+                                                            paddingLeft: column.paddingLeft,
                                                             lineHeight: 1.2,
                                                             padding: "0px",
                                                             paddingBottom: "10px"
@@ -475,6 +478,10 @@ function BudgetModal() {
                                                                                     alignItems: 'center',
                                                                                     flexDirection: 'row',
                                                                                     justifyContent: "flex-start",
+                                                                                    fontWeight: column.fontWeight,
+                                                                                    backgroundColor: "#f1f1f1",
+                                                                                    paddingLeft: "10px",
+                                                                                    borderRadius: 10,
                                                                                     height: 40,
                                                                                 }}
                                                                             >
