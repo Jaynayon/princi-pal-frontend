@@ -17,6 +17,7 @@ import DocumentTable from '../Components/Table/LRTable';
 import Button from '@mui/material/Button';
 import { useSchoolContext } from '../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
+import InputAdornment from '@mui/material/InputAdornment';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import JEVTable from '../Components/Table/JEVTable';
 import RestService from '../Services/RestService';
@@ -278,13 +279,16 @@ function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
 }
 
 function BudgetModal() {
-    const { month, currentSchool, currentDocument, jev } = useSchoolContext();
+    const { month, year, currentSchool, currentDocument, jev, setJev } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [amount, setAmount] = React.useState(0)
     const [confirmOpen, setConfirmOpen] = React.useState(false);
     const [tab, setTab] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(4);
     const [page, setPage] = React.useState(0);
+    const [inputValue, setInputValue] = React.useState('Initial Value');
+    const [editingCell, setEditingCell] = React.useState({ colId: null, rowId: null });
+    const [initialValue, setInitialValue] = React.useState(''); //only request update if there is changes in initial value
 
     const columns = [
         {
@@ -333,6 +337,44 @@ function BudgetModal() {
         setTab(newTab);
     };
 
+    const handleCellClick = (colId, rowId, event) => {
+        setEditingCell({ colId, rowId });
+        setInitialValue(event.target.value); // Save the initial value of the clicked cell
+        setInputValue(event.target.value); // Set input value to the current value
+        console.log(editingCell)
+        console.log('row Id: ' + rowId + " and col Id: " + colId)
+    };
+
+    const handleInputChange = (colId, rowId, event) => {
+        let modifiedValue = event.target.value.replace(/[^0-9]/g, '');
+        // Find the index of the object with matching id
+        const rowIndex = jev.findIndex(row => row.id === rowId);
+
+        if (rowIndex !== -1) {
+            // Copy the array to avoid mutating state directly
+            const updatedRows = [...jev];
+
+            // Update the specific property of the object
+            updatedRows[rowIndex][colId] = modifiedValue;
+
+            // Update the state with the modified rows
+            setJev(updatedRows);
+            setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
+        } else {
+            console.error(`Row with id ${rowId} not found`);
+        }
+    };
+
+    const handleInputBlur = (colId, rowId) => {
+        setEditingCell(null);
+        // Perform any action when input is blurred (e.g., save the value)
+        if (inputValue !== initialValue) {
+            console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
+            // updateJevById(colId, rowId, inputValue);
+        }
+        console.log('Value saved:', inputValue);
+    };
+
     React.useEffect(() => {
         if (currentDocument) {
             setAmount(currentDocument?.cashAdvance)
@@ -342,11 +384,14 @@ function BudgetModal() {
             setTab(0);
             setPage(0);
         }
-    }, [currentDocument, jev, tab, setTab, setPage])
+    }, [currentDocument, month, year, jev, tab, setTab, setPage]) // Add month and year as dependency to reload component
 
     const formatNumberDisplay = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
-        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
+            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
+        }
+        return number > 0 ? number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
     }
 
     const handleChangePage = (event, newPage) => {
@@ -432,7 +477,6 @@ function BudgetModal() {
                                                         style={{
                                                             minWidth: column.minWidth,
                                                             maxWidth: column.maxWidth,
-                                                            paddingLeft: column.paddingLeft,
                                                             lineHeight: 1.2,
                                                             padding: "0px",
                                                             paddingBottom: "10px"
@@ -472,21 +516,42 @@ function BudgetModal() {
                                                                     >
                                                                         {/*Budget field*/}
                                                                         {column.id === "budget" ?
-                                                                            <Box
-                                                                                style={{
-                                                                                    display: 'flex',
-                                                                                    alignItems: 'center',
-                                                                                    flexDirection: 'row',
-                                                                                    justifyContent: "flex-start",
-                                                                                    fontWeight: column.fontWeight,
-                                                                                    backgroundColor: "#f1f1f1",
-                                                                                    paddingLeft: "10px",
-                                                                                    borderRadius: 10,
-                                                                                    height: 40,
+                                                                            <TextField
+                                                                                variant="standard"
+                                                                                value={formatNumberDisplay(value, column.id, row.id)}
+                                                                                inputProps={{
+                                                                                    inputMode: 'numeric', // For mobile devices to show numeric keyboard
+                                                                                    pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
                                                                                 }}
-                                                                            >
-                                                                                {formatNumberDisplay(value, column.id, row.id)}
-                                                                            </Box>
+                                                                                InputProps={{
+                                                                                    startAdornment: (
+                                                                                        <InputAdornment position="start">
+                                                                                            ₱{/* Replace this with your desired currency symbol */}
+                                                                                        </InputAdornment>
+                                                                                    ),
+                                                                                    style: {
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'center',
+                                                                                        flexDirection: 'row',
+                                                                                        justifyContent: "flex-start",
+                                                                                        fontWeight: "bold",
+                                                                                        borderRadius: 10,
+                                                                                        fontSize: 13,
+                                                                                        height: 35,
+                                                                                    }
+                                                                                }}
+                                                                                onClick={(event) => handleCellClick(column.id, row.id, event)}
+                                                                                onChange={(event) =>
+                                                                                    handleInputChange(column.id, row.id, event)
+                                                                                }
+                                                                                onBlur={() => handleInputBlur(column.id, row.id)}
+                                                                                onKeyDown={(e) => {
+                                                                                    if (e.key === 'Enter') {
+                                                                                        e.preventDefault();
+                                                                                        e.target.blur(); // Invoke handleLogin on Enter key press
+                                                                                    }
+                                                                                }}
+                                                                            />
                                                                             :
                                                                             /*Account Type field*/
                                                                             column.id === "uacsCode" ?
@@ -496,9 +561,7 @@ function BudgetModal() {
                                                                                     alignItems: 'center',
                                                                                     padding: "0px",
                                                                                 }}>
-                                                                                    <Box>
-                                                                                        {value}
-                                                                                    </Box>
+                                                                                    {value}
                                                                                 </Box>
                                                                                 :
                                                                                 /*Accounts and Explanations*/
@@ -508,9 +571,7 @@ function BudgetModal() {
                                                                                     padding: "0px",
                                                                                     paddingRight: "10px"
                                                                                 }}>
-                                                                                    <Box>
-                                                                                        {value}
-                                                                                    </Box>
+                                                                                    {value}
                                                                                 </Box>
                                                                         }
                                                                     </TableCell>
