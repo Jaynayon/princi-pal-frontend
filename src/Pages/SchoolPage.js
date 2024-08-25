@@ -1,38 +1,44 @@
-import '../App.css'
-import React, { } from 'react';
-import Paper from '@mui/material/Paper';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+import '../App.css';
+import React from 'react';
 import PropTypes from 'prop-types';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Backdrop from '@mui/material/Backdrop';
-import Fade from '@mui/material/Fade';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import { FilterDate, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/FilterDate'
-import DocumentTable from '../Components/Table/LRTable';
-import Button from '@mui/material/Button';
+import {
+    Paper,
+    Tabs,
+    Tab,
+    Container,
+    Grid,
+    Box,
+    Button
+} from '@mui/material';
+
+import {
+    FilterDate,
+    SchoolFieldsFilter,
+    SchoolSearchFilter
+} from '../Components/Filters/FilterDate';
+
 import { useSchoolContext } from '../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
-import DocumentSummary from '../Components/Summary/DocumentSummary';
-import JEVTable from '../Components/Table/JEVTable';
-import RestService from '../Services/RestService';
 
-function CustomTabPanel(props) {
+import DocumentTable from '../Components/Table/LRTable';
+import JEVTable from '../Components/Table/JEVTable';
+import DocumentSummary from '../Components/Summary/DocumentSummary';
+import BudgetModal from '../Components/Modal/BudgetModal';
+
+export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
+
+    const isHidden = value !== index;
 
     return (
         <Box
             role="tabpanel"
-            hidden={value !== index}
+            hidden={isHidden}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
             {...other}
         >
-            {value === index && (
+            {!isHidden && (
                 <Box sx={{ paddingTop: 1 }}>
                     {children}
                 </Box>
@@ -47,7 +53,7 @@ CustomTabPanel.propTypes = {
     value: PropTypes.number.isRequired,
 };
 
-function a11yProps(index) {
+export function a11yProps(index) {
     return {
         id: `simple-tab-${index}`,
         'aria-controls': `simple-tabpanel-${index}`,
@@ -87,16 +93,10 @@ function SchoolPage(props) {
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Schools useEffect: lr updated");
-        // if (value === 0) {
-        //     updateLr(); //update or fetch lr data on load
-        // } else if (value === 1) {
-        //     updateJev();
-        // }
-
         updateLr();
         updateJev();
-        setIsAdding(false); //reset state to allow addFields again
 
+        setIsAdding(false); //reset state to allow addFields again
     }, [value, year, month, reload, updateLr, updateJev, setIsAdding]);
 
     const handleChange = (event, newValue) => {
@@ -144,7 +144,6 @@ function SchoolPage(props) {
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
                                         height: "100%",
-                                        //backgroundColor: 'green'
                                     }}
                                     >
                                         <DocumentSummary />
@@ -204,152 +203,6 @@ function SchoolPage(props) {
     );
 }
 
-function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
-    const { currentDocument, fetchDocumentData, createNewDocument, jev } = useSchoolContext();
-
-    const updateDocumentById = async (newValue) => {
-        try {
-            const response = await RestService.updateDocumentById(currentDocument?.id, "Cash Advance", newValue);
-            if (response) {
-                console.log(`Document with id: ${currentDocument?.id} is updated`);
-            } else {
-                console.log("Document not updated");
-            }
-            fetchDocumentData(); //fetch data changes
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    }
-
-    const handleOnClick = async () => {
-        let obj = {}
-        obj = { cashAdvance: value }
-        console.log(jev)
-        // jev length upon initialization will always be > 2
-        if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
-            await createNewDocument(obj, value);
-        } else {
-            await updateDocumentById(value); //update field in db
-        }
-
-        handleClose();
-        handleCloseParent();
-    }
-
-    return (
-        <Modal
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-            closeAfterTransition
-            slots={{ backdrop: Backdrop }}
-        >
-            <Fade in={open}>
-                <Paper sx={[styles.paper, { p: 3, pb: 2 }]}> {/*Overload padding component*/}
-                    <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
-                        Are you sure you want to set the desired amount?
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 1 }}>
-                        You can only set your budget
-                        <span style={{ fontWeight: 'bold' }}> once </span>
-                        per month for each school. This action cannot be undone.
-                    </Typography>
-                    <Box sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: " flex-end",
-                        pt: 1
-                    }}>
-                        <Button onClick={handleClose} color="primary">
-                            Cancel
-                        </Button>
-                        <Button onClick={() => handleOnClick()} color="primary">
-                            Save
-                        </Button>
-                    </Box>
-                </Paper>
-            </Fade>
-        </Modal>
-    )
-}
-
-function BudgetModal() {
-    const { month, currentSchool, currentDocument } = useSchoolContext();
-    const [open, setOpen] = React.useState(false);
-    const [amount, setAmount] = React.useState(0)
-    const [confirmOpen, setConfirmOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-    const handleConfirmClose = () => setConfirmOpen(false)
-    const handleChange = (event) => {
-        const value = event.target.value;
-        const regex = /^[0-9]*$/;
-
-        if (regex.test(value)) {
-            setAmount(value);
-        }
-    }
-
-    React.useEffect(() => {
-        if (currentDocument) {
-            setAmount(currentDocument?.cashAdvance)
-        }
-    }, [currentDocument])
-
-    return (
-        <React.Fragment>
-            <Button
-                sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
-                onClick={handleOpen}
-            >
-                Budget
-            </Button>
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-                closeAfterTransition
-                slots={{ backdrop: Backdrop }}
-            >
-                <Fade in={open}>
-                    <Paper sx={styles.paper}>
-                        <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
-                            Budget
-                            <span style={{ color: "grey" }}> (Cash Advance)</span>
-                        </Typography>
-                        <Typography id="modal-modal-description" sx={{ mt: 1 }}>
-                            Set the budget required or delegated for the month of
-                            <span style={{ fontWeight: 'bold' }}> {month}</span> in
-                            <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
-                        </Typography>
-                        <TextField
-                            sx={{ alignSelf: "center", mt: 2, width: "100%" }}
-                            type="text"
-                            value={amount || 0}
-                            disabled={!!currentDocument?.cashAdvance} // Convert to boolean; Disabled if cash advance already set
-                            onChange={(event) => handleChange(event)}
-                            label="Input Amount"
-                        />
-                        <Button sx={styles.button}
-                            onClick={() => setConfirmOpen(true)}
-                            variant="contained"
-                            disabled={!!currentDocument?.cashAdvance} >
-                            Save
-                        </Button>
-                        <ConfirmModal
-                            open={confirmOpen}
-                            handleClose={handleConfirmClose}
-                            handleCloseParent={handleClose}
-                            value={amount || 0} />
-                    </Paper>
-                </Fade>
-            </Modal>
-        </React.Fragment>
-    );
-}
-
 const styles = {
     header: {
         overflow: 'auto', //if overflow, hide it
@@ -360,7 +213,6 @@ const styles = {
             justifyContent: 'space-between',
             alignItems: 'center',
             width: '650px', //adjust the container
-            //position: 'relative'
         }
     },
     container: {
@@ -386,7 +238,6 @@ const styles = {
         p: 4.5,
         width: 400,
         borderRadius: '15px',
-        //textAlign: 'center',
     },
     button: {
         mt: 2,

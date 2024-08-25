@@ -94,7 +94,7 @@ export const SchoolProvider = ({ children }) => {
         try {
             if (currentSchool) {
                 const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                    currentSchool?.id,
+                    currentSchool.id,
                     year,
                     month
                 );
@@ -175,7 +175,7 @@ export const SchoolProvider = ({ children }) => {
         try {
             if (currentDocument) {
                 // Call RestService to fetch lr by document id
-                const data = await RestService.getLrByDocumentId(currentDocument?.id);
+                const data = await RestService.getLrByDocumentId(currentDocument.id);
                 console.log("lr")
                 if (data) { //data.decodedToken
                     setLr(data)

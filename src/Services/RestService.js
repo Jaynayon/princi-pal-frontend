@@ -289,8 +289,8 @@ const RestService = (() => {
         let obj = {}
 
         // Construct the payload object based on the provided colId
-        if (colId === "amount") {
-            obj = { amount: value };
+        if (colId === "budget") {
+            obj = { budget: value };
         }
 
         try {
@@ -335,11 +335,11 @@ const RestService = (() => {
                 // Server responded with a status other than 2xx
                 console.error('Status:', error.response.status);
                 console.error('Data:', error.response.data);
-              } else if (error.request) {
+            } else if (error.request) {
                 // Request was made but no response received
                 console.error('Request:', error.request);
-              }  else {
-              console.error('Non-Axios Error:', error);
+            } else {
+                console.error('Non-Axios Error:', error);
             }
             return null;
         }

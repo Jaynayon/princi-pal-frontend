@@ -184,18 +184,16 @@ function RecordsRow(props) {
         }
         // Perform validation for new row/addFields/ add row feature
         else {
-            if (colId === "date") {
-                const result = isValidDateFormat(inputValue);
-                setDateError(!result);
-            }
+            if (colId === "date") { setDateError(!isValidDateFormat(inputValue)); }
         }
     };
 
     // Function to format a number with commas and two decimal places
     const formatNumber = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
-        if (editingCell?.colId === colId && editingCell?.rowId === rowId)
-            return number;
+        if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
+            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
+        }
         return "₱" + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
