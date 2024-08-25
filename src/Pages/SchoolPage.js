@@ -304,7 +304,7 @@ function BudgetModal() {
             format: (value) => value.toLocaleString('en-US'),
         },
         {
-            id: 'amount',
+            id: 'budget',
             label: 'Budget',
             minWidth: 90,
             maxWidth: 90,
@@ -470,8 +470,8 @@ function BudgetModal() {
                                                                         ]}
                                                                     // onClick={(event) => handleCellClick(column.id, row.id, event)}
                                                                     >
-                                                                        {/*Amount field*/}
-                                                                        {column.id === "amount" ?
+                                                                        {/*Budget field*/}
+                                                                        {column.id === "budget" ?
                                                                             <Box
                                                                                 style={{
                                                                                     display: 'flex',
