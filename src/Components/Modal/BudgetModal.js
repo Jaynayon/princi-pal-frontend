@@ -25,6 +25,7 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 
 import { CustomTabPanel, a11yProps } from '../../Pages/SchoolPage';
 import ConfirmModal from './ConfirmModal';
+import RestService from '../../Services/RestService';
 
 export default function BudgetModal() {
     const { month, year, currentSchool, currentDocument, jev, setJev } = useSchoolContext();
@@ -93,6 +94,20 @@ export default function BudgetModal() {
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
 
+    const updateJevById = async (colId, rowId, value) => {
+        try {
+            const response = await RestService.updateJevById(colId, rowId, value);
+            if (response) {
+                console.log(`LR with id: ${rowId} is updated`);
+            } else {
+                console.log("LR not updated");
+            }
+            // fetchDocumentData();
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }
+
     const handleInputChange = (colId, rowId, event) => {
         let modifiedValue = event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
 
@@ -114,12 +129,12 @@ export default function BudgetModal() {
         }
     };
 
-    const handleInputBlur = (colId, rowId) => {
+    const handleInputBlur = async (colId, rowId) => {
         setEditingCell(null);
         // Perform any action when input is blurred (e.g., save the value)
         if (inputValue !== initialValue) {
             console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-            // updateJevById(colId, rowId, inputValue);
+            await updateJevById(colId, rowId, inputValue);
         }
         console.log('Value saved:', inputValue);
     };
@@ -138,7 +153,7 @@ export default function BudgetModal() {
     const formatNumberDisplay = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
         if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
-            return number > 0 ? number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""; // Return the number if it's greater than 0, otherwise return an empty string
+            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
         }
         return number > 0 ? number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
     }
@@ -261,13 +276,12 @@ export default function BudgetModal() {
                                                                                 paddingTop: "5px"
                                                                             }
                                                                         ]}
-                                                                    // onClick={(event) => handleCellClick(column.id, row.id, event)}
                                                                     >
                                                                         {/*Budget field*/}
                                                                         {column.id === "budget" ?
                                                                             <TextField
                                                                                 variant="standard"
-                                                                                value={formatNumberDisplay(value, column.id, row.id)}
+                                                                                value={column.id === "budget" ? formatNumberDisplay(value, column.id, row.id) : value}
                                                                                 inputProps={{
                                                                                     inputMode: 'numeric', // For mobile devices to show numeric keyboard
                                                                                     pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
