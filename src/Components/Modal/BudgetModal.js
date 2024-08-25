@@ -94,7 +94,8 @@ export default function BudgetModal() {
     };
 
     const handleInputChange = (colId, rowId, event) => {
-        let modifiedValue = event.target.value.replace(/[^0-9]/g, '');
+        let modifiedValue = event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+
         // Find the index of the object with matching id
         const rowIndex = jev.findIndex(row => row.id === rowId);
 
@@ -137,7 +138,7 @@ export default function BudgetModal() {
     const formatNumberDisplay = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
         if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
-            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
+            return number > 0 ? number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""; // Return the number if it's greater than 0, otherwise return an empty string
         }
         return number > 0 ? number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
     }
