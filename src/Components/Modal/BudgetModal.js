@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     Paper,
     Tabs,
@@ -18,6 +18,9 @@ import {
     TableHead,
     TablePagination,
     TableRow,
+    Select,
+    FormControl,
+    MenuItem,
 } from '@mui/material';
 
 import { useSchoolContext } from '../../Context/SchoolProvider';
@@ -27,8 +30,64 @@ import { CustomTabPanel, a11yProps } from '../../Pages/SchoolPage';
 import ConfirmModal from './ConfirmModal';
 import RestService from '../../Services/RestService';
 
+const columns = [
+    {
+        id: 'uacsName',
+        label: 'Accounts & Explanations',
+        minWidth: 120,
+        maxWidth: 120,
+        align: 'left',
+        format: (value) => value.toLocaleString('en-US'),
+    },
+    {
+        id: 'uacsCode',
+        label: 'Code',
+        minWidth: 100,
+        maxWidth: 100,
+        align: 'left',
+        format: (value) => value.toLocaleString('en-US'),
+    },
+    {
+        id: 'budget',
+        label: 'Budget',
+        minWidth: 90,
+        maxWidth: 90,
+        fontWeight: "bold",
+        align: 'left',
+        format: (value) => value.toLocaleString('en-US'),
+    }
+];
+
+const columnsAnnual = [
+    {
+        id: 'status',
+        label: 'Status',
+        minWidth: 60,
+        maxWidth: 60,
+        align: "center",
+        format: (value) => value.toLocaleString('en-US'),
+    },
+    {
+        id: 'month',
+        label: 'Month',
+        minWidth: 60,
+        maxWidth: 60,
+        align: 'left',
+        format: (value) => value.toLocaleString('en-US'),
+    },
+    {
+        id: 'budget',
+        label: 'Budget',
+        minWidth: 60,
+        maxWidth: 60,
+        fontWeight: "bold",
+        align: 'left',
+        format: (value) => value.toLocaleString('en-US'),
+    }
+];
+
 export default function BudgetModal() {
-    const { month, year, currentSchool, currentDocument, jev, setJev } = useSchoolContext();
+    const { months, month, year, currentSchool, currentDocument, jev, setJev } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [amount, setAmount] = React.useState(0)
     const [confirmOpen, setConfirmOpen] = React.useState(false);
@@ -38,34 +97,7 @@ export default function BudgetModal() {
     const [inputValue, setInputValue] = React.useState('Initial Value');
     const [editingCell, setEditingCell] = React.useState({ colId: null, rowId: null });
     const [initialValue, setInitialValue] = React.useState(''); //only request update if there is changes in initial value
-
-    const columns = [
-        {
-            id: 'uacsName',
-            label: 'Accounts & Explanations',
-            minWidth: 120,
-            maxWidth: 120,
-            align: 'left',
-            format: (value) => value.toLocaleString('en-US'),
-        },
-        {
-            id: 'uacsCode',
-            label: 'Code',
-            minWidth: 100,
-            maxWidth: 100,
-            align: 'left',
-            format: (value) => value.toLocaleString('en-US'),
-        },
-        {
-            id: 'budget',
-            label: 'Budget',
-            minWidth: 90,
-            maxWidth: 90,
-            fontWeight: "bold",
-            align: 'left',
-            format: (value) => value.toLocaleString('en-US'),
-        }
-    ];
+    const [documentsByYear, setDocumentsByYear] = React.useState([]);
 
     const handleOpen = () => setOpen(true);
 
@@ -93,6 +125,22 @@ export default function BudgetModal() {
         console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
+
+    const getDocumentsByYear = useCallback(async () => {
+        try {
+            if (currentSchool) {
+                const response = await RestService.getDocumentBySchoolIdYear(currentSchool.id, year);
+                if (response) {
+                    console.log(response);
+                    setDocumentsByYear(response);
+                } else {
+                    console.log("Documents not fetched");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }, [currentSchool, year])
 
     const updateJevById = async (colId, rowId, value) => {
         try {
@@ -148,7 +196,8 @@ export default function BudgetModal() {
             setTab(0);
             setPage(0);
         }
-    }, [currentDocument, month, year, jev, tab, setTab, setPage]) // Add month and year as dependency to reload component
+        getDocumentsByYear()
+    }, [currentDocument, month, year, jev, tab, setTab, setPage, getDocumentsByYear]) // Add month and year as dependency to reload component
 
     const formatNumberDisplay = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
@@ -168,8 +217,9 @@ export default function BudgetModal() {
     };
 
     return (
-        <React.Fragment>
+        <Box aria-hidden="true">
             <Button
+                aria-hidden="true"
                 sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
                 onClick={handleOpen}
             >
@@ -217,10 +267,12 @@ export default function BudgetModal() {
                                     onChange={(event) => handleChange(event)}
                                     label="Input Amount"
                                 />
-                                <Button sx={styles.button}
+                                <Button
+                                    sx={styles.button}
                                     onClick={() => setConfirmOpen(true)}
                                     variant="contained"
-                                    disabled={!!currentDocument?.cashAdvance} >
+                                    disabled={!!currentDocument?.cashAdvance}
+                                >
                                     Save
                                 </Button>
                             </CustomTabPanel>
@@ -345,7 +397,6 @@ export default function BudgetModal() {
                                                 })}
                                         </TableBody>
                                     </Table>
-
                                 </TableContainer>
                                 <TablePagination
                                     sx={{
@@ -370,6 +421,169 @@ export default function BudgetModal() {
                                     Set the budget required or delegated each month of the fiscal year at
                                     <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
                                 </Typography>
+                                <Box sx={
+                                    {
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        height: 80,
+                                        width: "100%",
+                                        borderRadius: 5,
+                                        border: "1px solid #c7c7c7",
+                                        mt: 2.5,
+                                        mb: 2.5,
+                                        p: 1
+                                    }
+                                }>
+                                    <FormControl variant="standard" sx={{ m: 2, minWidth: 90 }}>
+                                        <Select
+                                            sx={{ fontSize: 13, fontWeight: "bold" }}
+                                            labelId="demo-simple-select-standard-label"
+                                            id="demo-simple-select-standard"
+                                            value={"test"}
+                                            onChange={handleChange}
+                                            label="Age"
+                                        >
+                                            <MenuItem value=""><em>None</em></MenuItem>
+                                            <MenuItem value={"test"}>Test</MenuItem>
+                                            <MenuItem value={"test2"}>Test2</MenuItem>
+                                            <MenuItem value={"test3"}>Test3</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    <TextField
+                                        variant="standard"
+                                        // value={column.id === "budget" ? formatNumberDisplay(value, column.id, row.id) : value}
+                                        inputProps={{
+                                            inputMode: 'numeric', // For mobile devices to show numeric keyboard
+                                            pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    ₱{/* Replace this with your desired currency symbol */}
+                                                </InputAdornment>
+                                            ),
+                                            style: {
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                flexDirection: 'row',
+                                                justifyContent: "flex-start",
+                                                fontWeight: "bold",
+                                                borderRadius: 10,
+                                                fontSize: 13,
+                                                height: 30
+                                            }
+                                        }}
+                                    // onClick={(event) => handleCellClick(column.id, row.id, event)}
+                                    // onChange={(event) =>
+                                    //     handleInputChange(column.id, row.id, event)
+                                    // }
+                                    // onBlur={() => handleInputBlur(column.id, row.id)}
+                                    // onKeyDown={(e) => {
+                                    //     if (e.key === 'Enter') {
+                                    //         e.preventDefault();
+                                    //         e.target.blur(); // Invoke handleLogin on Enter key press
+                                    //     }
+                                    // }} 
+                                    />
+                                    <Button
+                                        sx={[styles.button, { fontSize: 13, m: 2, maxHeight: 35 }]}
+                                        // onClick={() => setConfirmOpen(true)}
+                                        variant="contained"
+                                    // disabled={!!currentDocument?.cashAdvance}
+                                    >
+                                        Save
+                                    </Button>
+                                </Box>
+                                <TableContainer sx={{ mt: 2, maxHeight: 240 }}>
+                                    <Table stickyHeader aria-label="sticky table">
+                                        <TableHead >
+                                            <TableRow>
+                                                {columnsAnnual.map((column) => (
+                                                    <TableCell
+                                                        key={column.id}
+                                                        align={column.align}
+                                                        style={{
+                                                            minWidth: column.minWidth,
+                                                            maxWidth: column.maxWidth,
+                                                            // backgroundColor: "green",
+                                                            zIndex: 3,
+                                                            lineHeight: 1.2,
+                                                            // padding: "0px",
+                                                            paddingTop: "7.5px"
+                                                        }}
+                                                    >
+                                                        {column.label}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody sx={{ pt: "20px" }}>
+                                            {months
+                                                .map((month, index) => {
+                                                    const uniqueKey = `row_${month}_${index}`;
+                                                    return (
+                                                        <TableRow key={uniqueKey} hover role="checkbox" tabIndex={-1}>
+                                                            {columnsAnnual.map((column) => {
+                                                                const value = documentsByYear.find(doc => doc.month === month);
+                                                                return (
+                                                                    <TableCell
+                                                                        key={column.id}
+                                                                        align={column.align}
+                                                                        sx={[
+                                                                            styles.cell,
+                                                                            {
+                                                                                minWidth: column.minWidth,
+                                                                                maxWidth: column.maxWidth,
+                                                                                fontSize: column.fontSize,
+                                                                                padding: 0,
+                                                                                borderWidth: 0
+                                                                            }
+                                                                        ]}
+                                                                    >
+                                                                        {column.id === "status" ?
+                                                                            <Box sx={{
+                                                                                display: "flex",
+                                                                                flexDirection: "column",
+                                                                                alignItems: "center",
+                                                                                justifyContent: "center",
+                                                                                position: "relative",
+                                                                                height: 50
+                                                                            }}>
+                                                                                <Box sx={styles.verticalStep} />
+                                                                                <Box sx={{
+                                                                                    display: 'flex',
+                                                                                    backgroundColor: value?.budget ? "#00c851" : "#d6d6d6",
+                                                                                    alignItems: 'center',
+                                                                                    color: "white",
+                                                                                    justifyContent: "center",
+                                                                                    borderRadius: 10,
+                                                                                    fontSize: 9,
+                                                                                    height: 25,
+                                                                                    width: 70,
+                                                                                    zIndex: 2
+                                                                                }}
+                                                                                >
+                                                                                    {value?.budget ? "Funded" : "Unfundned"}
+                                                                                </Box>
+                                                                            </Box>
+                                                                            :
+                                                                            column.id === "month" ?
+                                                                                <Box> {month} </Box>
+                                                                                :
+                                                                                <Box>
+                                                                                    ₱ {value?.budget ?? 0}</Box>
+                                                                        }
+                                                                    </TableCell>
+                                                                )
+                                                            })}
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
                             </CustomTabPanel>
                         </Box>
                         <ConfirmModal
@@ -380,34 +594,26 @@ export default function BudgetModal() {
                     </Paper>
                 </Fade>
             </Modal>
-        </React.Fragment >
+        </Box>
     );
 }
 
 const styles = {
-    header: {
-        overflow: 'auto', //if overflow, hide it
-        overflowWrap: "break-word",
-        fontFamily: 'Mulish-Regular',
-        buttons: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '650px', //adjust the container
-            //position: 'relative'
-        }
-    },
-    container: {
-        overflow: 'hidden',
-        padding: "10px",
-        paddingTop: "10px"
-    },
     tab: {
         minHeight: '10px',
         '&.Mui-selected': {
             color: 'black', // Color of selected tab
             fontWeight: 'bold', // Font weight of selected tab
         },
+    },
+    verticalStep: {
+        display: "flex",
+        backgroundColor: "#d8d8d8",
+        flexDirection: "column",
+        position: "absolute",
+        width: 1.5,
+        zIndex: 1,
+        height: "100%"
     },
     paper: {
         display: 'flex',
@@ -420,7 +626,6 @@ const styles = {
         p: 4.5,
         width: 400,
         borderRadius: '15px',
-        //textAlign: 'center',
     },
     button: {
         mt: 2,
