@@ -14,9 +14,9 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
 
 import { CustomTabPanel, a11yProps } from '../../Pages/SchoolPage';
-import BudgetTab from './BudgetTab';
 import AnnualTab from './AnnualTab';
 import UACSTab from './UACSTab';
+import CashAdvanceTab from './CashAdvanceTab';
 
 export default function BudgetModal() {
     const { month, year, currentDocument, jev } = useSchoolContext();
@@ -66,7 +66,7 @@ export default function BudgetModal() {
                                     onChange={handleChangeTab}
                                     aria-label="basic tabs example"
                                 >
-                                    <Tab sx={styles.tab} label="Budget" {...a11yProps(0)} />
+                                    <Tab sx={styles.tab} label="Cash Adv." {...a11yProps(0)} />
                                     <Tab
                                         sx={styles.tab}
                                         label="UACS"
@@ -77,7 +77,7 @@ export default function BudgetModal() {
                                 </Tabs>
                             </Box>
                             <CustomTabPanel value={tab} index={0}>
-                                <BudgetTab handleClose={handleClose} />
+                                <CashAdvanceTab handleClose={handleClose} />
                             </CustomTabPanel>
                             <CustomTabPanel value={tab} index={1}>
                                 <UACSTab />

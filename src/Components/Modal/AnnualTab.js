@@ -39,8 +39,8 @@ const columns = [
         format: (value) => value.toLocaleString('en-US'),
     },
     {
-        id: 'budget',
-        label: 'Budget',
+        id: 'cashAdvance',
+        label: 'Cash Advance',
         minWidth: 60,
         maxWidth: 60,
         fontWeight: "bold",
@@ -71,12 +71,18 @@ export default function AnnualTab() {
         }
 
         getDocumentsByYear();
-    }, [currentDocument, year, jev, currentSchool])
+    }, [currentDocument, year, jev, currentSchool]);
+
+    const formatNumberDisplay = (number) => {
+        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
+        return number > 0 ? number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
+    }
 
     return (
         <React.Fragment>
             <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
-                Set the budget required or delegated each month of the fiscal year at
+                Set the required or delegated cash advance for each month of the fiscal year
+                <span style={{ fontWeight: 'bold' }}> {year}</span> at
                 <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
             </Typography>
             <Box sx={
@@ -90,7 +96,7 @@ export default function AnnualTab() {
                     borderRadius: 5,
                     border: "1px solid #c7c7c7",
                     mt: 2.5,
-                    mb: 2.5,
+                    mb: 1.5,
                     p: 1
                 }
             }>
@@ -154,9 +160,9 @@ export default function AnnualTab() {
                     Save
                 </Button>
             </Box>
-            <TableContainer sx={{ mt: 2, maxHeight: 240 }}>
+            <TableContainer sx={{ mt: 2, maxHeight: 250 }}>
                 <Table stickyHeader aria-label="sticky table">
-                    <TableHead >
+                    <TableHead>
                         <TableRow>
                             {columns.map((column) => (
                                 <TableCell
@@ -168,8 +174,8 @@ export default function AnnualTab() {
                                         // backgroundColor: "green",
                                         zIndex: 3,
                                         lineHeight: 1.2,
-                                        // padding: "0px",
-                                        paddingTop: "7.5px"
+                                        paddingTop: "7px",
+                                        paddingBottom: "7px",
                                     }}
                                 >
                                     {column.label}
@@ -211,26 +217,25 @@ export default function AnnualTab() {
                                                             <Box sx={styles.verticalStep} />
                                                             <Box sx={{
                                                                 display: 'flex',
-                                                                backgroundColor: value?.budget ? "#00c851" : "#d6d6d6",
+                                                                backgroundColor: value?.cashAdvance ? "#00c851" : "#d6d6d6",
                                                                 alignItems: 'center',
                                                                 color: "white",
                                                                 justifyContent: "center",
                                                                 borderRadius: 10,
                                                                 fontSize: 9,
                                                                 height: 25,
-                                                                width: 70,
+                                                                width: value?.cashAdvance ? 70 : 30,
                                                                 zIndex: 2
                                                             }}
                                                             >
-                                                                {value?.budget ? "Funded" : "Unfundned"}
+                                                                {value?.cashAdvance ? "Funded" : ""}
                                                             </Box>
                                                         </Box>
                                                         :
                                                         column.id === "month" ?
                                                             <Box> {month} </Box>
                                                             :
-                                                            <Box>
-                                                                ₱ {value?.budget ?? 0}</Box>
+                                                            <Box> ₱ {formatNumberDisplay(value?.cashAdvance ?? 0)}</Box>
                                                     }
                                                 </TableCell>
                                             )
@@ -241,7 +246,7 @@ export default function AnnualTab() {
                     </TableBody>
                 </Table>
             </TableContainer>
-        </React.Fragment>
+        </React.Fragment >
     );
 }
 

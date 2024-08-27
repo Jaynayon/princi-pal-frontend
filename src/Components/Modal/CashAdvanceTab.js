@@ -4,7 +4,7 @@ import { TextField, Typography, Button } from '@mui/material';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import ConfirmModal from './ConfirmModal';
 
-export default function BudgetTab({ handleClose }) {
+export default function CashAdvanceTab({ handleClose }) {
     const { month, currentSchool, currentDocument, jev } = useSchoolContext();
     const [amount, setAmount] = React.useState(0)
     const [confirmOpen, setConfirmOpen] = React.useState(false);
@@ -29,7 +29,7 @@ export default function BudgetTab({ handleClose }) {
     return (
         <React.Fragment>
             <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
-                Set the budget required or delegated for the month of
+                Set the required or delegated cash advance for the month of
                 <span style={{ fontWeight: 'bold' }}> {month}</span> in
                 <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
             </Typography>
