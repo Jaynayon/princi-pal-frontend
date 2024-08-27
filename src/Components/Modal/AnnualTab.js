@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     Box,
     TextField,
@@ -49,29 +49,58 @@ const columns = [
     }
 ];
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        },
+    },
+};
+
+const getStyles = (name, personName) => ({
+    fontWeight: "650",
+    color: personName === name ? "#176AF6" : null
+});
+
 export default function AnnualTab() {
-    const { months, year, currentSchool, currentDocument, jev } = useSchoolContext();
+    const { month, months, year, currentSchool, jev } = useSchoolContext();
     const [documentsByYear, setDocumentsByYear] = React.useState([]);
+    const [tabMonth, setTabMonth] = React.useState(month); // Initally get current month value
+    const [input, setInput] = React.useState(0);
+
+    const getDocumentsByYear = React.useCallback(async () => {
+        try {
+            if (currentSchool) {
+                const response = await RestService.getDocumentBySchoolIdYear(currentSchool.id, year);
+                if (response) {
+                    console.log(response);
+                    setDocumentsByYear(response);
+                } else {
+                    console.log("Documents not fetched");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }, [currentSchool, year])
 
     React.useEffect(() => {
-        const getDocumentsByYear = async () => {
-            try {
-                if (currentSchool) {
-                    const response = await RestService.getDocumentBySchoolIdYear(currentSchool.id, year);
-                    if (response) {
-                        console.log(response);
-                        setDocumentsByYear(response);
-                    } else {
-                        console.log("Documents not fetched");
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching document:', error);
-            }
-        }
-
         getDocumentsByYear();
-    }, [currentDocument, year, jev, currentSchool]);
+    }, [year, jev, getDocumentsByYear, month]);
+
+    React.useEffect(() => {
+        const value = documentsByYear.find(doc => doc.month === tabMonth);
+        setInput(value ? value.cashAdvance : 0);
+    }, [documentsByYear, tabMonth]);
+
+    const handleChangeMonth = (event) => { setTabMonth(event.target.value) }
+
+    const handleInputChange = (event) => {
+        let modifiedValue = event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+        setInput(modifiedValue);
+    }
 
     const formatNumberDisplay = (number) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
@@ -95,7 +124,7 @@ export default function AnnualTab() {
                     width: "100%",
                     borderRadius: 5,
                     border: "1px solid #c7c7c7",
-                    mt: 2.5,
+                    mt: 1.5,
                     mb: 1.5,
                     p: 1
                 }
@@ -105,19 +134,25 @@ export default function AnnualTab() {
                         sx={{ fontSize: 13, fontWeight: "bold" }}
                         labelId="demo-simple-select-standard-label"
                         id="demo-simple-select-standard"
-                        value={"test"}
-                        // onChange={handleChange}
+                        value={tabMonth}
+                        onChange={handleChangeMonth}
                         label="Age"
+                        inputProps={{ 'aria-label': 'Without label' }}
+                        MenuProps={MenuProps}
                     >
-                        <MenuItem value=""><em>None</em></MenuItem>
-                        <MenuItem value={"test"}>Test</MenuItem>
-                        <MenuItem value={"test2"}>Test2</MenuItem>
-                        <MenuItem value={"test3"}>Test3</MenuItem>
+                        {months.map((item) => (
+                            <MenuItem
+                                key={item}
+                                value={item}
+                                style={getStyles(item, tabMonth)}
+                            >{item}
+                            </MenuItem>
+                        ))}
                     </Select>
                 </FormControl>
                 <TextField
                     variant="standard"
-                    // value={column.id === "budget" ? formatNumberDisplay(value, column.id, row.id) : value}
+                    value={input}
                     inputProps={{
                         inputMode: 'numeric', // For mobile devices to show numeric keyboard
                         pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
@@ -139,10 +174,10 @@ export default function AnnualTab() {
                             height: 30
                         }
                     }}
-                // onClick={(event) => handleCellClick(column.id, row.id, event)}
-                // onChange={(event) =>
-                //     handleInputChange(column.id, row.id, event)
-                // }
+                    // onClick={(event) => handleCellClick(column.id, row.id, event)}
+                    onChange={(event) =>
+                        handleInputChange(event)
+                    }
                 // onBlur={() => handleInputBlur(column.id, row.id)}
                 // onKeyDown={(e) => {
                 //     if (e.key === 'Enter') {
@@ -155,7 +190,7 @@ export default function AnnualTab() {
                     sx={[styles.button, { fontSize: 13, m: 2, maxHeight: 35 }]}
                     // onClick={() => setConfirmOpen(true)}
                     variant="contained"
-                // disabled={!!currentDocument?.cashAdvance}
+                    disabled={documentsByYear.some(doc => doc.month === tabMonth)}
                 >
                     Save
                 </Button>
@@ -266,7 +301,7 @@ const styles = {
         width: '160px',
         padding: '10px 0',
         alignSelf: "center",
-        backgroundColor: '#19B4E5', // Default background color for enabled button
+        backgroundColor: '#1565c0', // Default background color for enabled button
         color: 'white', // Default text color for enabled button
         '&:hover': {
             backgroundColor: '#19a2e5', // Background color on hover

@@ -7,7 +7,6 @@ import {
     Modal,
     Backdrop,
     Fade,
-    Button,
 } from '@mui/material';
 
 import { useSchoolContext } from '../../Context/SchoolProvider';
@@ -18,14 +17,9 @@ import AnnualTab from './AnnualTab';
 import UACSTab from './UACSTab';
 import CashAdvanceTab from './CashAdvanceTab';
 
-export default function BudgetModal() {
+export default function BudgetModal({ open, handleClose }) {
     const { month, year, currentDocument, jev } = useSchoolContext();
-    const [open, setOpen] = React.useState(false);
     const [tab, setTab] = React.useState(0);
-
-    const handleOpen = () => setOpen(true);
-
-    const handleClose = () => setOpen(false);
 
     const handleChangeTab = (event, newTab) => {
         setTab(newTab);
@@ -40,14 +34,7 @@ export default function BudgetModal() {
     }, [currentDocument, month, year, jev, tab, setTab]) // Add month and year as dependency to reload component
 
     return (
-        <Box aria-hidden="true">
-            <Button
-                aria-hidden="true"
-                sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
-                onClick={handleOpen}
-            >
-                Budget
-            </Button>
+        <Box >
             <Modal
                 open={open}
                 onClose={handleClose}

@@ -83,6 +83,11 @@ export function a11yProps(index) {
 function SchoolPage(props) {
     const { year, month, setIsAdding, currentDocument, exportDocument, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
     //const { selected } = useNavigationContext();
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => setOpen(true);
+
+    const handleClose = () => setOpen(false);
 
     const exportDocumentOnClick = async () => {
         await exportDocument();
@@ -173,6 +178,7 @@ function SchoolPage(props) {
                         <Grid container>
                             <Grid item xs={12} md={12} lg={12}>
                                 <Box sx={{
+                                    display: 'flex',
                                     overflow: 'auto', //if overflow, hide it
                                     overflowWrap: "break-word",
                                 }}>
@@ -182,8 +188,18 @@ function SchoolPage(props) {
                                         aria-label="basic tabs example">
                                         <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
                                         <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
-                                        <BudgetModal />
+
                                     </Tabs>
+                                    <Button
+                                        sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
+                                        onClick={handleOpen}
+                                    >
+                                        Budget
+                                    </Button>
+                                    <BudgetModal
+                                        open={open}
+                                        handleClose={handleClose}
+                                    />
                                 </Box>
                             </Grid>
                             {/*Document Tables*/}
