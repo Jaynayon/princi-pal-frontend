@@ -16,18 +16,19 @@ const emptyDocument = {
 }
 
 // Initialize current date to get current month and year
+const startYear = 2021;
+
 const currentDate = new Date();
 const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
-const currentYear = currentDate.getFullYear().toString(); // Get full year as string
+const currentYear = currentDate.getFullYear(); // Get full year as string
 
 const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-const years = [
-    '2021', '2022', '2023', '2024'
-];
+// Dynamic year starting from year 2021
+const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (startYear + i).toString());
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
@@ -38,7 +39,7 @@ export const SchoolProvider = ({ children }) => {
 
     // Set initial state for month and year using current date
     const [month, setMonth] = useState(currentMonth);
-    const [year, setYear] = useState(currentYear);
+    const [year, setYear] = useState(currentYear.toString());
 
     const [isAdding, setIsAdding] = useState(false);
     const [addOneRow, setAddOneRow] = useState(false);
@@ -50,7 +51,7 @@ export const SchoolProvider = ({ children }) => {
     const [jev, setJev] = useState([]);
 
     const monthIndex = months.indexOf(currentMonth);
-    const yearIndex = years.indexOf(currentYear);
+    const yearIndex = years.indexOf(currentYear.toString());
 
     const prevMonthRef = useRef(monthIndex === 0 ? 11 : monthIndex);
     const prevYearRef = useRef(monthIndex === 0 ? (yearIndex === 0 ? years.length - 1 : yearIndex - 1) : yearIndex);
@@ -150,7 +151,7 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    }, [currentSchool, fetchDocumentData, setCurrentDocument, year, month]);
+    }, [currentSchool, fetchDocumentData, setCurrentDocument, year]);
 
     const updateJev = useCallback(async () => {
         try {
