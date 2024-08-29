@@ -81,13 +81,6 @@ export const NavigationProvider = ({ children }) => {
             //const localStorageData = window.localStorage.getItem("LOCAL_STORAGE_SELECTED");
             //const data = "localStorageData ? JSON.parse(localStorageData) : null;"
 
-            // RegEx that transform route text to school name
-            function transformText(input) {
-                return input
-                    .replace(/-/g, ' ')  // Replace all hyphens with spaces
-                    .toUpperCase();      // Convert all letters to uppercase
-            }
-
             // Define a mapping between paths and the desired local storage values
             const pathToLocalStorageValue = {
                 '/dashboard': 'Dashboard',
@@ -105,6 +98,13 @@ export const NavigationProvider = ({ children }) => {
                 const schoolNameRoute = location.pathname.split('/')[2];
 
                 if (extractRoute === "/schools") {
+                    // RegEx that transform route text to school name
+                    function transformText(input) {
+                        return input
+                            .replace(/-/g, ' ')  // Replace all hyphens with spaces
+                            .toUpperCase();      // Convert all letters to uppercase
+                    }
+
                     const schoolName = transformText(schoolNameRoute); // Set school name as local storage value
 
                     // Check if schoolName is present in the name property of any object in currentUser.schools
@@ -160,7 +160,7 @@ export const NavigationProvider = ({ children }) => {
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [currentUser, fetchUser]); // Run effect only on mount and unmount
+    }, [fetchUser]); // Run effect only on mount and unmount
 
     return (
         <NavigationContext.Provider value={{

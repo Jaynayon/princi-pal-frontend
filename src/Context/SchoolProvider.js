@@ -41,20 +41,21 @@ export const SchoolProvider = ({ children }) => {
     const [month, setMonth] = useState(currentMonth);
     const [year, setYear] = useState(currentYear.toString());
 
-    const [isAdding, setIsAdding] = useState(false);
-    const [addOneRow, setAddOneRow] = useState(false);
-
-    const [reload, setReload] = useState(false);
-
-    const [currentDocument, setCurrentDocument] = useState(emptyDocument);
-    const [lr, setLr] = useState([]);
-    const [jev, setJev] = useState([]);
-
+    // Context states for sort by date
     const monthIndex = months.indexOf(currentMonth);
     const yearIndex = years.indexOf(currentYear.toString());
 
     const prevMonthRef = useRef(monthIndex === 0 ? 11 : monthIndex);
     const prevYearRef = useRef(monthIndex === 0 ? (yearIndex === 0 ? years.length - 1 : yearIndex - 1) : yearIndex);
+
+    // States needed for adding LR
+    const [isAdding, setIsAdding] = useState(false);
+    const [addOneRow, setAddOneRow] = useState(false);
+
+    // Document, LR, and JEV entities
+    const [currentDocument, setCurrentDocument] = useState(emptyDocument);
+    const [lr, setLr] = useState([]);
+    const [jev, setJev] = useState([]);
 
     const exportDocument = async () => {
         try {
@@ -189,19 +190,15 @@ export const SchoolProvider = ({ children }) => {
 
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
-        // console.log(currentSchool.name+ "with id: "+currentSchool);
         fetchDocumentData();
-        console.log(month)
-        console.log(year)
-
-    }, [month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
+    }, [fetchDocumentData]); // Run effect only on mount and unmount
 
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, setCurrentDocument, currentDocument,
             addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, reload, setReload, value, setValue, updateJev, jev, setJev, createNewDocument,
+            currentSchool, value, setValue, updateJev, jev, setJev, createNewDocument,
             fetchLRByKeyword, exportDocument
         }}>
             {children}

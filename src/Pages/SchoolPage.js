@@ -60,28 +60,8 @@ export function a11yProps(index) {
     };
 }
 
-// const theme = createTheme({
-//     components: {
-//         MuiButton: {
-//             styleOverrides: {
-//                 root: {
-//                     backgroundColor: '#19B4E5', // Default background color for enabled button
-//                     color: 'white', // Default text color for enabled button
-//                     '&:hover': {
-//                         backgroundColor: '#19a2e5', // Background color on hover
-//                     },
-//                     '&.Mui-disabled': {
-//                         backgroundColor: "#e0e0e0", // Background color when disabled
-//                         color: '#c4c4c4', // Text color when disabled
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// });
-
 function SchoolPage(props) {
-    const { year, month, setIsAdding, currentDocument, exportDocument, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
+    const { year, month, setIsAdding, exportDocument, updateLr, updateJev, value, setValue } = useSchoolContext();
     //const { selected } = useNavigationContext();
     const [open, setOpen] = React.useState(false);
 
@@ -89,9 +69,7 @@ function SchoolPage(props) {
 
     const handleClose = () => setOpen(false);
 
-    const exportDocumentOnClick = async () => {
-        await exportDocument();
-    }
+    const exportDocumentOnClick = async () => { await exportDocument(); }
 
     console.log("Schools renders")
 
@@ -100,17 +78,16 @@ function SchoolPage(props) {
         console.log("Schools useEffect: lr updated");
         updateLr();
         updateJev();
-
         setIsAdding(false); //reset state to allow addFields again
-    }, [value, year, month, reload, updateLr, updateJev, setIsAdding]);
+    }, [value, year, month, updateLr, updateJev, setIsAdding]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
-    if (!currentDocument) { //returns null until there's value
-        return null;
-    }
+    // if (!currentDocument) { //returns null until there's value
+    //     return null;
+    // }
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>

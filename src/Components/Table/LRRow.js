@@ -27,10 +27,9 @@ function RecordsRow(props) {
         isAdding,
         currentDocument,
         lr,
+        updateLr,
         setLr,
         fetchDocumentData,
-        setReload,
-        reload,
         value,
         createNewDocument,
         month,
@@ -116,10 +115,12 @@ function RecordsRow(props) {
     //else, set lr to empty
     const handleNewRecordCancel = async () => {
         console.log("cancel");
+        await fetchDocumentData();
         if (lr.length > 1) {
             await fetchDocumentData();
         } else {
-            setReload(!reload); //just to reload school.js to fetch lr data
+            // setReload(!reload); //just to reload school.js to fetch lr data
+            updateLr(); //just to reload school.js to fetch lr data
         }
         setDateError(false); //reset date error state
     }

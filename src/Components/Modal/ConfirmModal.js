@@ -38,11 +38,8 @@ export default function ConfirmModal({ currentDocument, month, open, handleClose
         // jev length upon initialization will always be > 2
         if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
             await createNewDocument(obj, month, value);
-            console.log(value);
-            console.log("mao ni ni invoke")
         } else {
             await updateDocumentById(value); //update field in db
-            console.log("mao ni ni invoke siguro?")
         }
 
         handleClose();
