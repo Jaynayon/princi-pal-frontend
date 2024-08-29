@@ -108,9 +108,9 @@ export default function AnnualTab() {
 
     React.useEffect(() => {
         if (documentsByYear) {
-            const value = documentsByYear.find(doc => doc.month === tabMonth);
-            setInput(value ? value.cashAdvance : 0);
-            setSelectedDocument(value ? value : emptyDocument);
+            const value = documentsByYear.find(doc => doc.month === tabMonth) || emptyDocument;
+            setInput(value?.cashAdvance || 0);
+            setSelectedDocument(value);
         }
     }, [documentsByYear, tabMonth]);
     console.log(selectedDocument)
@@ -177,7 +177,8 @@ export default function AnnualTab() {
                     </Select>
                 </FormControl>
                 <TextField
-                    disabled={documentsByYear.some(doc => doc.month === tabMonth)}
+                    // disabled={documentsByYear.some(doc => doc.month === tabMonth)}
+                    disabled={documentsByYear.some(doc => doc.month === tabMonth && doc.cashAdvance > 0)}
                     variant="standard"
                     value={input}
                     inputProps={{
@@ -214,10 +215,11 @@ export default function AnnualTab() {
                 // }} 
                 />
                 <Button
+                    disabled={documentsByYear.some(doc => doc.month === tabMonth && doc.cashAdvance > 0)}
+                    // disabled={!selectedDocument?.id === 0}
                     sx={[styles.button, { fontSize: 13, m: 2, maxHeight: 35 }]}
                     onClick={handleConfirmOpen}
                     variant="contained"
-                    disabled={documentsByYear.some(doc => doc.month === tabMonth)}
                 >
                     Save
                 </Button>

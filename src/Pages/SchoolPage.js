@@ -61,8 +61,8 @@ export function a11yProps(index) {
 }
 
 function SchoolPage(props) {
-    const { year, month, setIsAdding, exportDocument, updateLr, updateJev, value, setValue } = useSchoolContext();
-    //const { selected } = useNavigationContext();
+    const { year, month, setIsAdding, currentDocument, exportDocument, updateLr, updateJev, value, setValue, isLoading } = useSchoolContext();
+
     const [open, setOpen] = React.useState(false);
 
     const handleOpen = () => setOpen(true);
@@ -73,13 +73,15 @@ function SchoolPage(props) {
 
     console.log("Schools renders")
 
-    //Only retried documents from that school if the current selection is a school
+    // Ensures to update lr and jev only if its not loading and there's a current document
     React.useEffect(() => {
-        console.log("Schools useEffect: lr updated");
-        updateLr();
-        updateJev();
+        if (!isLoading && currentDocument) {
+            console.log("Schools useEffect: Document fetched, updating lr and jev");
+            updateLr();
+            updateJev();
+        }
         setIsAdding(false); //reset state to allow addFields again
-    }, [value, year, month, updateLr, updateJev, setIsAdding]);
+    }, [value, year, month, updateLr, updateJev, setIsAdding, isLoading, currentDocument]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -141,7 +143,9 @@ function SchoolPage(props) {
                                             pr: 2
                                         }}
                                     >
-                                        <Button variant="contained"
+                                        <Button
+                                            disabled={isLoading}
+                                            variant="contained"
                                             sx={{ backgroundColor: '#4A99D3' }}
                                             onClick={() => exportDocumentOnClick()}
                                         >Export

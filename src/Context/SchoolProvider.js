@@ -16,8 +16,6 @@ const emptyDocument = {
 }
 
 // Initialize current date to get current month and year
-const startYear = 2021;
-
 const currentDate = new Date();
 const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
 const currentYear = currentDate.getFullYear(); // Get full year as string
@@ -28,6 +26,7 @@ const months = [
 ];
 
 // Dynamic year starting from year 2021
+const startYear = 2021;
 const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (startYear + i).toString());
 
 export const SchoolProvider = ({ children }) => {
@@ -57,7 +56,10 @@ export const SchoolProvider = ({ children }) => {
     const [lr, setLr] = useState([]);
     const [jev, setJev] = useState([]);
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const exportDocument = async () => {
+        setIsLoading(true);  // Start loading
         try {
             if (currentSchool) {
                 const blobData = await RestService.getExcelFromLr(
@@ -73,6 +75,8 @@ export const SchoolProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Error fetching document:', error);
+        } finally {
+            setIsLoading(false);  // End loading
         }
     };
 
@@ -93,6 +97,7 @@ export const SchoolProvider = ({ children }) => {
     }, [currentSchool]);
 
     const fetchDocumentData = useCallback(async () => {
+        setIsLoading(true);  // Start loading
         try {
             if (currentSchool) {
                 const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
@@ -112,6 +117,8 @@ export const SchoolProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Error fetching document:', error);
+        } finally {
+            setIsLoading(false);  // End loading
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
@@ -185,7 +192,6 @@ export const SchoolProvider = ({ children }) => {
         }
 
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
-
     }, [])
 
     useEffect(() => {
@@ -199,7 +205,7 @@ export const SchoolProvider = ({ children }) => {
             lr, setLr, setCurrentDocument, currentDocument,
             addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
             currentSchool, value, setValue, updateJev, jev, setJev, createNewDocument,
-            fetchLRByKeyword, exportDocument
+            fetchLRByKeyword, exportDocument, isLoading, setIsLoading
         }}>
             {children}
         </SchoolContext.Provider>
