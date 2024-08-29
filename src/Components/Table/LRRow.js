@@ -33,6 +33,7 @@ function RecordsRow(props) {
         reload,
         value,
         createNewDocument,
+        month,
         jev
     } = useSchoolContext();
 
@@ -134,7 +135,7 @@ function RecordsRow(props) {
                 const rowIndex = lr.findIndex(row => row.id === rowId);
                 // jev length upon initialization will always be > 2 or not null/undefined
                 if (!currentDocument?.id || !jev || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
-                    await createNewDocument(lr[rowIndex]);
+                    await createNewDocument(lr[rowIndex], month);
                 } else {
                     try {
                         await createLrByDocumentId(currentDocument.id, lr[rowIndex]);

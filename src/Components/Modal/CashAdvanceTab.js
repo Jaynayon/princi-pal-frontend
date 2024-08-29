@@ -11,6 +11,8 @@ export default function CashAdvanceTab({ handleClose }) {
 
     const handleConfirmClose = () => setConfirmOpen(false)
 
+    const handleConfirmOpen = () => setConfirmOpen(true)
+
     React.useEffect(() => {
         if (currentDocument) {
             setAmount(currentDocument.cashAdvance)
@@ -43,7 +45,7 @@ export default function CashAdvanceTab({ handleClose }) {
             />
             <Button
                 sx={styles.button}
-                onClick={() => setConfirmOpen(true)}
+                onClick={handleConfirmOpen}
                 variant="contained"
                 disabled={!!currentDocument?.cashAdvance}
             >
@@ -51,6 +53,8 @@ export default function CashAdvanceTab({ handleClose }) {
             </Button>
             <ConfirmModal
                 open={confirmOpen}
+                month={month}
+                currentDocument={currentDocument}
                 handleClose={handleConfirmClose}
                 handleCloseParent={handleClose}
                 value={amount || 0} />

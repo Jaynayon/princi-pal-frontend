@@ -13,8 +13,9 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 import RestService from '../../Services/RestService';
 // import { useNavigationContext } from '../Context/NavigationProvider';
 
-export default function ConfirmModal({ open, handleClose, handleCloseParent, value }) {
-    const { currentDocument, fetchDocumentData, createNewDocument, jev } = useSchoolContext();
+// Current document is passed by value to allow reusability for AnnualTab
+export default function ConfirmModal({ currentDocument, month, open, handleClose, handleCloseParent = null, value }) {
+    const { fetchDocumentData, createNewDocument, jev } = useSchoolContext();
 
     const updateDocumentById = async (newValue) => {
         try {
@@ -36,13 +37,18 @@ export default function ConfirmModal({ open, handleClose, handleCloseParent, val
         console.log(jev)
         // jev length upon initialization will always be > 2
         if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
-            await createNewDocument(obj, value);
+            await createNewDocument(obj, month, value);
+            console.log(value);
+            console.log("mao ni ni invoke")
         } else {
             await updateDocumentById(value); //update field in db
+            console.log("mao ni ni invoke siguro?")
         }
 
         handleClose();
-        handleCloseParent();
+        if (typeof handleCloseParent === 'function') { // If a parent setter is passed
+            handleCloseParent();
+        }
     }
 
     return (
