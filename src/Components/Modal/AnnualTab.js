@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
     Box,
     TextField,
@@ -20,6 +20,7 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
 
 import RestService from '../../Services/RestService';
+import ConfirmModal from './ConfirmModal';
 
 const columns = [
     {
@@ -49,6 +50,15 @@ const columns = [
     }
 ];
 
+const emptyDocument = {
+    id: 0,
+    budget: 0,
+    cashAdvance: 0,
+    claimant: "",
+    sds: "",
+    headAccounting: ""
+}
+
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -68,14 +78,20 @@ export default function AnnualTab() {
     const { month, months, year, currentSchool, jev } = useSchoolContext();
     const [documentsByYear, setDocumentsByYear] = React.useState([]);
     const [tabMonth, setTabMonth] = React.useState(month); // Initally get current month value
+    const [selectedDocument, setSelectedDocument] = React.useState(null); // Initially get current Document value
     const [input, setInput] = React.useState(0);
+    const [confirmOpen, setConfirmOpen] = React.useState(false);
+
+    const handleConfirmClose = () => setConfirmOpen(false);
+
+    const handleConfirmOpen = () => setConfirmOpen(true);
 
     const getDocumentsByYear = React.useCallback(async () => {
         try {
             if (currentSchool) {
                 const response = await RestService.getDocumentBySchoolIdYear(currentSchool.id, year);
                 if (response) {
-                    console.log(response);
+                    console.log(response); //test
                     setDocumentsByYear(response);
                 } else {
                     console.log("Documents not fetched");
@@ -91,11 +107,21 @@ export default function AnnualTab() {
     }, [year, jev, getDocumentsByYear, month]);
 
     React.useEffect(() => {
-        const value = documentsByYear.find(doc => doc.month === tabMonth);
-        setInput(value ? value.cashAdvance : 0);
+        if (documentsByYear) {
+            const value = documentsByYear.find(doc => doc.month === tabMonth);
+            setInput(value ? value.cashAdvance : 0);
+            setSelectedDocument(value ? value : emptyDocument);
+        }
     }, [documentsByYear, tabMonth]);
+    console.log(selectedDocument)
 
-    const handleChangeMonth = (event) => { setTabMonth(event.target.value) }
+    const handleChangeMonth = (event) => {
+        setTabMonth(event.target.value);
+        if (documentsByYear) {
+            const value = documentsByYear.find(doc => doc.month === tabMonth);
+            setSelectedDocument(value ? value : emptyDocument);
+        }
+    }
 
     const handleInputChange = (event) => {
         let modifiedValue = event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
@@ -151,6 +177,7 @@ export default function AnnualTab() {
                     </Select>
                 </FormControl>
                 <TextField
+                    disabled={documentsByYear.some(doc => doc.month === tabMonth)}
                     variant="standard"
                     value={input}
                     inputProps={{
@@ -188,7 +215,7 @@ export default function AnnualTab() {
                 />
                 <Button
                     sx={[styles.button, { fontSize: 13, m: 2, maxHeight: 35 }]}
-                    // onClick={() => setConfirmOpen(true)}
+                    onClick={handleConfirmOpen}
                     variant="contained"
                     disabled={documentsByYear.some(doc => doc.month === tabMonth)}
                 >
@@ -281,6 +308,12 @@ export default function AnnualTab() {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <ConfirmModal
+                open={confirmOpen}
+                month={tabMonth}
+                currentDocument={selectedDocument}
+                handleClose={handleConfirmClose}
+                value={input || 0} />
         </React.Fragment >
     );
 }
