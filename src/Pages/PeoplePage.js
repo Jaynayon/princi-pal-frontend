@@ -25,8 +25,9 @@ import ListItem from '@mui/material/ListItem';
 import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 import axios from 'axios'; // Import Axios for making HTTP requests
 import { useNavigationContext } from '../Context/NavigationProvider';
+import { transformSchoolText } from '../Components/Navigation/Navigation';
 
-function People(props) {
+function PeoplePage(props) {
     const [member, setMember] = useState('');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
@@ -338,7 +339,7 @@ function People(props) {
                                     >
                                         {schools?.map((school) => (
                                             <MenuItem key={school.id} value={school.id}>
-                                                {school.name}
+                                                {transformSchoolText(school.name)}
                                             </MenuItem>
                                         ))}
                                     </Select>
@@ -469,7 +470,7 @@ function People(props) {
     );
 }
 
-export default People;
+export default PeoplePage;
 
 
 

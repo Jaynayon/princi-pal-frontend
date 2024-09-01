@@ -229,7 +229,6 @@ export function FilterDate() {
 
 export function SchoolSearchFilter() {
     const [input, setInput] = useState('');
-    const { fetchLrByKeyword } = useSchoolContext();
 
     const handleInputChange = (event) => {
         setInput(event.target.value)
@@ -237,7 +236,6 @@ export function SchoolSearchFilter() {
 
     const handleInputBlur = () => {
         //Something after searching
-        //fetchLrByKeyword(input);
     }
 
     useEffect(() => {

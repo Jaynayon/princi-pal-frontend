@@ -7,13 +7,12 @@ import Button from '@mui/material/Button';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import MenuItem from '@mui/material/MenuItem';
 import { Menu, TextField } from '@mui/material';
-import RestService from '../../Services/RestService';
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UacsFilter from '../Filters/UacsFilter';
 
-function RecordsRow(props) {
+function LRRow(props) {
     const { page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
@@ -21,19 +20,21 @@ function RecordsRow(props) {
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [dateError, setDateError] = useState(false);
-    const [uacsError, setUacsError] = useState(false);
 
     const {
         addFields,
         isAdding,
         currentDocument,
         lr,
+        updateLr,
+        updateLrById,
+        deleteLrByid,
         setLr,
         fetchDocumentData,
-        setReload,
-        reload,
+        createLrByDocId,
         value,
         createNewDocument,
+        month,
         jev
     } = useSchoolContext();
 
@@ -70,37 +71,9 @@ function RecordsRow(props) {
         handleMenuClose();
     };
 
-    const deleteLrByid = async (rowId) => {
-        try {
-            const response = await RestService.deleteLrById(rowId);
-            if (response) {
-                console.log(`LR with id: ${rowId} is deleted`);
-            } else {
-                console.log("LR not deleted");
-            }
-            fetchDocumentData();
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    };
-
-    const updateLrById = async (colId, rowId, value) => {
-        try {
-            const response = await RestService.updateLrById(colId, rowId, value);
-            if (response) {
-                console.log(`LR with id: ${rowId} is updated`);
-            } else {
-                console.log("LR not updated");
-            }
-            fetchDocumentData();
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    }
-
     const createLrByDocumentId = async (doc_id, obj) => {
         try {
-            const response = await RestService.createLrByDocId(doc_id, obj);
+            const response = await createLrByDocId(doc_id, obj);
             if (response) {
                 console.log(`LR is created`);
             } else {
@@ -116,10 +89,12 @@ function RecordsRow(props) {
     //else, set lr to empty
     const handleNewRecordCancel = async () => {
         console.log("cancel");
+        await fetchDocumentData();
         if (lr.length > 1) {
             await fetchDocumentData();
         } else {
-            setReload(!reload); //just to reload school.js to fetch lr data
+            // setReload(!reload); //just to reload school.js to fetch lr data
+            updateLr(); //just to reload school.js to fetch lr data
         }
         setDateError(false); //reset date error state
     }
@@ -133,11 +108,15 @@ function RecordsRow(props) {
                 setDateError(true)
             } else {
                 const rowIndex = lr.findIndex(row => row.id === rowId);
-                // jev length upon initialization will always be > 2
-                if (jev.length < 2) { //if there's no current document or it's not yet existing
-                    createNewDocument(lr[rowIndex]);
+                // jev length upon initialization will always be > 2 or not null/undefined
+                if (!currentDocument?.id || !jev || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
+                    await createNewDocument(lr[rowIndex], month);
                 } else {
-                    await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                    try {
+                        await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                    } catch (error) {
+                        console.error('Error creating LR: ', error);
+                    }
                 }
             }
         }
@@ -181,19 +160,17 @@ function RecordsRow(props) {
         }
         // Perform validation for new row/addFields/ add row feature
         else {
-            if (colId === "date") {
-                const result = isValidDateFormat(inputValue);
-                setDateError(!result);
-            }
+            if (colId === "date") { setDateError(!isValidDateFormat(inputValue)); }
         }
     };
 
     // Function to format a number with commas and two decimal places
     const formatNumber = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
-        if (editingCell?.colId === colId && editingCell?.rowId === rowId)
-            return number;
-        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
+            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
+        }
+        return "₱" + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
     const displayError = (colId, rowId) => {
@@ -270,6 +247,7 @@ function RecordsRow(props) {
                                             >
                                                 <TextField
                                                     //variant='standard'
+                                                    id={lr?.id}
                                                     value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
                                                     error={isError(column.id, row.id)}
                                                     helperText={displayError(column.id, row.id)}
@@ -380,4 +358,4 @@ const styles = {
     }
 }
 
-export default RecordsRow;
+export default LRRow;

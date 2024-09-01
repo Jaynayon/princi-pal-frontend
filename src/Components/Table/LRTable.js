@@ -9,10 +9,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import RecordsRow from './LRRow';
+import LRRow from './LRRow';
 import Typography from '@mui/material/Typography';
-import { SchoolContext } from '../../Context/SchoolProvider';
-import RestService from '../../Services/RestService';
+import { SchoolContext, useSchoolContext } from '../../Context/SchoolProvider';
+// import { useSchoolContext } from '../Context/SchoolProvider';
 
 class LRTable extends Component {
     constructor(props) {
@@ -77,8 +77,8 @@ class LRTable extends Component {
             {
                 id: 'orsBursNo',
                 label: 'ORS/BURS No.',
-                minWidth: 140,
-                maxWidth: 140,
+                minWidth: 150,
+                maxWidth: 150,
                 align: 'left',
                 format: (value) => value.toLocaleString('en-US'),
             },
@@ -117,8 +117,8 @@ class LRTable extends Component {
             {
                 id: 'amount',
                 label: 'Amount',
-                minWidth: 120,
-                maxWidth: 120,
+                minWidth: 140,
+                maxWidth: 140,
                 align: 'left',
                 format: (value) => value.toLocaleString('en-US'),
             },
@@ -151,7 +151,7 @@ class LRTable extends Component {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            <RecordsRow
+                            <LRRow
                                 setRows={setLr}
                                 page={page}
                                 rowsPerPage={rowsPerPage}
@@ -165,20 +165,23 @@ class LRTable extends Component {
                         <Grid container sx={{ pl: 2, pb: 1 }}>
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <DocumentTextFields
-                                    id={currentDocument?.id} //pass by value
-                                    value={currentDocument?.claimant}
+                                    // id={currentDocument?.id} //pass by value
+                                    // value={currentDocument?.claimant || "None"}
+                                    prop={currentDocument}
                                     description="Claimant"
                                 />
                                 <DocumentTextFields
-                                    id={currentDocument?.id}
-                                    value={currentDocument?.sds}
+                                    // id={currentDocument?.id}
+                                    // value={currentDocument?.sds || "None"}
+                                    prop={currentDocument}
                                     description="SDS"
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6} md={6} lg={6}>
                                 <DocumentTextFields
-                                    id={currentDocument?.id}
-                                    value={currentDocument?.headAccounting}
+                                    // id={currentDocument?.id}
+                                    // value={currentDocument?.headAccounting || "None"}
+                                    prop={currentDocument}
                                     description="Head. Accounting Div. Unit"
                                 />
                             </Grid>
@@ -207,9 +210,23 @@ LRTable.contextType = SchoolContext;
 export default LRTable;
 
 const DocumentTextFields = (props) => {
+    const { updateDocumentById } = useSchoolContext();
+    const { description, prop } = props;
     // const { } = useSchoolContext();
-    const { description, value, id } = props;
-    const [input, setInput] = React.useState(value);
+    // const { description, value, id } = props;
+    const id = prop?.id || "None";
+    let value;
+    if (description === "Claimant") {
+        value = prop?.claimant || "None"
+    } else if (description === "SDS") {
+        value = prop?.sds || "None"
+    } else if (description === "Head. Accounting Div. Unit") {
+        value = prop?.headAccounting || "None"
+    } else {
+        value = "None"
+    }
+
+    const [input, setInput] = React.useState(prop || "None");
     const [prevInput, setPrevInput] = React.useState('initial state');
 
     React.useEffect(() => {
@@ -223,18 +240,21 @@ const DocumentTextFields = (props) => {
     const handleInputBlur = async () => {
         if (prevInput !== input) {
             console.log("there are changes");
-            await updateDocumentById(input); //update field in db
+            await updateDocumentFooter(input); //update field in db
         } else
             console.log("no changes");
     }
 
     const handleInputOnClick = (event) => {
+        if (value === "None" || value === "none") {
+            setInput("")
+        }
         setPrevInput(event.target.value);
     }
 
-    const updateDocumentById = async (newValue) => {
+    const updateDocumentFooter = async (newValue) => {
         try {
-            const response = await RestService.updateDocumentById(id, description, input);
+            const response = await updateDocumentById(id, description, input);
             if (response) {
                 console.log(`Document with id: ${id} is updated`);
                 setInput(newValue);

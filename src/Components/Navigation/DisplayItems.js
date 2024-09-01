@@ -94,6 +94,8 @@ export function DisplayItems() {
     }
 
     const handleLogout = (e) => {
+        // Remove local storage to reset initial selected state
+        window.localStorage.removeItem("LOCAL_STORAGE_SELECTED");
         e.preventDefault();
         logoutUser('jwt');
     };
