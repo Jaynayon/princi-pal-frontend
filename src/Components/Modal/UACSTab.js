@@ -14,9 +14,7 @@ import {
 } from '@mui/material';
 
 import { useSchoolContext } from '../../Context/SchoolProvider';
-// import { useNavigationContext } from '../../Context/NavigationProvider';
-
-import RestService from '../../Services/RestService';
+// import { useNavigationContext } from '../../Context/NavigationProvider';\
 
 const columns = [
     {
@@ -47,7 +45,7 @@ const columns = [
 ];
 
 export default function UACSTab() {
-    const { month, year, currentSchool, currentDocument, jev, setJev } = useSchoolContext();
+    const { month, year, currentSchool, currentDocument, jev, setJev, updateJevById } = useSchoolContext();
     const [rowsPerPage, setRowsPerPage] = React.useState(4);
     const [page, setPage] = React.useState(0);
     const [inputValue, setInputValue] = React.useState('Initial Value');
@@ -96,14 +94,14 @@ export default function UACSTab() {
         // Perform any action when input is blurred (e.g., save the value)
         if (inputValue !== initialValue) {
             console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-            await updateJevById(colId, rowId, inputValue);
+            await updateJevBudgetById(colId, rowId, inputValue);
         }
         console.log('Value saved:', inputValue);
     };
 
-    const updateJevById = async (colId, rowId, value) => {
+    const updateJevBudgetById = async (colId, rowId, value) => {
         try {
-            const response = await RestService.updateJevById(colId, rowId, value);
+            const response = await updateJevById(colId, rowId, value);
             if (response) {
                 console.log(`LR with id: ${rowId} is updated`);
             } else {

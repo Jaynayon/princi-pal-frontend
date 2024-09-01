@@ -7,13 +7,12 @@ import Button from '@mui/material/Button';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import MenuItem from '@mui/material/MenuItem';
 import { Menu, TextField } from '@mui/material';
-import RestService from '../../Services/RestService';
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UacsFilter from '../Filters/UacsFilter';
 
-function RecordsRow(props) {
+function LRRow(props) {
     const { page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [inputValue, setInputValue] = useState('Initial Value');
@@ -28,8 +27,11 @@ function RecordsRow(props) {
         currentDocument,
         lr,
         updateLr,
+        updateLrById,
+        deleteLrByid,
         setLr,
         fetchDocumentData,
+        createLrByDocId,
         value,
         createNewDocument,
         month,
@@ -69,37 +71,9 @@ function RecordsRow(props) {
         handleMenuClose();
     };
 
-    const deleteLrByid = async (rowId) => {
-        try {
-            const response = await RestService.deleteLrById(rowId);
-            if (response) {
-                console.log(`LR with id: ${rowId} is deleted`);
-            } else {
-                console.log("LR not deleted");
-            }
-            fetchDocumentData();
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    };
-
-    const updateLrById = async (colId, rowId, value) => {
-        try {
-            const response = await RestService.updateLrById(colId, rowId, value);
-            if (response) {
-                console.log(`LR with id: ${rowId} is updated`);
-            } else {
-                console.log("LR not updated");
-            }
-            fetchDocumentData();
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    }
-
     const createLrByDocumentId = async (doc_id, obj) => {
         try {
-            const response = await RestService.createLrByDocId(doc_id, obj);
+            const response = await createLrByDocId(doc_id, obj);
             if (response) {
                 console.log(`LR is created`);
             } else {
@@ -384,4 +358,4 @@ const styles = {
     }
 }
 
-export default RecordsRow;
+export default LRRow;

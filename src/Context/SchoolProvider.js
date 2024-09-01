@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
-import RestService from "../Services/RestService"
 import { useNavigationContext } from './NavigationProvider';
+import axios from 'axios';
 
 export const SchoolContext = createContext();
 
@@ -31,7 +31,7 @@ const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (sta
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool } = useNavigationContext();
+    const { currentSchool, navigationLoading } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -58,126 +58,243 @@ export const SchoolProvider = ({ children }) => {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const exportDocument = async () => {
-        setIsLoading(true);  // Start loading
-        try {
-            if (currentSchool) {
-                const blobData = await RestService.getExcelFromLr(
-                    currentDocument.id,
-                    currentSchool.id,
-                    year,
-                    month
-                );
-
-                if (blobData) {
-                    console.log("Successfully exported document")
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        } finally {
-            setIsLoading(false);  // End loading
-        }
-    };
-
-    const fetchLRByKeyword = useCallback(async (keyword) => {
-        try {
-            if (currentSchool) {
-                const getLr = await RestService.getLrByKeyword(
-                    keyword
-                );
-
-                if (getLr) {
-                    setLr(getLr);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    }, [currentSchool]);
-
     const fetchDocumentData = useCallback(async () => {
         setIsLoading(true);  // Start loading
         try {
-            if (currentSchool) {
-                const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                    currentSchool.id,
-                    year,
-                    month
-                );
+            if (!navigationLoading && currentSchool) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`)
 
-                console.log(getDocument)
-
-                if (getDocument) {
-                    setCurrentDocument(getDocument);
-                } else {
-                    console.log("this was invoked")
-                    setCurrentDocument(emptyDocument);
-                }
+                console.log(response.data)
+                setCurrentDocument(response.data);
             }
         } catch (error) {
+            setCurrentDocument(emptyDocument)
             console.error('Error fetching document:', error);
         } finally {
             setIsLoading(false);  // End loading
         }
-    }, [currentSchool, setCurrentDocument, year, month]);
+    }, [currentSchool, setCurrentDocument, year, month, navigationLoading]);
+
+    const createLrByDocId = useCallback(async (documentsId, obj) => {
+        try {
+            if (currentDocument) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_LR}/create`, {
+                    documentsId,
+                    date: obj.date,
+                    orsBursNo: obj.orsBursNo,
+                    particulars: obj.particulars,
+                    amount: obj.amount,
+                    objectCode: obj.objectCode,
+                    payee: obj.payee,
+                    natureOfPayment: obj.natureOfPayment
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                return response.status === 201;
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+            return null;
+        }
+    }, [currentDocument]);
+
+    const updateDocumentById = useCallback(async (docId, description, value) => {
+        // Construct the payload object based on the provided colId
+        const payload = {
+            "Claimant": { claimant: value },
+            "SDS": { sds: value },
+            "Head. Accounting Div. Unit": { headAccounting: value },
+            "Budget Limit": { budgetLimit: value },
+            "Cash Advance": { cashAdvance: value }
+        }[description] || {};
+
+        try {
+            const response = await axios.patch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, payload, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    }, []);
 
     const createNewDocument = useCallback(async (obj, month, cashAdvanceValue) => {
         try {
             if (currentSchool) {
-                const getDocument = await RestService.createDocBySchoolId(
-                    currentSchool.id,
-                    month,
-                    year,
-                    obj,
-                    cashAdvanceValue
-                );
+                // Troubleshooting: year and month passed is an array
+                // Extracting the year value from the array
+                const yearValue = Array.isArray(year) ? year[0] : year;
 
-                setCurrentDocument(getDocument || emptyDocument)
-                fetchDocumentData();
+                // Extracting the month value from the array
+                const monthValue = Array.isArray(month) ? month[0] : month;
+
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_DOC}/create`, {
+                    schoolId: currentSchool.id,
+                    month: monthValue,
+                    year: yearValue
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // Check if document creation was successful
+                if (response) {
+                    const newDocumentId = response.data.id;
+
+                    // If a payload (obj) is passed, create document and lr, else only document.
+                    if (obj) {
+                        if (obj.cashAdvance) {
+                            const setDocumentBudget = await updateDocumentById(newDocumentId, "Cash Advance", obj.cashAdvance);
+
+                            if (setDocumentBudget) {
+                                console.log("Budget set successfully");
+                            } else {
+                                console.error('Failed to set budget')
+                            }
+                        } else {
+                            // Insert new LR using the newly created document's ID
+                            const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
+
+                            if (lrCreationResponse) {
+                                console.log('LR created successfully');
+                            } else {
+                                console.error('Failed to create LR');
+                            }
+                        }
+                    }
+
+                    // return response.data; // Return the created document data
+                    setCurrentDocument(response.data || emptyDocument);
+                    // fetchDocumentData();
+                }
             }
         } catch (error) {
             console.error('Error fetching document:', error);
+            return null;
         }
-    }, [currentSchool, fetchDocumentData, setCurrentDocument, year]);
+    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById]);
 
     const updateJev = useCallback(async () => {
         try {
-            if (currentDocument) {
-                // Call RestService to fetch lr by document id
-                const data = await RestService.getJevByDocumentId(currentDocument.id);
-                console.log("lr")
-                if (data) { //data.decodedToken
-                    setJev(data)
-                } else {
-                    setJev([]); //meaning it's empty 
-                }
-                console.log(data);
+            if (!isLoading && currentDocument.id !== 0) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
+                setJev(response.data || [])
                 // Handle response as needed
+                console.log(response.data);
+
+            } else {
+                setJev([]); //meaning it's empty 
             }
         } catch (error) {
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setJev]);
+    }, [currentDocument, setJev, isLoading]);
+
+    const updateJevById = async (colId, rowId, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (colId === "budget") {
+            obj = { budget: value };
+        }
+
+        try {
+            const response = await axios.patch(`${process.env.REACT_APP_API_URL_JEV}/${rowId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            if (response) {
+                console.log(response.data);
+            }
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error fetching lrs by document id:', error);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
 
     const updateLr = useCallback(async () => {
         try {
-            if (currentDocument) {
-                // Call RestService to fetch lr by document id
-                const data = await RestService.getLrByDocumentId(currentDocument.id);
-                console.log("lr")
-                if (data) { //data.decodedToken
-                    setLr(data)
-                } else {
-                    setLr([]); //meaning it's empty 
-                }
-                console.log(data);
+            if (!isLoading && currentDocument.id !== 0) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
+                setLr(response.data || [])
                 // Handle response as needed
+                console.log(response.data);
+            } else {
+                setLr([]); //meaning it's empty 
             }
         } catch (error) {
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setLr]);
+    }, [currentDocument, setLr, isLoading]);
+
+    const updateLrById = async (colId, rowId, value) => {
+        let obj = {}
+
+        // Construct the payload object based on the provided colId
+        if (colId === "amount") {
+            obj = { amount: value };
+        } else if (colId === "particulars") {
+            obj = { particulars: value };
+        } else if (colId === "orsBursNo") {
+            obj = { orsBursNo: value };
+        } else if (colId === "date") {
+            obj = { date: value };
+        } else if (colId === "objectCode") {
+            obj = { objectCode: value };
+        } else if (colId === "payee") {
+            obj = { payee: value };
+        } else if (colId === "natureOfPayment") {
+            obj = { natureOfPayment: value };
+        }
+
+        try {
+            const response = await axios.patch(`${process.env.REACT_APP_API_URL_LR}/${rowId}`, obj, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response.status === 200) {
+                console.log(response.data);
+                console.log(`LR with id: ${rowId} is updated`);
+            } else {
+                console.log("LR not updated");
+            }
+            fetchDocumentData();
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }
+
+    const deleteLrByid = async (rowId) => {
+        try {
+            const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}`)
+            if (response) {
+                console.log(response.data)
+            }
+
+            if (response.status === 200) {
+                console.log(`LR with id: ${rowId} is deleted`);
+            } else {
+                console.log("LR not deleted");
+            }
+            fetchDocumentData();
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    };
 
     const addFields = useCallback((isAdding) => {
         let newLr = {
@@ -204,8 +321,9 @@ export const SchoolProvider = ({ children }) => {
             prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
             lr, setLr, setCurrentDocument, currentDocument,
             addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, value, setValue, updateJev, jev, setJev, createNewDocument,
-            fetchLRByKeyword, exportDocument, isLoading, setIsLoading
+            currentSchool, value, setValue, updateJev, updateJevById, jev, setJev, createNewDocument,
+            isLoading, setIsLoading, createLrByDocId, updateDocumentById, deleteLrByid,
+            updateLrById
         }}>
             {children}
         </SchoolContext.Provider>

@@ -10,22 +10,20 @@ import {
 } from '@mui/material';
 
 import { useSchoolContext } from '../../Context/SchoolProvider';
-import RestService from '../../Services/RestService';
 // import { useNavigationContext } from '../Context/NavigationProvider';
 
 // Current document is passed by value to allow reusability for AnnualTab
 export default function ConfirmModal({ currentDocument, month, open, handleClose, handleCloseParent = null, value }) {
-    const { fetchDocumentData, createNewDocument, jev } = useSchoolContext();
+    const { fetchDocumentData, createNewDocument, updateDocumentById, jev } = useSchoolContext();
 
-    const updateDocumentById = async (newValue) => {
+    const updateDocumentCashAdvById = async (newValue) => {
         try {
-            const response = await RestService.updateDocumentById(currentDocument?.id, "Cash Advance", newValue);
+            const response = await updateDocumentById(currentDocument?.id, "Cash Advance", newValue);
             if (response) {
                 console.log(`Document with id: ${currentDocument?.id} is updated`);
             } else {
                 console.log("Document not updated");
             }
-            fetchDocumentData(); //fetch data changes
         } catch (error) {
             console.error('Error fetching document:', error);
         }
@@ -36,15 +34,21 @@ export default function ConfirmModal({ currentDocument, month, open, handleClose
         obj = { cashAdvance: value }
         console.log(jev)
         // jev length upon initialization will always be > 2
-        if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
-            await createNewDocument(obj, month, value);
-        } else {
-            await updateDocumentById(value); //update field in db
-        }
-
-        handleClose();
-        if (typeof handleCloseParent === 'function') { // If a parent setter is passed
-            handleCloseParent();
+        try {
+            if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) {
+                await createNewDocument(obj, month, value);
+                await fetchDocumentData();
+            } else {
+                await updateDocumentCashAdvById(value);
+                await fetchDocumentData();
+            }
+        } catch (error) {
+            console.error('Error in handleOnClick:', error);
+        } finally {
+            handleClose();
+            if (typeof handleCloseParent === 'function') {
+                handleCloseParent();
+            }
         }
     }
 

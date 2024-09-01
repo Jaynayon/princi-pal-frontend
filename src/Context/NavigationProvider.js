@@ -6,6 +6,25 @@ const NavigationContext = createContext();
 
 export const useNavigationContext = () => useContext(NavigationContext);
 
+const emptySchool = {
+    "id": 0,
+    "name": "NONE",
+    "fullName": "NONE"
+}
+
+const emptyUser = {
+    "id": 0,
+    "fname": "",
+    "mname": "",
+    "lname": "",
+    "username": "",
+    "email": "",
+    "password": "",
+    "position": "ADAS",
+    "avatar": "Blue",
+    "schools": []
+}
+
 export const NavigationProvider = ({ children }) => {
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
     const [selected, setSelected] = useState('Dashboard');
@@ -16,6 +35,7 @@ export const NavigationProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [currentSchool, setCurrentSchool] = useState(null);
     const [userId, setUserId] = useState(null)
+    const [navigationLoading, setNavigationLoading] = useState(false);
     const prevOpenRef = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -40,6 +60,7 @@ export const NavigationProvider = ({ children }) => {
     const fetchUser = useCallback(async () => {
         // Extract the root route if it's the /schools route
         const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
+        setNavigationLoading(true);
         try {
             const jwtCookie = document.cookie
                 .split('; ')
@@ -72,6 +93,8 @@ export const NavigationProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Error validating token:', error);
+        } finally {
+            setNavigationLoading(false);
         }
     }, [currentUser, location.pathname]);
 
@@ -166,7 +189,7 @@ export const NavigationProvider = ({ children }) => {
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
             navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
-            openSub, setOpenSub, location
+            openSub, setOpenSub, location, setNavigationLoading, navigationLoading
         }}>
             {children}
         </NavigationContext.Provider>

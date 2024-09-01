@@ -9,10 +9,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import RecordsRow from './LRRow';
+import LRRow from './LRRow';
 import Typography from '@mui/material/Typography';
-import { SchoolContext } from '../../Context/SchoolProvider';
-import RestService from '../../Services/RestService';
+import { SchoolContext, useSchoolContext } from '../../Context/SchoolProvider';
+// import { useSchoolContext } from '../Context/SchoolProvider';
 
 class LRTable extends Component {
     constructor(props) {
@@ -151,7 +151,7 @@ class LRTable extends Component {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            <RecordsRow
+                            <LRRow
                                 setRows={setLr}
                                 page={page}
                                 rowsPerPage={rowsPerPage}
@@ -210,6 +210,7 @@ LRTable.contextType = SchoolContext;
 export default LRTable;
 
 const DocumentTextFields = (props) => {
+    const { updateDocumentById } = useSchoolContext();
     const { description, prop } = props;
     // const { } = useSchoolContext();
     // const { description, value, id } = props;
@@ -239,7 +240,7 @@ const DocumentTextFields = (props) => {
     const handleInputBlur = async () => {
         if (prevInput !== input) {
             console.log("there are changes");
-            await updateDocumentById(input); //update field in db
+            await updateDocumentFooter(input); //update field in db
         } else
             console.log("no changes");
     }
@@ -251,9 +252,9 @@ const DocumentTextFields = (props) => {
         setPrevInput(event.target.value);
     }
 
-    const updateDocumentById = async (newValue) => {
+    const updateDocumentFooter = async (newValue) => {
         try {
-            const response = await RestService.updateDocumentById(id, description, input);
+            const response = await updateDocumentById(id, description, input);
             if (response) {
                 console.log(`Document with id: ${id} is updated`);
                 setInput(newValue);

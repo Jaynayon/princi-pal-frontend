@@ -16,6 +16,8 @@ import {
     SchoolFieldsFilter,
     SchoolSearchFilter
 } from '../Components/Filters/FilterDate';
+import axios from 'axios';
+import { saveAs } from 'file-saver';
 
 import { useSchoolContext } from '../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
@@ -61,13 +63,43 @@ export function a11yProps(index) {
 }
 
 function SchoolPage(props) {
-    const { year, month, setIsAdding, currentDocument, exportDocument, updateLr, updateJev, value, setValue, isLoading } = useSchoolContext();
-
+    const { year, month, setIsAdding, currentDocument, currentSchool, updateLr, updateJev, value, setValue, isLoading } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
+    const [exportIsLoading, setExportIsLoading] = React.useState(false);
 
     const handleOpen = () => setOpen(true);
 
     const handleClose = () => setOpen(false);
+
+    const exportDocument = async () => {
+        setExportIsLoading(true);  // Start loading
+        try {
+            if (currentSchool && currentDocument) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_DOWNLOAD}`, {
+                    documentId: currentDocument.id,
+                    schoolId: currentSchool.id,
+                    year,
+                    month
+                }, {
+                    responseType: 'blob' // Set the response type to 'blob' to handle binary data
+                });
+
+                // Extract blob data from the response
+                const blobData = new Blob([response.data], { type: 'application/octet-stream' });
+
+                // Use FileSaver.js to trigger file download
+                saveAs(blobData, 'LR-2024.xlsx');
+
+                if (blobData) {
+                    console.log("Successfully exported document")
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        } finally {
+            setExportIsLoading(false);  // End loading
+        }
+    };
 
     const exportDocumentOnClick = async () => { await exportDocument(); }
 
@@ -81,15 +113,11 @@ function SchoolPage(props) {
             updateJev();
         }
         setIsAdding(false); //reset state to allow addFields again
-    }, [value, year, month, updateLr, updateJev, setIsAdding, isLoading, currentDocument]);
+    }, [year, month, updateLr, updateJev, setIsAdding, currentDocument, isLoading]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-
-    // if (!currentDocument) { //returns null until there's value
-    //     return null;
-    // }
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -144,7 +172,7 @@ function SchoolPage(props) {
                                         }}
                                     >
                                         <Button
-                                            disabled={isLoading}
+                                            disabled={exportIsLoading}
                                             variant="contained"
                                             sx={{ backgroundColor: '#4A99D3' }}
                                             onClick={() => exportDocumentOnClick()}
