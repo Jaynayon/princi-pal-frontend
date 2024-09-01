@@ -43,6 +43,8 @@ function People(props) {
     const [selectedValue, setSelectedValue] = useState('');
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
+    const [filteredRows, setFilteredRows] = useState([]);
+    
 
     const { currentUser } = useNavigationContext();
     const [currentAssocation, setCurrentAssociation] = useState('');
@@ -181,7 +183,7 @@ function People(props) {
     
     const confirmRoleChange = async () => {
         try {
-            let endpoint = '';
+            let endpoint = '';  
             let newRole = '';
     
             if (rows[selectedIndex].admin) {
@@ -219,19 +221,54 @@ function People(props) {
     };
 
     const handleInvite = () => {
-        // Implement invite functionality here
+        // Assuming inviteEmail is a state variable
         console.log("Inviting email:", inviteEmail);
-        // You can send an invitation using the inviteEmail value
-        // Reset inviteEmail state after sending invitation if needed
-        setInviteEmail('');
+        
+        // Make sure inviteEmail is not empty before sending invitation
+        if (inviteEmail.trim() === '') {
+            console.error('Email is empty');
+            return;
+        }
+    
+        // Make an HTTP POST request to the API endpoint
+        axios.post('http://localhost:4000/associations/invite', {
+            email: inviteEmail
+        })
+        .then(response => {
+            // Handle success
+            console.log('Invitation sent successfully:', response.data);
+            // Reset inviteEmail state after sending invitation if needed
+            setInviteEmail('');
+        })
+        .catch(error => {
+            // Handle error
+            console.error('Error sending invitation:', error);
+        });
     };
 
     // Filtered rows based on search value
-    const filteredRows = rows.filter(row =>
+    /*const filteredRows = rows.filter(row =>
         (row && row.name && row.name.toLowerCase().includes(searchValue.toLowerCase())) ||
         (row && row.email && row.email.toLowerCase().includes(searchValue.toLowerCase()))
-    );
+    );*/
 
+    const handleSearchChange = async (event) => {
+        const value = event.target.value.toLowerCase(); // Convert search value to lowercase
+        setSearchValue(value); // Update search value state
+    
+        try {
+            const response = await axios.post('http://localhost:4000/schools/users/search', {
+                schoolId: selectedValue,
+                searchValue: value
+            });
+            setFilteredRows(response.data); // Update filteredRows state with filtered data from the backend
+        } catch (error) {
+            console.error('Error searching users:', error);
+        }
+    };
+    
+
+    
     return (
         <Container className="test" maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
             <Grid container spacing={2}>
@@ -251,6 +288,7 @@ function People(props) {
                                 />
                             </Box>
                         </Grid>
+
                         <Grid item xs={12} md={6} lg={6}>
                             <TextField
                                 sx={{ width: '50%' }}
