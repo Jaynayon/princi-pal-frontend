@@ -4,7 +4,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import { useSchoolContext } from '../../Context/SchoolProvider';
-import RestService from '../../Services/RestService';
 
 const objectCodes = [
     { code: "5020502001", name: "Communication Expenses" },
@@ -18,7 +17,7 @@ const objectCodes = [
 
 function UacsDateFilter(props) {
     //const [anchorEl, setAnchorEl] = React.useState(null);
-    const { fetchDocumentData } = useSchoolContext();
+    const { fetchDocumentData, updateLrById } = useSchoolContext();
     const { value, rowId, handleInputChange } = props
     const [selectedCode, setSelectedCode] = useState(value);
 
@@ -45,7 +44,7 @@ function UacsDateFilter(props) {
 
     const updateLrByIdUacs = async (value) => {
         try {
-            const response = await RestService.updateLrById("objectCode", rowId, value);
+            const response = await updateLrById("objectCode", rowId, value);
             if (response) {
                 console.log(`LR with id: ${rowId} is updated`);
             } else {
