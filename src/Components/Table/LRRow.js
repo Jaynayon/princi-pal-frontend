@@ -21,7 +21,6 @@ function RecordsRow(props) {
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [dateError, setDateError] = useState(false);
-    const [uacsError, setUacsError] = useState(false);
 
     const {
         addFields,
@@ -133,11 +132,15 @@ function RecordsRow(props) {
                 setDateError(true)
             } else {
                 const rowIndex = lr.findIndex(row => row.id === rowId);
-                // jev length upon initialization will always be > 2
-                if (jev.length < 2) { //if there's no current document or it's not yet existing
-                    createNewDocument(lr[rowIndex]);
+                // jev length upon initialization will always be > 2 or not null/undefined
+                if (!currentDocument?.id || !jev || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
+                    await createNewDocument(lr[rowIndex]);
                 } else {
-                    await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                    try {
+                        await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                    } catch (error) {
+                        console.error('Error creating LR: ', error);
+                    }
                 }
             }
         }
@@ -181,19 +184,17 @@ function RecordsRow(props) {
         }
         // Perform validation for new row/addFields/ add row feature
         else {
-            if (colId === "date") {
-                const result = isValidDateFormat(inputValue);
-                setDateError(!result);
-            }
+            if (colId === "date") { setDateError(!isValidDateFormat(inputValue)); }
         }
     };
 
     // Function to format a number with commas and two decimal places
     const formatNumber = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
-        if (editingCell?.colId === colId && editingCell?.rowId === rowId)
-            return number;
-        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
+            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
+        }
+        return "₱" + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
     const displayError = (colId, rowId) => {
@@ -270,6 +271,7 @@ function RecordsRow(props) {
                                             >
                                                 <TextField
                                                     //variant='standard'
+                                                    id={lr?.id}
                                                     value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
                                                     error={isError(column.id, row.id)}
                                                     helperText={displayError(column.id, row.id)}

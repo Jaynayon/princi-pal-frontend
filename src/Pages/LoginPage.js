@@ -16,11 +16,17 @@ const LoginPage = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
     };
 
+    const handleBtnRegister = () => {
+        // Logic for handling register button click
+        // Redirect to the registration page
+        window.location.href = "http://localhost:3000/register";
+    }
+
     const handleLogin = async () => {
         try {
             const emailValue = getEmailorUsername(); // Get email or username
             const passwordValue = getPassword(); // Get password
-    
+
             if (!emailValue.trim() || !passwordValue.trim()) {
                 if (!emailValue.trim() && !passwordValue.trim()) {
                     setLoginError('Email or password cannot be empty.');
@@ -31,10 +37,10 @@ const LoginPage = () => {
                 }
                 return;
             }
-    
+
             // Make a POST request to the backend to validate the credentials
             const response = await RestService.authenticateUser(emailValue, passwordValue);
-    
+
             if (response) {
                 // Credentials are valid, set isLoggedIn to true
                 window.location.href = "http://localhost:3000/dashboard";
@@ -51,7 +57,7 @@ const LoginPage = () => {
             }
         }
     };
-    
+
 
     const getEmailorUsername = () => {
         // Logic to get email or username from the input field
@@ -141,7 +147,8 @@ const LoginPage = () => {
                     <Button onClick={loginButtonActionListener} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
                     <Typography variant="body1" sx={{ mt: 2, marginLeft: '25%' }}>
                         Not registered yet? <span style={{ color: '#6C6FD5' }}>Create an account </span>
-                        <Link to="/register" style={{ color: '#6EADDC', textDecoration: 'none', fontWeight: 'bold', borderBottom: '1px solid' }}>Signup</Link>
+                        <Link style={{ color: '#6EADDC', textDecoration: 'none', fontWeight: 'bold', borderBottom: '1px solid' }}
+                            onClick={() => handleBtnRegister()}>Signup</Link>
                     </Typography>
                 </Grid>
 

@@ -86,7 +86,7 @@ const ButtonWrapper = styled('div')({
     //right: '80px', // Adjust as needed
 });
 
-function Settings() {
+function SettingsPage() {
     const [anchorEl, setAnchorEl] = useState(null);
     const { currentUser } = useNavigationContext();
     const [newPassword, setNewPassword] = useState('');
@@ -310,7 +310,7 @@ function Settings() {
                             )}
                         </TextFieldWrapper>
                         <ButtonWrapper>
-                        <Button
+                            <Button
                                 sx={{
                                     backgroundColor: "#4a99d3",
                                     color: "#fff",
@@ -341,4 +341,4 @@ function Settings() {
     );
 }
 
-export default Settings;
+export default SettingsPage;

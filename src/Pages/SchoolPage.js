@@ -1,32 +1,44 @@
-import '../App.css'
-import React, { } from 'react';
-import Paper from '@mui/material/Paper';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+import '../App.css';
+import React from 'react';
 import PropTypes from 'prop-types';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import { FilterDate, SchoolFieldsFilter, SchoolSearchFilter } from '../Components/Filters/FilterDate'
-import DocumentTable from '../Components/Table/LRTable';
-import Button from '@mui/material/Button';
+import {
+    Paper,
+    Tabs,
+    Tab,
+    Container,
+    Grid,
+    Box,
+    Button
+} from '@mui/material';
+
+import {
+    FilterDate,
+    SchoolFieldsFilter,
+    SchoolSearchFilter
+} from '../Components/Filters/FilterDate';
+
 import { useSchoolContext } from '../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
-import DocumentSummary from '../Components/Summary/DocumentSummary';
-import JEVTable from '../Components/Table/JEVTable';
 
-function CustomTabPanel(props) {
+import DocumentTable from '../Components/Table/LRTable';
+import JEVTable from '../Components/Table/JEVTable';
+import DocumentSummary from '../Components/Summary/DocumentSummary';
+import BudgetModal from '../Components/Modal/BudgetModal';
+
+export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
+
+    const isHidden = value !== index;
 
     return (
         <Box
             role="tabpanel"
-            hidden={value !== index}
+            hidden={isHidden}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
             {...other}
         >
-            {value === index && (
+            {!isHidden && (
                 <Box sx={{ paddingTop: 1 }}>
                     {children}
                 </Box>
@@ -41,14 +53,34 @@ CustomTabPanel.propTypes = {
     value: PropTypes.number.isRequired,
 };
 
-function a11yProps(index) {
+export function a11yProps(index) {
     return {
         id: `simple-tab-${index}`,
         'aria-controls': `simple-tabpanel-${index}`,
     };
 }
 
-function Schools(props) {
+// const theme = createTheme({
+//     components: {
+//         MuiButton: {
+//             styleOverrides: {
+//                 root: {
+//                     backgroundColor: '#19B4E5', // Default background color for enabled button
+//                     color: 'white', // Default text color for enabled button
+//                     '&:hover': {
+//                         backgroundColor: '#19a2e5', // Background color on hover
+//                     },
+//                     '&.Mui-disabled': {
+//                         backgroundColor: "#e0e0e0", // Background color when disabled
+//                         color: '#c4c4c4', // Text color when disabled
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// });
+
+function SchoolPage(props) {
     const { year, month, setIsAdding, currentDocument, exportDocument, reload, updateLr, updateJev, value, setValue } = useSchoolContext();
     //const { selected } = useNavigationContext();
 
@@ -61,16 +93,10 @@ function Schools(props) {
     //Only retried documents from that school if the current selection is a school
     React.useEffect(() => {
         console.log("Schools useEffect: lr updated");
-        // if (value === 0) {
-        //     updateLr(); //update or fetch lr data on load
-        // } else if (value === 1) {
-        //     updateJev();
-        // }
-
         updateLr();
         updateJev();
-        setIsAdding(false); //reset state to allow addFields again
 
+        setIsAdding(false); //reset state to allow addFields again
     }, [value, year, month, reload, updateLr, updateJev, setIsAdding]);
 
     const handleChange = (event, newValue) => {
@@ -118,7 +144,6 @@ function Schools(props) {
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
                                         height: "100%",
-                                        //backgroundColor: 'green'
                                     }}
                                     >
                                         <DocumentSummary />
@@ -157,10 +182,10 @@ function Schools(props) {
                                         aria-label="basic tabs example">
                                         <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
                                         <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
+                                        <BudgetModal />
                                     </Tabs>
                                 </Box>
                             </Grid>
-
                             {/*Document Tables*/}
                             <Grid item xs={12} md={12} lg={12}>
                                 <CustomTabPanel value={value} index={0}>
@@ -188,7 +213,6 @@ const styles = {
             justifyContent: 'space-between',
             alignItems: 'center',
             width: '650px', //adjust the container
-            //position: 'relative'
         }
     },
     container: {
@@ -203,6 +227,34 @@ const styles = {
             fontWeight: 'bold', // Font weight of selected tab
         },
     },
+    paper: {
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        boxShadow: 24,
+        p: 4.5,
+        width: 400,
+        borderRadius: '15px',
+    },
+    button: {
+        mt: 2,
+        borderRadius: '10px',
+        width: '160px',
+        padding: '10px 0',
+        alignSelf: "center",
+        backgroundColor: '#19B4E5', // Default background color for enabled button
+        color: 'white', // Default text color for enabled button
+        '&:hover': {
+            backgroundColor: '#19a2e5', // Background color on hover
+        },
+        '&.Mui-disabled': {
+            backgroundColor: '#e0e0e0', // Background color when disabled
+            color: '#c4c4c4', // Text color when disabled
+        }
+    }
 }
 
-export default Schools;
+export default SchoolPage;

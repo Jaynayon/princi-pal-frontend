@@ -20,16 +20,14 @@ import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemAvatar, ListItemText } from '@mui/material';
-import PropTypes from 'prop-types';
-import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 import axios from 'axios'; // Import Axios for making HTTP requests
-import { useSchoolContext } from '../Context/SchoolProvider';
 import { useNavigationContext } from '../Context/NavigationProvider';
+import { transformSchoolText } from '../Components/Navigation/Navigation';
 
-function People(props) {
+function PeoplePage(props) {
     const [member, setMember] = useState('');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
@@ -80,7 +78,6 @@ function People(props) {
             fetchUsers();
             fetchAssociation();
         }
-        console.log(currentAssocation)
     }, [selectedValue, fetchUsers, currentUser, fetchAssociation]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
 
     // Fetch schools when component mounts
@@ -95,7 +92,7 @@ function People(props) {
     }, [currentUser]); // Empty dependency array ensures the effect runs only once
 
     // Function to handle school selection change
-    const handleMemberChange = (event) => {
+    const handleSchoolChange = (event) => {
         setSelectedValue(event.target.value); // Update selected school
         //fetchUsers(); // Fetch users belonging to the selected school
     };
@@ -180,29 +177,32 @@ function People(props) {
         setSelectedRole(newRole);
         setConfirmationDialogOpen(true); // Open confirmation dialog
     };
-    
+
     const confirmRoleChange = async () => {
         try {
             let endpoint = '';  
             let newRole = '';
-    
-            if (rows[selectedIndex].admin) {
-                endpoint = 'http://localhost:4000/associations/demote';
-                newRole = false;
-            } else {
-                endpoint = 'http://localhost:4000/associations/promote';
-                newRole = true;
+            if ((selectedRole === "Member" && rows[selectedIndex].admin) || (selectedRole === "Admin" && !rows[selectedIndex].admin)) {
+                if (selectedRole === "Member" && rows[selectedIndex].admin) {
+                    endpoint = 'http://localhost:4000/associations/demote';
+                    newRole = false;
+                } else if (selectedRole === "Admin" && !rows[selectedIndex].admin) {
+                    endpoint = 'http://localhost:4000/associations/promote';
+                    newRole = true;
+                }
+
+                const response = await axios.patch(endpoint, {
+                    userId: rows[selectedIndex].id,
+                    schoolId: selectedValue
+                });
+
+                console.log(response)
+
+                // Update role in frontend state if successful
+                const updatedRows = [...rows];
+                updatedRows[selectedIndex].admin = newRole;
+                setRows(updatedRows);
             }
-    
-            const response = await axios.patch(endpoint, {
-                userId: rows[selectedIndex].id,
-                schoolId: selectedValue
-            });
-    
-            // Update role in frontend state if successful
-            const updatedRows = [...rows];
-            updatedRows[selectedIndex].admin = newRole;
-            setRows(updatedRows);
         } catch (error) {
             console.error('Error changing role:', error);
             // Handle error scenario
@@ -213,7 +213,7 @@ function People(props) {
             handleMenuClose();
         }
     };
-    
+
     const cancelRoleChange = () => {
         // Close confirmation dialog without changing role
         setConfirmationDialogOpen(false);
@@ -331,7 +331,7 @@ function People(props) {
                                     id="demo-select-small"
                                     value={selectedValue}
                                     label="Member"
-                                    onChange={handleMemberChange}
+                                    onChange={handleSchoolChange}
                                 >
                                     {schools?.map((school) => (
                                         <MenuItem key={school.id} value={school.id}>
@@ -373,11 +373,11 @@ function People(props) {
                                         id="demo-select-small"
                                         value={selectedValue}
                                         label="Member"
-                                        onChange={handleMemberChange}
+                                        onChange={handleSchoolChange}
                                     >
                                         {schools?.map((school) => (
                                             <MenuItem key={school.id} value={school.id}>
-                                                {school.name}
+                                                {transformSchoolText(school.name)}
                                             </MenuItem>
                                         ))}
                                     </Select>
@@ -451,7 +451,6 @@ function People(props) {
                                                     {/* Role options */}
                                                     <MenuItem onClick={() => handleRoleChange("Admin")}>Admin</MenuItem>
                                                     <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
-
                                                 </Menu>
                                             }
                                         </TableCell>
@@ -491,7 +490,7 @@ function People(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={confirmRoleChange}>Save Changes</Button>
-                    <Button onClick={confirmRoleChange}>Cancel</Button>
+                    <Button onClick={cancelRoleChange}>Cancel</Button>
                 </DialogActions>
             </Dialog>
             {/* Confirmation dialog for delete */}
@@ -509,7 +508,7 @@ function People(props) {
     );
 }
 
-export default People;
+export default PeoplePage;
 
 
 

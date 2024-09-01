@@ -7,6 +7,7 @@ export const SchoolContext = createContext();
 export const useSchoolContext = () => useContext(SchoolContext);
 
 const emptyDocument = {
+    id: 0,
     budget: 0,
     cashAdvance: 0,
     claimant: "",
@@ -93,14 +94,17 @@ export const SchoolProvider = ({ children }) => {
         try {
             if (currentSchool) {
                 const getDocument = await RestService.getDocumentBySchoolIdYearMonth(
-                    currentSchool?.id,
+                    currentSchool.id,
                     year,
                     month
                 );
 
+                console.log(getDocument)
+
                 if (getDocument) {
                     setCurrentDocument(getDocument);
                 } else {
+                    console.log("this was invoked")
                     setCurrentDocument(emptyDocument);
                 }
             }
@@ -129,21 +133,18 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
-    const createNewDocument = useCallback(async (obj) => {
+    const createNewDocument = useCallback(async (obj, cashAdvanceValue) => {
         try {
             if (currentSchool) {
                 const getDocument = await RestService.createDocBySchoolId(
                     currentSchool.id,
                     month,
                     year,
-                    obj
+                    obj,
+                    cashAdvanceValue
                 );
 
-                if (getDocument) {
-                    setCurrentDocument(getDocument);
-                } else {
-                    setCurrentDocument(emptyDocument);
-                }
+                setCurrentDocument(getDocument || emptyDocument)
                 fetchDocumentData();
             }
         } catch (error) {
@@ -209,6 +210,8 @@ export const SchoolProvider = ({ children }) => {
         console.log("SchoolProvider useEffect: update document");
         // console.log(currentSchool.name+ "with id: "+currentSchool);
         fetchDocumentData();
+        console.log(month)
+        console.log(year)
 
     }, [month, year, currentSchool, fetchDocumentData]); // Run effect only on mount and unmount*/
 
