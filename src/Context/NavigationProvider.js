@@ -6,24 +6,24 @@ const NavigationContext = createContext();
 
 export const useNavigationContext = () => useContext(NavigationContext);
 
-const emptySchool = {
-    "id": 0,
-    "name": "NONE",
-    "fullName": "NONE"
-}
+// const emptySchool = {
+//     "id": 0,
+//     "name": "NONE",
+//     "fullName": "NONE"
+// }
 
-const emptyUser = {
-    "id": 0,
-    "fname": "",
-    "mname": "",
-    "lname": "",
-    "username": "",
-    "email": "",
-    "password": "",
-    "position": "ADAS",
-    "avatar": "Blue",
-    "schools": []
-}
+// const emptyUser = {
+//     "id": 0,
+//     "fname": "",
+//     "mname": "",
+//     "lname": "",
+//     "username": "",
+//     "email": "",
+//     "password": "",
+//     "position": "ADAS",
+//     "avatar": "Blue",
+//     "schools": []
+// }
 
 export const NavigationProvider = ({ children }) => {
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
@@ -82,7 +82,7 @@ export const NavigationProvider = ({ children }) => {
                 }
                 // Note: A default school will be presented upon load if the user is not in /schools route
                 // should the user be in /schools, the currentSchool is set on their school of choice.
-                if (currentUser && extractRoute !== "/schools") { // if current user is not null or undefined, or in /schools, set school
+                if (currentUser && (extractRoute !== "/schools")) { // if current user is not null or undefined, or in /schools, set school
                     setCurrentSchool(currentUser.schools[0]);
                 }
                 console.log(currentUser)
@@ -103,9 +103,10 @@ export const NavigationProvider = ({ children }) => {
         if (currentUser && currentUser.position !== "Super administrator") {
             //const localStorageData = window.localStorage.getItem("LOCAL_STORAGE_SELECTED");
             //const data = "localStorageData ? JSON.parse(localStorageData) : null;"
-
+            console.log(location.pathname) //test
             // Define a mapping between paths and the desired local storage values
             const pathToLocalStorageValue = {
+                "/": "Dashboard",
                 '/dashboard': 'Dashboard',
                 '/people': 'People',
                 '/settings': 'Settings',
@@ -122,10 +123,14 @@ export const NavigationProvider = ({ children }) => {
 
                 if (extractRoute === "/schools") {
                     // RegEx that transform route text to school name
-                    function transformText(input) {
+                    function transformText(input = "") {
+                        if (typeof input !== 'string') {
+                            return ''; // Return an empty string or handle it according to your needs
+                        }
                         return input
-                            .replace(/-/g, ' ')  // Replace all hyphens with spaces
-                            .toUpperCase();      // Convert all letters to uppercase
+                            .replace(/-/g, ' ')   // Replace all hyphens with spaces
+                            .replace(/\//g, '')   // Remove all forward slashes
+                            .toUpperCase();       // Convert all letters to uppercase
                     }
 
                     const schoolName = transformText(schoolNameRoute); // Set school name as local storage value
@@ -156,7 +161,14 @@ export const NavigationProvider = ({ children }) => {
             // }
 
             // Set the state with the current local storage value
-            localStorageValue !== null || localStorageValue !== undefined ? setSelected(localStorageValue) : setSelected("Dashboard")
+            if (localStorageValue !== null || localStorageValue !== undefined) {
+                setSelected(localStorageValue)
+            } else {
+                window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify("Dashboard"));
+                setSelected("Dashboard")
+            }
+            // localStorageValue !== null || localStorageValue !== undefined ? 
+            // setSelected(localStorageValue) : setSelected("Dashboard")
         }
     }, [currentUser, location, navigate])
 
