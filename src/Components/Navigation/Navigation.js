@@ -143,6 +143,7 @@ export default function Navigation({ children }) {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [previousBalance, setPreviousBalance] = useState(null);
 
 
 
@@ -238,6 +239,33 @@ useEffect(() => {
 }, [fetchNotifications]); // Depend on fetchNotifications to ensure updates
 
 useEffect(() => {
+  fetchNotifications(); // Fetch notifications when the component mounts
+}, [fetchNotifications]);
+
+useEffect(() => {
+  if (currentDocument) {
+    const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0); 
+
+    // Create a unique key for the notification based on balance and document details
+    const notificationKey = `balance-negative-${currentDocument.id || ''}-${balance}`;
+
+    // Check if this notification has already been created
+    if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !createdNotifications.has(notificationKey)) {
+      createNotification(
+        userId, 
+        `Alert: Your balance is negative!`
+      );
+
+      setCreatedNotifications(prev => new Set(prev).add(notificationKey));
+    }
+
+    setPreviousBalance(balance);
+  }
+}, [currentDocument, previousBalance, createNotification, userId, createdNotifications]);
+
+
+
+useEffect(() => {
   if (!currentDocument || !currentDocument.month || !currentDocument.year) {
     return;
   }
@@ -255,7 +283,6 @@ useEffect(() => {
             `Alert: UACS ${row.uacsName} exceeded budget in ${currentDocument.month} ${currentDocument.year}. Amount: ₱${row.amount}, Budget: ₱${row.budget}`
           );
 
-          // Add the notification key to the set of created notifications
           setCreatedNotifications(prev => new Set(prev).add(notificationKey));
         }
       }
