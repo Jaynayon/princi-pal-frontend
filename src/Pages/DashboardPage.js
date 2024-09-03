@@ -21,36 +21,80 @@ import { transformSchoolText } from '../Components/Navigation/Navigation';
 //Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState(uacsData[0]?.code || '');
+    const [chartType, setChartType] = useState('line');
 
-    const generateSeries = (expenses) => [
-        {
-            name: "Actual Expenses",
-            data: expenses
+    useEffect(() => {
+        // Change the chart type to 'bar' when 'Total' is selected
+        if (selectedCategory === '19901020000') {
+            setChartType('bar');
+        } else {
+            setChartType('line');
         }
-    ];
+    }, [selectedCategory]);
 
-    const generateOptions = (budget, maxExpense) => ({
+    const generateSeries = () => {
+        if (selectedCategory === '19901020000') {
+            // Aggregate expenses from all UACS categories for "Total"
+            const totalExpenses = uacsData.slice(0, -1).map(uacs => {
+                return uacs.expenses.reduce((acc, expense) => acc + expense, 0); // Sum of expenses for each category
+            });
+            return [
+                {
+                    name: "Total Expenses",
+                    data: totalExpenses
+                }
+            ];
+        } else {
+            const selectedUacs = uacsData.find(uacs => uacs.code === selectedCategory);
+            if (selectedUacs) {
+                return [
+                    {
+                        name: "Actual Expenses",
+                        data: selectedUacs.expenses
+                    }
+                ];
+            } else {
+                return []; // Return empty array if no category is found
+            }
+        }
+    };
+
+    const generateOptions = (budget, maxExpense, chartType, categories) => ({
         chart: {
             height: 350,
-            type: 'line',
+            type: chartType,
             zoom: {
                 enabled: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '60%', // Adjust column width for a better fit
             }
         },
         dataLabels: {
             enabled: false
         },
         stroke: {
-            curve: 'straight'
+            show: true,
+            width: 2,
+            colors: ['#0000FF'] // Blue line color for expenses
         },
         grid: {
             row: {
-                colors: ['#f3f3f3', 'transparent'],
+                colors: ['#f3f3f3', 'transparent'], // alternating grid colors
                 opacity: 0.5
-            },
+            }
         },
         xaxis: {
-            categories: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+            categories: categories,
+            labels: {
+                rotate: -45, // Rotate labels if needed for better fit
+                style: {
+                    fontSize: '12px'
+                }
+            }
         },
         yaxis: {
             title: {
@@ -76,17 +120,20 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         }
     });
 
-    // Get the selected UACS data based on the selected category
     const selectedUacs = uacsData.find(uacs => uacs.code === selectedCategory);
-
-    // Handle the case where selectedUacs is undefined
-    if (!selectedUacs) {
-        return <Typography variant="body1"></Typography>;
+    if (!selectedUacs && selectedCategory !== '19901020000') {
+        return <Typography variant="body1">No data available.</Typography>;
     }
 
-    // Check if the selected category is "Total"
+    // Determine the categories for the x-axis
+    const categories = selectedCategory === '19901020000' 
+        ? uacsData.slice(0, -1).map(uacs => uacs.name) // Exclude the 'Total' category itself
+        : ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
+
     const budgetToUse = selectedCategory === '19901020000' ? budgetLimit : selectedUacs.budget;
-    const maxExpense = Math.max(...selectedUacs.expenses);
+    const maxExpense = selectedCategory === '19901020000'
+        ? Math.max(...uacsData.slice(0, -1).map(uacs => uacs.expenses.reduce((acc, expense) => acc + expense, 0)))
+        : Math.max(...selectedUacs.expenses);
 
     return (
         <div>
@@ -94,22 +141,20 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                 <Typography variant="body1">No data available.</Typography>
             ) : (
                 <div style={{ position: 'relative', marginBottom: '40px' }}>
-                    {/* Render the line chart based on selected category */}
                     <div>
                         <ReactApexChart
-                            options={generateOptions(budgetToUse, maxExpense)}
-                            series={generateSeries(selectedUacs.expenses)}
-                            type="line"
+                            options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
+                            series={generateSeries()}
+                            type={chartType}
                             height={350}
                         />
-                        {/* Container for x-axis labels and dropdown */}
                         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <div style={{ marginLeft: '10px' }}>
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                     style={{
-                                        width: '100px', // Set the width to make it smaller
+                                        width: '100px',
                                         padding: '5px'
                                     }}
                                 >
@@ -128,57 +173,8 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     );
 };
 
-// Sample data
-const sampleUacsData = [
-    {
-        code: '5020502001',
-        name: 'Communication Expenses',
-        budget: 10000, //jev property: documentId, jev.budget
-        expenses: [5000, 0, 18000, 20000, 50000]
-    },
-    {
-        code: '5020402000',
-        name: 'Electricity Expenses',
-        budget: 50000,
-        expenses: [1000, 5000, 6000, 47000, 10000]
-    },
-    {
-        code: '5020503000',
-        name: 'Internet Subscription Expenses',
-        budget: 10000,
-        expenses: [0, 5000, 10000, 15000, 20000]
-    },
-    {
-        code: '5029904000',
-        name: 'Transpo/Delivery Expenses',
-        budget: 10000,
-        expenses: [0, 5000, 10000, 15000, 20000]
-    },
-    {
-        code: '5020201000',
-        name: 'Training Expenses',
-        budget: 10000,
-        expenses: [0, 5000, 10000, 15000, 20000]
-    },
-    {
-        code: '5020399000',
-        name: 'Other Supplies & Materials Expenses',
-        budget: 10000,
-        expenses: [0, 5000, 10000, 15000, 20000]
-    },
-    {
-        code: '1990101000',
-        name: 'Advances to Operating Expenses',
-        budget: 10000,
-        expenses: [0, 5000, 10000, 15000, 20000]
-    },
-    {
-        code: '19901020000',
-        name: 'Total',
-        budget: 500000,
-        expenses: [0, 5000, 7000, 26000, 150000]
-    }
-];
+
+
 
 
 function DashboardPage(props) {
@@ -193,9 +189,10 @@ function DashboardPage(props) {
     const [schools, setSchools] = useState([]);
     const [loadingSchools, setLoadingSchools] = useState(false);
     const [schoolBudget, setSchoolBudget] = useState(null);
-    const { currentDocument, currentSchool, year, month, setCurrentDocument } = useSchoolContext();
+    const { currentDocument, currentSchool, year, month, setCurrentDocument, jev } = useSchoolContext();
     const currentBudget = currentDocument ? currentDocument.budget : null;
     const [dateString, setDateString] = useState('');
+    const [chartType, setChartType] = useState('line');
 
     // This function only runs when dependencies: currentSchool & currentUser are changed
     const initializeSelectedSchool = useCallback(() => {
@@ -262,6 +259,57 @@ function DashboardPage(props) {
         }
     };
 
+// Sample data
+    const sampleUacsData = [
+    {
+        code: '5020502001',
+        name: 'Communication Expenses',
+        budget: jev[0]?.budget,
+        expenses: [5000, 0, 18000, 20000, 50000]
+    },
+    {
+        code: '5020402000',
+        name: 'Electricity Expenses',
+        budget:jev[1]?.budget,
+        expenses: [1000, 5000, 6000, 47000, 10000]
+    },
+    {
+        code: '5020503000',
+        name: 'Internet Subscription Expenses',
+        budget: jev[2]?.budget,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '5029904000',
+        name: 'Transpo/Delivery Expenses',
+        budget: jev[3]?.budget,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '5020201000',
+        name: 'Training Expenses',
+        budget:  jev[4]?.budget,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '5020399000',
+        name: 'Other Supplies & Materials Expenses',
+        budget: jev[5]?.budget,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '1990101000',
+        name: 'Advances to Operating Expenses',
+        budget: jev[6]?.budget,
+        expenses: [0, 5000, 10000, 15000, 20000]
+    },
+    {
+        code: '19901020000',
+        name: 'Total',
+        budget: 500000,
+        expenses: [0, 5000, 7000, 26000, 150000]
+    }
+];
 
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
