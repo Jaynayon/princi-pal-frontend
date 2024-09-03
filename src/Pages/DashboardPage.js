@@ -122,7 +122,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
     const selectedUacs = uacsData.find(uacs => uacs.code === selectedCategory);
     if (!selectedUacs && selectedCategory !== '19901020000') {
-        return <Typography variant="body1">No data available.</Typography>;
+        return <Typography variant="body1"></Typography>;
     }
 
     // Determine the categories for the x-axis
