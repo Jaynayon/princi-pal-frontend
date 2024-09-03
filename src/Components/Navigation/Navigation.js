@@ -1,6 +1,5 @@
 // React imports
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 // Material-UI imports
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
@@ -137,12 +136,15 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
-  const { currentDocument } = useSchoolContext(); // Get current document state
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser, userId } = useNavigationContext();
+  const { currentDocument, jev } = useSchoolContext(); // Get current document state
+  const [createdNotifications, setCreatedNotifications] = useState(new Set());
+  const [anchorEl, setAnchorEl] = useState(null);
   const [options, setOptions] = useState([]);
-  const [previousBalance, setPreviousBalance] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -152,42 +154,115 @@ export default function Navigation({ children }) {
     setAnchorEl(null);
   };
 
-  const handleClearOptions = () => {
-    setOptions([]); // Clear options by setting it to an empty array
-  };
+  const fetchNotifications = useCallback(async () => {
+    if (!currentUser || !currentUser.id) {
+        // If currentUser is not defined or doesn't have an id, don't attempt to fetch notifications
+        return;
+    }
 
-  const fetchNotifications = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/notifications/all');
-      const data = await response.json();
-      setOptions(data);
+        const response = await fetch(`http://localhost:4000/notifications/user/${currentUser.id}`);
+        
+        if (!response.ok) throw new Error('Failed to fetch notifications');
+        
+        const contentType = response.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            setOptions(data);
+        } else {
+            throw new Error('Unexpected response type');
+        }
+        
+        setError(null);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+        setError(error.message);
+        console.error('Error fetching notifications:', error);
+    } finally {
+        setLoading(false);
     }
-  };
-  
-  const createNotification = (userId, balance) => {
-    const message = `Alert: Your balance is negative.`;
-    setOptions(prevOptions => [...prevOptions, message]);
-  };
-  
-  useEffect(() => {
-    if (currentDocument) {
-      const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0); 
+}, [currentUser]);
 
-      if (balance < 0 && previousBalance !== null && previousBalance >= 0) {
-        createNotification(balance);
+const createNotification = useCallback(async (userId, details) => {
+  if (!currentUser || !currentUser.id) {
+    console.warn('Current user is not defined');
+    return;
+  }
+
+  const notification = {
+    userId: currentUser.id,
+    details,
+  };
+
+  try {
+    const response = await fetch('http://localhost:4000/notifications/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(notification),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create notification');
+    }
+
+    await response.json();
+    fetchNotifications(); // Fetch updated notifications after creating a new one
+  } catch (error) {
+    console.error('Error creating notification:', error);
+  }
+}, [currentUser, fetchNotifications]); // Ensure currentUser is included in dependencies
+
+
+const handleClearOptions = async () => {
+  if (!currentUser || !currentUser.id) {
+    return;
+  }
+  try {
+    const response = await fetch(`http://localhost:4000/notifications/user/${currentUser.id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) throw new Error('Failed to clear notifications');
+
+    // Clear options from UI after successful deletion
+    setOptions([]);
+  } catch (error) {
+    console.error('Error clearing notifications:', error);
+  }
+};
+
+useEffect(() => {
+  fetchNotifications(); // Fetch notifications when the component mounts
+}, [fetchNotifications]); // Depend on fetchNotifications to ensure updates
+
+useEffect(() => {
+  if (!currentDocument || !currentDocument.month || !currentDocument.year) {
+    return;
+  }
+
+  if (jev && currentUser && currentUser.id) {
+    jev.forEach(row => {
+      // Create a unique key for the notification based on UACS name, amount, and budget
+      const notificationKey = `${row.uacsName}-${row.amount}-${row.budget}-${currentDocument.month}-${currentDocument.year}`;
+
+      // Check if this notification has already been created
+      if (!createdNotifications.has(notificationKey)) {
+        if (row.amount > row.budget) {
+          createNotification(
+            currentUser.id,
+            `Alert: UACS ${row.uacsName} exceeded budget in ${currentDocument.month} ${currentDocument.year}. Amount: ₱${row.amount}, Budget: ₱${row.budget}`
+          );
+
+          // Add the notification key to the set of created notifications
+          setCreatedNotifications(prev => new Set(prev).add(notificationKey));
+        }
       }
+    });
+  }
+}, [jev, currentUser, createNotification, currentDocument, createdNotifications]);
 
-      // Update previous balance state
-      setPreviousBalance(balance);
-    }
-  }, [currentDocument]);
-  
-  useEffect(() => {
-    fetchNotifications(); // Fetch notifications when the component mounts
-  }, []);
-  
   const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
@@ -196,7 +271,6 @@ export default function Navigation({ children }) {
     },
     navStyle: styling[navStyle],
   });
-
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -248,7 +322,7 @@ export default function Navigation({ children }) {
                 ...(!open && { display: "none" }),
               }}
             >
-              <ProfileTab user={User} />
+              <ProfileTab userId={userId} />
               <IconButton
                 onClick={toggleDrawer}
                 sx={{
@@ -372,19 +446,21 @@ export default function Navigation({ children }) {
                       >
                         <Tab label="All" />
                       </Tabs>
-                      {options.flatMap((option, index) => (
+                      {loading && <Typography sx={{ padding: '16px' }}>Loading...</Typography>}
+                      {error && <Typography sx={{ padding: '16px', color: 'red' }}>Error: {error}</Typography>}
+                      {options.flatMap((options, index) => (
                         index !== options.length - 1
                           ? [
-                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                            <MenuItem key={options.id} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
                               <Avatar sx={{ marginRight: '8px' }} />
-                              {option}
+                              {options.details}
                             </MenuItem>,
                             <Divider key={`divider-${index}`} />
                           ]
                           : [
-                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                            <MenuItem key={options.id} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
                               <Avatar sx={{ marginRight: '8px' }} />
-                              {option}
+                              {options.details}
                             </MenuItem>
                           ]
                       ))}
