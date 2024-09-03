@@ -18,7 +18,6 @@ import { transformSchoolText } from './Navigation';
 // Custom imports
 import { VerticalLine } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
-//import RestService from '../../Services/RestService';
 
 export default function DisplaySchools() {
     const theme = useTheme();
