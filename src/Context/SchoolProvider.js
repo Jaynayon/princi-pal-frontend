@@ -174,14 +174,14 @@ export const SchoolProvider = ({ children }) => {
 
                     // return response.data; // Return the created document data
                     setCurrentDocument(response.data || emptyDocument);
-                    // fetchDocumentData();
+                    fetchDocumentData();
                 }
             }
         } catch (error) {
             console.error('Error fetching document:', error);
             return null;
         }
-    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById]);
+    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById, fetchDocumentData]);
 
     const updateJev = useCallback(async () => {
         try {
