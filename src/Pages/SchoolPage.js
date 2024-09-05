@@ -64,7 +64,7 @@ export function a11yProps(index) {
 }
 
 function SchoolPage(props) {
-    const { year, month, setIsAdding, currentDocument, currentSchool, updateLr, updateJev, value, setValue, isLoading } = useSchoolContext();
+    const { year, month, setIsAdding, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
 
@@ -108,13 +108,13 @@ function SchoolPage(props) {
 
     // Ensures to update lr and jev only if its not loading and there's a current document
     React.useEffect(() => {
-        if (!isLoading && currentDocument) {
+        if (currentDocument) {
             console.log("Schools useEffect: Document fetched, updating lr and jev");
             updateLr();
             updateJev();
         }
         setIsAdding(false); //reset state to allow addFields again
-    }, [year, month, updateLr, updateJev, setIsAdding, currentDocument, isLoading]);
+    }, [year, month, updateLr, updateJev, setIsAdding, currentDocument]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
