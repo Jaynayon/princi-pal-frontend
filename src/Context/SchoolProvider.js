@@ -31,7 +31,7 @@ const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (sta
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool, navigationLoading } = useNavigationContext();
+    const { currentSchool } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -56,12 +56,9 @@ export const SchoolProvider = ({ children }) => {
     const [lr, setLr] = useState([]);
     const [jev, setJev] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(false);
-
     const fetchDocumentData = useCallback(async () => {
-        setIsLoading(true);  // Start loading
         try {
-            if (!navigationLoading && currentSchool) {
+            if (currentSchool) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`)
 
                 console.log(response.data)
@@ -70,10 +67,8 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             setCurrentDocument(emptyDocument)
             console.error('Error fetching document:', error);
-        } finally {
-            setIsLoading(false);  // End loading
         }
-    }, [currentSchool, setCurrentDocument, year, month, navigationLoading]);
+    }, [currentSchool, setCurrentDocument, year, month]);
 
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
@@ -174,18 +169,18 @@ export const SchoolProvider = ({ children }) => {
 
                     // return response.data; // Return the created document data
                     setCurrentDocument(response.data || emptyDocument);
-                    // fetchDocumentData();
+                    fetchDocumentData();
                 }
             }
         } catch (error) {
             console.error('Error fetching document:', error);
             return null;
         }
-    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById]);
+    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById, fetchDocumentData]);
 
     const updateJev = useCallback(async () => {
         try {
-            if (!isLoading && currentDocument.id !== 0) {
+            if (currentDocument.id !== 0) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
                 setJev(response.data || [])
                 // Handle response as needed
@@ -195,9 +190,10 @@ export const SchoolProvider = ({ children }) => {
                 setJev([]); //meaning it's empty 
             }
         } catch (error) {
+            setJev([]);
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setJev, isLoading]);
+    }, [currentDocument, setJev]);
 
     const updateJevById = async (colId, rowId, value) => {
         let obj = {}
@@ -226,7 +222,7 @@ export const SchoolProvider = ({ children }) => {
 
     const updateLr = useCallback(async () => {
         try {
-            if (!isLoading && currentDocument.id !== 0) {
+            if (currentDocument.id !== 0) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
                 setLr(response.data || [])
                 // Handle response as needed
@@ -235,9 +231,10 @@ export const SchoolProvider = ({ children }) => {
                 setLr([]); //meaning it's empty 
             }
         } catch (error) {
+            setLr([]);
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setLr, isLoading]);
+    }, [currentDocument, setLr]);
 
     const updateLrById = async (colId, rowId, value) => {
         let obj = {}
@@ -322,7 +319,7 @@ export const SchoolProvider = ({ children }) => {
             lr, setLr, setCurrentDocument, currentDocument,
             addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
             currentSchool, value, setValue, updateJev, updateJevById, jev, setJev, createNewDocument,
-            isLoading, setIsLoading, createLrByDocId, updateDocumentById, deleteLrByid,
+            createLrByDocId, updateDocumentById, deleteLrByid,
             updateLrById
         }}>
             {children}

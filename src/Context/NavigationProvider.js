@@ -6,25 +6,6 @@ const NavigationContext = createContext();
 
 export const useNavigationContext = () => useContext(NavigationContext);
 
-const emptySchool = {
-    "id": 0,
-    "name": "NONE",
-    "fullName": "NONE"
-}
-
-const emptyUser = {
-    "id": 0,
-    "fname": "",
-    "mname": "",
-    "lname": "",
-    "username": "",
-    "email": "",
-    "password": "",
-    "position": "ADAS",
-    "avatar": "Blue",
-    "schools": []
-}
-
 export const NavigationProvider = ({ children }) => {
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
     const [selected, setSelected] = useState('Dashboard');
@@ -34,8 +15,7 @@ export const NavigationProvider = ({ children }) => {
     const [mobileMode, setMobileMode] = useState(false); // State to track position
     const [currentUser, setCurrentUser] = useState(null);
     const [currentSchool, setCurrentSchool] = useState(null);
-    const [userId, setUserId] = useState(null)
-    const [navigationLoading, setNavigationLoading] = useState(false);
+    const [userId, setUserId] = useState(null);
     const prevOpenRef = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -57,10 +37,10 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
+    // Fetch current user details
     const fetchUser = useCallback(async () => {
         // Extract the root route if it's the /schools route
         const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
-        setNavigationLoading(true);
         try {
             const jwtCookie = document.cookie
                 .split('; ')
@@ -77,12 +57,14 @@ export const NavigationProvider = ({ children }) => {
                     setUserId(data)
                     if (!currentUser) {
                         const user = await RestService.getUserById(data.id);
-                        setCurrentUser(user);
+                        if (currentUser !== user) {
+                            setCurrentUser(user);
+                        }
                     }
                 }
                 // Note: A default school will be presented upon load if the user is not in /schools route
                 // should the user be in /schools, the currentSchool is set on their school of choice.
-                if (currentUser && extractRoute !== "/schools") { // if current user is not null or undefined, or in /schools, set school
+                if (currentUser && (extractRoute !== "/schools")) { // if current user is not null or undefined, or in /schools, set school
                     setCurrentSchool(currentUser.schools[0]);
                 }
                 console.log(currentUser)
@@ -93,24 +75,41 @@ export const NavigationProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Error validating token:', error);
-        } finally {
-            setNavigationLoading(false);
         }
-    }, [currentUser, location.pathname]);
-
+    }, [currentUser, location]);
 
     useEffect(() => {
+        if (!currentUser) {
+            fetchUser();
+        }
+
+        // Call the function to set initial mobileMode state
+        updateMobileMode();
+
+        const handleResize = () => {
+            // Call the function to update mobileMode state on resize
+            updateMobileMode();
+        };
+
+        // Add event listener for resize
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup the event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [currentUser, location, fetchUser]); // Run effect only on mount and unmount
+
+    useEffect(() => {
+        // Define a mapping between paths and the desired local storage values
+        const pathToLocalStorageValue = {
+            "/": "Dashboard",
+            '/dashboard': 'Dashboard',
+            '/people': 'People',
+            '/settings': 'Settings',
+        };
+
         if (currentUser && currentUser.position !== "Super administrator") {
-            //const localStorageData = window.localStorage.getItem("LOCAL_STORAGE_SELECTED");
-            //const data = "localStorageData ? JSON.parse(localStorageData) : null;"
-
-            // Define a mapping between paths and the desired local storage values
-            const pathToLocalStorageValue = {
-                '/dashboard': 'Dashboard',
-                '/people': 'People',
-                '/settings': 'Settings',
-            };
-
             // Get the local storage value based on the current path
             let localStorageValue = pathToLocalStorageValue[location.pathname];
 
@@ -122,10 +121,14 @@ export const NavigationProvider = ({ children }) => {
 
                 if (extractRoute === "/schools") {
                     // RegEx that transform route text to school name
-                    function transformText(input) {
+                    function transformText(input = "") {
+                        if (typeof input !== 'string') {
+                            return ''; // Return an empty string or handle it according to your needs
+                        }
                         return input
-                            .replace(/-/g, ' ')  // Replace all hyphens with spaces
-                            .toUpperCase();      // Convert all letters to uppercase
+                            .replace(/-/g, ' ')   // Replace all hyphens with spaces
+                            .replace(/\//g, '')   // Remove all forward slashes
+                            .toUpperCase();       // Convert all letters to uppercase
                     }
 
                     const schoolName = transformText(schoolNameRoute); // Set school name as local storage value
@@ -150,13 +153,13 @@ export const NavigationProvider = ({ children }) => {
                 }
             }
 
-            // // Update local storage
-            // if (localStorageValue !== data) {
-            //     window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(localStorageValue));
-            // }
-
             // Set the state with the current local storage value
-            localStorageValue !== null || localStorageValue !== undefined ? setSelected(localStorageValue) : setSelected("Dashboard")
+            if (localStorageValue !== null || localStorageValue !== undefined) {
+                setSelected(localStorageValue)
+            } else {
+                window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify("Dashboard"));
+                setSelected("Dashboard")
+            }
         }
     }, [currentUser, location, navigate])
 
@@ -164,32 +167,11 @@ export const NavigationProvider = ({ children }) => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
     }, [selected])
 
-    useEffect(() => {
-        // Fetch current user details
-        fetchUser();
-
-        // Call the function to set initial mobileMode state
-        updateMobileMode();
-
-        const handleResize = () => {
-            // Call the function to update mobileMode state on resize
-            updateMobileMode();
-        };
-
-        // Add event listener for resize
-        window.addEventListener('resize', handleResize);
-
-        // Cleanup the event listener on component unmount
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, [fetchUser]); // Run effect only on mount and unmount
-
     return (
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
             navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
-            openSub, setOpenSub, location, setNavigationLoading, navigationLoading
+            openSub, setOpenSub, location
         }}>
             {children}
         </NavigationContext.Provider>
