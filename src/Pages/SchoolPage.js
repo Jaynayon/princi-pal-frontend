@@ -8,7 +8,8 @@ import {
     Container,
     Grid,
     Box,
-    Button
+    Button,
+    Typography
 } from '@mui/material';
 
 import {
@@ -128,7 +129,8 @@ function SchoolPage(props) {
                             styles.header, {
                                 p: 2,
                                 display: 'flex',
-                                flexDirection: 'row'
+                                flexDirection: 'row',
+                                justifyContent: 'space-between'
                             }
                         ]}
                         elevation={0}
@@ -137,6 +139,16 @@ function SchoolPage(props) {
                             <FilterDate />
                             <SchoolFieldsFilter />
                             <SchoolSearchFilter />
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: "center" }}>
+                            <Typography
+                                sx={{ color: "#252733" }}
+                                component="h1"
+                                color="inherit"
+                                noWrap
+                            >
+                                {`${month} ${year}`}
+                            </Typography>
                         </Box>
                     </Paper>
                 </Grid>
