@@ -157,12 +157,12 @@ export default function Navigation({ children }) {
 
   const fetchNotifications = useCallback(async () => {
     if (!currentUser || !currentUser.id) return;
-
+  
     setLoading(true);
     try {
       const response = await fetch(`http://localhost:4000/notifications/user/${currentUser.id}`);
       if (!response.ok) throw new Error('Failed to fetch notifications');
-
+  
       const contentType = response.headers.get('Content-Type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
@@ -170,7 +170,7 @@ export default function Navigation({ children }) {
       } else {
         throw new Error('Unexpected response type');
       }
-
+  
       setError(null);
     } catch (error) {
       setError(error.message);
@@ -182,21 +182,21 @@ export default function Navigation({ children }) {
 
   const createNotification = useCallback(async (userId, details, notificationKey) => {
     if (!currentUser || !currentUser.id) return;
-
+  
     // Fetch saved notifications from local storage
     let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
     let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
-
+  
     // Check if the notificationKey already exists in local storage
     if (savedNotifications.includes(notificationKey) || deletedNotifications.includes(notificationKey)) {
       return; // Avoid creating duplicate or re-creating deleted notifications
     }
-
+  
     const notification = {
       userId: currentUser.id,
       details,
     };
-
+  
     try {
       const response = await fetch('http://localhost:4000/notifications/create', {
         method: 'POST',
@@ -205,12 +205,12 @@ export default function Navigation({ children }) {
         },
         body: JSON.stringify(notification),
       });
-
+  
       if (!response.ok) throw new Error('Failed to create notification');
-
+  
       await response.json();
       fetchNotifications();
-
+  
       // Save notificationKey to local storage to prevent future duplicates
       savedNotifications.push(notificationKey);
       localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
@@ -219,35 +219,25 @@ export default function Navigation({ children }) {
     }
   }, [currentUser, fetchNotifications]);
 
-
   const handleClearOptions = async () => {
     if (!currentUser || !currentUser.id) return;
-
-    // Log current state and local storage
-    console.log('Notifications before clearing:', options);
-    console.log('Clearing notifications for user:', currentUser.id);
-    console.log('LocalStorage before clearing:', localStorage.getItem('createdNotifications'));
-
+  
     try {
-      // Delete notifications from the server
       const response = await fetch(`http://localhost:4000/notifications/user/${currentUser.id}`, {
         method: 'DELETE',
       });
-
+  
       if (!response.ok) throw new Error('Failed to clear notifications');
-
-      // Clear notifications from client-side state
+  
       setOptions([]);
-
-      // Fetch saved notifications and add them to deletedNotifications
+  
       let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
       let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
-
+  
       savedNotifications.forEach(notificationKey => {
         deletedNotifications.push(notificationKey);
       });
-
-      // Clear notifications from local storage
+  
       localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
       localStorage.removeItem('createdNotifications');
     } catch (error) {
@@ -257,7 +247,6 @@ export default function Navigation({ children }) {
     }
   };
 
-
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
@@ -266,46 +255,41 @@ export default function Navigation({ children }) {
     if (currentDocument) {
       const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
       const notificationKey = `balance-negative-${currentDocument.id || ''}`;
-
+  
       // Fetch saved notifications from local storage
       const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-
+  
       if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(notificationKey)) {
-        createNotification(userId, `Alert: Your balance is negative!`, notificationKey);
-
-        // Save notificationKey to localStorage to prevent future duplicates
-        savedNotifications.push(notificationKey);
-        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+        createNotification(
+          currentUser.id,
+          `Your budget has gone negative. Current balance: ${balance}`,
+          notificationKey
+        );
       }
-
+  
       setPreviousBalance(balance);
     }
-  }, [currentDocument, previousBalance, createNotification, userId]);
-
+  }, [currentDocument, createNotification, currentUser, previousBalance]);
 
   useEffect(() => {
-    if (jev && jev.length > 0 && currentUser && currentUser.id) {
+    if (jev && jev.length) {
       jev.forEach(row => {
-        if (row.amount > row.budget) {
-          const notificationKey = `${currentUser.id}-jev-${row.id}`;
-          const details = `Alert: UACS ${row.uacsName} exceeded budget in ${currentDocument.month} ${currentDocument.year}. Amount: ₱${row.amount}, Budget: ₱${row.budget}`;
-
-          // Fetch saved notifications from local storage
-          const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-
-          if (!savedNotifications.includes(notificationKey)) {
-            createNotification(currentUser.id, details, notificationKey);
-
-            // Save notificationKey to localStorage to prevent future duplicates
-            savedNotifications.push(notificationKey);
-            localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
-          }
+        const exceededBudget = row.amount > (row.budget || 0);
+        const notificationKey = `budget-exceeded-${row.id || ''}`;
+  
+        // Fetch saved notifications from local storage
+        const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+  
+        if (exceededBudget && !savedNotifications.includes(notificationKey)) {
+          createNotification(
+            currentUser.id,
+            `The amount for UACS ${row.uacsName} exceeds the budget. Amount: ${row.amount}, Budget: ${row.budget}`,
+            notificationKey
+          );
         }
       });
     }
-  }, [jev, currentUser, createNotification, currentDocument, createdNotifications]);
-
-
+  }, [jev, createNotification, currentUser]);
 
   const ITEM_HEIGHT = 48;
 
