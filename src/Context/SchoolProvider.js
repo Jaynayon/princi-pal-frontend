@@ -31,7 +31,7 @@ const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (sta
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool } = useNavigationContext();
+    const { currentSchool, currentUser } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -72,9 +72,10 @@ export const SchoolProvider = ({ children }) => {
 
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
-            if (currentDocument) {
+            if (currentDocument && currentUser) {
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_LR}/create`, {
                     documentsId,
+                    userId: currentUser.id,
                     date: obj.date,
                     orsBursNo: obj.orsBursNo,
                     particulars: obj.particulars,
@@ -94,7 +95,7 @@ export const SchoolProvider = ({ children }) => {
             console.error('Error fetching document:', error);
             return null;
         }
-    }, [currentDocument]);
+    }, [currentDocument, currentUser]);
 
     const updateDocumentById = useCallback(async (docId, description, value) => {
         // Construct the payload object based on the provided colId
@@ -237,23 +238,34 @@ export const SchoolProvider = ({ children }) => {
     }, [currentDocument, setLr]);
 
     const updateLrById = async (colId, rowId, value) => {
-        let obj = {}
+        let obj = { userId: currentUser.id }
 
         // Construct the payload object based on the provided colId
-        if (colId === "amount") {
-            obj = { amount: value };
-        } else if (colId === "particulars") {
-            obj = { particulars: value };
-        } else if (colId === "orsBursNo") {
-            obj = { orsBursNo: value };
-        } else if (colId === "date") {
-            obj = { date: value };
-        } else if (colId === "objectCode") {
-            obj = { objectCode: value };
-        } else if (colId === "payee") {
-            obj = { payee: value };
-        } else if (colId === "natureOfPayment") {
-            obj = { natureOfPayment: value };
+        switch (colId) {
+            case "amount":
+                obj.amount = value;
+                break;
+            case "particulars":
+                obj.particulars = value;
+                break;
+            case "orsBursNo":
+                obj.orsBursNo = value;
+                break;
+            case "date":
+                obj.date = value;
+                break;
+            case "objectCode":
+                obj.objectCode = value;
+                break;
+            case "payee":
+                obj.payee = value;
+                break;
+            case "natureOfPayment":
+                obj.natureOfPayment = value;
+                break;
+            default:
+                console.warn("Invalid colId:", colId); // Handle unexpected colId
+                break;
         }
 
         try {
@@ -277,15 +289,17 @@ export const SchoolProvider = ({ children }) => {
 
     const deleteLrByid = async (rowId) => {
         try {
-            const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}`)
-            if (response) {
-                console.log(response.data)
-            }
+            if (currentUser) {
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}/user/${currentUser.id}`)
+                if (response) {
+                    console.log(response.data)
+                }
 
-            if (response.status === 200) {
-                console.log(`LR with id: ${rowId} is deleted`);
-            } else {
-                console.log("LR not deleted");
+                if (response.status === 200) {
+                    console.log(`LR with id: ${rowId} is deleted`);
+                } else {
+                    console.log("LR not deleted");
+                }
             }
             fetchDocumentData();
         } catch (error) {
