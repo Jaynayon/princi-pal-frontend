@@ -115,8 +115,8 @@ export default function HistoryModal({ open, handleClose, handleCloseParent, ind
                                             </Typography>
                                             {status.text === "Modified" && (
                                                 <Typography variant="body2" gutterBottom>
-                                                    Modified the <span style={{ fontWeight: "bold" }}>{labelMap[item.fieldName]}</span> field,
-                                                    and changed the value from <span style={{ fontWeight: "bold" }}>{item.oldValue}</span> to <span style={{ fontWeight: "bold" }}>{item.newValue}</span>
+                                                    Modified the <span style={{ fontWeight: "bold" }}>{labelMap[item.fieldName]}</span> field
+                                                    by changing the value from <span style={{ fontWeight: "bold" }}>{item.oldValue}</span> to <span style={{ fontWeight: "bold" }}>{item.newValue}</span>
                                                 </Typography>
                                             )}
                                             {item.lrCopy && [
