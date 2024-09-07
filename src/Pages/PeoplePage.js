@@ -297,7 +297,7 @@ function PeoplePage(props) {
                                 >
                                     {schools?.map((school) => (
                                         <MenuItem key={school.id} value={school.id}>
-                                            {school.name}
+                                            {transformSchoolText(school.name)}
                                         </MenuItem>
                                     ))}
                                 </Select>
