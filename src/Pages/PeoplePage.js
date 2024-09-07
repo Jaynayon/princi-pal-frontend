@@ -186,13 +186,13 @@ function PeoplePage(props) {
                     endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/demote`;
                     newRole = false;
                 } else if (selectedRole === "Admin" && !rows[selectedIndex].admin) {
-                    endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/associations/promote`;
+                    endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/promote`;
                     newRole = true;
                 }
 
                 const response = await axios.patch(endpoint, {
                     userId: rows[selectedIndex].id,
-                    schoolId: selectedValue
+                    schoolId: rows[selectedIndex].schoolId // changed to rows[selectedIndex].schoolId from selectedIndex
                 });
 
                 console.log(response)
