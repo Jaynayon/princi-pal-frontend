@@ -11,6 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UacsFilter from '../Filters/UacsFilter';
+import HistoryModal from '../Modal/HistoryModal';
 
 function LRRow(props) {
     const { page, rowsPerPage } = props;
@@ -20,6 +21,11 @@ function LRRow(props) {
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [dateError, setDateError] = useState(false);
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => setOpen(true);
+
+    const handleClose = () => setOpen(false);
 
     const {
         addFields,
@@ -324,7 +330,8 @@ function LRRow(props) {
                                             open={Boolean(deleteAnchorEl && selectedIndex === index)}
                                             onClose={handleMenuClose}
                                         >
-                                            <MenuItem onClick={() => handleDelete(row.id)}>Delete</MenuItem>
+                                            <MenuItem onClick={() => handleOpen()}>History</MenuItem>
+                                            <MenuItem sx={{ color: "red" }} onClick={() => handleDelete(row.id)}>Delete</MenuItem>
                                         </Menu>
                                     </Box>
                                 )}
@@ -332,7 +339,7 @@ function LRRow(props) {
                         </TableRow>
                     );
                 })}
-
+            <HistoryModal open={open} handleClose={handleClose} handleCloseParent={handleMenuClose} index={selectedIndex} />
         </React.Fragment>
     );
 }
