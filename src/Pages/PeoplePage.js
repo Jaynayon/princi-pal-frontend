@@ -125,6 +125,7 @@ function PeoplePage(props) {
         // Also set the deleteAnchorEl and selectedIndex
         setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
+        console.log(rows[index]);
     };
 
     const handleMenuClose = () => {
@@ -144,12 +145,12 @@ function PeoplePage(props) {
 
     const confirmDelete = async () => {
         try {
-            if (selectedIndex !== null && rows[selectedIndex]) {
-                const userId = rows[selectedIndex].userId; // Get userId of the selected user
+            if (selectedIndex && rows[selectedIndex]) {
+                const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
                 // Make an API call to delete the user association
-                await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`);
-                console.log("User deleted successfully.");
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`);
+                console.log("User deleted successfully. " + response.data);
                 // Remove the deleted row from the state
                 setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
             }
