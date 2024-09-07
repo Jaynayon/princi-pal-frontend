@@ -47,7 +47,7 @@ function PeoplePage(props) {
 
     const fetchAssociation = useCallback(async () => {
         try {
-            const response = await axios.post('http://localhost:4000/associations/user', {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
                 userId: currentUser.id,
                 schoolId: selectedValue
             });
@@ -62,7 +62,7 @@ function PeoplePage(props) {
     // Function to fetch users by school ID
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.post('http://localhost:4000/schools/users', { schoolId: selectedValue });
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`, { schoolId: selectedValue });
             setRows(response.data); // Update the state with the fetched data
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -148,7 +148,7 @@ function PeoplePage(props) {
                 const userId = rows[selectedIndex].userId; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
                 // Make an API call to delete the user association
-                await axios.delete(`http://localhost:4000/associations/${userId}/${schoolId}`);
+                await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`);
                 console.log("User deleted successfully.");
                 // Remove the deleted row from the state
                 setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
@@ -182,10 +182,10 @@ function PeoplePage(props) {
             let newRole = '';
             if ((selectedRole === "Member" && rows[selectedIndex].admin) || (selectedRole === "Admin" && !rows[selectedIndex].admin)) {
                 if (selectedRole === "Member" && rows[selectedIndex].admin) {
-                    endpoint = 'http://localhost:4000/associations/demote';
+                    endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/demote`;
                     newRole = false;
                 } else if (selectedRole === "Admin" && !rows[selectedIndex].admin) {
-                    endpoint = 'http://localhost:4000/associations/promote';
+                    endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/associations/promote`;
                     newRole = true;
                 }
 
