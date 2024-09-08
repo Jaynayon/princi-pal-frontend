@@ -70,6 +70,18 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, month]);
 
+    const fetchDocumentBySchoolId = useCallback(async (schoolId) => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${schoolId}/${year}/${month}`)
+
+            console.log(response.data)
+            setCurrentDocument(response.data);
+        } catch (error) {
+            setCurrentDocument(emptyDocument)
+            console.error('Error fetching document:', error);
+        }
+    }, [setCurrentDocument, year, month]);
+
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
             if (currentDocument && currentUser) {
@@ -340,7 +352,8 @@ export const SchoolProvider = ({ children }) => {
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
-    }, [fetchDocumentData]); // Run effect only on mount and unmount
+        console.log(currentSchool);
+    }, [fetchDocumentData, currentSchool]); // Run effect only on mount and unmount
 
     return (
         <SchoolContext.Provider value={{
@@ -348,7 +361,8 @@ export const SchoolProvider = ({ children }) => {
             lr, setLr, setCurrentDocument, currentDocument,
             addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
             currentSchool, value, setValue, updateJev, updateJevById, jev, setJev, createNewDocument,
-            createLrByDocId, updateDocumentById, deleteLrByid, updateLrById, getDocumentBySchoolIdYear
+            createLrByDocId, updateDocumentById, deleteLrByid, updateLrById, getDocumentBySchoolIdYear,
+            fetchDocumentBySchoolId
         }}>
             {children}
         </SchoolContext.Provider>
