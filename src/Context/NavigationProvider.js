@@ -1,10 +1,17 @@
 import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import RestService from "../Services/RestService"
+import axios from 'axios';
 
 const NavigationContext = createContext();
 
 export const useNavigationContext = () => useContext(NavigationContext);
+
+//Function that allows us to accept credentials
+const instance = axios.create({
+    baseURL: 'http://localhost:4000', // Set your backend URL
+    withCredentials: true, // Enable sending cookies with cross-origin requests
+});
 
 export const NavigationProvider = ({ children }) => {
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
@@ -34,6 +41,28 @@ export const NavigationProvider = ({ children }) => {
             setOpen(false)
         } else {
             setMobileMode(false);
+        }
+    };
+
+    const authenticateUser = async (email, password) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_AUTH}/login`, {
+                emailOrUsername: email,
+                password,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response) {
+                console.log(response.data)
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error('Error authenticating user:', error);
+            throw new Error("Authentication failed. Please try again later.");
         }
     };
 
@@ -165,13 +194,13 @@ export const NavigationProvider = ({ children }) => {
 
     useEffect(() => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
-    }, [selected])
+    }, [selected]);
 
     return (
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
             navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
-            openSub, setOpenSub, location
+            openSub, setOpenSub, location, authenticateUser
         }}>
             {children}
         </NavigationContext.Provider>

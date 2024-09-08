@@ -4,19 +4,14 @@ import { TextField, InputAdornment, IconButton, Button, Typography, Container, G
 import { Link } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Box from '@mui/material/Box';
-import axios from 'axios';
-
-//Function that allows us to accept credentials
-const instance = axios.create({
-    baseURL: 'http://localhost:4000', // Set your backend URL
-    withCredentials: true, // Enable sending cookies with cross-origin requests
-});
+import { useNavigationContext } from "../Context/NavigationProvider";
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
+    const { authenticateUser } = useNavigationContext();
 
     const handleShowPasswordClick = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
@@ -26,28 +21,6 @@ const LoginPage = () => {
         // Logic for handling register button click
         // Redirect to the registration page
         window.location.href = "http://localhost:3000/register";
-    };
-
-    const authenticateUser = async (email, password) => {
-        try {
-            const response = await instance.post(`${process.env.REACT_APP_API_URL_AUTH}/login`, {
-                emailOrUsername: email,
-                password,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-
-            if (response) {
-                console.log(response.data)
-            }
-
-            return response.data;
-        } catch (error) {
-            console.error('Error authenticating user:', error);
-            throw new Error("Authentication failed. Please try again later.");
-        }
     };
 
     const handleLogin = async () => {
