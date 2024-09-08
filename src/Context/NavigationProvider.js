@@ -66,6 +66,58 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
+    const createUser = async (fname, mname, lname, username, email, password, position) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/create`, {
+                fname,
+                mname,
+                lname,
+                username,
+                email,
+                password,
+                position
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response) {
+                console.log(response.data)
+            }
+
+            return response.status === 201;
+        } catch (error) {
+            console.error('Error creating user:', error);
+            if (error.response && error.response.status === 409) {
+                throw new Error("User with the same email or username already exists.");
+            } else {
+                throw new Error("Registration failed. Please try again later.");
+            }
+        }
+    };
+
+    const validateUsernameEmail = async (email) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/exists`, {
+                emailOrUsername: email
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response) {
+                console.log(response.data);
+            }
+
+            return response.data
+        } catch (error) {
+            console.error('Error validating username/email:', error);
+            throw new Error("Validation failed. Please try again later.");
+        }
+    };
+
     // Fetch current user details
     const fetchUser = useCallback(async () => {
         // Extract the root route if it's the /schools route
@@ -200,7 +252,7 @@ export const NavigationProvider = ({ children }) => {
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
             navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
-            openSub, setOpenSub, location, authenticateUser
+            openSub, setOpenSub, location, authenticateUser, createUser, validateUsernameEmail
         }}>
             {children}
         </NavigationContext.Provider>

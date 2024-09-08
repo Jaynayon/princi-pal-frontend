@@ -9,37 +9,6 @@ const instance = axios.create({
 const RestService = (() => {
     let isAuthenticated = false;
 
-    const createUser = async (fname, mname, lname, username, email, password, position) => {
-        try {
-            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/create`, {
-                fname,
-                mname,
-                lname,
-                username,
-                email,
-                password,
-                position
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-
-            if (response) {
-                console.log(response.data)
-            }
-
-            return response.status === 201;
-        } catch (error) {
-            console.error('Error creating user:', error);
-            if (error.response && error.response.status === 409) {
-                throw new Error("User with the same email or username already exists.");
-            } else {
-                throw new Error("Registration failed. Please try again later.");
-            }
-        }
-    };
-
     const createUserPrincipal = async (adminId, fname, mname, lname, username, email, password) => {
         try {
             const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/create/principal`, {
@@ -69,29 +38,6 @@ const RestService = (() => {
             } else {
                 throw new Error("Registration failed. Please try again later.");
             }
-        }
-    };
-
-
-
-    const validateUsernameEmail = async (email) => {
-        try {
-            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/exists`, {
-                emailOrUsername: email
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-
-            if (response) {
-                console.log(response.data);
-            }
-
-            return response.data
-        } catch (error) {
-            console.error('Error validating username/email:', error);
-            throw new Error("Validation failed. Please try again later.");
         }
     };
 
@@ -332,8 +278,6 @@ const RestService = (() => {
 
 
     return {
-        createUser,
-        validateUsernameEmail,
         validateToken,
         getIsAuthenticated,
         getUserById,
