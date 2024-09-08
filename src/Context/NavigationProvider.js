@@ -185,10 +185,14 @@ export const NavigationProvider = ({ children }) => {
                         if (currentUser !== user) {
                             setCurrentUser(user);
                         }
+                        // Note: A default school will be presented upon load if the user is not in /schools route
+                        // should the user be in /schools, the currentSchool is set on their school of choice. 
+                        if (extractRoute !== "/schools") {
+                            setCurrentSchool(user.schools[0]);
+                        }
                     }
                 }
-                // Note: A default school will be presented upon load if the user is not in /schools route
-                // should the user be in /schools, the currentSchool is set on their school of choice.
+
                 if (currentUser && (extractRoute !== "/schools")) { // if current user is not null or undefined, or in /schools, set school
                     setCurrentSchool(currentUser.schools[0]);
                 }
@@ -286,7 +290,7 @@ export const NavigationProvider = ({ children }) => {
                 setSelected("Dashboard")
             }
         }
-    }, [currentUser, location, navigate]);
+    }, [currentUser, currentSchool, location, navigate]);
 
     useEffect(() => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
