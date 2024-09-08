@@ -30,7 +30,6 @@ import {
     Person as PersonIcon,
     Email as EmailIcon,
 } from '@mui/icons-material';
-import RestService from '../Services/RestService'
 import { useNavigationContext } from '../Context/NavigationProvider';
 
 const DemoPaper = styled(Paper)(({ theme }) => ({
@@ -88,7 +87,7 @@ const ButtonWrapper = styled('div')({
 
 function SettingsPage() {
     const [anchorEl, setAnchorEl] = useState(null);
-    const { currentUser } = useNavigationContext();
+    const { currentUser, updateUserPassword } = useNavigationContext();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -140,7 +139,7 @@ function SettingsPage() {
         }
 
         try {
-            const success = await RestService.updateUserPassword(userId, newPassword);
+            const success = await updateUserPassword(userId, newPassword);
             if (success) {
                 // Set a success message
                 setMessage("Password updated successfully");

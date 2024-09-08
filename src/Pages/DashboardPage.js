@@ -13,10 +13,8 @@ import { FilterDate } from '../Components/Filters/FilterDate';
 import Select from '@mui/material/Select';
 import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
-import RestService from '../Services/RestService'; // Adjust the path as needed
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
-
 
 //Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
@@ -189,49 +187,37 @@ function DashboardPage(props) {
     const [schools, setSchools] = useState([]);
     const [loadingSchools, setLoadingSchools] = useState(false);
     const [schoolBudget, setSchoolBudget] = useState(null);
-    const { currentDocument, currentSchool, year, month, setCurrentDocument, jev } = useSchoolContext();
-    const currentBudget = currentDocument ? currentDocument.budget : null;
-    const [dateString, setDateString] = useState('');
-    const [chartType, setChartType] = useState('line');
+    const {
+        currentDocument,
+        currentSchool,
+        year,
+        month,
+        setCurrentDocument,
+        fetchDocumentBySchoolId,
+        jev
+    } = useSchoolContext();
 
     // This function only runs when dependencies: currentSchool & currentUser are changed
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
             setSelectedSchool(currentSchool?.id || currentUser.schools[0].id); // Ensure a valid value
         }
-    }, [currentSchool, currentUser])
+    }, [currentSchool, currentUser]);
 
     useEffect(() => {
-        if (month && year) {
-            setDateString(`${month} ${year}`);
-        }
         initializeSelectedSchool();
     }, [month, year, initializeSelectedSchool]);
+
+    // Function that calls a document by their school id, year, and month
+    useEffect(() => {
+        if (selectedSchool !== '') {
+            fetchDocumentBySchoolId(selectedSchool);
+        }
+    }, [selectedSchool, fetchDocumentBySchoolId]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
         console.log('Selected school:', schoolId);
-
-        try {
-            const document = await RestService.getDocumentBySchoolIdYearMonth(schoolId, year, month);
-            if (!document) {
-                setCurrentDocument({
-                    budget: 0.0,
-                    budgetLimit: 0.0,
-                    schoolId: schoolId,
-                    id: document.id // assuming `document` has an `id` field
-                });
-            } else {
-                setCurrentDocument({
-                    budget: document.budget,
-                    budgetLimit: document.budgetLimit,
-                    schoolId: schoolId,
-                    id: document.id // assuming `document` has an `id` field
-                });
-            }
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
     };
 
     const updateDocumentById = async (docId, value) => {
@@ -403,11 +389,11 @@ function DashboardPage(props) {
             >
                 {displayTitle}
                 {displayTitle === 'Monthly Budget' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
 
                 )}
                 {displayTitle === 'Budget Limit' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 )}
                 {displayTitle === 'Budget Limit' && (
                     <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
@@ -415,7 +401,7 @@ function DashboardPage(props) {
                     </Button>
                 )}
                 {displayTitle === 'Total Balance' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)).toFixed(2)}</p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {((currentDocument.cashAdvance || 0) - (currentDocument.budget || 0)).toFixed(2)}</p>
                 )}
 
                 <Modal
@@ -469,7 +455,7 @@ function DashboardPage(props) {
                 }}
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
-                <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{dateString}</p>
+                <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{`${month} ${year}`}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget : Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Budget Limit: Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Balance: Php {((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)).toFixed(2)}</p>
@@ -555,7 +541,7 @@ function DashboardPage(props) {
                                 color="inherit"
                                 noWrap
                             >
-                                {dateString}
+                                {`${month} ${year}`}
                             </Typography>
                         </Box>
                     </Grid>

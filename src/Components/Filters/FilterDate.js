@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import Button from '@mui/material/Button';
 import SortIcon from '@mui/icons-material/Sort';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
@@ -15,6 +15,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import IconButton from '@mui/material/IconButton';
 import Popover from '@mui/material/Popover';
 import { useSchoolContext } from '../../Context/SchoolProvider';
+import axios from 'axios';
 
 export function SchoolFieldsFilter() {
     return (
@@ -228,19 +229,55 @@ export function FilterDate() {
 }
 
 export function SchoolSearchFilter() {
-    const [input, setInput] = useState('');
+    const { setLr, isLoading, currentDocument } = useSchoolContext();
+    // const [input, setInput] = useState('');
+    const [lrCopy, setLrCopy] = useState([]);
 
     const handleInputChange = (event) => {
-        setInput(event.target.value)
+        console.log(event.target.value);
+        // setInput(event.target.value);
+        setLr(lookup(event.target.value));
     }
 
     const handleInputBlur = () => {
         //Something after searching
     }
 
+    // Get the original copy of the LR
+    const getCurrentLr = useCallback(async () => {
+        try {
+            if (!isLoading && currentDocument.id !== 0) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
+                setLrCopy(response.data || [])
+                // Handle response as needed
+                console.log(response.data);
+            } else {
+                setLrCopy([]); //meaning it's empty 
+            }
+        } catch (error) {
+            console.error('Error fetching lr:', error);
+        }
+    }, [currentDocument, setLrCopy, isLoading]);
+
+    const lookup = (keyword) => {
+        const obj = lrCopy.filter((item) => {
+            // Convert the item to a string by joining its values, and then check if the keyword exists
+            return Object.values(item).some(value =>
+                value.toString().toLowerCase().includes(keyword.toLowerCase())
+            );
+        });
+        console.log(obj);
+        // Check if the filtered result is empty
+        if (obj.length === 0) {
+            // Return the original array if the keyword didn't match anything
+            return lrCopy;
+        }
+        return obj;
+    };
+
     useEffect(() => {
-        console.log(input)
-    }, [input])
+        getCurrentLr();
+    }, [getCurrentLr])
 
     return (
         <React.Fragment>

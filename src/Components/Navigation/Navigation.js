@@ -1,6 +1,5 @@
 // React imports
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 // Material-UI imports
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
@@ -137,12 +136,16 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
-  const { currentDocument } = useSchoolContext(); // Get current document state
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser, userId } = useNavigationContext();
+  const { currentDocument, jev } = useSchoolContext(); // Get current document state
+  const [createdNotifications, setCreatedNotifications] = useState(new Set());
+  const [anchorEl, setAnchorEl] = useState(null);
   const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [previousBalance, setPreviousBalance] = useState(null);
+
+
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -152,42 +155,158 @@ export default function Navigation({ children }) {
     setAnchorEl(null);
   };
 
-  const handleClearOptions = () => {
-    setOptions([]); // Clear options by setting it to an empty array
-  };
+  const fetchNotifications = useCallback(async () => {
+    if (!currentUser || !currentUser.id) return;
 
-  const fetchNotifications = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/notifications/all');
-      const data = await response.json();
-      setOptions(data);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    }
-  };
-  
-  const createNotification = (userId, balance) => {
-    const message = `Alert: Your balance is negative.`;
-    setOptions(prevOptions => [...prevOptions, message]);
-  };
-  
-  useEffect(() => {
-    if (currentDocument) {
-      const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0); 
+      const response = await fetch(`http://localhost:4000/notifications/user/${currentUser.id}`);
+      if (!response.ok) throw new Error('Failed to fetch notifications');
 
-      if (balance < 0 && previousBalance !== null && previousBalance >= 0) {
-        createNotification(balance);
+      const contentType = response.headers.get('Content-Type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        setOptions(data.reverse()); // Reverse the array to show newest notifications first
+      } else {
+        throw new Error('Unexpected response type');
       }
 
-      // Update previous balance state
+      setError(null);
+    } catch (error) {
+      setError(error.message);
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUser]);
+
+  const createNotification = useCallback(async (userId, details, notificationKey) => {
+    if (!currentUser || !currentUser.id) return;
+
+    // Fetch saved notifications from local storage
+    let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+    let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
+
+    // Check if the notificationKey already exists in local storage
+    if (savedNotifications.includes(notificationKey) || deletedNotifications.includes(notificationKey)) {
+      return; // Avoid creating duplicate or re-creating deleted notifications
+    }
+
+    const notification = {
+      userId: currentUser.id,
+      details,
+    };
+
+    try {
+      const response = await fetch('http://localhost:4000/notifications/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(notification),
+      });
+
+      if (!response.ok) throw new Error('Failed to create notification');
+
+      await response.json();
+      fetchNotifications();
+
+      // Save notificationKey to local storage to prevent future duplicates
+      savedNotifications.push(notificationKey);
+      localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+    } catch (error) {
+      console.error('Error creating notification:', error);
+    }
+  }, [currentUser, fetchNotifications]);
+
+
+  const handleClearOptions = async () => {
+    if (!currentUser || !currentUser.id) return;
+
+    // Log current state and local storage
+    console.log('Notifications before clearing:', options);
+    console.log('Clearing notifications for user:', currentUser.id);
+    console.log('LocalStorage before clearing:', localStorage.getItem('createdNotifications'));
+
+    try {
+      // Delete notifications from the server
+      const response = await fetch(`http://localhost:4000/notifications/user/${currentUser.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to clear notifications');
+
+      // Clear notifications from client-side state
+      setOptions([]);
+
+      // Fetch saved notifications and add them to deletedNotifications
+      let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+      let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
+
+      savedNotifications.forEach(notificationKey => {
+        deletedNotifications.push(notificationKey);
+      });
+
+      // Clear notifications from local storage
+      localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
+      localStorage.removeItem('createdNotifications');
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+    } finally {
+      handleMenuClose(); // Close the menu after clearing notifications
+    }
+  };
+
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    if (currentDocument) {
+      const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
+      const notificationKey = `balance-negative-${currentDocument.id || ''}`;
+
+      // Fetch saved notifications from local storage
+      const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+
+      if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(notificationKey)) {
+        createNotification(userId, `Alert: Your balance is negative!`, notificationKey);
+
+        // Save notificationKey to localStorage to prevent future duplicates
+        savedNotifications.push(notificationKey);
+        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+      }
+
       setPreviousBalance(balance);
     }
-  }, [currentDocument]);
-  
+  }, [currentDocument, previousBalance, createNotification, userId]);
+
+
   useEffect(() => {
-    fetchNotifications(); // Fetch notifications when the component mounts
-  }, []);
-  
+    if (jev && jev.length > 0 && currentUser && currentUser.id) {
+      jev.forEach(row => {
+        if (row.amount > row.budget) {
+          const notificationKey = `${currentUser.id}-jev-${row.id}`;
+          const details = `Alert: UACS ${row.uacsName} exceeded budget in ${currentDocument.month} ${currentDocument.year}. Amount: ₱${row.amount}, Budget: ₱${row.budget}`;
+
+          // Fetch saved notifications from local storage
+          const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+
+          if (!savedNotifications.includes(notificationKey)) {
+            createNotification(currentUser.id, details, notificationKey);
+
+            // Save notificationKey to localStorage to prevent future duplicates
+            savedNotifications.push(notificationKey);
+            localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+          }
+        }
+      });
+    }
+  }, [jev, currentUser, createNotification, currentDocument, createdNotifications]);
+
+
+
   const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
@@ -196,7 +315,6 @@ export default function Navigation({ children }) {
     },
     navStyle: styling[navStyle],
   });
-
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -248,7 +366,7 @@ export default function Navigation({ children }) {
                 ...(!open && { display: "none" }),
               }}
             >
-              <ProfileTab user={User} />
+              <ProfileTab userId={userId} />
               <IconButton
                 onClick={toggleDrawer}
                 sx={{
@@ -372,19 +490,21 @@ export default function Navigation({ children }) {
                       >
                         <Tab label="All" />
                       </Tabs>
-                      {options.flatMap((option, index) => (
+                      {loading && <Typography sx={{ padding: '16px' }}>Loading...</Typography>}
+                      {error && <Typography sx={{ padding: '16px', color: 'red' }}>Error: {error}</Typography>}
+                      {options.flatMap((options, index) => (
                         index !== options.length - 1
                           ? [
-                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                            <MenuItem key={options.id} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
                               <Avatar sx={{ marginRight: '8px' }} />
-                              {option}
+                              {options.details}
                             </MenuItem>,
                             <Divider key={`divider-${index}`} />
                           ]
                           : [
-                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                            <MenuItem key={options.id} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
                               <Avatar sx={{ marginRight: '8px' }} />
-                              {option}
+                              {options.details}
                             </MenuItem>
                           ]
                       ))}

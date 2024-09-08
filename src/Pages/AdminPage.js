@@ -17,11 +17,11 @@ import {
     Person as PersonIcon,
     Email as EmailIcon,
 } from '@mui/icons-material';
-import RestService from "../Services/RestService";
 import { useNavigationContext } from '../Context/NavigationProvider';
+import axios from 'axios';
 
 function AdminPage(props) {
-    const { currentUser } = useNavigationContext();
+    const { currentUser, validateUsernameEmail } = useNavigationContext();
     const [showPassword, setShowPassword] = useState(false);
     const [usernameError, setUsernameError] = useState(false);
     const [emailError, setEmailError] = useState(false);
@@ -59,6 +59,125 @@ function AdminPage(props) {
     const [school, setSchool] = useState('');
     const [user, setUser] = useState('');
 
+    const createUserPrincipal = async (adminId, fname, mname, lname, username, email, password) => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_USER}/create/principal`, {
+                adminId,
+                fname,
+                mname,
+                lname,
+                username,
+                email,
+                password,
+                position: "Principal"
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response) {
+                console.log(response.data)
+            }
+
+            return response.status === 201;
+        } catch (error) {
+            console.error('Error creating user:', error);
+            if (error.response && error.response.status === 409) {
+                throw new Error("User with the same email or username already exists.");
+            } else {
+                throw new Error("Registration failed. Please try again later.");
+            }
+        }
+    };
+
+    const getSchoolName = async (name) => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/name`, {
+                name
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response?.data || null;
+        } catch (error) {
+            console.error('Error retrieving school:', error);
+            return null;
+        }
+    };
+
+    const createSchool = async (name, fullName) => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/create`, {
+                name,
+                fullName
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response?.data || null;
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
+    const getPrincipal = async (schoolId) => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/principal`, {
+                schoolId
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response?.data || null;
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
+    const getUserByEmailUsername = async (email) => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_USER}/schools`, {
+                emailOrUsername: email
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response?.data || null;
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
+    const insertUserAssociation = async (userId, schoolId) => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/insert`, {
+                userId,
+                schoolId
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response?.data || null;
+        } catch (error) {
+            console.error('Error creating school:', error);
+            return null;
+        }
+    };
+
     const handleIntegrateInputChange = (key, value) => {
         setIsTyping(true);
         setIntegrateFormData({
@@ -66,13 +185,13 @@ function AdminPage(props) {
             [key]: value
         });
         console.log(integrateFormData.email)
-    }
+    };
 
     const integrateOnBlur = async (key, value) => {
         let nameExists
         // Check if school exists
         if (key === "name" && integrateFormData.name !== "") {
-            nameExists = await RestService.getSchoolName(value);
+            nameExists = await getSchoolName(value);
 
             //!nameExists ? setIntegrateSchoolError(true) : setIntegrateSchoolError(false);
             if (!nameExists) {
@@ -80,7 +199,7 @@ function AdminPage(props) {
                 setErrorMessage("School doesn't exist");
             } else {
                 // Check if school already has a principal integrated
-                const principal = await RestService.getPrincipal(nameExists.id);
+                const principal = await getPrincipal(nameExists.id);
                 if (principal) {
                     setIntegrateSchoolError(true)
                     setErrorMessage("A principal already exists in this school");
@@ -93,7 +212,7 @@ function AdminPage(props) {
 
             //Check if user exists
         } else if (key === "email" && integrateFormData.email !== "") {
-            const userExists = await RestService.getUserByEmailUsername(value);
+            const userExists = await getUserByEmailUsername(value);
 
             if (!userExists) {
                 setEmailUsernameError(true)
@@ -125,7 +244,7 @@ function AdminPage(props) {
         // Further validation logic for email, password, and confirmPassword
         if (!integrateSchoolError && !emailUsernameError) {
             try {
-                const response = await RestService.insertUserAssociation(user.id, school.id);
+                const response = await insertUserAssociation(user.id, school.id);
                 if (response) {
                     console.log("Insert association creation successful");
 
@@ -162,10 +281,10 @@ function AdminPage(props) {
     const schoolOnBlur = async (key, value) => {
         let nameExists
         if (key === "name" && schoolFormData.name !== "") {
-            nameExists = await RestService.getSchoolName(value);
+            nameExists = await getSchoolName(value);
             nameExists ? setSchoolNameError(true) : setSchoolNameError(false);
         } else if (key === "fullName" && schoolFormData.fullName !== "") {
-            nameExists = await RestService.getSchoolName(value);
+            nameExists = await getSchoolName(value);
             nameExists ? setSchoolFullNameError(true) : setSchoolFullNameError(false);
         } else if (schoolFormData.name === "" || schoolFormData.fullName === "") {
             schoolFormData.name === "" ? setSchoolNameError(false) : setSchoolFullNameError(false);
@@ -185,7 +304,7 @@ function AdminPage(props) {
         // Further validation logic for email, password, and confirmPassword
         if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
             try {
-                const response = await RestService.createSchool(name, fullName);
+                const response = await createSchool(name, fullName);
                 if (response) {
                     console.log("School creation successful");
 
@@ -270,7 +389,7 @@ function AdminPage(props) {
         const value = event.target.value;
         if (value && validateEmail(value)) {
             try {
-                const exists = await RestService.validateUsernameEmail(value); // returns boolean
+                const exists = await validateUsernameEmail(value); // returns boolean
                 setEmailExistsError(exists);
             } catch (error) {
                 console.error(error);
@@ -284,7 +403,7 @@ function AdminPage(props) {
         const value = event.target.value;
         if (value) {
             try {
-                const exists = await RestService.validateUsernameEmail(value);
+                const exists = await validateUsernameEmail(value);
                 setUsernameError(exists);
             } catch (error) {
                 console.error(error);
@@ -306,7 +425,7 @@ function AdminPage(props) {
         // Further validation logic for email, password, and confirmPassword
         if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
             try {
-                const response = await RestService.createUserPrincipal(currentUser.id, firstName, middleName, lastName, username, email, password);
+                const response = await createUserPrincipal(currentUser.id, firstName, middleName, lastName, username, email, password);
                 if (response) {
                     console.log("Registration successful");
 

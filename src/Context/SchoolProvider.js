@@ -31,7 +31,7 @@ const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (sta
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool, navigationLoading } = useNavigationContext();
+    const { currentSchool, currentUser } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -56,12 +56,9 @@ export const SchoolProvider = ({ children }) => {
     const [lr, setLr] = useState([]);
     const [jev, setJev] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(false);
-
     const fetchDocumentData = useCallback(async () => {
-        setIsLoading(true);  // Start loading
         try {
-            if (!navigationLoading && currentSchool) {
+            if (currentSchool) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`)
 
                 console.log(response.data)
@@ -70,16 +67,27 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             setCurrentDocument(emptyDocument)
             console.error('Error fetching document:', error);
-        } finally {
-            setIsLoading(false);  // End loading
         }
-    }, [currentSchool, setCurrentDocument, year, month, navigationLoading]);
+    }, [currentSchool, setCurrentDocument, year, month]);
+
+    const fetchDocumentBySchoolId = useCallback(async (schoolId) => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${schoolId}/${year}/${month}`)
+
+            console.log(response.data)
+            setCurrentDocument(response.data);
+        } catch (error) {
+            setCurrentDocument(emptyDocument)
+            console.error('Error fetching document:', error);
+        }
+    }, [setCurrentDocument, year, month]);
 
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
-            if (currentDocument) {
+            if (currentDocument && currentUser) {
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_LR}/create`, {
                     documentsId,
+                    userId: currentUser.id,
                     date: obj.date,
                     orsBursNo: obj.orsBursNo,
                     particulars: obj.particulars,
@@ -99,7 +107,7 @@ export const SchoolProvider = ({ children }) => {
             console.error('Error fetching document:', error);
             return null;
         }
-    }, [currentDocument]);
+    }, [currentDocument, currentUser]);
 
     const updateDocumentById = useCallback(async (docId, description, value) => {
         // Construct the payload object based on the provided colId
@@ -174,18 +182,33 @@ export const SchoolProvider = ({ children }) => {
 
                     // return response.data; // Return the created document data
                     setCurrentDocument(response.data || emptyDocument);
-                    // fetchDocumentData();
+                    fetchDocumentData();
                 }
             }
         } catch (error) {
             console.error('Error fetching document:', error);
             return null;
         }
-    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById]);
+    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById, fetchDocumentData]);
+
+    const getDocumentBySchoolIdYear = async (school_id, year) => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}`)
+            if (response) {
+                console.log(response.data);
+            }
+            return response.data
+        } catch (error) {
+            console.log(error.response.data)
+            //console.error('Error fetching lrs by document id:', error.message);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
 
     const updateJev = useCallback(async () => {
         try {
-            if (!isLoading && currentDocument.id !== 0) {
+            if (currentDocument.id !== 0) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
                 setJev(response.data || [])
                 // Handle response as needed
@@ -195,9 +218,10 @@ export const SchoolProvider = ({ children }) => {
                 setJev([]); //meaning it's empty 
             }
         } catch (error) {
+            setJev([]);
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setJev, isLoading]);
+    }, [currentDocument, setJev]);
 
     const updateJevById = async (colId, rowId, value) => {
         let obj = {}
@@ -226,7 +250,7 @@ export const SchoolProvider = ({ children }) => {
 
     const updateLr = useCallback(async () => {
         try {
-            if (!isLoading && currentDocument.id !== 0) {
+            if (currentDocument.id !== 0) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
                 setLr(response.data || [])
                 // Handle response as needed
@@ -235,28 +259,40 @@ export const SchoolProvider = ({ children }) => {
                 setLr([]); //meaning it's empty 
             }
         } catch (error) {
+            setLr([]);
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setLr, isLoading]);
+    }, [currentDocument, setLr]);
 
     const updateLrById = async (colId, rowId, value) => {
-        let obj = {}
+        let obj = { userId: currentUser.id }
 
         // Construct the payload object based on the provided colId
-        if (colId === "amount") {
-            obj = { amount: value };
-        } else if (colId === "particulars") {
-            obj = { particulars: value };
-        } else if (colId === "orsBursNo") {
-            obj = { orsBursNo: value };
-        } else if (colId === "date") {
-            obj = { date: value };
-        } else if (colId === "objectCode") {
-            obj = { objectCode: value };
-        } else if (colId === "payee") {
-            obj = { payee: value };
-        } else if (colId === "natureOfPayment") {
-            obj = { natureOfPayment: value };
+        switch (colId) {
+            case "amount":
+                obj.amount = value;
+                break;
+            case "particulars":
+                obj.particulars = value;
+                break;
+            case "orsBursNo":
+                obj.orsBursNo = value;
+                break;
+            case "date":
+                obj.date = value;
+                break;
+            case "objectCode":
+                obj.objectCode = value;
+                break;
+            case "payee":
+                obj.payee = value;
+                break;
+            case "natureOfPayment":
+                obj.natureOfPayment = value;
+                break;
+            default:
+                console.warn("Invalid colId:", colId); // Handle unexpected colId
+                break;
         }
 
         try {
@@ -276,19 +312,21 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    }
+    };
 
     const deleteLrByid = async (rowId) => {
         try {
-            const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}`)
-            if (response) {
-                console.log(response.data)
-            }
+            if (currentUser) {
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}/user/${currentUser.id}`)
+                if (response) {
+                    console.log(response.data)
+                }
 
-            if (response.status === 200) {
-                console.log(`LR with id: ${rowId} is deleted`);
-            } else {
-                console.log("LR not deleted");
+                if (response.status === 200) {
+                    console.log(`LR with id: ${rowId} is deleted`);
+                } else {
+                    console.log("LR not deleted");
+                }
             }
             fetchDocumentData();
         } catch (error) {
@@ -314,7 +352,8 @@ export const SchoolProvider = ({ children }) => {
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
-    }, [fetchDocumentData]); // Run effect only on mount and unmount
+        console.log(currentSchool);
+    }, [fetchDocumentData, currentSchool]); // Run effect only on mount and unmount
 
     return (
         <SchoolContext.Provider value={{
@@ -322,8 +361,8 @@ export const SchoolProvider = ({ children }) => {
             lr, setLr, setCurrentDocument, currentDocument,
             addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
             currentSchool, value, setValue, updateJev, updateJevById, jev, setJev, createNewDocument,
-            isLoading, setIsLoading, createLrByDocId, updateDocumentById, deleteLrByid,
-            updateLrById
+            createLrByDocId, updateDocumentById, deleteLrByid, updateLrById, getDocumentBySchoolIdYear,
+            fetchDocumentBySchoolId
         }}>
             {children}
         </SchoolContext.Provider>

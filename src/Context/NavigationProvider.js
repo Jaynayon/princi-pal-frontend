@@ -1,29 +1,16 @@
 import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import RestService from "../Services/RestService"
+import axios from 'axios';
 
 const NavigationContext = createContext();
 
 export const useNavigationContext = () => useContext(NavigationContext);
 
-const emptySchool = {
-    "id": 0,
-    "name": "NONE",
-    "fullName": "NONE"
-}
-
-const emptyUser = {
-    "id": 0,
-    "fname": "",
-    "mname": "",
-    "lname": "",
-    "username": "",
-    "email": "",
-    "password": "",
-    "position": "ADAS",
-    "avatar": "Blue",
-    "schools": []
-}
+//Function that allows us to accept credentials
+const instance = axios.create({
+    baseURL: 'http://localhost:4000', // Set your backend URL
+    withCredentials: true, // Enable sending cookies with cross-origin requests
+});
 
 export const NavigationProvider = ({ children }) => {
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
@@ -34,8 +21,7 @@ export const NavigationProvider = ({ children }) => {
     const [mobileMode, setMobileMode] = useState(false); // State to track position
     const [currentUser, setCurrentUser] = useState(null);
     const [currentSchool, setCurrentSchool] = useState(null);
-    const [userId, setUserId] = useState(null)
-    const [navigationLoading, setNavigationLoading] = useState(false);
+    const [userId, setUserId] = useState(null);
     const prevOpenRef = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -57,10 +43,129 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
+    const validateToken = async (token) => {
+        try {
+            if (token) {
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_AUTH}/verify/?token=${token}`)
+                if (response) {
+                    console.log(response.data)
+                }
+                return response.data
+            }
+        } catch (error) {
+            console.error('Error validating token:', error);
+            throw new Error("Token validation failed. Please try again later.");
+        }
+    };
+
+    const getUserById = async (user_id) => {
+        try {
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_USER}/${user_id}`)
+            if (response) {
+                console.log(response.data);
+            }
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            throw new Error("Get user failed. Please try again later.");
+        }
+    };
+
+    const authenticateUser = async (email, password) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_AUTH}/login`, {
+                emailOrUsername: email,
+                password,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response) {
+                console.log(response.data)
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error('Error authenticating user:', error);
+            throw new Error("Authentication failed. Please try again later.");
+        }
+    };
+
+    const createUser = async (fname, mname, lname, username, email, password, position) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/create`, {
+                fname,
+                mname,
+                lname,
+                username,
+                email,
+                password,
+                position
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response) {
+                console.log(response.data)
+            }
+
+            return response.status === 201;
+        } catch (error) {
+            console.error('Error creating user:', error);
+            if (error.response && error.response.status === 409) {
+                throw new Error("User with the same email or username already exists.");
+            } else {
+                throw new Error("Registration failed. Please try again later.");
+            }
+        }
+    };
+
+    const validateUsernameEmail = async (email) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/exists`, {
+                emailOrUsername: email
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response) {
+                console.log(response.data);
+            }
+
+            return response.data
+        } catch (error) {
+            console.error('Error validating username/email:', error);
+            throw new Error("Validation failed. Please try again later.");
+        }
+    };
+
+    const updateUserPassword = async (userId, newPassword) => {
+        try {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_USER}/${userId}/password`, {
+                newPassword,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error updating password:', error);
+            return false;
+        }
+    };
+
+    // Fetch current user details
     const fetchUser = useCallback(async () => {
         // Extract the root route if it's the /schools route
         const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
-        setNavigationLoading(true);
         try {
             const jwtCookie = document.cookie
                 .split('; ')
@@ -70,19 +175,25 @@ export const NavigationProvider = ({ children }) => {
                 const token = jwtCookie.split('=')[1];
                 console.log('JWT Token Provider:', token);
 
-                // Call RestService to validate the token
-                const data = await RestService.validateToken(token);
+                // Call to validate the token
+                const data = await validateToken(token);
 
                 if (data) { //data.decodedToken
                     setUserId(data)
                     if (!currentUser) {
-                        const user = await RestService.getUserById(data.id);
-                        setCurrentUser(user);
+                        const user = await getUserById(data.id);
+                        if (currentUser !== user) {
+                            setCurrentUser(user);
+                        }
+                        // Note: A default school will be presented upon load if the user is not in /schools route
+                        // should the user be in /schools, the currentSchool is set on their school of choice. 
+                        if (extractRoute !== "/schools") {
+                            setCurrentSchool(user.schools[0]);
+                        }
                     }
                 }
-                // Note: A default school will be presented upon load if the user is not in /schools route
-                // should the user be in /schools, the currentSchool is set on their school of choice.
-                if (currentUser && extractRoute !== "/schools") { // if current user is not null or undefined, or in /schools, set school
+
+                if (currentUser && (extractRoute !== "/schools")) { // if current user is not null or undefined, or in /schools, set school
                     setCurrentSchool(currentUser.schools[0]);
                 }
                 console.log(currentUser)
@@ -93,24 +204,41 @@ export const NavigationProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Error validating token:', error);
-        } finally {
-            setNavigationLoading(false);
         }
-    }, [currentUser, location.pathname]);
-
+    }, [currentUser, location]);
 
     useEffect(() => {
+        if (!currentUser) {
+            fetchUser();
+        }
+
+        // Call the function to set initial mobileMode state
+        updateMobileMode();
+
+        const handleResize = () => {
+            // Call the function to update mobileMode state on resize
+            updateMobileMode();
+        };
+
+        // Add event listener for resize
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup the event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [currentUser, location, fetchUser]); // Run effect only on mount and unmount
+
+    useEffect(() => {
+        // Define a mapping between paths and the desired local storage values
+        const pathToLocalStorageValue = {
+            "/": "Dashboard",
+            '/dashboard': 'Dashboard',
+            '/people': 'People',
+            '/settings': 'Settings',
+        };
+
         if (currentUser && currentUser.position !== "Super administrator") {
-            //const localStorageData = window.localStorage.getItem("LOCAL_STORAGE_SELECTED");
-            //const data = "localStorageData ? JSON.parse(localStorageData) : null;"
-
-            // Define a mapping between paths and the desired local storage values
-            const pathToLocalStorageValue = {
-                '/dashboard': 'Dashboard',
-                '/people': 'People',
-                '/settings': 'Settings',
-            };
-
             // Get the local storage value based on the current path
             let localStorageValue = pathToLocalStorageValue[location.pathname];
 
@@ -122,10 +250,14 @@ export const NavigationProvider = ({ children }) => {
 
                 if (extractRoute === "/schools") {
                     // RegEx that transform route text to school name
-                    function transformText(input) {
+                    function transformText(input = "") {
+                        if (typeof input !== 'string') {
+                            return ''; // Return an empty string or handle it according to your needs
+                        }
                         return input
-                            .replace(/-/g, ' ')  // Replace all hyphens with spaces
-                            .toUpperCase();      // Convert all letters to uppercase
+                            .replace(/-/g, ' ')   // Replace all hyphens with spaces
+                            .replace(/\//g, '')   // Remove all forward slashes
+                            .toUpperCase();       // Convert all letters to uppercase
                     }
 
                     const schoolName = transformText(schoolNameRoute); // Set school name as local storage value
@@ -150,46 +282,26 @@ export const NavigationProvider = ({ children }) => {
                 }
             }
 
-            // // Update local storage
-            // if (localStorageValue !== data) {
-            //     window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(localStorageValue));
-            // }
-
             // Set the state with the current local storage value
-            localStorageValue !== null || localStorageValue !== undefined ? setSelected(localStorageValue) : setSelected("Dashboard")
+            if (localStorageValue !== null || localStorageValue !== undefined) {
+                setSelected(localStorageValue)
+            } else {
+                window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify("Dashboard"));
+                setSelected("Dashboard")
+            }
         }
-    }, [currentUser, location, navigate])
+    }, [currentUser, currentSchool, location, navigate]);
 
     useEffect(() => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
-    }, [selected])
-
-    useEffect(() => {
-        // Fetch current user details
-        fetchUser();
-
-        // Call the function to set initial mobileMode state
-        updateMobileMode();
-
-        const handleResize = () => {
-            // Call the function to update mobileMode state on resize
-            updateMobileMode();
-        };
-
-        // Add event listener for resize
-        window.addEventListener('resize', handleResize);
-
-        // Cleanup the event listener on component unmount
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, [fetchUser]); // Run effect only on mount and unmount
+    }, [selected]);
 
     return (
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
             navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
-            openSub, setOpenSub, location, setNavigationLoading, navigationLoading
+            openSub, setOpenSub, location, authenticateUser, createUser, validateUsernameEmail,
+            updateUserPassword
         }}>
             {children}
         </NavigationContext.Provider>
