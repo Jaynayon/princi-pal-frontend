@@ -19,7 +19,6 @@ import {
 import { useSchoolContext } from '../../Context/SchoolProvider';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
 
-import RestService from '../../Services/RestService';
 import ConfirmModal from './ConfirmModal';
 
 const columns = [
@@ -75,7 +74,7 @@ const getStyles = (name, personName) => ({
 });
 
 export default function AnnualTab() {
-    const { month, months, year, currentSchool, jev } = useSchoolContext();
+    const { month, months, year, currentSchool, jev, getDocumentBySchoolIdYear } = useSchoolContext();
     const [documentsByYear, setDocumentsByYear] = React.useState([]);
     const [tabMonth, setTabMonth] = React.useState(month); // Initally get current month value
     const [selectedDocument, setSelectedDocument] = React.useState(null); // Initially get current Document value
@@ -89,7 +88,7 @@ export default function AnnualTab() {
     const getDocumentsByYear = React.useCallback(async () => {
         try {
             if (currentSchool) {
-                const response = await RestService.getDocumentBySchoolIdYear(currentSchool.id, year);
+                const response = await getDocumentBySchoolIdYear(currentSchool.id, year);
                 if (response) {
                     console.log(response); //test
                     setDocumentsByYear(response);
@@ -100,7 +99,7 @@ export default function AnnualTab() {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    }, [currentSchool, year])
+    }, [currentSchool, year, getDocumentBySchoolIdYear]);
 
     React.useEffect(() => {
         getDocumentsByYear();

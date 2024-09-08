@@ -17,7 +17,7 @@ import {
   Person as PersonIcon,
   Email as EmailIcon,
 } from '@mui/icons-material';
-import RestService from "../Services/RestService";
+import { useNavigationContext } from "../Context/NavigationProvider";
 
 const RegistrationPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +38,7 @@ const RegistrationPage = () => {
     position: 'ADAS'
   });
   const [formValid, setFormValid] = useState(true); // Track form validity
+  const { createUser, validateUsernameEmail } = useNavigationContext();
 
   const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
@@ -112,7 +113,7 @@ const RegistrationPage = () => {
     const value = event.target.value;
     if (value && validateEmail(value)) {
       try {
-        const exists = await RestService.validateUsernameEmail(value); // returns boolean
+        const exists = await validateUsernameEmail(value); // returns boolean
         setEmailExistsError(exists);
       } catch (error) {
         console.error(error);
@@ -126,7 +127,7 @@ const RegistrationPage = () => {
     const value = event.target.value;
     if (value) {
       try {
-        const exists = await RestService.validateUsernameEmail(value);
+        const exists = await validateUsernameEmail(value);
         setUsernameError(exists);
       } catch (error) {
         console.error(error);
@@ -148,7 +149,7 @@ const RegistrationPage = () => {
     // Further validation logic for email, password, and confirmPassword
     if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
       try {
-        const response = await RestService.createUser(firstName, middleName, lastName, username, email, password, position);
+        const response = await createUser(firstName, middleName, lastName, username, email, password, position);
         if (response) {
           console.log("Registration successful");
           setRegistrationError('');
