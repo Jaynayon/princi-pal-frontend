@@ -72,27 +72,7 @@ const RestService = (() => {
         }
     };
 
-    const authenticateUser = async (email, password) => {
-        try {
-            const response = await instance.post(`${process.env.REACT_APP_API_URL_AUTH}/login`, {
-                emailOrUsername: email,
-                password,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
 
-            if (response) {
-                console.log(response.data)
-            }
-
-            return response.data;
-        } catch (error) {
-            console.error('Error authenticating user:', error);
-            throw new Error("Authentication failed. Please try again later.");
-        }
-    };
 
     const validateUsernameEmail = async (email) => {
         try {
@@ -353,7 +333,6 @@ const RestService = (() => {
 
     return {
         createUser,
-        authenticateUser,
         validateUsernameEmail,
         validateToken,
         getIsAuthenticated,

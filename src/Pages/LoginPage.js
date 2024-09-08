@@ -1,10 +1,16 @@
 import { useState } from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { TextField, InputAdornment, IconButton, Button, Typography, Container, Grid } from "@mui/material";
-import RestService from "../Services/RestService";
 import { Link } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Box from '@mui/material/Box';
+import axios from 'axios';
+
+//Function that allows us to accept credentials
+const instance = axios.create({
+    baseURL: 'http://localhost:4000', // Set your backend URL
+    withCredentials: true, // Enable sending cookies with cross-origin requests
+});
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +26,29 @@ const LoginPage = () => {
         // Logic for handling register button click
         // Redirect to the registration page
         window.location.href = "http://localhost:3000/register";
-    }
+    };
+
+    const authenticateUser = async (email, password) => {
+        try {
+            const response = await instance.post(`${process.env.REACT_APP_API_URL_AUTH}/login`, {
+                emailOrUsername: email,
+                password,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response) {
+                console.log(response.data)
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error('Error authenticating user:', error);
+            throw new Error("Authentication failed. Please try again later.");
+        }
+    };
 
     const handleLogin = async () => {
         try {
@@ -39,7 +67,7 @@ const LoginPage = () => {
             }
 
             // Make a POST request to the backend to validate the credentials
-            const response = await RestService.authenticateUser(emailValue, passwordValue);
+            const response = await authenticateUser(emailValue, passwordValue);
 
             if (response) {
                 // Credentials are valid, set isLoggedIn to true
