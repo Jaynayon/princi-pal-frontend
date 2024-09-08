@@ -39,21 +39,6 @@ const RestService = (() => {
         }
     };
 
-    const getDocumentBySchoolIdYear = async (school_id, year) => {
-        try {
-            const response = await instance.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}`)
-            if (response) {
-                console.log(response.data);
-            }
-            return response.data
-        } catch (error) {
-            console.log(error.response.data)
-            //console.error('Error fetching lrs by document id:', error.message);
-            //throw new Error("Get lr failed. Please try again later.");
-            return null;
-        }
-    };
-
     const getSchoolName = async (name) => {
         try {
             const response = await instance.post(`${process.env.REACT_APP_API_URL_SCHOOL}/name`, {
@@ -227,7 +212,6 @@ const RestService = (() => {
 
 
     return {
-        getDocumentBySchoolIdYear,
         createUserPrincipal,
         getSchoolName,
         getSchoolFullName,

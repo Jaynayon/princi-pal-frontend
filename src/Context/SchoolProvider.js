@@ -179,6 +179,21 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById, fetchDocumentData]);
 
+    const getDocumentBySchoolIdYear = async (school_id, year) => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}`)
+            if (response) {
+                console.log(response.data);
+            }
+            return response.data
+        } catch (error) {
+            console.log(error.response.data)
+            //console.error('Error fetching lrs by document id:', error.message);
+            //throw new Error("Get lr failed. Please try again later.");
+            return null;
+        }
+    };
+
     const updateJev = useCallback(async () => {
         try {
             if (currentDocument.id !== 0) {
@@ -285,7 +300,7 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    }
+    };
 
     const deleteLrByid = async (rowId) => {
         try {
@@ -333,8 +348,7 @@ export const SchoolProvider = ({ children }) => {
             lr, setLr, setCurrentDocument, currentDocument,
             addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
             currentSchool, value, setValue, updateJev, updateJevById, jev, setJev, createNewDocument,
-            createLrByDocId, updateDocumentById, deleteLrByid,
-            updateLrById
+            createLrByDocId, updateDocumentById, deleteLrByid, updateLrById, getDocumentBySchoolIdYear
         }}>
             {children}
         </SchoolContext.Provider>
