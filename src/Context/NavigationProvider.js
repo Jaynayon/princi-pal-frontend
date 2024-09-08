@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import RestService from "../Services/RestService"
 import axios from 'axios';
 
 const NavigationContext = createContext();
@@ -41,6 +40,34 @@ export const NavigationProvider = ({ children }) => {
             setOpen(false)
         } else {
             setMobileMode(false);
+        }
+    };
+
+    const validateToken = async (token) => {
+        try {
+            if (token) {
+                const response = await instance.get(`${process.env.REACT_APP_API_URL_AUTH}/verify/?token=${token}`)
+                if (response) {
+                    console.log(response.data)
+                }
+                return response.data
+            }
+        } catch (error) {
+            console.error('Error validating token:', error);
+            throw new Error("Token validation failed. Please try again later.");
+        }
+    };
+
+    const getUserById = async (user_id) => {
+        try {
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_USER}/${user_id}`)
+            if (response) {
+                console.log(response.data);
+            }
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            throw new Error("Get user failed. Please try again later.");
         }
     };
 
@@ -148,13 +175,13 @@ export const NavigationProvider = ({ children }) => {
                 const token = jwtCookie.split('=')[1];
                 console.log('JWT Token Provider:', token);
 
-                // Call RestService to validate the token
-                const data = await RestService.validateToken(token);
+                // Call to validate the token
+                const data = await validateToken(token);
 
                 if (data) { //data.decodedToken
                     setUserId(data)
                     if (!currentUser) {
-                        const user = await RestService.getUserById(data.id);
+                        const user = await getUserById(data.id);
                         if (currentUser !== user) {
                             setCurrentUser(user);
                         }

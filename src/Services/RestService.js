@@ -7,8 +7,6 @@ const instance = axios.create({
 });
 
 const RestService = (() => {
-    let isAuthenticated = false;
-
     const createUserPrincipal = async (adminId, fname, mname, lname, username, email, password) => {
         try {
             const response = await instance.post(`${process.env.REACT_APP_API_URL_USER}/create/principal`, {
@@ -38,38 +36,6 @@ const RestService = (() => {
             } else {
                 throw new Error("Registration failed. Please try again later.");
             }
-        }
-    };
-
-    const validateToken = async (token) => {
-        try {
-            if (token) {
-                const response = await instance.get(`${process.env.REACT_APP_API_URL_AUTH}/verify/?token=${token}`)
-                if (response) {
-                    console.log(response.data)
-                }
-                return response.data
-            }
-        } catch (error) {
-            console.error('Error validating token:', error);
-            throw new Error("Token validation failed. Please try again later.");
-        }
-    };
-
-    const getIsAuthenticated = () => {
-        return isAuthenticated;
-    };
-
-    const getUserById = async (user_id) => {
-        try {
-            const response = await instance.get(`${process.env.REACT_APP_API_URL_USER}/${user_id}`)
-            if (response) {
-                console.log(response.data);
-            }
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching user:', error);
-            throw new Error("Get user failed. Please try again later.");
         }
     };
 
@@ -261,9 +227,6 @@ const RestService = (() => {
 
 
     return {
-        validateToken,
-        getIsAuthenticated,
-        getUserById,
         getDocumentBySchoolIdYear,
         createUserPrincipal,
         getSchoolName,
