@@ -203,23 +203,6 @@ const RestService = (() => {
         }
     };
 
-    const updateUserPassword = async (userId, newPassword) => {
-        try {
-            const response = await instance.patch(`${process.env.REACT_APP_API_URL_USER}/${userId}/password`, {
-                newPassword,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            return response.status === 200;
-        } catch (error) {
-            console.error('Error updating password:', error);
-            return false;
-        }
-    };
-
     const createNotification = async (userId, message, type) => {
         try {
             const response = await instance.post(`${process.env.REACT_APP_API_URL_NOTIFICATION}/create`, {
@@ -290,7 +273,6 @@ const RestService = (() => {
         getUserByEmailUsername,
         insertUserAssociation,
         getSchools,
-        updateUserPassword,
         createNotification,
         getNotificationsForUser,
         markNotificationAsRead,

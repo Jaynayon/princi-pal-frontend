@@ -118,6 +118,23 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
+    const updateUserPassword = async (userId, newPassword) => {
+        try {
+            const response = await instance.patch(`${process.env.REACT_APP_API_URL_USER}/${userId}/password`, {
+                newPassword,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error updating password:', error);
+            return false;
+        }
+    };
+
     // Fetch current user details
     const fetchUser = useCallback(async () => {
         // Extract the root route if it's the /schools route
@@ -242,7 +259,7 @@ export const NavigationProvider = ({ children }) => {
                 setSelected("Dashboard")
             }
         }
-    }, [currentUser, location, navigate])
+    }, [currentUser, location, navigate]);
 
     useEffect(() => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
@@ -252,7 +269,8 @@ export const NavigationProvider = ({ children }) => {
         <NavigationContext.Provider value={{
             open, toggleDrawer, prevOpen: prevOpenRef.current, list, selected, setSelected,
             navStyle, setNavStyle, mobileMode, userId, currentUser, setCurrentSchool, currentSchool,
-            openSub, setOpenSub, location, authenticateUser, createUser, validateUsernameEmail
+            openSub, setOpenSub, location, authenticateUser, createUser, validateUsernameEmail,
+            updateUserPassword
         }}>
             {children}
         </NavigationContext.Provider>
