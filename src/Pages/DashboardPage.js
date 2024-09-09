@@ -312,16 +312,7 @@ const sampleUacsData = [
 ];
 
     console.log(jev)
-    const getCurrentMonthYear = () => {
-        const currentDate = new Date();
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
-        const month = monthNames[currentDate.getMonth()];
-        const year = currentDate.getFullYear();
-        return `${month} ${year}`;
-    };
+    
 
     const handleOpen = (text) => {
         setOpen(true);
@@ -457,7 +448,7 @@ const sampleUacsData = [
     };
 
     const renderSummaryCard = () => {
-        const budgetLimitData = editableAmounts['Budget Limit'] || { currency: '', amount: '' };
+        
 
         return (
             <Paper
