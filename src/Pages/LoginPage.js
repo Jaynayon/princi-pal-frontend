@@ -4,14 +4,14 @@ import { TextField, InputAdornment, IconButton, Button, Typography, Container, G
 import { Link } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Box from '@mui/material/Box';
-import { useNavigationContext } from "../Context/NavigationProvider";
+import { useAppContext } from "../Context/AppProvider";
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
-    const { authenticateUser } = useNavigationContext();
+    const { authenticateUser } = useAppContext();
 
     const handleShowPasswordClick = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
@@ -42,10 +42,7 @@ const LoginPage = () => {
             // Make a POST request to the backend to validate the credentials
             const response = await authenticateUser(emailValue, passwordValue);
 
-            if (response) {
-                // Credentials are valid, set isLoggedIn to true
-                window.location.href = "http://localhost:3000/dashboard";
-            } else {
+            if (!response) {
                 // Invalid credentials, display error message
                 setLoginError('Incorrect email or password.');
             }

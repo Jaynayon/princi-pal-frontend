@@ -137,8 +137,8 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser, userId } = useNavigationContext();
-  const {  month, year, currentDocument, jev, currentSchool } = useSchoolContext(); // Get current document state
+  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser } = useNavigationContext();
+  const { month, year, currentDocument, jev, currentSchool } = useSchoolContext(); // Get current document state
   const [createdNotifications, setCreatedNotifications] = useState(new Set());
   const [anchorEl, setAnchorEl] = useState(null);
   const [options, setOptions] = useState([]);
@@ -163,7 +163,7 @@ export default function Navigation({ children }) {
     console.log('Fetching notifications for user ID:', currentUser.id, 'and school ID:', currentSchool.id);
     setLoading(true);
     try {
-      console.log('Current User ID:', currentUser.id); 
+      console.log('Current User ID:', currentUser.id);
       const response = await axios.get(`http://localhost:4000/Notifications/school/${currentSchool.id}`);
       console.log('Response status:', response.status);
       console.log('Fetched notifications data:', response.data);
@@ -348,7 +348,7 @@ export default function Navigation({ children }) {
                 ...(!open && { display: "none" }),
               }}
             >
-              <ProfileTab userId={userId} />
+              <ProfileTab />
               <IconButton
                 onClick={toggleDrawer}
                 sx={{

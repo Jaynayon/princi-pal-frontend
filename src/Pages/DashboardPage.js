@@ -180,7 +180,8 @@ const sampleUacsData = [
 
 
 function DashboardPage(props) {
-    const { currentUser } = useNavigationContext();
+    const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
+    const { currentDocument, year, month, setCurrentDocument } = useSchoolContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
@@ -191,35 +192,26 @@ function DashboardPage(props) {
     const [schools, setSchools] = useState([]);
     const [loadingSchools, setLoadingSchools] = useState(false);
     const [schoolBudget, setSchoolBudget] = useState(null);
-    const {
-        currentDocument,
-        currentSchool,
-        year,
-        month,
-        setCurrentDocument,
-        fetchDocumentBySchoolId
-    } = useSchoolContext();
 
     // This function only runs when dependencies: currentSchool & currentUser are changed
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
-            setSelectedSchool(currentSchool?.id || currentUser.schools[0].id); // Ensure a valid value
+            if (currentSchool) {
+                setSelectedSchool(currentSchool.id); // Ensure a valid value
+            } else {
+                setSelectedSchool(currentUser.schools[0].id); // Ensure a valid value
+            }
+
         }
     }, [currentSchool, currentUser]);
 
     useEffect(() => {
         initializeSelectedSchool();
-    }, [month, year, initializeSelectedSchool]);
-
-    // Function that calls a document by their school id, year, and month
-    useEffect(() => {
-        if (selectedSchool !== '') {
-            fetchDocumentBySchoolId(selectedSchool);
-        }
-    }, [selectedSchool, fetchDocumentBySchoolId]);
+    }, [initializeSelectedSchool]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
+        setCurrentSchool(currentUser.schools.find(s => s.id === schoolId));
         console.log('Selected school:', schoolId);
     };
 

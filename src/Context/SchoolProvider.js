@@ -31,7 +31,7 @@ const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (sta
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool, currentUser } = useNavigationContext();
+    const { currentSchool, setCurrentSchool, currentUser } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -58,6 +58,8 @@ export const SchoolProvider = ({ children }) => {
 
     const fetchDocumentData = useCallback(async () => {
         try {
+            console.log(`${year} ${month}`);
+            console.log(currentSchool);
             if (currentSchool) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`)
 
@@ -352,17 +354,27 @@ export const SchoolProvider = ({ children }) => {
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
-        console.log(currentSchool);
-    }, [fetchDocumentData, currentSchool]); // Run effect only on mount and unmount
+    }, [fetchDocumentData]); // Run effect only on mount and unmount
 
     return (
         <SchoolContext.Provider value={{
-            prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
-            lr, setLr, setCurrentDocument, currentDocument,
-            addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, value, setValue, updateJev, updateJevById, jev, setJev, createNewDocument,
-            createLrByDocId, updateDocumentById, deleteLrByid, updateLrById, getDocumentBySchoolIdYear,
-            fetchDocumentBySchoolId
+            prevMonthRef, prevYearRef,
+            value, setValue,
+            month, setMonth,
+            year, setYear,
+            months, years,
+            lr, setLr, updateLr,
+            jev, setJev, updateJev,
+            currentDocument, setCurrentDocument,
+            addFields,
+            isAdding, setIsAdding,
+            addOneRow, setAddOneRow,
+            currentSchool, setCurrentSchool,
+            fetchDocumentData,
+            fetchDocumentBySchoolId,
+            createNewDocument, updateDocumentById, getDocumentBySchoolIdYear,
+            createLrByDocId, deleteLrByid, updateLrById,
+            updateJevById
         }}>
             {children}
         </SchoolContext.Provider>
