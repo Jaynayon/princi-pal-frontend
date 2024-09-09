@@ -1,5 +1,6 @@
 // React imports
 import React, { useEffect, useState, useCallback } from "react";
+import axios from 'axios';
 
 // Material-UI imports
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
@@ -137,15 +138,13 @@ const displayTitle = (selected) => {
 
 export default function Navigation({ children }) {
   const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser, userId } = useNavigationContext();
-  const { currentDocument, jev } = useSchoolContext(); // Get current document state
+  const {  month, year, currentDocument, jev, currentSchool } = useSchoolContext(); // Get current document state
   const [createdNotifications, setCreatedNotifications] = useState(new Set());
   const [anchorEl, setAnchorEl] = useState(null);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [previousBalance, setPreviousBalance] = useState(null);
-
-
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -156,21 +155,26 @@ export default function Navigation({ children }) {
   };
 
   const fetchNotifications = useCallback(async () => {
-    if (!currentUser || !currentUser.id) return;
-  
+    if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
+      console.log('No current user or school ID');
+      return;
+    }
+
+    console.log('Fetching notifications for user ID:', currentUser.id, 'and school ID:', currentSchool.id);
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:4000/notifications/user/${currentUser.id}`);
-      if (!response.ok) throw new Error('Failed to fetch notifications');
-  
-      const contentType = response.headers.get('Content-Type');
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        setOptions(data.reverse()); // Reverse the array to show newest notifications first
+      console.log('Current User ID:', currentUser.id); 
+      const response = await axios.get(`http://localhost:4000/Notifications/school/${currentSchool.id}`);
+      console.log('Response status:', response.status);
+      console.log('Fetched notifications data:', response.data);
+
+      if (Array.isArray(response.data)) {
+        console.log('Number of notifications:', response.data.length);
+        setOptions(response.data.reverse()); // Reverse to show newest notifications first
       } else {
-        throw new Error('Unexpected response type');
+        console.error('Unexpected response format:', response.data);
       }
-  
+
       setError(null);
     } catch (error) {
       setError(error.message);
@@ -178,72 +182,68 @@ export default function Navigation({ children }) {
     } finally {
       setLoading(false);
     }
-  }, [currentUser]);
+  }, [currentUser, currentSchool]);
 
-  const createNotification = useCallback(async (userId, details, notificationKey) => {
-    if (!currentUser || !currentUser.id) return;
-  
-    // Fetch saved notifications from local storage
+  const createNotification = useCallback(async (userId, details, NotificationsKey) => {
+    if (!currentUser || !currentUser.id) {
+      console.log('No current user or user ID');
+      return;
+    }
+
     let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
     let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
-  
-    // Check if the notificationKey already exists in local storage
-    if (savedNotifications.includes(notificationKey) || deletedNotifications.includes(notificationKey)) {
-      return; // Avoid creating duplicate or re-creating deleted notifications
+
+    if (savedNotifications.includes(NotificationsKey) || deletedNotifications.includes(NotificationsKey)) {
+      console.log('Notification key already exists or is deleted');
+      return;
     }
-  
+
     const notification = {
       userId: currentUser.id,
       details,
+      schoolId: currentSchool.id, // Attach the school ID to the notification
     };
-  
+
     try {
-      const response = await fetch('http://localhost:4000/notifications/create', {
-        method: 'POST',
+      await axios.post('http://localhost:4000/Notifications/create', notification, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(notification),
       });
-  
-      if (!response.ok) throw new Error('Failed to create notification');
-  
-      await response.json();
+
       fetchNotifications();
-  
-      // Save notificationKey to local storage to prevent future duplicates
-      savedNotifications.push(notificationKey);
+
+      savedNotifications.push(NotificationsKey);
       localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
     } catch (error) {
       console.error('Error creating notification:', error);
     }
-  }, [currentUser, fetchNotifications]);
+  }, [currentUser, currentSchool, fetchNotifications]);
 
   const handleClearOptions = async () => {
-    if (!currentUser || !currentUser.id) return;
-  
+    if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
+      console.log('No current user or school ID');
+      return;
+    }
+
     try {
-      const response = await fetch(`http://localhost:4000/notifications/user/${currentUser.id}`, {
-        method: 'DELETE',
-      });
-  
-      if (!response.ok) throw new Error('Failed to clear notifications');
-  
+      await axios.delete(`http://localhost:4000/Notifications/school/${currentSchool.id}`);
+
       setOptions([]);
-  
+
       let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
       let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
-  
-      savedNotifications.forEach(notificationKey => {
-        deletedNotifications.push(notificationKey);
+
+      savedNotifications.forEach(NotificationsKey => {
+        deletedNotifications.push(NotificationsKey);
       });
-  
+
       localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
       localStorage.removeItem('createdNotifications');
     } catch (error) {
       console.error('Error clearing notifications:', error);
     } finally {
-      handleMenuClose(); // Close the menu after clearing notifications
+      handleMenuClose();
     }
   };
 
@@ -254,19 +254,18 @@ export default function Navigation({ children }) {
   useEffect(() => {
     if (currentDocument) {
       const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
-      const notificationKey = `balance-negative-${currentDocument.id || ''}`;
-  
-      // Fetch saved notifications from local storage
+      const NotificationsKey = `balance-negative-${currentDocument.id || ''}`;
+
       const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-      if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(notificationKey)) {
+
+      if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(NotificationsKey)) {
         createNotification(
           currentUser.id,
           `Your budget has gone negative. Current balance: ${balance}`,
-          notificationKey
+          NotificationsKey
         );
       }
-  
+
       setPreviousBalance(balance);
     }
   }, [currentDocument, createNotification, currentUser, previousBalance]);
@@ -275,16 +274,15 @@ export default function Navigation({ children }) {
     if (jev && jev.length) {
       jev.forEach(row => {
         const exceededBudget = row.amount > (row.budget || 0);
-        const notificationKey = `budget-exceeded-${row.id || ''}`;
-  
-        // Fetch saved notifications from local storage
+        const NotificationsKey = `budget-exceeded-${row.id || ''}`;
+
         const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-        if (exceededBudget && !savedNotifications.includes(notificationKey)) {
+
+        if (exceededBudget && !savedNotifications.includes(NotificationsKey)) {
           createNotification(
             currentUser.id,
-            `The amount for UACS ${row.uacsName} exceeds the budget. Amount: ${row.amount}, Budget: ${row.budget}`,
-            notificationKey
+            `As of ${month} ${year}, the amount for UACS ${row.uacsName} exceeds the budget. Amount: ${row.amount}, Budget: ${row.budget}`,
+            NotificationsKey
           );
         }
       });
