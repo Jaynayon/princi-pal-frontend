@@ -14,14 +14,12 @@ import {
 
 import {
     FilterDate,
-    SchoolFieldsFilter,
     SchoolSearchFilter
 } from '../Components/Filters/FilterDate';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 
 import { useSchoolContext } from '../Context/SchoolProvider';
-// import { useNavigationContext } from '../Context/NavigationProvider';
 
 import DocumentTable from '../Components/Table/LRTable';
 import JEVTable from '../Components/Table/JEVTable';
@@ -137,7 +135,6 @@ function SchoolPage(props) {
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
                             <FilterDate />
-                            <SchoolFieldsFilter />
                             <SchoolSearchFilter />
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: "center" }}>
@@ -247,7 +244,6 @@ const styles = {
         fontFamily: 'Mulish-Regular',
         buttons: {
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
             width: '650px', //adjust the container
         }

@@ -30,6 +30,7 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import { Typography } from '@mui/material';
+import { useAppContext } from '../../Context/AppProvider';
 
 export function DisplayItems() {
     const theme = useTheme();
@@ -37,10 +38,6 @@ export function DisplayItems() {
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // State to manage logout dialog
 
     console.log("display items rendered");
-
-    // useEffect(() => {
-    //     console.log(selected);
-    // }, [selected]);
 
     const styles = {
         icon: {
@@ -170,11 +167,11 @@ export function DisplayItems() {
     );
 }
 
-export const ProfileTab = ({ user }) => {
+export const ProfileTab = () => {
     const theme = useTheme();
     const [selected, setSelected] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
-    const { currentUser } = useNavigationContext();
+    const { currentUser } = useAppContext();
 
     if (!currentUser) {
         return null

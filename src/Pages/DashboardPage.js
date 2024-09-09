@@ -16,6 +16,9 @@ import { useNavigationContext } from '../Context/NavigationProvider';
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 
+
+
+
 //Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState(uacsData[0]?.code || '');
@@ -139,20 +142,22 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                 <Typography variant="body1">No data available.</Typography>
             ) : (
                 <div style={{ position: 'relative', marginBottom: '40px' }}>
+                    {/* Render the line chart based on selected category */}
                     <div>
-                        <ReactApexChart
+                    <ReactApexChart
                             options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
                             series={generateSeries()}
                             type={chartType}
                             height={350}
                         />
+                        {/* Container for x-axis labels and dropdown */}
                         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <div style={{ marginLeft: '10px' }}>
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                     style={{
-                                        width: '100px',
+                                        width: '100px', // Set the width to make it smaller
                                         padding: '5px'
                                     }}
                                 >
@@ -173,10 +178,8 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
 
 
-
-
 function DashboardPage(props) {
-    const { currentUser } = useNavigationContext();
+    const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
@@ -189,34 +192,80 @@ function DashboardPage(props) {
     const [schoolBudget, setSchoolBudget] = useState(null);
     const {
         currentDocument,
-        currentSchool,
         year,
         month,
         setCurrentDocument,
         fetchDocumentBySchoolId,
-        jev
+        jev, 
+        
     } = useSchoolContext();
+    const { fetchDocumentData, lr } = useSchoolContext();
+    const [chartData, setChartData] = useState([]);
 
+    useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await fetchDocumentData(); // Fetch the LR data
+
+        // Log the specific fields (date, objectCode, and amount) for each LR row
+        if (lr && lr.length > 0) {
+          lr.forEach(row => {
+            console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
+          });
+        } else {
+          console.log('No LR data available');
+        }
+      } catch (error) {
+        console.error('Error fetching document data:', error);
+      }
+    };
+    
+        fetchData();
+      }, [fetchDocumentData, lr]); // Ensure to trigger whenever `lr` updates
+    
+      const transformChartData = (lrData) => {
+        const data = lrData.map(item => ({
+          x: item.date,        // Date for the x-axis
+          y: item.amount,      // Amount for the y-axis
+          objectCode: item.objectCode // Can be used as a label or for filtering
+        }));
+    
+        setChartData(data);
+      };
+    
+      const chartOptions = {
+        chart: { id: 'lr-chart' },
+        xaxis: { type: 'datetime' },  // Assuming date is in a valid format
+        yaxis: { title: { text: 'Amount' } },
+        // other options...
+      };
+    
+
+
+
+
+
+
+   
     // This function only runs when dependencies: currentSchool & currentUser are changed
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
-            setSelectedSchool(currentSchool?.id || currentUser.schools[0].id); // Ensure a valid value
+            if (currentSchool) {
+                setSelectedSchool(currentSchool.id); // Ensure a valid value
+            } else {
+                setSelectedSchool(currentUser.schools[0].id); // Ensure a valid value
+            }
+
         }
     }, [currentSchool, currentUser]);
 
     useEffect(() => {
         initializeSelectedSchool();
-    }, [month, year, initializeSelectedSchool]);
-
-    // Function that calls a document by their school id, year, and month
-    useEffect(() => {
-        if (selectedSchool !== '') {
-            fetchDocumentBySchoolId(selectedSchool);
-        }
-    }, [selectedSchool, fetchDocumentBySchoolId]);
+    }, [initializeSelectedSchool]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
+        setCurrentSchool(currentUser.schools.find(s => s.id === schoolId));
         console.log('Selected school:', schoolId);
     };
 
@@ -244,9 +293,8 @@ function DashboardPage(props) {
             return false;
         }
     };
-
 // Sample data
-    const sampleUacsData = [
+const sampleUacsData = [
     {
         code: '5020502001',
         name: 'Communication Expenses',
@@ -296,6 +344,7 @@ function DashboardPage(props) {
         expenses: [0, 5000, 7000, 26000, 150000]
     }
 ];
+
 
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
@@ -577,6 +626,7 @@ function DashboardPage(props) {
                                 >
                                     <ApexChart uacsData={sampleUacsData} budgetLimit={currentDocument?.budgetLimit} />
                                     <ApexChart totalBudget={schoolBudget} />
+                                    
                                 </Paper>
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>

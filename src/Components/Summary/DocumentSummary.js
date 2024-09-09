@@ -4,25 +4,17 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { useSchoolContext } from '../../Context/SchoolProvider';
-// import { useNavigationContext } from '../../Context/NavigationProvider';
 import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 
 function DocumentSummary(props) {
     const { currentDocument, setIsAdding, value } = useSchoolContext();
-    // const { selected, currentSchool } = useNavigationContext();
 
     const handleAddButtonClick = () => {
         if (value === 0) { //can only add row if on LR & RCD tab
             setIsAdding(true); // Set isAdding to true when button is clicked
         }
     };
-
-    //console.log(currentDocument);
-
-    if (!currentDocument) {
-        return null;
-    }
 
     // Function to format a number with commas and two decimal places
     const formatNumber = (number) => {

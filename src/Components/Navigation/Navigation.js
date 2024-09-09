@@ -136,7 +136,7 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser, userId } = useNavigationContext();
+  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser } = useNavigationContext();
   const { currentDocument, jev } = useSchoolContext(); // Get current document state
   const [createdNotifications, setCreatedNotifications] = useState(new Set());
   const [anchorEl, setAnchorEl] = useState(null);
@@ -271,7 +271,7 @@ export default function Navigation({ children }) {
       const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
 
       if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(notificationKey)) {
-        createNotification(userId, `Alert: Your balance is negative!`, notificationKey);
+        createNotification(currentUser.id, `Alert: Your balance is negative!`, notificationKey);
 
         // Save notificationKey to localStorage to prevent future duplicates
         savedNotifications.push(notificationKey);
@@ -280,7 +280,7 @@ export default function Navigation({ children }) {
 
       setPreviousBalance(balance);
     }
-  }, [currentDocument, previousBalance, createNotification, userId]);
+  }, [currentDocument, previousBalance, createNotification, currentUser]);
 
 
   useEffect(() => {
@@ -366,7 +366,7 @@ export default function Navigation({ children }) {
                 ...(!open && { display: "none" }),
               }}
             >
-              <ProfileTab userId={userId} />
+              <ProfileTab />
               <IconButton
                 onClick={toggleDrawer}
                 sx={{
