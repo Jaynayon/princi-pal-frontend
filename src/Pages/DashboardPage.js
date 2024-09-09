@@ -21,9 +21,11 @@ import { transformSchoolText } from '../Components/Navigation/Navigation';
 
 //Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
-    const [selectedCategory, setSelectedCategory] = useState(uacsData[0]?.code || '');
+    const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
 
+    
+    
     useEffect(() => {
         // Change the chart type to 'bar' when 'Total' is selected
         if (selectedCategory === '19901020000') {
@@ -180,74 +182,36 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
 function DashboardPage(props) {
     const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
+    const { currentDocument, year, month, setCurrentDocument , jev, updateJev, lr, updateLr} = useSchoolContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
-    const [error, setError] = useState('');
-    const [applyButtonClicked, setApplyButtonClicked] = useState(false);
-    const [schoolMenuAnchor, setSchoolMenuAnchor] = useState(null);
-    const [schools, setSchools] = useState([]);
-    const [loadingSchools, setLoadingSchools] = useState(false);
-    const [schoolBudget, setSchoolBudget] = useState(null);
-    const {
-        currentDocument,
-        year,
-        month,
-        setCurrentDocument,
-        fetchDocumentBySchoolId,
-        jev, 
-        
-    } = useSchoolContext();
-    const { fetchDocumentData, lr } = useSchoolContext();
-    const [chartData, setChartData] = useState([]);
+    const [ setError] = useState('');
+    const [loadingSchools] = useState(false);
+    const [schoolBudget] = useState(null);
+
+    // This function only runs when dependencies: currentSchool & currentUser are changed
 
     useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await fetchDocumentData(); // Fetch the LR data
-
-        // Log the specific fields (date, objectCode, and amount) for each LR row
-        if (lr && lr.length > 0) {
-          lr.forEach(row => {
-            console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
-          });
-        } else {
-          console.log('No LR data available');
-        }
-      } catch (error) {
-        console.error('Error fetching document data:', error);
-      }
-    };
-    
-        fetchData();
-      }, [fetchDocumentData, lr]); // Ensure to trigger whenever `lr` updates
-    
-      const transformChartData = (lrData) => {
-        const data = lrData.map(item => ({
-          x: item.date,        // Date for the x-axis
-          y: item.amount,      // Amount for the y-axis
-          objectCode: item.objectCode // Can be used as a label or for filtering
-        }));
-    
-        setChartData(data);
-      };
-    
-      const chartOptions = {
-        chart: { id: 'lr-chart' },
-        xaxis: { type: 'datetime' },  // Assuming date is in a valid format
-        yaxis: { title: { text: 'Amount' } },
-        // other options...
-      };
-    
+        const fetchData = async () => {
+          try {
+            // Log the specific fields (date, objectCode, and amount) for each LR row
+            if (lr && lr.length > 0) {
+              lr.forEach(row => {
+                console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
+              });
+            } else {
+              console.log('No LR data available');
+            }
+          } catch (error) {
+            console.error('Error fetching document data:', error);
+          }
+        };
+            fetchData();
+          }, [lr]); // Ensure to trigger whenever `lr` updates
 
 
-
-
-
-
-   
-    // This function only runs when dependencies: currentSchool & currentUser are changed
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
             if (currentSchool) {
@@ -261,7 +225,9 @@ function DashboardPage(props) {
 
     useEffect(() => {
         initializeSelectedSchool();
-    }, [initializeSelectedSchool]);
+        updateJev();
+        updateLr();
+    }, [initializeSelectedSchool, updateJev, updateLr]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
@@ -299,7 +265,7 @@ const sampleUacsData = [
         code: '5020502001',
         name: 'Communication Expenses',
         budget: jev[0]?.budget,
-        expenses: [5000, 0, 18000, 20000, 50000]
+        expenses: [5000, 0, 18000, 20000, 50000]//93,000
     },
     {
         code: '5020402000',
@@ -345,7 +311,7 @@ const sampleUacsData = [
     }
 ];
 
-
+    console.log(jev)
     const getCurrentMonthYear = () => {
         const currentDate = new Date();
         const monthNames = [
@@ -626,7 +592,6 @@ const sampleUacsData = [
                                 >
                                     <ApexChart uacsData={sampleUacsData} budgetLimit={currentDocument?.budgetLimit} />
                                     <ApexChart totalBudget={schoolBudget} />
-                                    
                                 </Paper>
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
