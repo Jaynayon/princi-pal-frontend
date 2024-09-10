@@ -25,6 +25,7 @@ import DocumentTable from '../Components/Table/LRTable';
 import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import BudgetModal from '../Components/Modal/BudgetModal';
+import { useNavigationContext } from '../Context/NavigationProvider';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -62,6 +63,7 @@ export function a11yProps(index) {
 }
 
 function SchoolPage(props) {
+    const { currentUser } = useNavigationContext();
     const { year, month, setIsAdding, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
@@ -73,8 +75,9 @@ function SchoolPage(props) {
     const exportDocument = async () => {
         setExportIsLoading(true);  // Start loading
         try {
-            if (currentSchool && currentDocument) {
+            if (currentSchool && currentDocument && currentUser) {
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_DOWNLOAD}`, {
+                    userId: currentUser.id,
                     documentId: currentDocument.id,
                     schoolId: currentSchool.id,
                     year,
