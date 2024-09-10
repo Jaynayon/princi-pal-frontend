@@ -61,7 +61,7 @@ export const SchoolProvider = ({ children }) => {
         try {
             if (currentSchool) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`);
-                setCurrentDocument(response.data);
+                setCurrentDocument(response.data || emptyDocument);
             }
         } catch (error) {
             setCurrentDocument(emptyDocument)
@@ -347,11 +347,13 @@ export const SchoolProvider = ({ children }) => {
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
-    }, [fetchDocumentData]); // Run effect only on mount and unmount
+    }, [fetchDocumentData, year, month]);
 
     useEffect(() => {
-        fetchUacs();
-    }, [fetchUacs]); // Run effect only on mount and unmount
+        if (objectCodes.length === 0) {
+            fetchUacs();
+        }
+    }, [fetchUacs, objectCodes]); // Run effect only on mount and unmount
 
     return (
         <SchoolContext.Provider value={{

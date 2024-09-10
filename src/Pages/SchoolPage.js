@@ -109,13 +109,13 @@ function SchoolPage(props) {
 
     // Ensures to update lr and jev only if its not loading and there's a current document
     React.useEffect(() => {
-        if (currentDocument) {
-            console.log("Schools useEffect: Document fetched, updating lr and jev");
-            updateLr();
-            updateJev();
-        }
+        console.log("Schools useEffect: Document fetched, updating lr and jev");
+        // update lr and jev has currentDocument as a dependency
+        // fetch lr and jev per document change
+        updateLr();
+        updateJev();
         setIsAdding(false); //reset state to allow addFields again
-    }, [year, month, updateLr, updateJev, setIsAdding, currentDocument]);
+    }, [currentDocument, updateLr, updateJev, setIsAdding]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
