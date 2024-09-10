@@ -261,7 +261,7 @@ export default function Navigation({ children }) {
       if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(NotificationsKey)) {
         createNotification(
           currentUser.id,
-          `Your budget has gone negative. Current balance: ${balance}`,
+          `Your balance has gone negative. Current balance: ₱${balance}`,
           NotificationsKey
         );
       }
@@ -281,13 +281,31 @@ export default function Navigation({ children }) {
         if (exceededBudget && !savedNotifications.includes(NotificationsKey)) {
           createNotification(
             currentUser.id,
-            `As of ${month} ${year}, the amount for UACS ${row.uacsName} exceeds the budget. Amount: ${row.amount}, Budget: ${row.budget}`,
+            `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${row.amount}, Allocated Budget: ₱${row.budget}`
+,
             NotificationsKey
           );
         }
       });
     }
   }, [jev, createNotification, currentUser]);
+
+  useEffect(() => {
+    if (currentDocument && currentDocument.budgetLimit > 0) {
+      const NotificationsKey = `budgetLimit-positive-${currentDocument.id || ''}`;
+
+      const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+
+      if (!savedNotifications.includes(NotificationsKey)) {
+        createNotification(
+          currentUser.id,
+          `The budget limit for ${month} ${year} has been set to ₱${currentDocument.budgetLimit}.`,
+
+          NotificationsKey
+        );
+      }
+    }
+  }, [currentDocument, createNotification, currentUser]);
 
   const ITEM_HEIGHT = 48;
 
