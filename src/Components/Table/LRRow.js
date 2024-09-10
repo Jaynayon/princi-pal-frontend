@@ -235,6 +235,7 @@ function LRRow(props) {
                                                 alignItems: 'center',
                                             }}>
                                                 <UacsFilter
+                                                    name={`lr-uacs-filter-${lr?.id}`}
                                                     value={value} // objectCode value
                                                     rowId={row.id} // lr id
                                                     handleInputChange={handleInputChange} //handle input change on current row

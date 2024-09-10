@@ -156,6 +156,7 @@ export default function AnnualTab() {
             }>
                 <FormControl variant="standard" sx={{ m: 2, minWidth: 90 }}>
                     <Select
+                        name={"document-month-select"}
                         sx={{ fontSize: 13, fontWeight: "bold" }}
                         labelId="demo-simple-select-standard-label"
                         id="demo-simple-select-standard"

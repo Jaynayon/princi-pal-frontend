@@ -285,6 +285,7 @@ export function SchoolSearchFilter() {
             >
                 <SearchIcon sx={styles.icon} />
                 <input
+                    name={"lr-search-input"}
                     style={styles.input}
                     placeholder='Search'
                     onChange={(event) => handleInputChange(event)}

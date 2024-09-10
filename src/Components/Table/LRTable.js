@@ -140,6 +140,7 @@ export default function LRTable() {
                 </Grid>
                 <Grid item xs={12} sm={12} md={4} lg={4} sx={{ pt: 1 }}>
                     <TablePagination
+                        name={"testtest"}
                         rowsPerPageOptions={[4, 10, 25, 100]}
                         component="div"
                         count={lr.length}

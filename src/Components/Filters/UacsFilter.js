@@ -7,7 +7,7 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 
 function UacsDateFilter(props) {
     const { fetchDocumentData, updateLrById, objectCodes } = useSchoolContext();
-    const { value, rowId, handleInputChange } = props
+    const { value, rowId, handleInputChange, name } = props
     const [selectedCode, setSelectedCode] = useState(value);
 
     const ITEM_HEIGHT = 48;
@@ -67,14 +67,16 @@ function UacsDateFilter(props) {
     };
 
     return (
-        <FormControl sx={{
-            minWidth: 90,
-            display: 'flex',
-            alignItems: 'center',
-            flexDirection: 'row',
-            justifyContent: "flex-start"
-        }}>
+        <FormControl
+            sx={{
+                minWidth: 90,
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: 'row',
+                justifyContent: "flex-start"
+            }}>
             <Select
+                name={name}
                 displayEmpty
                 value={selectedCode}
                 onChange={handleChangeMonth}
