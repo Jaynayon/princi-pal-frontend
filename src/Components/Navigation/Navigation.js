@@ -1,6 +1,6 @@
 // React imports
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import axios from 'axios';
 
 // Material-UI imports
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
@@ -137,11 +137,13 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
-  const { currentDocument } = useSchoolContext(); // Get current document state
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser } = useNavigationContext();
+  const { month, year, currentDocument, jev, currentSchool } = useSchoolContext(); // Get current document state
+  const [createdNotifications, setCreatedNotifications] = useState(new Set());
+  const [anchorEl, setAnchorEl] = useState(null);
   const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [previousBalance, setPreviousBalance] = useState(null);
 
   const handleMenuOpen = (event) => {
@@ -152,42 +154,141 @@ export default function Navigation({ children }) {
     setAnchorEl(null);
   };
 
-  const handleClearOptions = () => {
-    setOptions([]); // Clear options by setting it to an empty array
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await fetch('/api/notifications/all');
-      const data = await response.json();
-      setOptions(data);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
+  const fetchNotifications = useCallback(async () => {
+    if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
+      console.log('No current user or school ID');
+      return;
     }
-  };
-  
-  const createNotification = (userId, balance) => {
-    const message = `Alert: Your balance is negative.`;
-    setOptions(prevOptions => [...prevOptions, message]);
-  };
-  
-  useEffect(() => {
-    if (currentDocument) {
-      const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0); 
 
-      if (balance < 0 && previousBalance !== null && previousBalance >= 0) {
-        createNotification(balance);
+    console.log('Fetching notifications for user ID:', currentUser.id, 'and school ID:', currentSchool.id);
+    setLoading(true);
+    try {
+      console.log('Current User ID:', currentUser.id);
+      const response = await axios.get(`http://localhost:4000/Notifications/school/${currentSchool.id}`);
+      console.log('Response status:', response.status);
+      console.log('Fetched notifications data:', response.data);
+
+      if (Array.isArray(response.data)) {
+        console.log('Number of notifications:', response.data.length);
+        setOptions(response.data.reverse()); // Reverse to show newest notifications first
+      } else {
+        console.error('Unexpected response format:', response.data);
       }
 
-      // Update previous balance state
+      setError(null);
+    } catch (error) {
+      setError(error.message);
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUser, currentSchool]);
+
+  const createNotification = useCallback(async (userId, details, NotificationsKey) => {
+    if (!currentUser || !currentUser.id) {
+      console.log('No current user or user ID');
+      return;
+    }
+
+    let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+    let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
+
+    if (savedNotifications.includes(NotificationsKey) || deletedNotifications.includes(NotificationsKey)) {
+      console.log('Notification key already exists or is deleted');
+      return;
+    }
+
+    const notification = {
+      userId: currentUser.id,
+      details,
+      schoolId: currentSchool.id, // Attach the school ID to the notification
+    };
+
+    try {
+      await axios.post('http://localhost:4000/Notifications/create', notification, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      fetchNotifications();
+
+      savedNotifications.push(NotificationsKey);
+      localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+    } catch (error) {
+      console.error('Error creating notification:', error);
+    }
+  }, [currentUser, currentSchool, fetchNotifications]);
+
+  const handleClearOptions = async () => {
+    if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
+      console.log('No current user or school ID');
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:4000/Notifications/school/${currentSchool.id}`);
+
+      setOptions([]);
+
+      let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+      let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
+
+      savedNotifications.forEach(NotificationsKey => {
+        deletedNotifications.push(NotificationsKey);
+      });
+
+      localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
+      localStorage.removeItem('createdNotifications');
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+    } finally {
+      handleMenuClose();
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    if (currentDocument) {
+      const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
+      const NotificationsKey = `balance-negative-${currentDocument.id || ''}`;
+
+      const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+
+      if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(NotificationsKey)) {
+        createNotification(
+          currentUser.id,
+          `Your budget has gone negative. Current balance: ${balance}`,
+          NotificationsKey
+        );
+      }
+
       setPreviousBalance(balance);
     }
-  }, [currentDocument]);
-  
+  }, [currentDocument, createNotification, currentUser, previousBalance]);
+
   useEffect(() => {
-    fetchNotifications(); // Fetch notifications when the component mounts
-  }, []);
-  
+    if (jev && jev.length) {
+      jev.forEach(row => {
+        const exceededBudget = row.amount > (row.budget || 0);
+        const NotificationsKey = `budget-exceeded-${row.id || ''}`;
+
+        const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+
+        if (exceededBudget && !savedNotifications.includes(NotificationsKey)) {
+          createNotification(
+            currentUser.id,
+            `As of ${month} ${year}, the amount for UACS ${row.uacsName} exceeds the budget. Amount: ${row.amount}, Budget: ${row.budget}`,
+            NotificationsKey
+          );
+        }
+      });
+    }
+  }, [jev, createNotification, currentUser]);
+
   const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
@@ -196,7 +297,6 @@ export default function Navigation({ children }) {
     },
     navStyle: styling[navStyle],
   });
-
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -248,7 +348,7 @@ export default function Navigation({ children }) {
                 ...(!open && { display: "none" }),
               }}
             >
-              <ProfileTab user={User} />
+              <ProfileTab />
               <IconButton
                 onClick={toggleDrawer}
                 sx={{
@@ -372,19 +472,21 @@ export default function Navigation({ children }) {
                       >
                         <Tab label="All" />
                       </Tabs>
-                      {options.flatMap((option, index) => (
+                      {loading && <Typography sx={{ padding: '16px' }}>Loading...</Typography>}
+                      {error && <Typography sx={{ padding: '16px', color: 'red' }}>Error: {error}</Typography>}
+                      {options.flatMap((options, index) => (
                         index !== options.length - 1
                           ? [
-                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                            <MenuItem key={options.id} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
                               <Avatar sx={{ marginRight: '8px' }} />
-                              {option}
+                              {options.details}
                             </MenuItem>,
                             <Divider key={`divider-${index}`} />
                           ]
                           : [
-                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
+                            <MenuItem key={options.id} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
                               <Avatar sx={{ marginRight: '8px' }} />
-                              {option}
+                              {options.details}
                             </MenuItem>
                           ]
                       ))}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, Outlet, RouterProvider } from 'react-router-dom';
 import Navigation from './Components/Navigation/Navigation.js';
 import DashboardPage from './Pages/DashboardPage.js';
@@ -13,47 +13,10 @@ import { NavigationProvider } from './Context/NavigationProvider.js';
 import { SchoolProvider } from './Context/SchoolProvider.js';
 import WelcomePage from './Pages/WelcomePage.js';
 import RegistrationPage from './Pages/RegistrationPage.js';
-import RestService from './Services/RestService.js';
+import { useAppContext } from './Context/AppProvider.js';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const jwtCookie = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('jwt='));
-
-        if (jwtCookie) {
-          const token = jwtCookie.split('=')[1];
-          console.log('JWT Token:', token);
-
-          // Call RestService to validate the token
-          const data = await RestService.validateToken(token);
-
-          if (data) { // access data.id
-            const user = await RestService.getUserById(data.id);
-            user.position === "Super administrator" && setIsSuperAdmin(true); //is admin
-            setIsLoggedIn(true)
-          } else {
-            setIsLoggedIn(false)
-          }
-          console.log(data)
-          // Handle response as needed
-        } else {
-          setIsLoggedIn(false)
-          console.log('JWT Token not found in cookies.');
-        }
-      } catch (error) {
-        console.error('Error validating token:', error);
-      }
-    };
-
-    fetchData();
-
-  }, [isSuperAdmin]);
+  const { isLoggedIn, isSuperAdmin } = useAppContext();
 
   const getElement = (Component) => {
     if (!isLoggedIn) {

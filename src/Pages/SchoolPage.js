@@ -8,19 +8,18 @@ import {
     Container,
     Grid,
     Box,
-    Button
+    Button,
+    Typography
 } from '@mui/material';
 
 import {
     FilterDate,
-    SchoolFieldsFilter,
     SchoolSearchFilter
 } from '../Components/Filters/FilterDate';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 
 import { useSchoolContext } from '../Context/SchoolProvider';
-// import { useNavigationContext } from '../Context/NavigationProvider';
 
 import DocumentTable from '../Components/Table/LRTable';
 import JEVTable from '../Components/Table/JEVTable';
@@ -63,7 +62,7 @@ export function a11yProps(index) {
 }
 
 function SchoolPage(props) {
-    const { year, month, setIsAdding, currentDocument, currentSchool, updateLr, updateJev, value, setValue, isLoading } = useSchoolContext();
+    const { year, month, setIsAdding, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
 
@@ -107,13 +106,13 @@ function SchoolPage(props) {
 
     // Ensures to update lr and jev only if its not loading and there's a current document
     React.useEffect(() => {
-        if (!isLoading && currentDocument) {
+        if (currentDocument) {
             console.log("Schools useEffect: Document fetched, updating lr and jev");
             updateLr();
             updateJev();
         }
         setIsAdding(false); //reset state to allow addFields again
-    }, [year, month, updateLr, updateJev, setIsAdding, currentDocument, isLoading]);
+    }, [year, month, updateLr, updateJev, setIsAdding, currentDocument]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -128,15 +127,25 @@ function SchoolPage(props) {
                             styles.header, {
                                 p: 2,
                                 display: 'flex',
-                                flexDirection: 'row'
+                                flexDirection: 'row',
+                                justifyContent: 'space-between'
                             }
                         ]}
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
                             <FilterDate />
-                            <SchoolFieldsFilter />
                             <SchoolSearchFilter />
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: "center" }}>
+                            <Typography
+                                sx={{ color: "#252733" }}
+                                component="h1"
+                                color="inherit"
+                                noWrap
+                            >
+                                {`${month} ${year}`}
+                            </Typography>
                         </Box>
                     </Paper>
                 </Grid>
@@ -235,7 +244,6 @@ const styles = {
         fontFamily: 'Mulish-Regular',
         buttons: {
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
             width: '650px', //adjust the container
         }

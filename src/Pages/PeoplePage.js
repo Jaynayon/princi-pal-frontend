@@ -51,7 +51,7 @@ function PeoplePage(props) {
 
     const fetchAssociation = useCallback(async () => {
         try {
-            const response = await axios.post('http://localhost:4000/associations/user', {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
                 userId: currentUser.id,
                 schoolId: selectedValue
             });
@@ -66,7 +66,7 @@ function PeoplePage(props) {
     // Function to fetch users by school ID
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.post('http://localhost:4000/schools/users', { schoolId: selectedValue });
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`, { schoolId: selectedValue });
             setRows(response.data); // Update the state with the fetched data
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -151,6 +151,7 @@ function PeoplePage(props) {
         // Also set the deleteAnchorEl and selectedIndex
         setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
+        console.log(rows[index]);
     };
 
     const handleMenuClose = () => {
@@ -170,12 +171,12 @@ function PeoplePage(props) {
 
     const confirmDelete = async () => {
         try {
-            if (selectedIndex !== null && rows[selectedIndex]) {
-                const userId = rows[selectedIndex].userId; // Get userId of the selected user
+            if (selectedIndex && rows[selectedIndex]) {
+                const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
                 // Make an API call to delete the user association
-                await axios.delete(`http://localhost:4000/associations/${userId}/${schoolId}`);
-                console.log("User deleted successfully.");
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`);
+                console.log("User deleted successfully. " + response.data);
                 // Remove the deleted row from the state
                 setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
             }
@@ -208,16 +209,16 @@ function PeoplePage(props) {
             let newRole = '';
             if ((selectedRole === "Member" && rows[selectedIndex].admin) || (selectedRole === "Admin" && !rows[selectedIndex].admin)) {
                 if (selectedRole === "Member" && rows[selectedIndex].admin) {
-                    endpoint = 'http://localhost:4000/associations/demote';
+                    endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/demote`;
                     newRole = false;
                 } else if (selectedRole === "Admin" && !rows[selectedIndex].admin) {
-                    endpoint = 'http://localhost:4000/associations/promote';
+                    endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/promote`;
                     newRole = true;
                 }
 
                 const response = await axios.patch(endpoint, {
                     userId: rows[selectedIndex].id,
-                    schoolId: selectedValue
+                    schoolId: rows[selectedIndex].schoolId // changed to rows[selectedIndex].schoolId from selectedIndex
                 });
 
                 console.log(response)
@@ -372,7 +373,7 @@ function PeoplePage(props) {
                                 >
                                     {schools?.map((school) => (
                                         <MenuItem key={school.id} value={school.id}>
-                                            {school.name}
+                                            {transformSchoolText(school.name)}
                                         </MenuItem>
                                     ))}
                                 </Select>
