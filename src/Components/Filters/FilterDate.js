@@ -248,11 +248,7 @@ export function SchoolSearchFilter() {
         try {
             if (!isLoading && currentDocument.id !== 0) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
-                setLrCopy(response.data || [])
-                // Handle response as needed
-                console.log(response.data);
-            } else {
-                setLrCopy([]); //meaning it's empty 
+                setLrCopy(response.data || []);
             }
         } catch (error) {
             console.error('Error fetching lr:', error);
@@ -277,7 +273,7 @@ export function SchoolSearchFilter() {
 
     useEffect(() => {
         getCurrentLr();
-    }, [getCurrentLr])
+    }, [getCurrentLr]);
 
     return (
         <React.Fragment>
