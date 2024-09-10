@@ -107,31 +107,6 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
-    // useEffect(() => {
-    //     // Extract the root route if it's the /schools route
-    //     const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
-    //     if (!currentSchool && currentUser && (extractRoute !== "/schools")) { // if current user is not null or undefined, or in /schools, set school
-    //         setCurrentSchool(currentUser.schools[0]);
-    //     }
-    //     console.log(currentUser);
-
-    //     // Call the function to set initial mobileMode state
-    //     updateMobileMode();
-
-    //     const handleResize = () => {
-    //         // Call the function to update mobileMode state on resize
-    //         updateMobileMode();
-    //     };
-
-    //     // Add event listener for resize
-    //     window.addEventListener('resize', handleResize);
-
-    //     // Cleanup the event listener on component unmount
-    //     return () => {
-    //         window.removeEventListener('resize', handleResize);
-    //     };
-    // }, [currentUser, location, currentSchool]); // Run effect only on mount and unmount
-
     useEffect(() => {
         // Extract the root route if it's the /schools route
         const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
@@ -140,7 +115,6 @@ export const NavigationProvider = ({ children }) => {
         if (!currentSchool && currentUser && (extractRoute !== "/schools")) {
             setCurrentSchool(currentUser.schools[0]);
         }
-        console.log(currentUser);
 
         // Define a mapping between paths and the desired local storage values
         const pathToLocalStorageValue = {
