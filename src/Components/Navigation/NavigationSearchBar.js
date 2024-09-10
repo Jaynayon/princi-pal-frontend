@@ -15,13 +15,16 @@ import Select from "@mui/material/Select";
 import CloseIcon from "@mui/icons-material/Close";
 import MenuItem from "@mui/material/MenuItem";
 import axios from "axios";
-
+import { useNavigationContext } from "../../Context/NavigationProvider";
+ 
 const POSITIONS = [
   "ADAS",
   "ADOF"
 ];
-
+ 
 const NavigationSearchBar = () => {
+  const { currentUser, userId } = useNavigationContext();
+  const { currentSchool } = useNavigationContext();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState("");
@@ -29,7 +32,7 @@ const NavigationSearchBar = () => {
   const [select, setSelect] = useState("ADAS");
   const [appliedSchools, setAppliedSchools] = useState([]);
   const [schools, setSchools] = useState([]);
-
+ 
   useEffect(() => {
     // Fetch school data from the API when the component mounts
     axios.get('http://localhost:4000/schools/all')
@@ -40,50 +43,62 @@ const NavigationSearchBar = () => {
         console.error("There was an error fetching the school data!", error);
       });
   }, []);
-
-  const handleApplySchool = () => {
-    if (selectedSchool && !appliedSchools.includes(selectedSchool.fullName)) {
-      setAppliedSchools([...appliedSchools, selectedSchool.fullName]);
+ 
+  const handleApplySchool = async () => {
+    try {
+        // Ensure selectedSchool has the required ID or value for the API request
+        await axios.post('http://localhost:4000/associations/apply', {
+            userId: currentUser.id, // Replace with appropriate user ID
+            schoolId: selectedSchool.id // Assuming selectedSchool has an 'id' property
+        });
+        console.log("Application submitted successfully.");
+        // Update appliedSchools state if needed
+        setAppliedSchools([...appliedSchools, selectedSchool.fullName]); // Add school to applied list
+        handleClose(); // Close the dialog
+    } catch (error) {
+        console.error("Error applying to school:", error);
+        // Handle error scenario
     }
-    setOpen(false);
-  };
-
+};
+ 
+const handleClickOpen = (school) => {
+    setSelectedSchool(school); // Set the selected school
+    setOpen(true); // Open the dialog
+};
+ 
+// Ensure selectedSchool has an id property for the API request
+ 
   const handleRemoveSchool = (schoolToRemove) => {
     const updatedSchools = appliedSchools.filter(
       (school) => school !== schoolToRemove
     );
     setAppliedSchools(updatedSchools);
   };
-
+ 
   const handleChange = (event) => {
     setSelect(event.target.value);
   };
-
+ 
   const handleClickOpenApplicationInbox = () => {
     setOpenApplicationInbox(true);
   };
-
+ 
   const handleClickCloseApplicationInbox = () => {
     setOpenApplicationInbox(false);
   };
-
-  const handleClickOpen = (school) => {
-    setSelectedSchool(school);
-    setOpen(true);
-  };
-
+ 
   const handleClose = () => {
     setOpen(false);
   };
-
+ 
   const handleInputChange = (event) => {
     setQuery(event.target.value);
   };
-
+ 
   const filteredSchools = schools.filter((school) =>
     school.fullName && school.fullName.toLowerCase().includes(query.toLowerCase())
   );
-
+ 
   return (
     <Box style={{ width: "400px", position: "relative" }}>
       <Box
@@ -266,5 +281,5 @@ const NavigationSearchBar = () => {
     </Box>
   );
 };
-
+ 
 export default NavigationSearchBar;

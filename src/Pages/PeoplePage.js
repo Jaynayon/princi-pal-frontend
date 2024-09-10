@@ -45,6 +45,10 @@ function PeoplePage(props) {
     const { currentUser } = useNavigationContext();
     const [currentAssocation, setCurrentAssociation] = useState('');
 
+    const [currentSchool, setCurrentSchool] = useState({ id: null });
+    const [applications, setApplications] = useState([]);
+    const [invitationMessage, setInvitationMessage] = useState('');
+
     const fetchAssociation = useCallback(async () => {
         try {
             const response = await axios.post('http://localhost:4000/associations/user', {
@@ -96,8 +100,30 @@ function PeoplePage(props) {
     };
 
     const handleClickOpen = () => {
-        setOpen(true);
+        console.log("Current School State:", currentSchool); // Debugging line
+        if (currentSchool && currentSchool.id) {
+            console.log(`Fetching applications from: http://localhost:4000/associations/applications/${currentSchool.id}`);
+            setOpen(true);
+            axios.get(`http://localhost:4000/associations/applications/${currentSchool.id}`)
+                .then(response => {
+                    console.log("Applications fetched:", response.data); // Debugging line
+                    setApplications(response.data);
+                })
+                .catch(error => {
+                    console.error("Error fetching applications:", error.response ? error.response.data : error.message);
+                });
+        } else {
+            console.error("Cannot fetch applications: School ID is missing.");
+        }
     };
+    
+    //
+    useEffect(() => {
+        // Assuming the current school is set based on some logic or user interaction
+        if (selectedValue) {
+            setCurrentSchool({ id: selectedValue });
+        }
+    }, [selectedValue]);    
 
     const handleClose = (value) => {
         setOpen(false);
@@ -218,13 +244,62 @@ function PeoplePage(props) {
         setDropdownAnchorEl(null);
     };
 
-    const handleInvite = () => {
-        // Implement invite functionality here
+    /*const handleInvite = () => {
+        if (inviteEmail.trim() === '') {
+            setInvitationMessage('Please enter a valid email.');
+            return;
+        }
+
         console.log("Inviting email:", inviteEmail);
-        // You can send an invitation using the inviteEmail value
-        // Reset inviteEmail state after sending invitation if needed
+
+        // Define the payload with the email and other required fields (like schoolId)
+        const invitePayload = {
+            userId: inviteEmail, // Assuming userId corresponds to email, or change as needed
+            schoolId: currentSchool.id // Replace with actual schoolId you are working with
+        };
+
+        // Send the invitation request to the backend
+        axios.post('http://localhost:4000/associations/invite', invitePayload)
+            .then(response => {
+                console.log("Invitation sent successfully:", response.data);
+                setInvitationMessage('Invitation sent successfully!');
+            })
+            .catch(error => {
+                console.error("Error inviting member:", error.response ? error.response.data : error.message);
+                setInvitationMessage('Failed to send invitation. Please try again.');
+            });
+
+        // Reset inviteEmail state after sending invitation
+        setInviteEmail('');
+    };*/
+
+    const handleInvite = () => {
+        if (inviteEmail.trim() === '') {
+            setInvitationMessage('Please enter a valid email.');
+            return;
+        }
+    
+        console.log("Inviting email:", inviteEmail);
+    
+        const invitePayload = {
+            userId: inviteEmail, // or another identifier
+            schoolId: currentSchool.id // Ensure you have the correct schoolId
+        };
+    
+        axios.post('http://localhost:4000/associations/invite', invitePayload)
+            .then(response => {
+                console.log("Invitation sent successfully:", response.data);
+                setInvitationMessage('Invitation sent successfully!');
+            })
+            .catch(error => {
+                console.error("Error inviting member:", error.response ? error.response.data : error.message);
+                setInvitationMessage('Failed to send invitation. Please try again.');
+            });
+    
         setInviteEmail('');
     };
+    
+
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
@@ -312,14 +387,22 @@ function PeoplePage(props) {
                                 <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
                                     <List>
-                                        <ListItem disableGutters sx={{ paddingRight: '20px' }}>
-                                            <ListItemAvatar sx={{ paddingLeft: '10px' }}>{schoolAvatar}</ListItemAvatar>
-                                            <ListItemText primary="Kiki Kiki" />
-                                            <Button onClick={handleAccept} variant="contained" color="primary">
-                                                Accept
-                                            </Button>
-                                        </ListItem>
+                                        {applications.length === 0 ? (
+                                            <ListItem>
+                                                <ListItemText primary="No applications found." />
+                                            </ListItem>
+                                        ) : (
+                                            applications.map(application => (
+                                                <ListItem key={application.id} disableGutters>
+                                                    <ListItemText primary={application.userName} />
+                                                    <Button onClick={() => handleAccept(application.id)} variant="contained" color="primary">
+                                                        Accept
+                                                    </Button>
+                                                </ListItem>
+                                            ))
+                                        )}
                                     </List>
+
                                 </Dialog>
                             </FormControl>
                         </Grid>
