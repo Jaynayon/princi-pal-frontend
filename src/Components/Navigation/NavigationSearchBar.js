@@ -283,4 +283,3 @@ const handleClickOpen = (school) => {
 };
  
 export default NavigationSearchBar;
- 
