@@ -136,9 +136,28 @@ function PeoplePage(props) {
         </Avatar>
     );
 
-    const handleAccept = () => {
-        handleClose('accepted');
+        const handleAccept = async (associationRequest) => {
+        try {
+            const response = await fetch('http://localhost:4000/associations/approve', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(associationRequest), // Sending the correct request object
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Error: ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('Success:', data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
+
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);
@@ -245,35 +264,6 @@ function PeoplePage(props) {
         setDropdownAnchorEl(null);
     };
 
-    /*const handleInvite = () => {
-        if (inviteEmail.trim() === '') {
-            setInvitationMessage('Please enter a valid email.');
-            return;
-        }
-
-        console.log("Inviting email:", inviteEmail);
-
-        // Define the payload with the email and other required fields (like schoolId)
-        const invitePayload = {
-            userId: inviteEmail, // Assuming userId corresponds to email, or change as needed
-            schoolId: currentSchool.id // Replace with actual schoolId you are working with
-        };
-
-        // Send the invitation request to the backend
-        axios.post('http://localhost:4000/associations/invite', invitePayload)
-            .then(response => {
-                console.log("Invitation sent successfully:", response.data);
-                setInvitationMessage('Invitation sent successfully!');
-            })
-            .catch(error => {
-                console.error("Error inviting member:", error.response ? error.response.data : error.message);
-                setInvitationMessage('Failed to send invitation. Please try again.');
-            });
-
-        // Reset inviteEmail state after sending invitation
-        setInviteEmail('');
-    };*/
-
     const handleInvite = () => {
         if (inviteEmail.trim() === '') {
             setInvitationMessage('Please enter a valid email.');
@@ -283,7 +273,7 @@ function PeoplePage(props) {
         console.log("Inviting email:", inviteEmail);
     
         const invitePayload = {
-            userId: inviteEmail, // or another identifier
+            email: inviteEmail, // or another identifier
             schoolId: currentSchool.id // Ensure you have the correct schoolId
         };
     
@@ -396,9 +386,13 @@ function PeoplePage(props) {
                                             applications.map(application => (
                                                 <ListItem key={application.id} disableGutters>
                                                     <ListItemText primary={application.userName} />
-                                                    <Button onClick={() => handleAccept(application.id)} variant="contained" color="primary">
+                                                    <Button
+                                                        onClick={() => handleAccept({ userId: application.userId, schoolId: application.schoolId })}
+                                                        variant="contained"
+                                                        color="primary"
+                                                    >
                                                         Accept
-                                                    </Button>
+                                                    </Button>;
                                                 </ListItem>
                                             ))
                                         )}
