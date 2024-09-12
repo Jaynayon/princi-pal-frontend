@@ -184,7 +184,7 @@ function SchoolPage(props) {
                                         }}
                                     >
                                         <Button
-                                            disabled={exportIsLoading}
+                                            disabled={exportIsLoading || currentDocument.id === 0 || !currentDocument}
                                             variant="contained"
                                             sx={{ backgroundColor: '#4A99D3' }}
                                             onClick={() => exportDocumentOnClick()}
