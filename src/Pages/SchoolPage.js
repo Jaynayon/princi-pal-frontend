@@ -90,7 +90,7 @@ function SchoolPage(props) {
                 const blobData = new Blob([response.data], { type: 'application/octet-stream' });
 
                 // Use FileSaver.js to trigger file download
-                saveAs(blobData, 'LR-2024.xlsx');
+                saveAs(blobData, `Documents-${month}-${year}.zip`);
 
                 if (blobData) {
                     console.log("Successfully exported document")
