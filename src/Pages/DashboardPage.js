@@ -57,7 +57,7 @@ const calculateWeeklyExpenses = (expensesData) => {
     // Initialize an empty object to hold the weekly totals for each UACS category
     const weeklyExpenses = {};
 
-    // Find the earliest and latest dates in the data to determine the number of weeks
+    // Convert date strings to Date objects
     const dates = expensesData.map(({ date }) => new Date(date));
     const earliestDate = new Date(Math.min(...dates));
     const latestDate = new Date(Math.max(...dates));
@@ -74,22 +74,33 @@ const calculateWeeklyExpenses = (expensesData) => {
     // Calculate the total number of weeks between the earliest and latest date
     const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1; // +1 to include the final week
 
+    // Helper function to get the start date of a specific week index
+    const getStartOfWeek = (weekIndex, startDate) => {
+        const start = new Date(startDate);
+        start.setDate(start.getDate() + weekIndex * 7);
+        return start;
+    };
+
     // Helper function to determine the week index (relative to the earliest date)
     const getWeekIndex = (date) => {
-        const startOfMonth = new Date(earliestDate.getFullYear(), earliestDate.getMonth(), 1);
-        const timeDiff = new Date(date) - startOfMonth;
+        const startOfWeek = new Date(earliestDate);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Move to the start of the week
+        const timeDiff = date - startOfWeek;
         const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert time difference to days
         return Math.floor(daysDiff / 7); // Convert days to week index
     };
 
+    // Initialize weekly expenses for all object codes
+    expensesData.forEach(({ objectCode }) => {
+        if (!weeklyExpenses[objectCode]) {
+            weeklyExpenses[objectCode] = new Array(totalWeeks).fill(0);
+        }
+    });
+
     // Process each expense entry
     expensesData.forEach(({ date, objectCode, amount }) => {
-        const weekIndex = getWeekIndex(new Date(date));
-
-        // Initialize the category if not already present
-        if (!weeklyExpenses[objectCode]) {
-            weeklyExpenses[objectCode] = new Array(totalWeeks).fill(0); // Create an array for total weeks
-        }
+        const expenseDate = new Date(date);
+        const weekIndex = getWeekIndex(expenseDate);
 
         // Add the amount to the appropriate week index
         if (weekIndex >= 0 && weekIndex < totalWeeks) {
