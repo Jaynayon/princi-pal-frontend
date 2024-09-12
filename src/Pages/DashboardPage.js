@@ -35,7 +35,7 @@ const calculateWeeklyExpenses = (expensesData) => {
     // Process each expense entry
     expensesData.forEach(({ date, objectCode, amount }) => {
         const week = getWeekOfMonth(new Date(date));
-        
+
         // Initialize the category if not already present
         if (!weeklyExpenses[objectCode]) {
             weeklyExpenses[objectCode] = [0, 0, 0, 0, 0]; // Array for 5 weeks
@@ -49,7 +49,7 @@ const calculateWeeklyExpenses = (expensesData) => {
         console.log(`Week of Month: ${week}`);
         console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
     });
- console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
+    console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
     return weeklyExpenses;
 };
 
@@ -58,8 +58,8 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
 
-    
-    
+
+
     useEffect(() => {
         // Change the chart type to 'bar' when 'Total' is selected
         if (selectedCategory === '19901020000') {
@@ -163,7 +163,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     }
 
     // Determine the categories for the x-axis
-    const categories = selectedCategory === '19901020000' 
+    const categories = selectedCategory === '19901020000'
         ? uacsData.slice(0, -1).map(uacs => uacs.name) // Exclude the 'Total' category itself
         : ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
 
@@ -180,7 +180,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                 <div style={{ position: 'relative', marginBottom: '40px' }}>
                     {/* Render the line chart based on selected category */}
                     <div>
-                    <ReactApexChart
+                        <ReactApexChart
                             options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
                             series={generateSeries()}
                             type={chartType}
@@ -216,20 +216,109 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
 function DashboardPage(props) {
     const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
-    const { currentDocument, year, month, setCurrentDocument , jev, updateJev, lr, updateLr} = useSchoolContext();
+    const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
-    const [ setError] = useState('');
+    const [setError] = useState('');
     const [loadingSchools] = useState(false);
     const [schoolBudget] = useState(null);
 
     const [uacsData, setUacsData] = useState([]);
 
+
     // This function only runs when dependencies: currentSchool & currentUser are changed
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Log the specific fields (date, objectCode, and amount) for each LR row
+                if (lr && lr.length > 0) {
+                    lr.forEach(row => {
+                        console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
+                    });
+                } else {
+                    console.log('No LR data available');
+                }
+            } catch (error) {
+                console.error('Error fetching document data:', error);
+            }
+        };
+        fetchData();
+    }, [lr]); // Ensure to trigger whenever `lr` updates
+
+
+    const initializeSelectedSchool = useCallback(() => {
+        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
+            if (currentSchool) {
+                setSelectedSchool(currentSchool.id); // Ensure a valid value
+            } else {
+                setSelectedSchool(currentUser.schools[0].id); // Ensure a valid value
+            }
+
+        }
+    }, [currentSchool, currentUser]);
+
+    useEffect(() => {
+        initializeSelectedSchool();
+        updateJev();
+        updateLr();
+    }, [initializeSelectedSchool, updateJev, updateLr]);
+
+    useEffect(() => {
+        // Sample data
+        const sampleUacsData = [
+            {
+                code: '5020502001',
+                name: 'Communication Expenses',
+                budget: jev[0]?.budget,
+                expenses: [0, 0, 0, 0, 0]//93,000
+            },
+            {
+                code: '5020402000',
+                name: 'Electricity Expenses',
+                budget: jev[1]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020503000',
+                name: 'Internet Subscription Expenses',
+                budget: jev[2]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5029904000',
+                name: 'Transpo/Delivery Expenses',
+                budget: jev[3]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020201000',
+                name: 'Training Expenses',
+                budget: jev[4]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020399000',
+                name: 'Other Supplies & Materials Expenses',
+                budget: jev[5]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '1990101000',
+                name: 'Advances to Operating Expenses',
+                budget: jev[6]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '19901020000',
+                name: 'Total',
+                budget: 500000,
+                expenses: [0, 0, 0, 0, 0]
+            }
+        ];
+
         const fetchData = async () => {
             try {
                 if (lr && lr.length > 0) {
@@ -255,45 +344,7 @@ function DashboardPage(props) {
         };
 
         fetchData();
-    }, [lr]);
-
-
-
-    useEffect(() => {
-        const fetchData = async () => {
-          try {
-            // Log the specific fields (date, objectCode, and amount) for each LR row
-            if (lr && lr.length > 0) {
-              lr.forEach(row => {
-                console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
-              });
-            } else {
-              console.log('No LR data available');
-            }
-          } catch (error) {
-            console.error('Error fetching document data:', error);
-          }
-        };
-            fetchData();
-          }, [lr]); // Ensure to trigger whenever `lr` updates
-
-
-    const initializeSelectedSchool = useCallback(() => {
-        if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
-            if (currentSchool) {
-                setSelectedSchool(currentSchool.id); // Ensure a valid value
-            } else {
-                setSelectedSchool(currentUser.schools[0].id); // Ensure a valid value
-            }
-
-        }
-    }, [currentSchool, currentUser]);
-
-    useEffect(() => {
-        initializeSelectedSchool();
-        updateJev();
-        updateLr();
-    }, [initializeSelectedSchool, updateJev, updateLr]);
+    }, [lr, jev]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
@@ -325,60 +376,10 @@ function DashboardPage(props) {
             return false;
         }
     };
-// Sample data
-const sampleUacsData = [
-    {
-        code: '5020502001',
-        name: 'Communication Expenses',
-        budget: jev[0]?.budget,
-        expenses: [0, 0, 0, 0, 0]//93,000
-    },
-    {
-        code: '5020402000',
-        name: 'Electricity Expenses',
-        budget:jev[1]?.budget,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '5020503000',
-        name: 'Internet Subscription Expenses',
-        budget: jev[2]?.budget,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '5029904000',
-        name: 'Transpo/Delivery Expenses',
-        budget: jev[3]?.budget,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '5020201000',
-        name: 'Training Expenses',
-        budget:  jev[4]?.budget,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '5020399000',
-        name: 'Other Supplies & Materials Expenses',
-        budget: jev[5]?.budget,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '1990101000',
-        name: 'Advances to Operating Expenses',
-        budget: jev[6]?.budget,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '19901020000',
-        name: 'Total',
-        budget: 500000,
-        expenses: [0, 0, 0, 0, 0]
-    }
-];
+
 
     console.log(jev)
-    
+
 
     const handleOpen = (text) => {
         setOpen(true);
@@ -514,7 +515,7 @@ const sampleUacsData = [
     };
 
     const renderSummaryCard = () => {
-        
+
 
         return (
             <Paper
