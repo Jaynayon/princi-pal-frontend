@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import { Container, TextField, IconButton, Button, InputAdornment, Tabs, Tab } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import LockIcon from '@mui/icons-material/Lock';
-import PersonIcon from '@mui/icons-material/Person';
-import EmailIcon from '@mui/icons-material/Email';
-import { Link } from 'react-router-dom'; // Import Link for navigation
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
+import Typography from "@mui/material/Typography";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import React, { useState } from "react";
+import {
+    Container,
+    TextField,
+    IconButton,
+    Button,
+    InputAdornment
+} from "@mui/material";
+import {
+    VisibilityOff as VisibilityOffIcon,
+    Lock as LockIcon,
+    Person as PersonIcon,
+    Email as EmailIcon,
+} from '@mui/icons-material';
+import { useNavigationContext } from '../Context/NavigationProvider';
 import axios from 'axios';
-import { useNavigationContext } from '../Context/NavigationProvider'; // Ensure this is the correct path
-
-
 
 function AdminPage(props) {
     const { currentUser, validateUsernameEmail } = useNavigationContext();
@@ -487,22 +488,17 @@ function AdminPage(props) {
         return false;
     }
 
-    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-
-    const handleLogout = () => {
-        logoutUser('jwt');
-        setLogoutDialogOpen(false); // Close dialog after logout
-    };
-
-    const logoutUser = (cookieName) => {
+    function logoutUser(cookieName) {
+        // Check if the cookie exists
         if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
-            document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+            // Overwrite the cookie with an empty value and a path that matches the original cookie's path
+            document.cookie = `${cookieName}=; path=/;`;
             console.log(`${cookieName} cookie removed.`);
-            window.location.href = "/"; // Redirect after logout
+            window.location.href = "http://localhost:3000/";
         } else {
             console.log(`${cookieName} cookie not found.`);
         }
-    };
+    }
 
     const defaultTheme = createTheme({
         typography: {
@@ -511,175 +507,303 @@ function AdminPage(props) {
         //navStyle: styling[navStyle], //default or light
     });
 
-  return (
-    <Container
-      maxWidth={false}
-      style={{
-        width: "100vw",
-        height: "100vh",
-        position: "relative",
-        overflow: "auto",
-        backgroundImage: `url(/bg.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <Container
-        maxWidth="md" // Adjusted to 'md' for responsiveness
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "relative",
-          zIndex: 1,
-          paddingTop: "64px", // Adjust for AppBar height
-          padding: "0 1rem", // Added padding for smaller screens
-        }}
-      >
-        <Typography
-          variant="h4"
-          style={{ marginBottom: "2rem", marginTop: "2rem", fontFamily: "Mulish", color: "#000", textAlign: "center" }}
-        >
-          Admin Page
-        </Typography>
-
-        <Paper
-          style={{
-            width: '100%', // Full width on small screens
-            padding: '2rem',
-            borderRadius: '10px',
-            margin: 'auto', // Center horizontally
-            position: 'relative', // Ensure it's not fixed to the viewport
-            bottom: '20px', // Position towards the bottom
-            left: '0',
-            right: '0',
-            zIndex: 1, // Ensure it is above other content
-          }}
-        >
-          <Tabs
-            value={0}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth" // Ensure tabs fit the width of the container
-          >
-            <Tab label="Create Principal" component={Link} to="/create-principal" />
-            <Tab label="Create School" component={Link} to="/create-school" />
-            <Tab label="Integrate Principal" component={Link} to="/integrate-principal" />
-            <Tab
-                    label="Logout"
-                    component="button"
-                    onClick={() => setLogoutDialogOpen(true)} />
-          </Tabs>
-
-          <Box
-            sx={{
-              minHeight: "60vh",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              paddingTop: "3rem",
-            }}
-          >
-            {[ 
-              { label: "Email", icon: <EmailIcon />, key: 'email' },
-              { label: "Username", icon: <PersonIcon />, key: 'username', maxLength: 20 },
-              { label: "First Name", icon: <PersonIcon />, key: 'firstName', maxLength: 20 },
-              { label: "Middle Name", icon: <PersonIcon />, key: 'middleName', maxLength: 20 },
-              { label: "Last Name", icon: <PersonIcon />, key: 'lastName', maxLength: 20 },
-              { label: "Password", icon: <LockIcon />, key: 'password', maxLength: 20 },
-              { label: "Confirm Password", icon: <LockIcon />, key: 'confirmPassword' },
-            ].map((item, index) => (
-              <TextField
-                key={index}
-                style={{ marginBottom: "1rem", width: "100%", maxWidth: '400px' }} // Adjust width here
-                color="primary"
-                onBlur={(event) => {
-                  if (item.key === 'email') handleExistingEmail(event);
-                  if (item.key === 'username') handleExistingUsername(event);
+    return (
+        <ThemeProvider theme={defaultTheme}>
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "100vh",
+                    backgroundImage: `url(/bg.png)`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
                 }}
-                label={item.label}
-                variant="outlined"
-                type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
-                value={formData[item.key]}
-                onChange={(e) => handleInputChange(item.key, e.target.value)}
-                error={!!getErrorCondition(item)}
-                helperText={getErrorCondition(item)}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
-                  endAdornment: index >= 5 && (
-                    <InputAdornment position="end">
-                      <IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility">
-                        <VisibilityOffIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{ maxLength: item.maxLength }}
-                sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }}
-              />
-            ))}
-
-            {registrationError && (
-              <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
-            )}
-            <Button
-            sx={{
-                backgroundColor: "#4a99d3", 
-                color: "#fff", 
-                textTransform: "none", 
-                width: "100%", 
-                maxWidth: '400px', // Match the width of the text fields
-                marginBottom: "1rem", 
-                padding: "15px", 
-                borderRadius: "1.5px", 
-                cursor: "pointer", 
-                transition: "background-color 0.3s", 
-                "&:hover": { backgroundColor: "#474bca" },
-                display: 'block', // Ensure it occupies its own block
-                marginLeft: 'auto', 
-                marginRight: 'auto', // Center horizontally
-            }}
-            disabled={
-                (usernameError || emailError || emailExistsError || passwordError || confirmPasswordError) ||
-                (formData.email === '' || formData.username === '' || formData.password === '' || formData.confirmPassword === '')
-            }
-            disableElevation
-            variant="contained"
-            onClick={handleSubmit}
             >
-            Create Account
-            </Button>
+                <Box
+                    sx={{
+                        pt: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        width: "1000px",
+                        // backgroundColor: "green"
+                    }}
+                >
+                    <Box sx={{
+                        display: 'flex',
+                        alignSelf: "flex-start",
+                        flexDirection: "row",
+                        flexGrow: 1,
+                        pt: 3,
+                        pb: 2
+                    }}>
+                        <Typography
+                            component="h1"
+                            variant="h6"
+                            color="inherit"
+                            noWrap
+                            sx={{
+                                textAlign: "left",
+                                color: "#252733",
+                                fontWeight: "bold",
+                                pr: 2
+                            }}
+                        >
+                            Admin Page
+                        </Typography>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => logoutUser('jwt')}
+                        >
+                            Logout
+                        </Button>
+                    </Box>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={6} lg={6}>
+                            <Container
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    position: "relative",
+                                    zIndex: 1,
+                                    scale: "0.8",
+                                    height: "550px"
+                                }}
+                            >
+                                <div style={{ marginBottom: "1rem" }}>
+                                    <b style={{ fontSize: "20px", fontFamily: "Mulish", color: "#000" }}>
+                                        Create a new principal account</b>
+                                </div>
+                                {[
+                                    { label: "Email", icon: <EmailIcon />, key: 'email' },
+                                    { label: "Username", icon: <PersonIcon />, key: 'username', maxLength: 20 },
+                                    { label: "First Name", icon: <PersonIcon />, key: 'firstName', maxLength: 20 },
+                                    { label: "Middle Name", icon: <PersonIcon />, key: 'middleName', maxLength: 20 },
+                                    { label: "Last Name", icon: <PersonIcon />, key: 'lastName', maxLength: 20 },
+                                    { label: "Password", icon: <LockIcon />, key: 'password', maxLength: 20 },
+                                    { label: "Confirm Password", icon: <LockIcon />, key: 'confirmPassword' },
+                                ].map((item, index) => (
+                                    <TextField
+                                        key={index}
+                                        style={{ marginBottom: "1rem", width: "100%" }}
+                                        color="primary"
+                                        onBlur={(event) => {
+                                            if (item.key === 'email') handleExistingEmail(event);
+                                            if (item.key === 'username') handleExistingUsername(event);
+                                        }}
+                                        label={item.label}
+                                        variant="outlined"
+                                        type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
+                                        value={formData[item.key]}
+                                        onChange={(e) => handleInputChange(item.key, e.target.value)}
+                                        error={!!getErrorCondition(item)}
+                                        helperText={getErrorCondition(item)}
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
+                                            endAdornment: index >= 5 && (
+                                                <InputAdornment position="end">
+                                                    <IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility">
+                                                        <VisibilityOffIcon />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        inputProps={{ maxLength: item.maxLength }} // Set maxlength attribute
+                                        sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set background color and outline color
+                                    />
+                                ))}
+                                {registrationError && (
+                                    <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
+                                )}
+                                <Button
+                                    sx={{
+                                        backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem", padding: "15px", borderRadius: "1.5px", cursor: "pointer", transition: "background-color 0.3s", "&:hover": { backgroundColor: "#474bca", },
+                                    }}
+                                    disabled={
+                                        (usernameError || emailError || emailExistsError || passwordError || confirmPasswordError) ||
+                                        (formData.email === '' || formData.username === '' || formData.password === '' || formData.confirmPassword === '')
+                                    }
+                                    disableElevation
+                                    variant="contained"
+                                    onClick={handleSubmit}
+                                >
+                                    Create Account
+                                </Button>
+                            </Container>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={6}>
+                            {/*Create School*/}
+                            <Paper>
+                                <Box sx={styles.container}>
+                                    <Typography
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={styles.title}
+                                    >
+                                        Create School
+                                    </Typography>
+                                    <Typography
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={styles.description}
+                                    >
+                                        Create a new school to manipulate documents
+                                    </Typography>
+                                    <TextField
+                                        variant='outlined'
+                                        label='School Name'
+                                        sx={{ m: 1 }}
+                                        value={schoolFormData["name"]}
+                                        error={schoolFormData.name === "" ? false : schoolNameError}
+                                        helperText={schoolNameError && "School name already exists"}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
+                                        onBlur={(event) => schoolOnBlur("name", event.target.value)}
+                                        onChange={(event) => handleSchoolInputChange("name", event.target.value)}
+                                    />
+                                    <TextField
+                                        variant='outlined'
+                                        label='School Full Name'
+                                        sx={{ m: 1 }}
+                                        value={schoolFormData["fullName"]}
+                                        error={schoolFormData.fullName === "" ? false : schoolFullNameError}
+                                        helperText={schoolFullNameError && "School full name already exists"}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
+                                        onBlur={(event) => schoolOnBlur("fullName", event.target.value)}
+                                        onChange={(event) => handleSchoolInputChange("fullName", event.target.value)}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={
+                                            (schoolFullNameError || schoolNameError) ||
+                                            (schoolFormData.name === "" || schoolFormData.fullName === "") ||
+                                            isTyping
+                                        }
+                                        onClick={() => handleSchoolSubmit()}
+                                    >
+                                        Create School
+                                    </Button>
+                                </Box>
+                            </Paper>
+                            {/*Integrate Principal*/}
+                            <Paper>
+                                <Box sx={[styles.container, { mt: 2 }]}>
+                                    <Typography
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={styles.title}
+                                    >
+                                        Integrate Principal
+                                    </Typography>
+                                    <Typography
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={styles.description}
+                                    >
+                                        Integrate principal to an existing school
+                                    </Typography>
+                                    <TextField
+                                        variant='outlined'
+                                        label='School Name or Full Name'
+                                        sx={{ m: 1 }}
+                                        value={integrateFormData["name"]}
+                                        error={integrateFormData.name === "" ? false : integrateSchoolError}
+                                        helperText={integrateSchoolError && errorMessage}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
+                                        onBlur={(event) => integrateOnBlur("name", event.target.value)}
+                                        onChange={(event) => handleIntegrateInputChange("name", event.target.value)}
+                                    />
+                                    <TextField
+                                        variant='outlined'
+                                        label='Email or Username'
+                                        sx={{ m: 1 }}
+                                        value={integrateFormData["email"]}
+                                        error={integrateFormData.email === "" ? false : emailUsernameError}
+                                        helperText={emailUsernameError && userErrorMessage}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
+                                        onBlur={(event) => integrateOnBlur("email", event.target.value)}
+                                        onChange={(event) => handleIntegrateInputChange("email", event.target.value)}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={
+                                            (integrateSchoolError || emailUsernameError) ||
+                                            (integrateFormData.name === "" || integrateFormData.email === "") ||
+                                            isTyping
+                                        }
+                                        onClick={() => handleIntegrateSubmit()}
+                                    >
+                                        Integrate User
+                                    </Button>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                </Box>
+            </Box>
+        </ThemeProvider>
 
-          </Box>
-        </Paper>
-      </Container>
-   {/* Logout confirmation dialog */}
-   <Dialog
-                open={logoutDialogOpen}
-                onClose={() => setLogoutDialogOpen(false)}
-                aria-labelledby="logout-dialog-title"
-                maxWidth="xs"
-                fullWidth
-            >
-                <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
-                <DialogContent sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-end", p: 0 }}>
-                    <DialogActions>
-                        <Box>
-                            <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
-                                Cancel
-                            </Button>
-                            <Button onClick={handleLogout} color="primary">
-                                Logout
-                            </Button>
-                        </Box>
-                    </DialogActions>
-                </DialogContent>
-            </Dialog>
-        </Container>
     );
-};
+}
 
-export default AdminPage;;
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: "column",
+        padding: 3
+    },
+    title: {
+        flexGrow: 1,
+        textAlign: "left",
+        color: "#252733",
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        pl: 1
+    },
+    description: {
+        flexGrow: 1,
+        textAlign: "left",
+        color: "#9FA2B4",
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        fontSize: 12,
+        pb: 1,
+        pl: 1
+    },
+    InputLabelProps: {
+        style: {
+            fontSize: 14,
+            color: 'black', // Adjust color if needed
+            marginTop: -4, // Adjust vertical positioning
+        }
+    },
+    InputProps: {
+        style: {
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 14,
+            height: 40
+        }
+    }
+}
+
+
+
+export default AdminPage;
