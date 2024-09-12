@@ -18,6 +18,40 @@ import { transformSchoolText } from '../Components/Navigation/Navigation';
 
 
 
+const calculateWeeklyExpenses = (expensesData) => {
+    // Initialize an empty object to hold the weekly totals for each UACS category
+    const weeklyExpenses = {};
+
+    // Helper function to determine the week of the month for a given date
+    const getWeekOfMonth = (date) => {
+        const day = date.getDate();
+        if (day >= 1 && day <= 7) return 1;
+        if (day >= 8 && day <= 14) return 2;
+        if (day >= 15 && day <= 21) return 3;
+        if (day >= 22 && day <= 28) return 4;
+        return 5;
+    };
+
+    // Process each expense entry
+    expensesData.forEach(({ date, objectCode, amount }) => {
+        const week = getWeekOfMonth(new Date(date));
+        
+        // Initialize the category if not already present
+        if (!weeklyExpenses[objectCode]) {
+            weeklyExpenses[objectCode] = [0, 0, 0, 0, 0]; // Array for 5 weeks
+        }
+
+        // Add the amount to the appropriate week
+        weeklyExpenses[objectCode][week - 1] += amount;
+
+        // Log the intermediate results
+        console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}`);
+        console.log(`Week of Month: ${week}`);
+        console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
+    });
+ console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
+    return weeklyExpenses;
+};
 
 //Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
@@ -191,7 +225,39 @@ function DashboardPage(props) {
     const [loadingSchools] = useState(false);
     const [schoolBudget] = useState(null);
 
+    const [uacsData, setUacsData] = useState([]);
+
     // This function only runs when dependencies: currentSchool & currentUser are changed
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                if (lr && lr.length > 0) {
+                    // Calculate weekly expenses from the LR data
+                    const weeklyExpenses = calculateWeeklyExpenses(lr);
+
+                    // Update uacsData with the calculated weekly expenses
+                    const updatedUacsData = sampleUacsData.map(uacs => {
+                        if (weeklyExpenses[uacs.code]) {
+                            return {
+                                ...uacs,
+                                expenses: weeklyExpenses[uacs.code]
+                            };
+                        }
+                        return uacs;
+                    });
+
+                    setUacsData(updatedUacsData);
+                }
+            } catch (error) {
+                console.error('Error processing data:', error);
+            }
+        };
+
+        fetchData();
+    }, [lr]);
+
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -265,49 +331,49 @@ const sampleUacsData = [
         code: '5020502001',
         name: 'Communication Expenses',
         budget: jev[0]?.budget,
-        expenses: [5000, 0, 18000, 20000, 50000]//93,000
+        expenses: [0, 0, 0, 0, 0]//93,000
     },
     {
         code: '5020402000',
         name: 'Electricity Expenses',
         budget:jev[1]?.budget,
-        expenses: [1000, 5000, 6000, 47000, 10000]
+        expenses: [0, 0, 0, 0, 0]
     },
     {
         code: '5020503000',
         name: 'Internet Subscription Expenses',
         budget: jev[2]?.budget,
-        expenses: [0, 5000, 10000, 15000, 20000]
+        expenses: [0, 0, 0, 0, 0]
     },
     {
         code: '5029904000',
         name: 'Transpo/Delivery Expenses',
         budget: jev[3]?.budget,
-        expenses: [0, 5000, 10000, 15000, 20000]
+        expenses: [0, 0, 0, 0, 0]
     },
     {
         code: '5020201000',
         name: 'Training Expenses',
         budget:  jev[4]?.budget,
-        expenses: [0, 5000, 10000, 15000, 20000]
+        expenses: [0, 0, 0, 0, 0]
     },
     {
         code: '5020399000',
         name: 'Other Supplies & Materials Expenses',
         budget: jev[5]?.budget,
-        expenses: [0, 5000, 10000, 15000, 20000]
+        expenses: [0, 0, 0, 0, 0]
     },
     {
         code: '1990101000',
         name: 'Advances to Operating Expenses',
         budget: jev[6]?.budget,
-        expenses: [0, 5000, 10000, 15000, 20000]
+        expenses: [0, 0, 0, 0, 0]
     },
     {
         code: '19901020000',
         name: 'Total',
         budget: 500000,
-        expenses: [0, 5000, 7000, 26000, 150000]
+        expenses: [0, 0, 0, 0, 0]
     }
 ];
 
@@ -581,7 +647,7 @@ const sampleUacsData = [
                                     }}
 
                                 >
-                                    <ApexChart uacsData={sampleUacsData} budgetLimit={currentDocument?.budgetLimit} />
+                                    <ApexChart uacsData={uacsData} budgetLimit={currentDocument?.budgetLimit} />
                                     <ApexChart totalBudget={schoolBudget} />
                                 </Paper>
                             </Grid>
