@@ -70,13 +70,8 @@ const calculateWeeklyExpenses = (expensesData) => {
         if (weekIndex >= 0 && weekIndex < totalWeeks) {
             weeklyExpenses[objectCode][weekIndex] += amount;
         }
-
-        // Log the intermediate results for debugging
-        console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
-        console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
     });
 
-    console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
     return weeklyExpenses;
 };
 
@@ -261,28 +256,6 @@ function DashboardPage(props) {
 
     const [uacsData, setUacsData] = useState([]);
 
-
-    // This function only runs when dependencies: currentSchool & currentUser are changed
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Log the specific fields (date, objectCode, and amount) for each LR row
-                if (lr && lr.length > 0) {
-                    lr.forEach(row => {
-                        console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
-                    });
-                } else {
-                    console.log('No LR data available');
-                }
-            } catch (error) {
-                console.error('Error fetching document data:', error);
-            }
-        };
-        fetchData();
-    }, [lr]); // Ensure to trigger whenever `lr` updates
-
-
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
             if (currentSchool) {
@@ -383,7 +356,6 @@ function DashboardPage(props) {
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
         setCurrentSchool(currentUser.schools.find(s => s.id === schoolId));
-        console.log('Selected school:', schoolId);
     };
 
     const updateDocumentById = async (docId, value) => {
@@ -401,18 +373,12 @@ function DashboardPage(props) {
             if (response.ok) {
                 console.log('Budget limit updated successfully:', data);
                 return true;
-            } else {
-                console.error('Failed to update budget limit:', data);
-                return false;
             }
         } catch (error) {
             console.error('Error updating budget limit:', error);
             return false;
         }
     };
-
-
-    console.log(jev)
 
 
     const handleOpen = (text) => {
@@ -444,7 +410,6 @@ function DashboardPage(props) {
     const handleSubmit = async (event) => {
         event.preventDefault();
         const updatedAmount = editableAmounts[clickedButton];
-        console.log('Document ID:', currentDocument.id);
 
         try {
             const isUpdated = await updateDocumentById(currentDocument.id, updatedAmount.amount);
@@ -462,11 +427,9 @@ function DashboardPage(props) {
                 setError('');
                 setOpen(false);
             } else {
-                console.error('Failed to save budget limit');
                 setError('Failed to save budget limit. Please try again later.');
             }
         } catch (error) {
-            console.error('Error saving budget limit:', error);
             setError('Failed to save budget limit. Please try again later.');
         }
     };
