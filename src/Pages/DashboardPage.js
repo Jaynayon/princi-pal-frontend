@@ -16,43 +16,6 @@ import { useNavigationContext } from '../Context/NavigationProvider';
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 
-
-
-const calculateWeekly2Expenses = (expensesData) => {
-    // Initialize an empty object to hold the weekly totals for each UACS category
-    const weeklyExpenses = {};
-
-    // Helper function to determine the week of the month for a given date
-    const getWeekOfMonth = (date) => {
-        const day = date.getDate();
-        if (day >= 1 && day <= 7) return 1;
-        if (day >= 8 && day <= 14) return 2;
-        if (day >= 15 && day <= 21) return 3;
-        if (day >= 22 && day <= 28) return 4;
-        return 5;
-    };
-
-    // Process each expense entry
-    expensesData.forEach(({ date, objectCode, amount }) => {
-        const week = getWeekOfMonth(new Date(date));
-
-        // Initialize the category if not already present
-        if (!weeklyExpenses[objectCode]) {
-            weeklyExpenses[objectCode] = [0, 0, 0, 0, 0]; // Array for 5 weeks
-        }
-
-        // Add the amount to the appropriate week
-        weeklyExpenses[objectCode][week - 1] += amount;
-
-        // Log the intermediate results
-        console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}`);
-        console.log(`Week of Month: ${week}`);
-        console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
-    });
-    console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
-    return weeklyExpenses;
-};
-
 const calculateWeeklyExpenses = (expensesData) => {
     // Initialize an empty object to hold the weekly totals for each UACS category
     const weeklyExpenses = {};
@@ -68,7 +31,8 @@ const calculateWeeklyExpenses = (expensesData) => {
         const end = new Date(endDate);
         const timeDiff = end - start;
         const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert time difference to days
-        return Math.ceil(daysDiff / 7); // Convert days to weeks
+        const maxWeeks = Math.ceil(daysDiff / 7) <= 12 ? Math.ceil(daysDiff / 7) : 12;
+        return maxWeeks; // Convert days to weeks
     };
 
     // Calculate the total number of weeks between the earliest and latest date
@@ -121,8 +85,6 @@ const calculateWeeklyExpenses = (expensesData) => {
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
-
-
 
     useEffect(() => {
         // Change the chart type to 'bar' when 'Total' is selected
@@ -231,10 +193,13 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         return Array.from({ length: numberOfWeeks }, (_, i) => `Week ${i + 1}`);
     };
 
+    let weekLength = uacsData.find(item => item.code === selectedCategory).expenses.length;
+
     // Determine the categories for the x-axis dynamically
     const categories = selectedCategory === '19901020000'
         ? uacsData.slice(0, -1).map(uacs => uacs.name) // Exclude the 'Total' category itself
-        : generateWeekLabels(uacsData[0]?.expenses.length || 5); // Dynamically generate based on the number of weeks
+        : generateWeekLabels(weekLength >= 12 ? 12 : weekLength); // Dynamically generate based on the number of weeks
+
 
     const budgetToUse = selectedCategory === '19901020000' ? budgetLimit : selectedUacs.budget;
     const maxExpense = selectedCategory === '19901020000'
