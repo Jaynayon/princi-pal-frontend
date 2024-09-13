@@ -17,7 +17,30 @@ import DialogActions from '@mui/material/DialogActions';
 import axios from 'axios';
 import { useNavigationContext } from '../Context/NavigationProvider'; // Ensure this is the correct path
 
+import PropTypes from 'prop-types';
+// TabPanel component for displaying content based on the active tab
+const TabPanel = ({ children, value, index }) => {
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`tabpanel-${index}`}
+            aria-labelledby={`tab-${index}`}
+        >
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    {children}
+                </Box>
+            )}
+        </div>
+    );
+};
 
+TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.any.isRequired,
+    value: PropTypes.any.isRequired,
+};
 
 function AdminPage(props) {
     const { currentUser, validateUsernameEmail } = useNavigationContext();
@@ -37,6 +60,11 @@ function AdminPage(props) {
         lastName: '',
         confirmPassword: ''
     });
+    const [tabValue, setTabValue] = useState(0);
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
+
     const [formValid, setFormValid] = useState(true); // Track form validity
     const [isTyping, setIsTyping] = useState(false);
 
@@ -511,175 +539,285 @@ function AdminPage(props) {
         //navStyle: styling[navStyle], //default or light
     });
 
-  return (
-    <Container
-      maxWidth={false}
-      style={{
-        width: "100vw",
-        height: "100vh",
-        position: "relative",
-        overflow: "auto",
-        backgroundImage: `url(/bg.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <Container
-        maxWidth="md" // Adjusted to 'md' for responsiveness
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "relative",
-          zIndex: 1,
-          paddingTop: "64px", // Adjust for AppBar height
-          padding: "0 1rem", // Added padding for smaller screens
-        }}
-      >
-        <Typography
-          variant="h4"
-          style={{ marginBottom: "2rem", marginTop: "2rem", fontFamily: "Mulish", color: "#000", textAlign: "center" }}
-        >
-          Admin Page
-        </Typography>
-
-        <Paper
+    return (
+        <Container
+          maxWidth={false}
           style={{
-            width: '100%', // Full width on small screens
-            padding: '2rem',
-            borderRadius: '10px',
-            margin: 'auto', // Center horizontally
-            position: 'relative', // Ensure it's not fixed to the viewport
-            bottom: '20px', // Position towards the bottom
-            left: '0',
-            right: '0',
-            zIndex: 1, // Ensure it is above other content
+            width: "100vw",
+            height: "100vh",
+            position: "relative",
+            overflow: "auto",
+            backgroundImage: `url(/bg.png)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
           }}
         >
-          <Tabs
-            value={0}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth" // Ensure tabs fit the width of the container
-          >
-            <Tab label="Create Principal" component={Link} to="/create-principal" />
-            <Tab label="Create School" component={Link} to="/create-school" />
-            <Tab label="Integrate Principal" component={Link} to="/integrate-principal" />
-            <Tab
-                    label="Logout"
-                    component="button"
-                    onClick={() => setLogoutDialogOpen(true)} />
-          </Tabs>
-
-          <Box
-            sx={{
-              minHeight: "60vh",
+          <Container
+            maxWidth="md"
+            style={{
+              minHeight: "100vh",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              paddingTop: "3rem",
+              position: "relative",
+              zIndex: 1,
+              paddingTop: "64px",
+              padding: "0 1rem",
             }}
           >
-            {[ 
-              { label: "Email", icon: <EmailIcon />, key: 'email' },
-              { label: "Username", icon: <PersonIcon />, key: 'username', maxLength: 20 },
-              { label: "First Name", icon: <PersonIcon />, key: 'firstName', maxLength: 20 },
-              { label: "Middle Name", icon: <PersonIcon />, key: 'middleName', maxLength: 20 },
-              { label: "Last Name", icon: <PersonIcon />, key: 'lastName', maxLength: 20 },
-              { label: "Password", icon: <LockIcon />, key: 'password', maxLength: 20 },
-              { label: "Confirm Password", icon: <LockIcon />, key: 'confirmPassword' },
-            ].map((item, index) => (
-              <TextField
-                key={index}
-                style={{ marginBottom: "1rem", width: "100%", maxWidth: '400px' }} // Adjust width here
-                color="primary"
-                onBlur={(event) => {
-                  if (item.key === 'email') handleExistingEmail(event);
-                  if (item.key === 'username') handleExistingUsername(event);
-                }}
-                label={item.label}
-                variant="outlined"
-                type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
-                value={formData[item.key]}
-                onChange={(e) => handleInputChange(item.key, e.target.value)}
-                error={!!getErrorCondition(item)}
-                helperText={getErrorCondition(item)}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
-                  endAdornment: index >= 5 && (
-                    <InputAdornment position="end">
-                      <IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility">
-                        <VisibilityOffIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{ maxLength: item.maxLength }}
-                sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }}
-              />
-            ))}
-
-            {registrationError && (
-              <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
-            )}
-            <Button
-            sx={{
-                backgroundColor: "#4a99d3", 
-                color: "#fff", 
-                textTransform: "none", 
-                width: "100%", 
-                maxWidth: '400px', // Match the width of the text fields
-                marginBottom: "1rem", 
-                padding: "15px", 
-                borderRadius: "1.5px", 
-                cursor: "pointer", 
-                transition: "background-color 0.3s", 
-                "&:hover": { backgroundColor: "#474bca" },
-                display: 'block', // Ensure it occupies its own block
-                marginLeft: 'auto', 
-                marginRight: 'auto', // Center horizontally
-            }}
-            disabled={
-                (usernameError || emailError || emailExistsError || passwordError || confirmPasswordError) ||
-                (formData.email === '' || formData.username === '' || formData.password === '' || formData.confirmPassword === '')
-            }
-            disableElevation
-            variant="contained"
-            onClick={handleSubmit}
+            <Typography
+              variant="h4"
+              style={{ marginBottom: "2rem", marginTop: "2rem", fontFamily: "Mulish", color: "#000", textAlign: "center" }}
             >
-            Create Account
-            </Button>
-
+              Admin Page
+            </Typography>
+    
+            <Paper
+              style={{
+                width: '100%',
+                padding: '2rem',
+                borderRadius: '10px',
+                margin: 'auto',
+                position: 'relative',
+                bottom: '20px',
+                left: '0',
+                right: '0',
+                zIndex: 1,
+              }}
+            >
+              <Tabs value={tabValue} onChange={handleTabChange} centered>
+                <Tab label="Create Principal" />
+                <Tab label="Create School" />
+                <Tab label="Integrate Principal" />
+                <Tab label="Logout" onClick={() => setLogoutDialogOpen(true)} />
+              </Tabs>
+    
+              {/* Tab Content */}
+              <Box
+                sx={{
+                    minHeight: "60vh",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingTop: "3rem",
+                    width: "100%",
+                    maxWidth: "700px", // Adjust if needed
+                    margin: "0 auto", // Center align horizontally
+                }}
+              >
+                {tabValue === 0 && (
+                  <Box>
+                    {[ 
+                      { label: "Email", icon: <EmailIcon />, key: 'email' },
+                      { label: "Username", icon: <PersonIcon />, key: 'username', maxLength: 20 },
+                      { label: "First Name", icon: <PersonIcon />, key: 'firstName', maxLength: 20 },
+                      { label: "Middle Name", icon: <PersonIcon />, key: 'middleName', maxLength: 20 },
+                      { label: "Last Name", icon: <PersonIcon />, key: 'lastName', maxLength: 20 },
+                      { label: "Password", icon: <LockIcon />, key: 'password', maxLength: 20 },
+                      { label: "Confirm Password", icon: <LockIcon />, key: 'confirmPassword' },
+                    ].map((item, index) => (
+                      <TextField
+                        key={index}
+                        style={{ marginBottom: "1rem", width: "100%", maxWidth: '400px' }}
+                        color="primary"
+                        label={item.label}
+                        variant="outlined"
+                        type={index >= 5 ? (showPassword ? "text" : "password") : "text"}
+                        value={formData[item.key]}
+                        onChange={(e) => handleInputChange(item.key, e.target.value)}
+                        error={!!getErrorCondition(item)}
+                        helperText={getErrorCondition(item)}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">{item.icon}</InputAdornment>,
+                          endAdornment: index >= 5 && (
+                            <InputAdornment position="end">
+                              <IconButton onClick={() => setShowPassword(!showPassword)} aria-label="toggle password visibility">
+                                <VisibilityOffIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                        inputProps={{ maxLength: item.maxLength }}
+                        sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }}
+                      />
+                    ))}
+    
+                    {registrationError && (
+                      <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
+                    )}
+    
+                    <Button
+                      sx={{
+                        backgroundColor: "#4a99d3",
+                        color: "#fff",
+                        textTransform: "none",
+                        width: "100%",
+                        maxWidth: '400px',
+                        marginBottom: "1rem",
+                        padding: "15px",
+                        borderRadius: "1.5px",
+                        cursor: "pointer",
+                        transition: "background-color 0.3s",
+                        "&:hover": { backgroundColor: "#474bca" },
+                        display: 'block',
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                      }}
+                      disabled={
+                        (usernameError || emailError || emailExistsError || passwordError || confirmPasswordError) ||
+                        (formData.email === '' || formData.username === '' || formData.password === '' || formData.confirmPassword === '')
+                      }
+                      disableElevation
+                      variant="contained"
+                      onClick={handleSubmit}
+                    >
+                      Create Account
+                    </Button>
+                  </Box>
+                )}
+    
+                {tabValue === 1 && (
+                   <Box sx={{ width: "100%", display: "flex", justifyContent: "center", maxWidth: "400px", marginBottom:"10%" }}>
+                    {/* Create School Form */}
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                          <Typography component="p">School Registration for Document Management</Typography>
+                          <TextField
+                            variant="outlined"
+                            label="School Name"
+                            sx={{ 
+                            m: 1, 
+                            width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
+                            backgroundColor: "#DBF0FD", 
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, 
+                            borderRadius: '8px'
+                            }}
+                            value={schoolFormData.name}
+                            error={schoolNameError}
+                            helperText={schoolNameError && "School name already exists"}
+                            onChange={(e) => handleSchoolInputChange("name", e.target.value)}
+                        />
+                        <TextField
+                            variant="outlined"
+                            label="School Full Name"
+                            sx={{ 
+                            m: 1, 
+                            width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
+                            backgroundColor: "#DBF0FD", 
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, 
+                            borderRadius: '8px'
+                            }}
+                            value={schoolFormData.fullName}
+                            error={schoolFullNameError}
+                            helperText={schoolFullNameError && "School full name already exists"}
+                            onChange={(e) => handleSchoolInputChange("fullName", e.target.value)}
+                        />
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            sx={{ 
+                            width: 'calc(100% - 2rem)',  // Match width with TextField
+                            mt: 1, // Margin top to space from TextField
+                            backgroundColor: "#4a99d3",
+                            '&:hover': { backgroundColor: "#474bca" }
+                            }}
+                            disabled={
+                                (schoolFullNameError || schoolNameError) ||
+                                (schoolFormData.name === "" || schoolFormData.fullName === "") ||
+                                isTyping
+                            }
+                            onClick={() => handleSchoolSubmit()}
+                            >
+                            Create School
+                        </Button>
+                        </Grid>
+                    </Grid>
+                </Box>
+                )}
+    
+                {tabValue === 2 && (
+                  <Box sx={{ width: "100%", display: "flex", justifyContent: "center", maxWidth: "400px", marginBottom:"10%" }}>
+                    {/* Integrate Principal Form */}
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                          <Typography component="p">Assign principal to an existing school</Typography>
+                        <TextField
+                        variant="outlined"
+                        label="School Name or Full Name"
+                        sx={{ 
+                        m: 1, 
+                        width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
+                        backgroundColor: "#DBF0FD", 
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, 
+                        borderRadius: '8px'
+                        }}
+                        value={schoolFormData.name}
+                        error={schoolNameError}
+                        helperText={schoolNameError && "School name already exists"}
+                        onChange={(e) => handleSchoolInputChange("name", e.target.value)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        label="Email or Username"
+                        sx={{ 
+                        m: 1, 
+                        width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
+                        backgroundColor: "#DBF0FD", 
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, 
+                        borderRadius: '8px'
+                        }}
+                        value={schoolFormData.fullName}
+                        error={schoolFullNameError}
+                        helperText={schoolFullNameError && "Invalid input"}
+                        onChange={(e) => handleSchoolInputChange("fullName", e.target.value)}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ 
+                        width: 'calc(100% - 2rem)',  // Match width with TextField
+                        mt: 1, // Margin top to space from TextField
+                        backgroundColor: "#4a99d3",
+                        '&:hover': { backgroundColor: "#474bca" }
+                        }}
+                        disabled={
+                            (integrateSchoolError || emailUsernameError) ||
+                            (integrateFormData.name === "" || integrateFormData.email === "") ||
+                            isTyping
+                        }
+                        onClick={() => handleIntegrateSubmit()}
+                    >
+                        Integrate Principal
+                    </Button>
+                    </Grid>
+                </Grid>
+                
+            </Box>
+            )}
           </Box>
         </Paper>
       </Container>
-   {/* Logout confirmation dialog */}
-   <Dialog
-                open={logoutDialogOpen}
-                onClose={() => setLogoutDialogOpen(false)}
-                aria-labelledby="logout-dialog-title"
-                maxWidth="xs"
-                fullWidth
-            >
-                <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
-                <DialogContent sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-end", p: 0 }}>
-                    <DialogActions>
-                        <Box>
-                            <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
-                                Cancel
-                            </Button>
-                            <Button onClick={handleLogout} color="primary">
-                                Logout
-                            </Button>
-                        </Box>
-                    </DialogActions>
-                </DialogContent>
-            </Dialog>
+    
+          {/* Logout confirmation dialog */}
+          <Dialog open={logoutDialogOpen} onClose={() => setLogoutDialogOpen(false)} aria-labelledby="logout-dialog-title" maxWidth="xs" fullWidth>
+            <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
+            <DialogContent sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-end", p: 0 }}>
+              <DialogActions>
+                <Box>
+                  <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleLogout} color="primary">
+                    Logout
+                  </Button>
+                </Box>
+              </DialogActions>
+            </DialogContent>
+          </Dialog>
         </Container>
-    );
-};
-
-export default AdminPage;;
+      );
+    }
+    
+    export default AdminPage;
