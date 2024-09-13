@@ -410,7 +410,10 @@ function PeoplePage(props) {
                                                 <ListItem key={application.id} disableGutters>
                                                     <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
                                                     <Button
-                                                        onClick={() => handleAccept({ userId: application.userId, schoolId: application.schoolId })}
+                                                        onClick={() => {
+                                                            handleAccept({ userId: application.id, schoolId: application.schoolId });
+                                                            handleClose();  // Close the dialog after accepting
+                                                        }}
                                                         variant="contained"
                                                         color="primary"
                                                     >
