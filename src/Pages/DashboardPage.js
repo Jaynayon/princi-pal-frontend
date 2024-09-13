@@ -241,7 +241,57 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     );
 };
 
-
+// Sample data
+const defaultUacsData = [
+    {
+        code: '5020502001',
+        name: 'Communication Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]//93,000
+    },
+    {
+        code: '5020402000',
+        name: 'Electricity Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '5020503000',
+        name: 'Internet Subscription Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '5029904000',
+        name: 'Transpo/Delivery Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '5020201000',
+        name: 'Training Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '5020399000',
+        name: 'Other Supplies & Materials Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '1990101000',
+        name: 'Advances to Operating Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '19901020000',
+        name: 'Total',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    }
+];
 
 function DashboardPage(props) {
     const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
@@ -254,7 +304,7 @@ function DashboardPage(props) {
     const [loadingSchools] = useState(false);
     const [schoolBudget] = useState(null);
 
-    const [uacsData, setUacsData] = useState([]);
+    const [uacsData, setUacsData] = useState(defaultUacsData);
 
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
@@ -321,7 +371,7 @@ function DashboardPage(props) {
             {
                 code: '19901020000',
                 name: 'Total',
-                budget: 500000,
+                budget: currentDocument.budget,
                 expenses: [0, 0, 0, 0, 0]
             }
         ];
