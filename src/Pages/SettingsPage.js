@@ -133,11 +133,26 @@ function SettingsPage() {
         return regex.test(input);
     };
 
-    const handlePasswordChange = (setter, value) => {
-        const isValid = validatePassword(value);
-        setErrorMessage(isValid ? '' : 'Password does not meet requirements');
-        setter(value);
+    const handlePasswordChange = (value) => {
+        setNewPassword(value);
+        setErrorMessage(validatePassword(value) ? '' : 'Password does not meet requirements');
     };
+
+    const blurPasswordChange = () => {
+        if (newPassword !== confirmPassword) {
+            setMessage("Passwords do not match");
+        }
+    }
+
+    const handleConfirmPasswordChange = (value) => {
+        setConfirmPassword(value);
+
+        if (newPassword && value !== newPassword) {
+            setMessage("Passwords do not match");
+        } else {
+            setMessage(validatePassword(value) ? '' : 'Password does not meet requirements');
+        }
+    }
 
     const handlePasswordUpdate = async () => {
         if (newPassword !== confirmPassword) {
@@ -274,7 +289,8 @@ function SettingsPage() {
                                 label="New Password"
                                 margin="normal"
                                 value={newPassword}
-                                onChange={(e) => handlePasswordChange(setNewPassword, e.target.value)}
+                                onChange={(e) => handlePasswordChange(e.target.value)}
+                                onBlur={blurPasswordChange}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -297,7 +313,7 @@ function SettingsPage() {
                                 label="Retype Password"
                                 margin="normal"
                                 value={confirmPassword}
-                                onChange={(e) => handlePasswordChange(setConfirmPassword, e.target.value)}
+                                onChange={(e) => handleConfirmPasswordChange(e.target.value)}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -312,7 +328,7 @@ function SettingsPage() {
                                 }}
                             />
                             {message && (
-                                <div className="message" style={{ color: 'red' }}>
+                                <div className="message" style={{ color: message === "Password updated successfully" ? 'green' : 'red' }}>
                                     {message}
                                 </div>
                             )}
