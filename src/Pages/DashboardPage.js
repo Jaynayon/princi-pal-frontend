@@ -219,6 +219,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <div style={{ marginLeft: '10px' }}>
                                 <select
+                                    name="apex-chart-select-category"
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                     style={{
@@ -633,6 +634,7 @@ function DashboardPage(props) {
                             <FilterDate />
                             <Box style={{ paddingRight: '10px' }}>
                                 <Select
+                                    name="dashboard-school-select"
                                     value={selectedSchool}
                                     onChange={(event) => handleSchoolSelect(event.target.value)}
                                     displayEmpty
