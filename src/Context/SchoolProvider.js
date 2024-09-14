@@ -31,7 +31,7 @@ const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (sta
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool, setCurrentSchool, currentUser } = useNavigationContext();
+    const { currentSchool, setCurrentSchool, currentUser, selected } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -49,6 +49,7 @@ export const SchoolProvider = ({ children }) => {
 
     // States needed for adding LR
     const [isAdding, setIsAdding] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const [addOneRow, setAddOneRow] = useState(false);
     const [objectCodes, setObjectCodes] = useState([]);
 
@@ -355,6 +356,27 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [fetchUacs, objectCodes]); // Run effect only on mount and unmount
 
+    // useEffect(() => {
+    //     // Check if user is in school tab or dashboard
+    //     if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
+    //         // Define the interval duration (in milliseconds)
+    //         const intervalDuration = 5000; // 5 seconds
+
+    //         // Define the task to execute at each interval
+    //         const updateDocumentData = () => {
+    //             if (!isAdding && !isEditing) { // only fetch if user is not adding new LR
+    //                 fetchDocumentData();
+    //             }
+    //         };
+
+    //         // Set up the interval
+    //         const intervalId = setInterval(updateDocumentData, intervalDuration);
+
+    //         // Cleanup function to clear the interval
+    //         return () => clearInterval(intervalId);
+    //     }
+    // }, [fetchDocumentData, isAdding, isEditing, currentUser.schools, selected]);
+
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef,
@@ -368,6 +390,7 @@ export const SchoolProvider = ({ children }) => {
             emptyDocument,
             addFields,
             isAdding, setIsAdding,
+            isEditing, setIsEditing,
             addOneRow, setAddOneRow,
             currentSchool, setCurrentSchool,
             fetchDocumentData,

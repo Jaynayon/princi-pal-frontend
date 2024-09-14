@@ -30,6 +30,7 @@ function LRRow(props) {
     const {
         addFields,
         isAdding,
+        setIsEditing,
         currentDocument,
         lr,
         updateLr,
@@ -52,12 +53,17 @@ function LRRow(props) {
     }, [isAdding, addFields, value]);
 
     const handleCellClick = (colId, rowId, event) => {
+        setIsEditing(true); // user clicked a cell
         setEditingCell({ colId, rowId });
         setInitialValue(event.target.value); // Save the initial value of the clicked cell
         setInputValue(event.target.value); // Set input value to the current value
         console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
+
+    const handleBlurCell = () => {
+        setIsEditing(false);
+    }
 
     const handleDeleteOpen = (event, index) => {
         setDeleteAnchorEl(event.currentTarget);
@@ -73,7 +79,7 @@ function LRRow(props) {
         // Implement delete functionality here
         console.log("Delete button clicked for row at index:", selectedIndex);
         console.log("Delete lr id: " + rowId)
-        deleteLrByid(rowId);
+        await deleteLrByid(rowId);
         handleMenuClose();
     };
 
@@ -85,7 +91,7 @@ function LRRow(props) {
             } else {
                 console.log("LR not created");
             }
-            fetchDocumentData();
+            await fetchDocumentData();
         } catch (error) {
             console.error('Error fetching document:', error);
         }
@@ -227,6 +233,7 @@ function LRRow(props) {
                                             }
                                         ]}
                                         onClick={(event) => handleCellClick(column.id, row.id, event)}
+                                        onBlur={() => handleBlurCell()}
                                     >
                                         {/*UACS field*/}
                                         {column.id === "objectCode" ?
