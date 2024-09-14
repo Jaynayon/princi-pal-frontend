@@ -365,6 +365,7 @@ export const SchoolProvider = ({ children }) => {
             lr, setLr, updateLr,
             jev, setJev, updateJev,
             currentDocument, setCurrentDocument,
+            emptyDocument,
             addFields,
             isAdding, setIsAdding,
             addOneRow, setAddOneRow,

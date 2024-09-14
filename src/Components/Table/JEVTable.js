@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -45,7 +45,7 @@ const columns = [
 ];
 
 export default function JEVTable() {
-    const { jev } = useContext(SchoolContext);
+    const { currentDocument, emptyDocument, jev } = useContext(SchoolContext);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
 
@@ -57,6 +57,12 @@ export default function JEVTable() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+
+    useEffect(() => {
+        if (currentDocument === emptyDocument) {
+            setPage(0);
+        }
+    }, [currentDocument, emptyDocument]);
 
     return (
         <React.Fragment>

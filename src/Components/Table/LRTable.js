@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Table from '@mui/material/Table';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -73,9 +73,9 @@ const columns = [
 ];
 
 export default function LRTable() {
+    const { currentDocument, emptyDocument, lr } = useSchoolContext();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
-    const { lr, currentDocument } = useSchoolContext();
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -86,8 +86,14 @@ export default function LRTable() {
         setPage(0);
     };
 
+    useEffect(() => {
+        if (currentDocument === emptyDocument) {
+            setPage(0);
+        }
+    }, [currentDocument, emptyDocument]);
+
     return (
-        <>
+        <React.Fragment>
             <TableContainer>
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
@@ -151,7 +157,7 @@ export default function LRTable() {
                     />
                 </Grid>
             </Grid>
-        </>
+        </React.Fragment>
     );
 };
 
