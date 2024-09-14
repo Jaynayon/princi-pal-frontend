@@ -9,7 +9,6 @@ import { grey } from '@mui/material/colors';
 import { blueGrey } from '@mui/material/colors';
 import { deepPurple } from '@mui/material/colors';
 import { brown } from '@mui/material/colors';
-import { deepOrange } from '@mui/material/colors';
 import { yellow } from '@mui/material/colors';
 import { indigo } from '@mui/material/colors';
 import { pink } from '@mui/material/colors';
@@ -103,6 +102,7 @@ function SettingsPage() {
     const userId = currentUser.id; // Ensure userId is correctly defined
 
     const handleClick = (event) => {
+        event.stopPropagation();  // Prevents event bubbling to affect popover
         setAnchorEl(event.currentTarget);
     };
 
@@ -112,11 +112,13 @@ function SettingsPage() {
 
     const handleColorChange = (color) => {
         setAnchorEl(null);
-        setCurrentUser((prevUser) => ({
-            ...prevUser,
-            avatar: color
-        }));
-        updateUserAvatar(currentUser?.id, color);
+        if (currentUser.avatar !== color) {
+            setCurrentUser((prevUser) => ({
+                ...prevUser,
+                avatar: color
+            }));
+            updateUserAvatar(currentUser?.id, color);
+        }
     };
 
     const open = Boolean(anchorEl);
@@ -177,45 +179,46 @@ function SettingsPage() {
                         <AvatarContainer>
                             <Avatar sx={{ bgcolor: currentUser.avatar, width: 130, height: 130, marginBottom: '15px' }} > </Avatar>
                             <FabWrapper>
-                                <Fab size="small" color="black" aria-label="add">
-                                    <AddIcon aria-describedby={id} variant="contained" onClick={handleClick} />
-                                    <Popover
-                                        id={id}
-                                        open={open}
-                                        anchorEl={anchorEl}
-                                        onClose={handleClose}
-                                        anchorOrigin={{
-                                            vertical: 'bottom',
-                                            horizontal: 'left',
-                                        }}
-                                        PaperProps={{
-                                            style: {
-                                                width: '220px', // Adjust width as needed
-                                                maxHeight: '300px', // Adjust height as needed
-                                            },
-                                        }}
-                                    >
-                                        <Typography sx={{ p: 2 }}>Avatar colors</Typography>
-                                        <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                            {[lightGreen[500], red[500], grey[900], blueGrey[500], deepPurple[500]].map((color, index) => (
-                                                <Avatar
-                                                    key={index}
-                                                    sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
-                                                    onClick={() => handleColorChange(color)}
-                                                > </Avatar>
-                                            ))}
-                                        </Stack>
-                                        <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                            {[brown[500], deepOrange[500], yellow[500], indigo[500], pink[500]].map((color, index) => (
-                                                <Avatar
-                                                    key={index}
-                                                    sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
-                                                    onClick={() => handleColorChange(color)}
-                                                > </Avatar>
-                                            ))}
-                                        </Stack>
-                                    </Popover>
+                                <Fab size="small" color="black" aria-label="add" onClick={handleClick}>
+                                    <AddIcon aria-describedby={id} variant="contained" />
                                 </Fab>
+                                <Popover
+                                    id={id}
+                                    open={open}
+                                    anchorEl={anchorEl}
+                                    onClose={handleClose}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    }}
+                                    PaperProps={{
+                                        style: {
+                                            width: '220px', // Adjust width as needed
+                                            maxHeight: '300px', // Adjust height as needed
+                                        },
+                                    }}
+                                >
+                                    <Typography sx={{ p: 2 }}>Avatar colors</Typography>
+                                    <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+                                        {[lightGreen[500], red[500], grey[900], blueGrey[500], deepPurple[500]].map((color, index) => (
+                                            <Avatar
+                                                key={index}
+                                                sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
+                                                onClick={() => handleColorChange(color)}
+                                            > </Avatar>
+                                        ))}
+                                    </Stack>
+                                    <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+                                        {[brown[500], blue[500], yellow[500], indigo[500], pink[500]].map((color, index) => (
+                                            <Avatar
+                                                key={index}
+                                                sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
+                                                onClick={() => handleColorChange(color)}
+                                            > </Avatar>
+                                        ))}
+                                    </Stack>
+                                </Popover>
+
                             </FabWrapper>
                             <Typography variant="h6" fontWeight="bold">{currentUser.fname + " " + currentUser.lname}</Typography>
                             <Typography variant="h8" fontWeight="bold">{currentUser.position}</Typography>
