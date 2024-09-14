@@ -28,7 +28,7 @@ import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 
 function PeoplePage(props) {
-    const [member, setMember] = useState('');
+    const [member, setMember] = useState('Member');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -353,8 +353,9 @@ function PeoplePage(props) {
                                 onChange={(e) => setInviteEmail(e.target.value)}
                             />
                             <FormControl sx={{ minWidth: 120 }}>
-                                <InputLabel id="demo-select-small-label">Role</InputLabel>
+                                <InputLabel name="demo-select-small-label">Role</InputLabel>
                                 <Select
+                                    name="demo-select-role"
                                     labelId="demo-select-small-label"
                                     id="demo-select-small"
                                     value={member}
