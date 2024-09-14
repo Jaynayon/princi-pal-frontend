@@ -1,46 +1,24 @@
-import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import { Container, TextField, IconButton, Button, InputAdornment, Tabs, Tab } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import LockIcon from '@mui/icons-material/Lock';
-import PersonIcon from '@mui/icons-material/Person';
-import EmailIcon from '@mui/icons-material/Email';
-import { Link } from 'react-router-dom'; // Import Link for navigation
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
+import Typography from "@mui/material/Typography";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import React, { useState } from "react";
+import {
+    Container,
+    TextField,
+    IconButton,
+    Button,
+    InputAdornment
+} from "@mui/material";
+import {
+    VisibilityOff as VisibilityOffIcon,
+    Lock as LockIcon,
+    Person as PersonIcon,
+    Email as EmailIcon,
+} from '@mui/icons-material';
+import { useNavigationContext } from '../Context/NavigationProvider';
 import axios from 'axios';
-import { useNavigationContext } from '../Context/NavigationProvider'; // Ensure this is the correct path
-
-import PropTypes from 'prop-types';
-// TabPanel component for displaying content based on the active tab
-const TabPanel = ({ children, value, index }) => {
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`tabpanel-${index}`}
-            aria-labelledby={`tab-${index}`}
-        >
-            {value === index && (
-                <Box sx={{ p: 3 }}>
-                    {children}
-                </Box>
-            )}
-        </div>
-    );
-};
-
-TabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.any.isRequired,
-    value: PropTypes.any.isRequired,
-};
 
 function AdminPage(props) {
     const { currentUser, validateUsernameEmail } = useNavigationContext();
@@ -60,11 +38,6 @@ function AdminPage(props) {
         lastName: '',
         confirmPassword: ''
     });
-    const [tabValue, setTabValue] = useState(0);
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
-
     const [formValid, setFormValid] = useState(true); // Track form validity
     const [isTyping, setIsTyping] = useState(false);
 
@@ -155,7 +128,7 @@ function AdminPage(props) {
 
     const getPrincipal = async (schoolId) => {
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users/principal`, {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/principal`, {
                 schoolId
             }, {
                 headers: {
@@ -219,7 +192,6 @@ function AdminPage(props) {
         // Check if school exists
         if (key === "name" && integrateFormData.name !== "") {
             nameExists = await getSchoolName(value);
-            console.log(nameExists)
 
             //!nameExists ? setIntegrateSchoolError(true) : setIntegrateSchoolError(false);
             if (!nameExists) {
@@ -228,7 +200,6 @@ function AdminPage(props) {
             } else {
                 // Check if school already has a principal integrated
                 const principal = await getPrincipal(nameExists.id);
-                console.log(principal)
                 if (principal) {
                     setIntegrateSchoolError(true)
                     setErrorMessage("A principal already exists in this school");
@@ -309,22 +280,15 @@ function AdminPage(props) {
 
     const schoolOnBlur = async (key, value) => {
         let nameExists
-
-        if (key === "name" && value !== "") {
+        if (key === "name" && schoolFormData.name !== "") {
             nameExists = await getSchoolName(value);
             nameExists ? setSchoolNameError(true) : setSchoolNameError(false);
-        } else if (key === "fullName" && value !== "") {
+        } else if (key === "fullName" && schoolFormData.fullName !== "") {
             nameExists = await getSchoolName(value);
-            console.log(nameExists)
             nameExists ? setSchoolFullNameError(true) : setSchoolFullNameError(false);
-        } else {
-            if (key === "fullName") {
-                setSchoolFullNameError(false);
-            } else {
-                setSchoolNameError(false);
-            }
+        } else if (schoolFormData.name === "" || schoolFormData.fullName === "") {
+            schoolFormData.name === "" ? setSchoolNameError(false) : setSchoolFullNameError(false);
         }
-
         setIsTyping(false);
     }
 
@@ -524,22 +488,17 @@ function AdminPage(props) {
         return false;
     }
 
-    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-
-    const handleLogout = () => {
-        logoutUser('jwt');
-        setLogoutDialogOpen(false); // Close dialog after logout
-    };
-
-    const logoutUser = (cookieName) => {
+    function logoutUser(cookieName) {
+        // Check if the cookie exists
         if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
-            document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+            // Overwrite the cookie with an empty value and a path that matches the original cookie's path
+            document.cookie = `${cookieName}=; path=/;`;
             console.log(`${cookieName} cookie removed.`);
-            window.location.href = "/"; // Redirect after logout
+            window.location.href = "http://localhost:3000/";
         } else {
             console.log(`${cookieName} cookie not found.`);
         }
-    };
+    }
 
     const defaultTheme = createTheme({
         typography: {
@@ -549,77 +508,76 @@ function AdminPage(props) {
     });
 
     return (
-        <Container
-            maxWidth={false}
-            style={{
-                width: "100vw",
-                height: "100vh",
-                position: "relative",
-                overflow: "auto",
-                backgroundImage: `url(/bg.png)`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-            }}
-        >
-            <Container
-                maxWidth="md"
-                style={{
-                    minHeight: "100vh",
+        <ThemeProvider theme={defaultTheme}>
+            <Box
+                sx={{
                     display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
                     alignItems: "center",
-                    position: "relative",
-                    zIndex: 1,
-                    paddingTop: "64px",
-                    padding: "0 1rem",
+                    justifyContent: "center",
+                    minHeight: "100vh",
+                    backgroundImage: `url(/bg.png)`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
                 }}
             >
-                <Typography
-                    variant="h4"
-                    style={{ marginBottom: "2rem", marginTop: "2rem", fontFamily: "Mulish", color: "#000", textAlign: "center" }}
-                >
-                    Admin Page
-                </Typography>
-
-                <Paper
-                    style={{
-                        width: '100%',
-                        padding: '2rem',
-                        borderRadius: '10px',
-                        margin: 'auto',
-                        position: 'relative',
-                        bottom: '20px',
-                        left: '0',
-                        right: '0',
-                        zIndex: 1,
+                <Box
+                    sx={{
+                        pt: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        width: "1000px",
+                        // backgroundColor: "green"
                     }}
                 >
-                    <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                        <Tabs value={tabValue} onChange={handleTabChange} centered>
-                            <Tab label="Create Principal" />
-                            <Tab label="Create School" />
-                            <Tab label="Integrate Principal" />
-                        </Tabs>
-                        <Button onClick={() => setLogoutDialogOpen(true)}>Logout</Button>
+                    <Box sx={{
+                        display: 'flex',
+                        alignSelf: "flex-start",
+                        flexDirection: "row",
+                        flexGrow: 1,
+                        pt: 3,
+                        pb: 2
+                    }}>
+                        <Typography
+                            component="h1"
+                            variant="h6"
+                            color="inherit"
+                            noWrap
+                            sx={{
+                                textAlign: "left",
+                                color: "#252733",
+                                fontWeight: "bold",
+                                pr: 2
+                            }}
+                        >
+                            Admin Page
+                        </Typography>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => logoutUser('jwt')}
+                        >
+                            Logout
+                        </Button>
                     </Box>
-
-                    {/* Tab Content */}
-                    <Box
-                        sx={{
-                            minHeight: "60vh",
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            paddingTop: "3rem",
-                            width: "100%",
-                            maxWidth: "700px", // Adjust if needed
-                            margin: "0 auto", // Center align horizontally
-                        }}
-                    >
-                        {tabValue === 0 && (
-                            <Box>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={6} lg={6}>
+                            <Container
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    position: "relative",
+                                    zIndex: 1,
+                                    scale: "0.8",
+                                    height: "550px"
+                                }}
+                            >
+                                <div style={{ marginBottom: "1rem" }}>
+                                    <b style={{ fontSize: "20px", fontFamily: "Mulish", color: "#000" }}>
+                                        Create a new principal account</b>
+                                </div>
                                 {[
                                     { label: "Email", icon: <EmailIcon />, key: 'email' },
                                     { label: "Username", icon: <PersonIcon />, key: 'username', maxLength: 20 },
@@ -631,7 +589,7 @@ function AdminPage(props) {
                                 ].map((item, index) => (
                                     <TextField
                                         key={index}
-                                        style={{ marginBottom: "1rem", width: "100%", maxWidth: '400px' }}
+                                        style={{ marginBottom: "1rem", width: "100%" }}
                                         color="primary"
                                         onBlur={(event) => {
                                             if (item.key === 'email') handleExistingEmail(event);
@@ -654,31 +612,16 @@ function AdminPage(props) {
                                                 </InputAdornment>
                                             ),
                                         }}
-                                        inputProps={{ maxLength: item.maxLength }}
-                                        sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }}
+                                        inputProps={{ maxLength: item.maxLength }} // Set maxlength attribute
+                                        sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }} // Set background color and outline color
                                     />
                                 ))}
-
                                 {registrationError && (
                                     <div style={{ color: "red", marginBottom: "1rem" }}>{registrationError}</div>
                                 )}
-
                                 <Button
                                     sx={{
-                                        backgroundColor: "#4a99d3",
-                                        color: "#fff",
-                                        textTransform: "none",
-                                        width: "100%",
-                                        maxWidth: '400px',
-                                        marginBottom: "1rem",
-                                        padding: "15px",
-                                        borderRadius: "1.5px",
-                                        cursor: "pointer",
-                                        transition: "background-color 0.3s",
-                                        "&:hover": { backgroundColor: "#474bca" },
-                                        display: 'block',
-                                        marginLeft: 'auto',
-                                        marginRight: 'auto',
+                                        backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem", padding: "15px", borderRadius: "1.5px", cursor: "pointer", transition: "background-color 0.3s", "&:hover": { backgroundColor: "#474bca", },
                                     }}
                                     disabled={
                                         (usernameError || emailError || emailExistsError || passwordError || confirmPasswordError) ||
@@ -690,153 +633,177 @@ function AdminPage(props) {
                                 >
                                     Create Account
                                 </Button>
-                            </Box>
-                        )}
+                            </Container>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={6}>
+                            {/*Create School*/}
+                            <Paper>
+                                <Box sx={styles.container}>
+                                    <Typography
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={styles.title}
+                                    >
+                                        Create School
+                                    </Typography>
+                                    <Typography
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={styles.description}
+                                    >
+                                        Create a new school to manipulate documents
+                                    </Typography>
+                                    <TextField
+                                        variant='outlined'
+                                        label='School Name'
+                                        sx={{ m: 1 }}
+                                        value={schoolFormData["name"]}
+                                        error={schoolFormData.name === "" ? false : schoolNameError}
+                                        helperText={schoolNameError && "School name already exists"}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
+                                        onBlur={(event) => schoolOnBlur("name", event.target.value)}
+                                        onChange={(event) => handleSchoolInputChange("name", event.target.value)}
+                                    />
+                                    <TextField
+                                        variant='outlined'
+                                        label='School Full Name'
+                                        sx={{ m: 1 }}
+                                        value={schoolFormData["fullName"]}
+                                        error={schoolFormData.fullName === "" ? false : schoolFullNameError}
+                                        helperText={schoolFullNameError && "School full name already exists"}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
+                                        onBlur={(event) => schoolOnBlur("fullName", event.target.value)}
+                                        onChange={(event) => handleSchoolInputChange("fullName", event.target.value)}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={
+                                            (schoolFullNameError || schoolNameError) ||
+                                            (schoolFormData.name === "" || schoolFormData.fullName === "") ||
+                                            isTyping
+                                        }
+                                        onClick={() => handleSchoolSubmit()}
+                                    >
+                                        Create School
+                                    </Button>
+                                </Box>
+                            </Paper>
+                            {/*Integrate Principal*/}
+                            <Paper>
+                                <Box sx={[styles.container, { mt: 2 }]}>
+                                    <Typography
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={styles.title}
+                                    >
+                                        Integrate Principal
+                                    </Typography>
+                                    <Typography
+                                        component="h1"
+                                        variant="h6"
+                                        color="inherit"
+                                        noWrap
+                                        sx={styles.description}
+                                    >
+                                        Integrate principal to an existing school
+                                    </Typography>
+                                    <TextField
+                                        variant='outlined'
+                                        label='School Name or Full Name'
+                                        sx={{ m: 1 }}
+                                        value={integrateFormData["name"]}
+                                        error={integrateFormData.name === "" ? false : integrateSchoolError}
+                                        helperText={integrateSchoolError && errorMessage}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
+                                        onBlur={(event) => integrateOnBlur("name", event.target.value)}
+                                        onChange={(event) => handleIntegrateInputChange("name", event.target.value)}
+                                    />
+                                    <TextField
+                                        variant='outlined'
+                                        label='Email or Username'
+                                        sx={{ m: 1 }}
+                                        value={integrateFormData["email"]}
+                                        error={integrateFormData.email === "" ? false : emailUsernameError}
+                                        helperText={emailUsernameError && userErrorMessage}
+                                        InputLabelProps={styles.InputLabelProps}
+                                        InputProps={styles.InputProps}
+                                        onBlur={(event) => integrateOnBlur("email", event.target.value)}
+                                        onChange={(event) => handleIntegrateInputChange("email", event.target.value)}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={
+                                            (integrateSchoolError || emailUsernameError) ||
+                                            (integrateFormData.name === "" || integrateFormData.email === "") ||
+                                            isTyping
+                                        }
+                                        onClick={() => handleIntegrateSubmit()}
+                                    >
+                                        Integrate User
+                                    </Button>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                </Box>
+            </Box>
+        </ThemeProvider>
 
-                        {tabValue === 1 && (
-                            <Box sx={{ width: "100%", display: "flex", justifyContent: "center", maxWidth: "400px", marginBottom: "10%" }}>
-                                {/* Create School Form */}
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <Typography component="p">School Registration for Document Management</Typography>
-                                        <TextField
-                                            variant="outlined"
-                                            label="School Name"
-                                            sx={{
-                                                m: 1,
-                                                width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
-                                                backgroundColor: "#DBF0FD",
-                                                '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" },
-                                                borderRadius: '8px'
-                                            }}
-                                            value={schoolFormData["name"]}
-                                            error={schoolFormData.name === "" ? false : schoolNameError}
-                                            helperText={schoolNameError && "School name already exists"}
-                                            onBlur={(event) => schoolOnBlur("name", event.target.value)}
-                                            onChange={(e) => handleSchoolInputChange("name", e.target.value)}
-                                        />
-                                        <TextField
-                                            variant="outlined"
-                                            label="School Full Name"
-                                            sx={{
-                                                m: 1,
-                                                width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
-                                                backgroundColor: "#DBF0FD",
-                                                '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" },
-                                                borderRadius: '8px'
-                                            }}
-                                            value={schoolFormData["fullName"]}
-                                            error={schoolFormData.fullName === "" ? false : schoolFullNameError}
-                                            helperText={schoolFullNameError && "School full name already exists"}
-                                            onBlur={(event) => schoolOnBlur("fullName", event.target.value)}
-                                            onChange={(e) => handleSchoolInputChange("fullName", e.target.value)}
-                                        />
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            sx={{
-                                                width: 'calc(100% - 2rem)',  // Match width with TextField
-                                                mt: 1, // Margin top to space from TextField
-                                                backgroundColor: "#4a99d3",
-                                                '&:hover': { backgroundColor: "#474bca" }
-                                            }}
-                                            disabled={
-                                                (schoolFullNameError || schoolNameError) ||
-                                                (schoolFormData.name === "" || schoolFormData.fullName === "") ||
-                                                isTyping
-                                            }
-                                            onClick={() => handleSchoolSubmit()}
-                                        >
-                                            Create School
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        )}
-
-                        {tabValue === 2 && (
-                            <Box sx={{ width: "100%", display: "flex", justifyContent: "center", maxWidth: "400px", marginBottom: "10%" }}>
-                                {/* Integrate Principal Form */}
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <Typography component="p">Assign principal to an existing school</Typography>
-                                        <TextField
-                                            variant="outlined"
-                                            label="School Name or Full Name"
-                                            sx={{
-                                                m: 1,
-                                                width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
-                                                backgroundColor: "#DBF0FD",
-                                                '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" },
-                                                borderRadius: '8px'
-                                            }}
-                                            value={integrateFormData["name"]}
-                                            error={integrateFormData.name === "" ? false : integrateSchoolError}
-                                            helperText={integrateSchoolError && errorMessage}
-                                            onBlur={(event) => integrateOnBlur("name", event.target.value)}
-                                            onChange={(event) => handleIntegrateInputChange("name", event.target.value)}
-                                        />
-                                        <TextField
-                                            variant="outlined"
-                                            label="Email or Username"
-                                            sx={{
-                                                m: 1,
-                                                width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
-                                                backgroundColor: "#DBF0FD",
-                                                '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" },
-                                                borderRadius: '8px'
-                                            }}
-                                            value={integrateFormData["email"]}
-                                            error={integrateFormData.email === "" ? false : emailUsernameError}
-                                            helperText={emailUsernameError && userErrorMessage}
-                                            onBlur={(event) => integrateOnBlur("email", event.target.value)}
-                                            onChange={(event) => handleIntegrateInputChange("email", event.target.value)}
-                                        />
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            sx={{
-                                                width: 'calc(100% - 2rem)',  // Match width with TextField
-                                                mt: 1, // Margin top to space from TextField
-                                                backgroundColor: "#4a99d3",
-                                                '&:hover': { backgroundColor: "#474bca" }
-                                            }}
-                                            disabled={
-                                                (integrateSchoolError || emailUsernameError) ||
-                                                (integrateFormData.name === "" || integrateFormData.email === "") ||
-                                                isTyping
-                                            }
-                                            onClick={() => handleIntegrateSubmit()}
-                                        >
-                                            Integrate Principal
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-
-                            </Box>
-                        )}
-                    </Box>
-                </Paper>
-            </Container>
-
-            {/* Logout confirmation dialog */}
-            <Dialog open={logoutDialogOpen} onClose={() => setLogoutDialogOpen(false)} aria-labelledby="logout-dialog-title" maxWidth="xs" fullWidth>
-                <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
-                <DialogContent sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-end", p: 0 }}>
-                    <DialogActions>
-                        <Box>
-                            <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
-                                Cancel
-                            </Button>
-                            <Button onClick={handleLogout} color="primary">
-                                Logout
-                            </Button>
-                        </Box>
-                    </DialogActions>
-                </DialogContent>
-            </Dialog>
-        </Container>
     );
 }
+
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: "column",
+        padding: 3
+    },
+    title: {
+        flexGrow: 1,
+        textAlign: "left",
+        color: "#252733",
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        pl: 1
+    },
+    description: {
+        flexGrow: 1,
+        textAlign: "left",
+        color: "#9FA2B4",
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        fontSize: 12,
+        pb: 1,
+        pl: 1
+    },
+    InputLabelProps: {
+        style: {
+            fontSize: 14,
+            color: 'black', // Adjust color if needed
+            marginTop: -4, // Adjust vertical positioning
+        }
+    },
+    InputProps: {
+        style: {
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 14,
+            height: 40
+        }
+    }
+}
+
+
 
 export default AdminPage;
