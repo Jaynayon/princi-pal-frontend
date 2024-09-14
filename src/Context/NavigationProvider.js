@@ -8,7 +8,7 @@ const NavigationContext = createContext();
 export const useNavigationContext = () => useContext(NavigationContext);
 
 export const NavigationProvider = ({ children }) => {
-    const { currentUser } = useAppContext();
+    const { currentUser, isLoggedIn } = useAppContext();
 
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
     const [selected, setSelected] = useState('Dashboard');
@@ -124,12 +124,23 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
+    // RegEx that transform route text to school name
+    function transformText(input = "") {
+        if (typeof input !== 'string') {
+            return ''; // Return an empty string or handle it according to your needs
+        }
+        return input
+            .replace(/-/g, ' ')   // Replace all hyphens with spaces
+            .replace(/\//g, '')   // Remove all forward slashes
+            .toUpperCase();       // Convert all letters to uppercase
+    }
+
     useEffect(() => {
         // Extract the root route if it's the /schools route
         const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
 
-        // if current user is not null or undefined, or in /schools, set school
-        if (!currentSchool && currentUser && (extractRoute !== "/schools")) {
+        // if current user is not null or undefined, or not in /schools, set default school
+        if (currentUser && !currentSchool && (extractRoute !== "/schools")) {
             setCurrentSchool(currentUser.schools[0]);
         }
 
@@ -146,42 +157,26 @@ export const NavigationProvider = ({ children }) => {
             let localStorageValue = pathToLocalStorageValue[location.pathname];
 
             if (!localStorageValue) {
-                // Extract the root route if it's the /schools route
-                const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
-                // Extract the school name
-                const schoolNameRoute = location.pathname.split('/')[2];
-
                 if (extractRoute === "/schools") {
-                    // RegEx that transform route text to school name
-                    function transformText(input = "") {
-                        if (typeof input !== 'string') {
-                            return ''; // Return an empty string or handle it according to your needs
-                        }
-                        return input
-                            .replace(/-/g, ' ')   // Replace all hyphens with spaces
-                            .replace(/\//g, '')   // Remove all forward slashes
-                            .toUpperCase();       // Convert all letters to uppercase
-                    }
-
+                    // Extract the school name
+                    const schoolNameRoute = location.pathname.split('/')[2];
                     const schoolName = transformText(schoolNameRoute); // Set school name as local storage value
 
                     // Check if schoolName is present in the name property of any object in currentUser.schools
                     const isSchoolValid = currentUser.schools.some(school => school?.name === schoolName);
-
                     const matchedSchool = currentUser.schools.find(school => school?.name === schoolName)
 
                     // Set localStorageValue based on the validity of schoolName
                     localStorageValue = isSchoolValid ? schoolName : "Dashboard";
 
                     // School url is invalid/does not exist with user
-                    if (!isSchoolValid) {
-                        navigate('/dashboard');
-                    }
+                    if (!isSchoolValid) { navigate('/dashboard'); }
 
                     // Fetch selected school data by setting the current school state
-                    if (matchedSchool) {
-                        setCurrentSchool(matchedSchool);
-                    }
+                    if (matchedSchool) { setCurrentSchool(matchedSchool); }
+                } else {
+                    // If user is logged in, redirect to inner modules
+                    navigate('/');
                 }
             }
             // Set the state with the current local storage value
@@ -212,6 +207,10 @@ export const NavigationProvider = ({ children }) => {
     useEffect(() => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
     }, [selected]);
+
+    // useEffect(() => {
+    //     window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
+    // }, [isLoggedIn]);
 
     return (
         <NavigationContext.Provider value={{
