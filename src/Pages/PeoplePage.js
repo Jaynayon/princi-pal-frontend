@@ -68,6 +68,7 @@ function PeoplePage(props) {
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`, { schoolId: selectedValue });
             setRows(response.data); // Update the state with the fetched data
+            console.log(response.data)
         } catch (error) {
             console.error('Error fetching users:', error);
         }
@@ -138,7 +139,7 @@ function PeoplePage(props) {
 
     const handleAccept = async (associationRequest) => {
         try {
-            const response = await fetch('http://localhost:4000/associations/approve', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -153,6 +154,9 @@ function PeoplePage(props) {
 
             const data = await response.json();
             console.log('Success:', data);
+
+            // Update table/fetch user after accept
+            fetchUsers();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -190,9 +194,11 @@ function PeoplePage(props) {
 
     const confirmDelete = async () => {
         try {
-            if (selectedIndex && rows[selectedIndex]) {
+            if (rows[selectedIndex]) {
                 const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
+
+                console.log(`${userId} and ${schoolId}`)
                 // Make an API call to delete the user association
                 const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`);
                 console.log("User deleted successfully. " + response.data);
@@ -263,32 +269,6 @@ function PeoplePage(props) {
         setConfirmationDialogOpen(false);
         setDropdownAnchorEl(null);
     };
-
-    /*const handleInvite = () => {
-        if (inviteEmail.trim() === '') {
-            setInvitationMessage('Please enter a valid email.');
-            return;
-        }
-    
-        console.log("Inviting email:", inviteEmail);
-    
-        const invitePayload = {
-            email: inviteEmail, // or another identifier
-            schoolId: currentSchool.id // Ensure you have the correct schoolId
-        };
-    
-        axios.post('http://localhost:4000/associations/invite', invitePayload)
-            .then(response => {
-                console.log("Invitation sent successfully:", response.data);
-                setInvitationMessage('Invitation sent successfully!');
-            })
-            .catch(error => {
-                console.error("Error inviting member:", error.response ? error.response.data : error.message);
-                setInvitationMessage('Failed to send invitation. Please try again.');
-            });
-    
-        setInviteEmail('');
-    };*/
 
     const handleInvite = () => {
         if (inviteEmail.trim() === '') {
@@ -402,7 +382,7 @@ function PeoplePage(props) {
                                 </Button>
                                 <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
-                                    <List>
+                                    <List sx={{ p: 3 }}>
                                         {applications.length === 0 ? (
                                             <ListItem>
                                                 <ListItemText primary="No applications found." />
