@@ -16,13 +16,76 @@ import { useNavigationContext } from '../Context/NavigationProvider';
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 
+const calculateWeeklyExpenses = (expensesData) => {
+    // Initialize an empty object to hold the weekly totals for each UACS category
+    const weeklyExpenses = {};
 
+    // Convert date strings to Date objects
+    const dates = expensesData.map(({ date }) => new Date(date));
+    const earliestDate = new Date(Math.min(...dates));
+    const latestDate = new Date(Math.max(...dates));
+
+    // Helper function to get the difference in weeks between two dates
+    const getWeekDifference = (startDate, endDate) => {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const timeDiff = end - start;
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert time difference to days
+        const maxWeeks = Math.ceil(daysDiff / 7) <= 12 ? Math.ceil(daysDiff / 7) : 12;
+        return maxWeeks; // Convert days to weeks
+    };
+
+    // Calculate the total number of weeks between the earliest and latest date
+    const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1; // +1 to include the final week
+
+    // Helper function to get the start date of a specific week index
+    const getStartOfWeek = (weekIndex, startDate) => {
+        const start = new Date(startDate);
+        start.setDate(start.getDate() + weekIndex * 7);
+        return start;
+    };
+
+    // Helper function to determine the week index (relative to the earliest date)
+    const getWeekIndex = (date) => {
+        const startOfWeek = new Date(earliestDate);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Move to the start of the week
+        const timeDiff = date - startOfWeek;
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert time difference to days
+        return Math.floor(daysDiff / 7); // Convert days to week index
+    };
+
+    // Initialize weekly expenses for all object codes
+    expensesData.forEach(({ objectCode }) => {
+        if (!weeklyExpenses[objectCode]) {
+            weeklyExpenses[objectCode] = new Array(totalWeeks).fill(0);
+        }
+    });
+
+    // Process each expense entry
+    expensesData.forEach(({ date, objectCode, amount }) => {
+        const expenseDate = new Date(date);
+        const weekIndex = getWeekIndex(expenseDate);
+
+        // Add the amount to the appropriate week index
+        if (weekIndex >= 0 && weekIndex < totalWeeks) {
+            weeklyExpenses[objectCode][weekIndex] += amount;
+        }
+
+        // Log the intermediate results for debugging
+        console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
+        console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
+    });
+
+    console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
+    return weeklyExpenses;
+};
 
 
 //Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
+
 
 
 
@@ -128,10 +191,18 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         return <Typography variant="body1"></Typography>;
     }
 
-    // Determine the categories for the x-axis
+    // Helper function to generate dynamic week labels
+    const generateWeekLabels = (numberOfWeeks) => {
+        return Array.from({ length: numberOfWeeks }, (_, i) => `Week ${i + 1}`);
+    };
+
+    let weekLength = uacsData.find(item => item.code === selectedCategory).expenses.length;
+
+    // Determine the categories for the x-axis dynamically
     const categories = selectedCategory === '19901020000'
         ? uacsData.slice(0, -1).map(uacs => uacs.name) // Exclude the 'Total' category itself
-        : ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
+        : generateWeekLabels(weekLength >= 12 ? 12 : weekLength); // Dynamically generate based on the number of weeks
+
 
     const budgetToUse = selectedCategory === '19901020000' ? budgetLimit : selectedUacs.budget;
     const maxExpense = selectedCategory === '19901020000'
@@ -146,6 +217,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                 <div style={{ position: 'relative', marginBottom: '40px' }}>
                     {/* Render the line chart based on selected category */}
                     <div>
+                        <ReactApexChart
                         <ReactApexChart
                             options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
                             series={generateSeries()}
@@ -183,12 +255,17 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 function DashboardPage(props) {
     const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
     const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
+    const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
+    const [setError] = useState('');
     const [loadingSchools] = useState(false);
     const [schoolBudget] = useState(null);
+
+    const [uacsData, setUacsData] = useState([]);
+
 
     // This function only runs when dependencies: currentSchool & currentUser are changed
 
@@ -228,6 +305,86 @@ function DashboardPage(props) {
         updateLr();
     }, [initializeSelectedSchool, updateJev, updateLr]);
 
+    useEffect(() => {
+        // Sample data
+        const sampleUacsData = [
+            {
+                code: '5020502001',
+                name: 'Communication Expenses',
+                budget: jev[0]?.budget,
+                expenses: [0, 0, 0, 0, 0]//93,000
+            },
+            {
+                code: '5020402000',
+                name: 'Electricity Expenses',
+                budget: jev[1]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020503000',
+                name: 'Internet Subscription Expenses',
+                budget: jev[2]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5029904000',
+                name: 'Transpo/Delivery Expenses',
+                budget: jev[3]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020201000',
+                name: 'Training Expenses',
+                budget: jev[4]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020399000',
+                name: 'Other Supplies & Materials Expenses',
+                budget: jev[5]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '1990101000',
+                name: 'Advances to Operating Expenses',
+                budget: jev[6]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '19901020000',
+                name: 'Total',
+                budget: 500000,
+                expenses: [0, 0, 0, 0, 0]
+            }
+        ];
+
+        const fetchData = async () => {
+            try {
+                if (lr && lr.length > 0) {
+                    // Calculate weekly expenses from the LR data
+                    const weeklyExpenses = calculateWeeklyExpenses(lr);
+
+                    // Update uacsData with the calculated weekly expenses
+                    const updatedUacsData = sampleUacsData.map(uacs => {
+                        if (weeklyExpenses[uacs.code]) {
+                            return {
+                                ...uacs,
+                                expenses: weeklyExpenses[uacs.code]
+                            };
+                        }
+                        return uacs;
+                    });
+
+                    setUacsData(updatedUacsData);
+                }
+            } catch (error) {
+                console.error('Error processing data:', error);
+            }
+        };
+
+        fetchData();
+    }, [lr, jev]);
+
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
         setCurrentSchool(currentUser.schools.find(s => s.id === schoolId));
@@ -258,6 +415,7 @@ function DashboardPage(props) {
             return false;
         }
     };
+
     // Sample data
     const sampleUacsData = [
         {
@@ -574,7 +732,7 @@ function DashboardPage(props) {
                                     }}
 
                                 >
-                                    <ApexChart uacsData={sampleUacsData} budgetLimit={currentDocument?.budgetLimit} />
+                                    <ApexChart uacsData={uacsData} budgetLimit={currentDocument?.budgetLimit} />
                                     <ApexChart totalBudget={schoolBudget} />
                                 </Paper>
                             </Grid>

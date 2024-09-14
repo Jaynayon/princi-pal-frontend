@@ -264,7 +264,7 @@ function PeoplePage(props) {
         setDropdownAnchorEl(null);
     };
 
-    const handleInvite = () => {
+    /*const handleInvite = () => {
         if (inviteEmail.trim() === '') {
             setInvitationMessage('Please enter a valid email.');
             return;
@@ -288,9 +288,34 @@ function PeoplePage(props) {
             });
     
         setInviteEmail('');
-    };
-    
+    };*/
 
+    const handleInvite = () => {
+        if (inviteEmail.trim() === '') {
+            setInvitationMessage('Please enter a valid email.');
+            return;
+        }
+        
+        console.log("Inviting email:", inviteEmail);
+        
+        const invitePayload = {
+            email: inviteEmail,
+            schoolId: currentSchool.id,
+            admin: member === 'Admin' // Set the admin status based on dropdown selection
+        };
+        
+        axios.post('http://localhost:4000/associations/invite', invitePayload)
+            .then(response => {
+                console.log("Invitation sent successfully:", response.data);
+                setInvitationMessage('Invitation sent successfully!');
+            })
+            .catch(error => {
+                console.error("Error inviting member:", error.response ? error.response.data : error.message);
+                setInvitationMessage('Failed to send invitation. Please try again.');
+            });
+        
+        setInviteEmail('');
+    };    
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
@@ -328,20 +353,18 @@ function PeoplePage(props) {
                                 onChange={(e) => setInviteEmail(e.target.value)}
                             />
                             <FormControl sx={{ minWidth: 120 }} size="53px">
-                                <InputLabel sx={{}} id="demo-select-small-label">Member</InputLabel>
-                                <Select
-                                    sx={{}}
-                                    labelId="demo-select-small-label"
-                                    id="demo-select-small"
-                                    value={member}
-                                    label="Member"
-                                    onChange={(event) => setMember(event.target.value)}
-                                >
-                                    <MenuItem>Member</MenuItem>
-                                    <MenuItem>Guess</MenuItem>
-                                    <MenuItem>Admin</MenuItem>
-                                </Select>
-                            </FormControl>
+                            <InputLabel id="demo-select-small-label">Role</InputLabel>
+                            <Select
+                                labelId="demo-select-small-label"
+                                id="demo-select-small"
+                                value={member}
+                                label="Role"
+                                onChange={(event) => setMember(event.target.value)}
+                            >
+                                <MenuItem value="Member">Member</MenuItem>
+                                <MenuItem value="Admin">Admin</MenuItem>
+                            </Select>
+                        </FormControl>
                             <Button
                                 sx={{ width: "20%", height: "55px" }}
                                 variant="contained"
@@ -385,14 +408,17 @@ function PeoplePage(props) {
                                         ) : (
                                             applications.map(application => (
                                                 <ListItem key={application.id} disableGutters>
-                                                    <ListItemText primary={application.userName} />
+                                                    <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
                                                     <Button
-                                                        onClick={() => handleAccept({ userId: application.userId, schoolId: application.schoolId })}
+                                                        onClick={() => {
+                                                            handleAccept({ userId: application.id, schoolId: application.schoolId });
+                                                            handleClose();  // Close the dialog after accepting
+                                                        }}
                                                         variant="contained"
                                                         color="primary"
                                                     >
                                                         Accept
-                                                    </Button>;
+                                                    </Button>
                                                 </ListItem>
                                             ))
                                         )}
