@@ -39,11 +39,11 @@ const calculateWeeklyExpenses = (expensesData) => {
     const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1; // +1 to include the final week
 
     // Helper function to get the start date of a specific week index
-    const getStartOfWeek = (weekIndex, startDate) => {
-        const start = new Date(startDate);
-        start.setDate(start.getDate() + weekIndex * 7);
-        return start;
-    };
+    // const getStartOfWeek = (weekIndex, startDate) => {
+    //     const start = new Date(startDate);
+    //     start.setDate(start.getDate() + weekIndex * 7);
+    //     return start;
+    // };
 
     // Helper function to determine the week index (relative to the earliest date)
     const getWeekIndex = (date) => {
@@ -401,7 +401,7 @@ function DashboardPage(props) {
         };
 
         fetchData();
-    }, [lr, jev]);
+    }, [lr, jev, currentDocument.budget]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
@@ -516,8 +516,19 @@ function DashboardPage(props) {
                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 )}
                 {displayTitle === 'Budget Limit' && (
-                    <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                        <EditIcon sx={{ width: '30px', height: '30px' }} />
+                    <Button
+                        onClick={() => handleOpen(title)}
+                        className={clickedButton === title ? 'clicked' : ''}
+                        style={{
+                            display: currentUser.position !== "Principal" && "none",
+                            position: 'absolute',
+                            top: '10px', right: '10px',
+                            background: 'none',
+                            border: 'none',
+                            padding: 0
+                        }}
+                    >
+                        <EditIcon sx={{ display: false, width: '30px', height: '30px' }} />
                     </Button>
                 )}
                 {displayTitle === 'Total Balance' && (
