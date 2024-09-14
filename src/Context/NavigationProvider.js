@@ -8,7 +8,7 @@ const NavigationContext = createContext();
 export const useNavigationContext = () => useContext(NavigationContext);
 
 export const NavigationProvider = ({ children }) => {
-    const { currentUser, isLoggedIn } = useAppContext();
+    const { currentUser } = useAppContext();
 
     const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
     const [selected, setSelected] = useState('Dashboard');

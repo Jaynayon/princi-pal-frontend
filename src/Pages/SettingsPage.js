@@ -43,13 +43,6 @@ const DemoPaper = styled(Paper)(({ theme }) => ({
     position: 'relative', // Added to make the button positioning relative to the parent
 }));
 
-const DivContainer = styled('div')({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    position: 'relative', // Added to make the button positioning relative to the parent
-});
-
 const AvatarContainer = styled('div')({
     position: 'relative',
     display: 'flex',
