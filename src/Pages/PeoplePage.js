@@ -60,7 +60,7 @@ function PeoplePage(props) {
             console.error('Error fetching association:', error);
         }
     }, [currentUser, selectedValue]);
-    
+
     //currentUser association, which will change per school
     //to fetch the user from the school she belong
     // Function to fetch users by school ID
@@ -116,14 +116,14 @@ function PeoplePage(props) {
             console.error("Cannot fetch applications: School ID is missing.");
         }
     };
-    
+
     //
     useEffect(() => {
         // Assuming the current school is set based on some logic or user interaction
         if (selectedValue) {
             setCurrentSchool({ id: selectedValue });
         }
-    }, [selectedValue]);    
+    }, [selectedValue]);
 
     const handleClose = (value) => {
         setOpen(false);
@@ -136,7 +136,7 @@ function PeoplePage(props) {
         </Avatar>
     );
 
-        const handleAccept = async (associationRequest) => {
+    const handleAccept = async (associationRequest) => {
         try {
             const response = await fetch('http://localhost:4000/associations/approve', {
                 method: 'POST',
@@ -295,15 +295,15 @@ function PeoplePage(props) {
             setInvitationMessage('Please enter a valid email.');
             return;
         }
-        
+
         console.log("Inviting email:", inviteEmail);
-        
+
         const invitePayload = {
             email: inviteEmail,
             schoolId: currentSchool.id,
             admin: member === 'Admin' // Set the admin status based on dropdown selection
         };
-        
+
         axios.post('http://localhost:4000/associations/invite', invitePayload)
             .then(response => {
                 console.log("Invitation sent successfully:", response.data);
@@ -313,9 +313,9 @@ function PeoplePage(props) {
                 console.error("Error inviting member:", error.response ? error.response.data : error.message);
                 setInvitationMessage('Failed to send invitation. Please try again.');
             });
-        
+
         setInviteEmail('');
-    };    
+    };
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
@@ -352,19 +352,19 @@ function PeoplePage(props) {
                                 value={inviteEmail}
                                 onChange={(e) => setInviteEmail(e.target.value)}
                             />
-                            <FormControl sx={{ minWidth: 120 }} size="53px">
-                            <InputLabel id="demo-select-small-label">Role</InputLabel>
-                            <Select
-                                labelId="demo-select-small-label"
-                                id="demo-select-small"
-                                value={member}
-                                label="Role"
-                                onChange={(event) => setMember(event.target.value)}
-                            >
-                                <MenuItem value="Member">Member</MenuItem>
-                                <MenuItem value="Admin">Admin</MenuItem>
-                            </Select>
-                        </FormControl>
+                            <FormControl sx={{ minWidth: 120 }}>
+                                <InputLabel id="demo-select-small-label">Role</InputLabel>
+                                <Select
+                                    labelId="demo-select-small-label"
+                                    id="demo-select-small"
+                                    value={member}
+                                    label="Role"
+                                    onChange={(event) => setMember(event.target.value)}
+                                >
+                                    <MenuItem value="Member">Member</MenuItem>
+                                    <MenuItem value="Admin">Admin</MenuItem>
+                                </Select>
+                            </FormControl>
                             <Button
                                 sx={{ width: "20%", height: "55px" }}
                                 variant="contained"
@@ -378,6 +378,7 @@ function PeoplePage(props) {
                             <FormControl sx={{ minWidth: 150 }} >
                                 <InputLabel id="demo-select-small-label">School Filter</InputLabel>
                                 <Select
+                                    name="user-school-filter"
                                     labelId="demo-select-small-label"
                                     id="demo-select-small"
                                     value={selectedValue}
@@ -435,6 +436,7 @@ function PeoplePage(props) {
                                 <FormControl sx={{ minWidth: 150 }} >
                                     <InputLabel id="demo-select-small-label">School Filter</InputLabel>
                                     <Select
+                                        name="user-school-filter"
                                         labelId="demo-select-small-label"
                                         id="demo-select-small"
                                         value={selectedValue}
