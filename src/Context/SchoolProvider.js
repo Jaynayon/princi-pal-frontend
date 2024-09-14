@@ -377,6 +377,30 @@ export const SchoolProvider = ({ children }) => {
     //     }
     // }, [fetchDocumentData, isAdding, isEditing, currentUser.schools, selected]);
 
+    useEffect(() => {
+        let timeoutId;
+
+        const updateDocumentData = () => {
+            if (!isAdding && !isEditing) {
+                fetchDocumentData().finally(() => {
+                    // Set the next timeout after the fetch is complete
+                    timeoutId = setTimeout(updateDocumentData, 10000); // 10 seconds
+                });
+            } else {
+                timeoutId = setTimeout(updateDocumentData, 10000); // 10 seconds
+            }
+        };
+
+        // Check if user is in school tab or dashboard
+        if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
+            updateDocumentData();
+        }
+
+        // Cleanup function to clear the timeout
+        return () => clearTimeout(timeoutId);
+
+    }, [fetchDocumentData, isAdding, isEditing, currentUser.schools, selected]);
+
     return (
         <SchoolContext.Provider value={{
             prevMonthRef, prevYearRef,
