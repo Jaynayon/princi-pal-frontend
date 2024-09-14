@@ -31,6 +31,7 @@ import {
     Email as EmailIcon,
 } from '@mui/icons-material';
 import { useNavigationContext } from '../Context/NavigationProvider';
+import { useAppContext } from '../Context/AppProvider';
 
 const DemoPaper = styled(Paper)(({ theme }) => ({
     //width: 1200, adjust automatically
@@ -87,7 +88,8 @@ const ButtonWrapper = styled('div')({
 
 function SettingsPage() {
     const [anchorEl, setAnchorEl] = useState(null);
-    const { currentUser, updateUserPassword } = useNavigationContext();
+    const { currentUser, setCurrentUser } = useAppContext();
+    const { updateUserPassword, updateUserAvatar } = useNavigationContext();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -110,7 +112,11 @@ function SettingsPage() {
 
     const handleColorChange = (color) => {
         setAnchorEl(null);
-        currentUser.avatar = color;
+        setCurrentUser((prevUser) => ({
+            ...prevUser,
+            avatar: color
+        }));
+        updateUserAvatar(currentUser?.id, color);
     };
 
     const open = Boolean(anchorEl);
@@ -217,7 +223,7 @@ function SettingsPage() {
                     </Grid>
                     <Grid item xs={12} md={6} lg={5.5} sx={{ padding: '2px' }}>
                         <TextFieldWrapper>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
+                            <TextField sx={{ width: '100%' }} disabled id="email-outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -226,7 +232,7 @@ function SettingsPage() {
                                     ),
                                 }}
                             />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal"
+                            <TextField sx={{ width: '100%' }} disabled id="username-outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -234,7 +240,7 @@ function SettingsPage() {
                                         </InputAdornment>
                                     ),
                                 }} />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " "} margin="normal"
+                            <TextField sx={{ width: '100%' }} disabled id="fname-outlined-disabled" label="First Name" defaultValue={currentUser.fname + " "} margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -242,7 +248,7 @@ function SettingsPage() {
                                         </InputAdornment>
                                     ),
                                 }} />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " "} margin="normal"
+                            <TextField sx={{ width: '100%' }} disabled id="mname-outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " "} margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -250,7 +256,7 @@ function SettingsPage() {
                                         </InputAdornment>
                                     ),
                                 }} />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal"
+                            <TextField sx={{ width: '100%' }} disabled id="lname-outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">

@@ -107,6 +107,23 @@ export const NavigationProvider = ({ children }) => {
         }
     };
 
+    const updateUserAvatar = async (userId, avatar) => {
+        try {
+            const response = await axios.patch(`${process.env.REACT_APP_API_URL_USER}/${userId}/avatar`, {
+                avatar,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error updating password:', error);
+            return false;
+        }
+    };
+
     useEffect(() => {
         // Extract the root route if it's the /schools route
         const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
@@ -210,7 +227,8 @@ export const NavigationProvider = ({ children }) => {
             currentSchool,
             createUser,
             validateUsernameEmail,
-            updateUserPassword
+            updateUserPassword,
+            updateUserAvatar
         }}>
             {children}
         </NavigationContext.Provider>

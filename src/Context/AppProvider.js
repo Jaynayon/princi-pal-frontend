@@ -111,7 +111,7 @@ export const AppProvider = ({ children }) => {
         <AppContext.Provider value={{
             isLoggedIn, setIsLoggedIn,
             isSuperAdmin, setIsSuperAdmin,
-            currentUser,
+            currentUser, setCurrentUser,
             validateToken,
             getUserById,
             authenticateUser
