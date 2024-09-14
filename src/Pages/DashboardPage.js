@@ -218,7 +218,6 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                     {/* Render the line chart based on selected category */}
                     <div>
                         <ReactApexChart
-                        <ReactApexChart
                             options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
                             series={generateSeries()}
                             type={chartType}
@@ -253,8 +252,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
 
 function DashboardPage(props) {
-    const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
-    const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
+    const { currentUser, currentSchool, setCurrentSchool } = useNavigationContext();
     const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
