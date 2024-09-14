@@ -142,15 +142,22 @@ export default function Navigation({ children }) {
   const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser } = useNavigationContext();
   const { month, year, currentDocument, jev, currentSchool } = useSchoolContext();
   const [invitedUserId, setInvitedUserId] = useState(null); 
-  const [notifications, setNotifications] = useState([]);
+  const [isClicked, setIsClicked] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [previousBalance, setPreviousBalance] = useState(null);
 
-  const handleMenuOpen = (event) => {
+  const handleMenuOpen = async (event, notificationId) => {
     setAnchorEl(event.currentTarget);
+  
+    try {
+      // Call the API to mark the notification as read
+      await axios.put(`http://localhost:4000/Notifications/${notificationId}/read`);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
   };
 
   const handleMenuClose = () => {
@@ -293,11 +300,15 @@ const handleAcceptNotification = async (notificationId) => {
 
     // Send a POST request with notificationId as a URL parameter
     const response = await axios.post(`http://localhost:4000/associations/approve/${notificationId}`, {
-      // No need to include body as it's a URL parameter request
+     
     });
 
     // Log the successful response data
     console.log('Success:', response.data);
+
+    const updateNotificationUrl = `http://localhost:4000/Notifications/accept/${notificationId}`;
+        await axios.put(updateNotificationUrl);
+
   } catch (error) {
     // Log the error response or message
     if (error.response) {
@@ -312,13 +323,47 @@ const handleAcceptNotification = async (notificationId) => {
       console.error('Error:', error.message);
     }
   }
+
+  setIsClicked(true);
+
 };
 
 
-  const handleRejectNotification = (notificationId) => {
-    // Handle reject action, e.g., making an API call to update the notification status
-    console.log(`Rejected notification: ${notificationId}`);
-  };
+const handleRejectNotification = async (notificationId) => {
+  // Log the notificationId to verify its value
+  console.log("Notification ID:", notificationId);
+
+  try {
+    // Ensure notificationId is valid
+    if (!notificationId) {
+      throw new Error("Invalid request: notificationId is required.");
+    }
+
+    // First, reject the notification (this could be a `PUT` or `DELETE` based on your logic)
+    const rejectNotificationUrl = `http://localhost:4000/Notifications/reject/${notificationId}`;
+    const rejectResponse = await axios.put(rejectNotificationUrl);
+
+    // Log the successful reject response
+    console.log('Notification Rejected & Association Deleted:', rejectResponse.data);
+
+    const deleteAssociation = `http://localhost:4000/associations/delete/${notificationId}`;
+        await axios.delete(deleteAssociation);
+
+  } catch (error) {
+    // Log the error response or message
+    if (error.response) {
+      console.error('Server Error:', error.response.data);
+    } else if (error.request) {
+      console.error('No Response:', error.request);
+    } else {
+      console.error('Error:', error.message);
+    }
+  }
+
+  setIsClicked(true);
+
+};
+
   
   useEffect(() => {
     if (currentUser && currentUser.id) {
@@ -602,10 +647,14 @@ const handleAcceptNotification = async (notificationId) => {
                                   <Button 
                                     onClick={() => handleAcceptNotification(option.id)} 
                                     sx={{ marginRight: '8px' }}
+                                    disabled={isClicked}
                                   >
                                     Accept
                                   </Button>
-                                  <Button onClick={() => handleRejectNotification(option.id)}>
+                                  <Button onClick={() => handleRejectNotification(option.id)}
+                                    sx={{ marginRight: '8px' }}
+                                    disabled={isClicked}
+                                  >
                                     Reject
                                   </Button>
                                 </Box>
