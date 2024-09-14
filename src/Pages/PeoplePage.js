@@ -295,27 +295,54 @@ function PeoplePage(props) {
             setInvitationMessage('Please enter a valid email.');
             return;
         }
-        
+    
         console.log("Inviting email:", inviteEmail);
-        
+    
         const invitePayload = {
             email: inviteEmail,
-            schoolId: currentSchool.id,
-            admin: member === 'Admin' // Set the admin status based on dropdown selection
+            schoolId: currentSchool.id
         };
-        
+    
         axios.post('http://localhost:4000/associations/invite', invitePayload)
             .then(response => {
-                console.log("Invitation sent successfully:", response.data);
-                setInvitationMessage('Invitation sent successfully!');
+                const invitedUserId = response.data.userId; // Ensure userId is correctly obtained
+                const schoolId = response.data.schoolId;
+                
+                // Fetch school name using the schoolId
+                axios.get(`http://localhost:4000/schools/${schoolId}`)
+                    .then(schoolResponse => {
+                        const schoolName = schoolResponse.data.fullName || 'your school'; // Use fetched school name or default
+    
+                        console.log("Invitation sent successfully:", response.data);
+                        setInvitationMessage('Invitation sent successfully!');
+    
+                        // Create notification payload for the invited user
+                        const notificationPayload = {
+                            userId: invitedUserId, // Use the userId from response data
+                            details: `You have been invited to join the association at ${schoolName}.`,
+                            assocId: response.data.id
+                        };
+    
+                        // Send the notification to the invited user
+                        axios.post('http://localhost:4000/Notifications/create', notificationPayload)
+                            .then(() => {
+                                console.log("Notification created successfully.");
+                            })
+                            .catch(error => {
+                                console.error("Error creating notification:", error.response ? error.response.data : error.message);
+                            });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching school details:", error.response ? error.response.data : error.message);
+                    });
             })
             .catch(error => {
                 console.error("Error inviting member:", error.response ? error.response.data : error.message);
                 setInvitationMessage('Failed to send invitation. Please try again.');
             });
-        
+    
         setInviteEmail('');
-    };    
+    };
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
