@@ -300,7 +300,8 @@ function PeoplePage(props) {
     
         const invitePayload = {
             email: inviteEmail,
-            schoolId: currentSchool.id
+            schoolId: currentSchool.id,
+            admin: member === 'Admin'
         };
     
         axios.post('http://localhost:4000/associations/invite', invitePayload)
