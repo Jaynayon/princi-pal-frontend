@@ -185,8 +185,6 @@ export default function Navigation({ children }) {
     } finally {
         setLoading(false);
     }
-
-    setIsClicked(true);
 }, []);
 
 const createNotification = useCallback(async (userId, details, NotificationsKey) => {
@@ -264,7 +262,10 @@ const handleAcceptNotification = async (notificationId) => {
      
     });
     const updateNotificationUrl = `http://localhost:4000/Notifications/accept/${notificationId}`;
-        await axios.put(updateNotificationUrl);
+        await axios.put(updateNotificationUrl, {
+          details: 'You accepted the invitation',
+          hasButtons: false
+        });
 
   } catch (error) {
     if (error.response) {
