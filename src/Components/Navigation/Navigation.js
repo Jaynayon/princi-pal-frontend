@@ -26,6 +26,7 @@ import Tab from '@mui/material/Tab';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 
 
 // Custom imports
@@ -576,7 +577,7 @@ const handleRejectNotification = async (notificationId) => {
                         return (
                           <div key={option.id}>
                             <MenuItem onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
-                              <Avatar sx={{ marginRight: '8px' }} />
+                              <CircleNotificationsIcon sx={{ marginRight: '8px' }} />
                               {option.details}
                               {option.hasButtons && (
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
