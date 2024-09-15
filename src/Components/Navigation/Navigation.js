@@ -24,7 +24,6 @@ import Divider from '@mui/material/Divider';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 
@@ -142,8 +141,6 @@ const displayTitle = (selected) => {
 export default function Navigation({ children }) {
   const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser } = useNavigationContext();
   const { month, year, currentDocument, jev, currentSchool } = useSchoolContext();
-  const [invitedUserId, setInvitedUserId] = useState(null); 
-  const [isClicked, setIsClicked] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -276,7 +273,6 @@ const handleAcceptNotification = async (notificationId) => {
       console.error('Error:', error.message);
     }
   }
-  setIsClicked(true);
 };
 
 
@@ -305,10 +301,13 @@ const handleRejectNotification = async (notificationId) => {
       console.error('Error:', error.message);
     }
   }
-
-  setIsClicked(true);
-
 };
+
+useEffect(() => {
+  if (currentUser && currentUser.id) {
+    fetchUserNotifications(currentUser.id);
+  }
+}, [currentUser, fetchUserNotifications]);
 
   useEffect(() => {
     if (currentDocument) {
@@ -380,13 +379,6 @@ const handleRejectNotification = async (notificationId) => {
       }
     }
   }, [currentDocument, createNotification, currentUser, month, year]);
-  
-  useEffect(() => {
-    if (currentUser && currentUser.id) {
-      fetchUserNotifications(currentUser.id);
-    }
-  }, [currentUser, fetchUserNotifications]);
-  
 
   const ITEM_HEIGHT = 48;
 
@@ -585,13 +577,11 @@ const handleRejectNotification = async (notificationId) => {
                                   <Button 
                                     onClick={() => handleAcceptNotification(option.id)} 
                                     sx={{ marginRight: '8px' }}
-                                    disabled={isClicked}
                                   >
                                     Accept
                                   </Button>
                                   <Button onClick={() => handleRejectNotification(option.id)}
                                     sx={{ marginRight: '8px' }}
-                                    disabled={isClicked}
                                   >
                                     Reject
                                   </Button>

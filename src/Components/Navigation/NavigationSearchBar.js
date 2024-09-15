@@ -47,11 +47,12 @@ const NavigationSearchBar = () => {
   const handleApplySchool = async () => {
     try {
         // Ensure selectedSchool has the required ID or value for the API request
-        await axios.post('http://localhost:4000/associations/apply', {
+        const response = await axios.post('http://localhost:4000/associations/apply', {
             userId: currentUser.id, // Replace with appropriate user ID
             schoolId: selectedSchool.id // Assuming selectedSchool has an 'id' property
         });
         console.log("Application submitted successfully.");
+        console.log("Response data:", response.data);
         // Update appliedSchools state if needed
         setAppliedSchools([...appliedSchools, selectedSchool.fullName]); // Add school to applied list
         handleClose(); // Close the dialog
@@ -68,12 +69,22 @@ const handleClickOpen = (school) => {
  
 // Ensure selectedSchool has an id property for the API request
  
-  const handleRemoveSchool = (schoolToRemove) => {
-    const updatedSchools = appliedSchools.filter(
-      (school) => school !== schoolToRemove
-    );
-    setAppliedSchools(updatedSchools);
-  };
+const handleRemoveSchool = async (schoolToRemove) => {
+  try {
+      // Assuming you have access to the current user's ID and the school ID
+      await axios.delete(`http://localhost:4000/associations/${currentUser.id}/${selectedSchool.id}`);
+      console.log("Association removed successfully.");
+
+      // Update appliedSchools state if needed
+      const updatedSchools = appliedSchools.filter(
+          (school) => school !== schoolToRemove
+      );
+      setAppliedSchools(updatedSchools);
+  } catch (error) {
+      console.error("Error removing school:", error);
+      // Handle error scenario
+  }
+};
  
   const handleChange = (event) => {
     setSelect(event.target.value);
