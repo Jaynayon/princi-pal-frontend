@@ -149,208 +149,152 @@ export default function Navigation({ children }) {
   const [error, setError] = useState(null);
   const [previousBalance, setPreviousBalance] = useState(null);
 
-  const handleMenuOpen = async (event, notificationId) => {
+  const handleMenuOpen = async (event) => {
     setAnchorEl(event.currentTarget);
-  
-    try {
-      // Call the API to mark the notification as read
-      await axios.put(`http://localhost:4000/Notifications/${notificationId}/read`);
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-    }
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
-  const fetchCurrentSchoolNotifications = useCallback(async () => {
-    if (!currentSchool || !currentSchool.id) {
-      console.log('No current school ID');
-      return;
-    }
-  
-    console.log('Fetching notifications for school ID:', currentSchool.id);
-    setLoading(true);
-    try {
-      const response = await axios.get(`http://localhost:4000/Notifications/school/${currentSchool.id}`);
-      console.log('Response status:', response.status);
-      console.log('Fetched notifications data:', response.data);
-  
-      if (Array.isArray(response.data)) {
-        console.log('Number of notifications:', response.data.length);
-        setOptions(response.data.reverse()); // Reverse to show newest notifications first
-      } else {
-        console.error('Unexpected response format:', response.data);
-      }
-  
-      setError(null);
-    } catch (error) {
-      setError(error.message);
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentSchool]);
-  
+ 
   const fetchUserNotifications = useCallback(async (userId) => {
     if (!userId) {
-      console.log('No user ID');
-      return;
+        console.log('No user ID');
+        return;
     }
-  
+
     console.log('Fetching notifications for user ID:', userId);
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:4000/Notifications/user/${userId}`);
-      console.log('Fetched notifications data:', response.data);
-  
-      if (Array.isArray(response.data)) {
-        console.log('Number of notifications:', response.data.length);
-        setOptions(response.data.reverse()); // Reverse to show newest notifications first
-      } else {
-        console.error('Unexpected response format:', response.data);
-      }
-  
-      setError(null);
+        // Updated URL structure based on new endpoint for fetching notifications via association
+        const response = await axios.get(`http://localhost:4000/Notifications/user/${userId}/all`);
+        console.log('Fetched notifications data:', response.data);
+
+        if (Array.isArray(response.data)) {
+            console.log('Number of notifications:', response.data.length);
+            setOptions(response.data.reverse()); // Reverse to show newest notifications first
+        } else {
+            console.error('Unexpected response format:', response.data);
+        }
+
+        setError(null);
     } catch (error) {
-      setError(error.message);
-      console.error('Error fetching notifications:', error);
+        setError(error.message);
+        console.error('Error fetching notifications:', error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  }, []);
-  
-  const createNotification = useCallback(async (userId, details, NotificationsKey) => {
+
+    setIsClicked(true);
+}, []);
+
+const createNotification = useCallback(async (userId, details, NotificationsKey) => {
     if (!currentUser || !currentUser.id) {
-      console.log('No current user or user ID');
-      return;
+        console.log('No current user or user ID');
+        return;
     }
-  
+
     let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
     let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
-  
+
     if (savedNotifications.includes(NotificationsKey) || deletedNotifications.includes(NotificationsKey)) {
-      console.log('Notification key already exists or is deleted');
-      return;
+        console.log('Notification key already exists or is deleted');
+        return;
     }
-  
+
     const notification = {
-      userId: userId,
-      details,
-      schoolId: currentSchool.id, // Attach the school ID to the notification
+        userId: userId,
+        details,
     };
-  
+
     try {
-      await axios.post('http://localhost:4000/Notifications/create', notification, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      // Fetch notifications for both the current user and invited users
-      fetchCurrentSchoolNotifications();
-      fetchUserNotifications(userId);
-  
-      savedNotifications.push(NotificationsKey);
-      localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+        await axios.post('http://localhost:4000/Notifications/create', notification, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+       
+        fetchUserNotifications(userId);
+
+        savedNotifications.push(NotificationsKey);
+        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
     } catch (error) {
-      console.error('Error creating notification:', error);
+        console.error('Error creating notification:', error);
     }
-  }, [currentUser, currentSchool, fetchCurrentSchoolNotifications, fetchUserNotifications]);
+}, [fetchUserNotifications]);
   
   
-  const handleClearOptions = async () => {
-    if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
-      console.log('No current user or school ID');
-      return;
-    }
-  
-    try {
-      await axios.delete(`http://localhost:4000/Notifications/school/${currentSchool.id}`);
-  
-      setOptions([]);
-  
-      let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-      let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
-  
-      savedNotifications.forEach(NotificationsKey => {
-        deletedNotifications.push(NotificationsKey);
-      });
-  
-      localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
-      localStorage.removeItem('createdNotifications');
-    } catch (error) {
-      console.error('Error clearing notifications:', error);
-    } finally {
-      handleMenuClose();
-    }
-  };
+const handleClearOptions = async () => {
+  if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
+    console.log('No current user or school ID');
+    return;
+  }
+
+  try {
+    await axios.delete(`http://localhost:4000/Notifications/user/${currentUser.id}`);
+
+    setOptions([]);
+
+    let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+    let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
+
+    savedNotifications.forEach(NotificationsKey => {
+      deletedNotifications.push(NotificationsKey);
+    });
+
+    localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
+    localStorage.removeItem('createdNotifications');
+  } catch (error) {
+    console.error('Error clearing notifications:', error);
+  } finally {
+    handleMenuClose();
+  }
+};
+
   
 
 const handleAcceptNotification = async (notificationId) => {
-  // Log the notificationId to verify its value
-  console.log("Notification ID:", notificationId);
-
   try {
-    // Ensure notificationId is valid
     if (!notificationId) {
       throw new Error("Invalid request: notificationId is required.");
     }
-
-    // Send a POST request with notificationId as a URL parameter
     const response = await axios.post(`http://localhost:4000/associations/approve/${notificationId}`, {
      
     });
-
-    // Log the successful response data
-    console.log('Success:', response.data);
-
     const updateNotificationUrl = `http://localhost:4000/Notifications/accept/${notificationId}`;
         await axios.put(updateNotificationUrl);
 
   } catch (error) {
-    // Log the error response or message
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
       console.error('Server Error:', error.response.data);
     } else if (error.request) {
-      // The request was made but no response was received
       console.error('No Response:', error.request);
     } else {
-      // Something happened in setting up the request that triggered an Error
       console.error('Error:', error.message);
     }
   }
-
   setIsClicked(true);
-
 };
 
 
 const handleRejectNotification = async (notificationId) => {
-  // Log the notificationId to verify its value
-  console.log("Notification ID:", notificationId);
-
   try {
-    // Ensure notificationId is valid
     if (!notificationId) {
       throw new Error("Invalid request: notificationId is required.");
     }
 
-    // First, reject the notification (this could be a `PUT` or `DELETE` based on your logic)
     const rejectNotificationUrl = `http://localhost:4000/Notifications/reject/${notificationId}`;
     const rejectResponse = await axios.put(rejectNotificationUrl);
 
-    // Log the successful reject response
-    console.log('Notification Rejected & Association Deleted:', rejectResponse.data);
 
     const deleteAssociation = `http://localhost:4000/associations/delete/${notificationId}`;
         await axios.delete(deleteAssociation);
 
+        const deleteNotification = `http://localhost:4000/Notifications/${notificationId}`;
+        await axios.delete(deleteNotification);   
+
   } catch (error) {
-    // Log the error response or message
     if (error.response) {
       console.error('Server Error:', error.response.data);
     } else if (error.request) {
@@ -364,13 +308,6 @@ const handleRejectNotification = async (notificationId) => {
 
 };
 
-  
-  useEffect(() => {
-    if (currentUser && currentUser.id) {
-      fetchCurrentSchoolNotifications();
-    }
-  }, [fetchCurrentSchoolNotifications, currentUser]);
-  
   useEffect(() => {
     if (currentDocument) {
       const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
@@ -442,7 +379,6 @@ const handleRejectNotification = async (notificationId) => {
     }
   }, [currentDocument, createNotification, currentUser, month, year]);
   
-  // Ensure `fetchUserNotifications` is called when the user is invited
   useEffect(() => {
     if (currentUser && currentUser.id) {
       fetchUserNotifications(currentUser.id);
