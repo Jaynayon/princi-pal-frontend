@@ -325,66 +325,30 @@ function DashboardPage(props) {
     }, [initializeSelectedSchool, updateJev, updateLr]);
 
     useEffect(() => {
-        // Sample data
-        const sampleUacsData = [
-            {
-                code: '5020502001',
-                name: 'Communication Expenses',
-                budget: jev[0]?.budget,
-                expenses: [0, 0, 0, 0, 0]//93,000
-            },
-            {
-                code: '5020402000',
-                name: 'Electricity Expenses',
-                budget: jev[1]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '5020503000',
-                name: 'Internet Subscription Expenses',
-                budget: jev[2]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '5029904000',
-                name: 'Transpo/Delivery Expenses',
-                budget: jev[3]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '5020201000',
-                name: 'Training Expenses',
-                budget: jev[4]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '5020399000',
-                name: 'Other Supplies & Materials Expenses',
-                budget: jev[5]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '1990101000',
-                name: 'Advances to Operating Expenses',
-                budget: jev[6]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '19901020000',
-                name: 'Total',
-                budget: currentDocument.budget,
-                expenses: [0, 0, 0, 0, 0]
-            }
-        ];
-
         const fetchData = async () => {
             try {
-                if (lr && lr.length > 0) {
+                if (lr?.length > 0 && jev?.length > 0) {
+                    // Dynamically generate UACS data from JEV array
+                    const uacsDataFromJev = jev.map(item => ({
+                        code: item.uacsCode,
+                        name: item.uacsName,
+                        budget: item.budget,
+                        expenses: [0, 0, 0, 0, 0] // Initialize expenses
+                    }));
+
+                    // Add the "Total" entry manually
+                    const totalEntry = {
+                        code: '19901020000',
+                        name: 'Total',
+                        budget: currentDocument.budget,
+                        expenses: [0, 0, 0, 0, 0] // Initialize expenses for "Total"
+                    };
+
                     // Calculate weekly expenses from the LR data
                     const weeklyExpenses = calculateWeeklyExpenses(lr);
 
                     // Update uacsData with the calculated weekly expenses
-                    const updatedUacsData = sampleUacsData.map(uacs => {
+                    const updatedUacsData = [...uacsDataFromJev, totalEntry].map(uacs => {
                         if (weeklyExpenses[uacs.code]) {
                             return {
                                 ...uacs,
@@ -392,6 +356,7 @@ function DashboardPage(props) {
                             };
                         }
                         return uacs;
+
                     });
 
                     setUacsData(updatedUacsData);
