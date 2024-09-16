@@ -23,8 +23,7 @@ const POSITIONS = [
 ];
  
 const NavigationSearchBar = () => {
-  const { currentUser, userId } = useNavigationContext();
-  const { currentSchool } = useNavigationContext();
+  const { currentUser} = useNavigationContext();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState("");

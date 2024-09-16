@@ -150,7 +150,7 @@ export default function Navigation({ children }) {
     setAnchorEl(null);
   };
  
-  const fetchUserNotifications = useCallback(async (userId) => {
+ const fetchUserNotifications = useCallback(async (userId) => {
     if (!userId) {
         console.log('No user ID');
         return;
@@ -159,13 +159,13 @@ export default function Navigation({ children }) {
     console.log('Fetching notifications for user ID:', userId);
     setLoading(true);
     try {
-        // Updated URL structure based on new endpoint for fetching notifications via association
         const response = await axios.get(`http://localhost:4000/Notifications/user/${userId}/all`);
         console.log('Fetched notifications data:', response.data);
 
         if (Array.isArray(response.data)) {
             console.log('Number of notifications:', response.data.length);
-            setOptions(response.data.reverse()); // Reverse to show newest notifications first
+            // Reverse to show newest notifications first
+            setOptions(response.data.reverse());
         } else {
             console.error('Unexpected response format:', response.data);
         }
@@ -179,41 +179,38 @@ export default function Navigation({ children }) {
     }
 }, []);
 
+
 const createNotification = useCallback(async (userId, details, NotificationsKey) => {
-    if (!currentUser || !currentUser.id) {
-        console.log('No current user or user ID');
-        return;
-    }
+  if (!currentUser || !currentUser.id) {
+      console.log('No current user or user ID');
+      return;
+  }
 
-    let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-    let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
+  let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+  let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
 
-    if (savedNotifications.includes(NotificationsKey) || deletedNotifications.includes(NotificationsKey)) {
-        console.log('Notification key already exists or is deleted');
-        return;
-    }
+  if (savedNotifications.includes(NotificationsKey) || deletedNotifications.includes(NotificationsKey)) {
+      console.log('Notification key already exists or is deleted');
+      return;
+  }
 
-    const notification = {
-        userId: userId,
-        details,
-    };
+  const notification = { userId, details };
 
-    try {
-        await axios.post('http://localhost:4000/Notifications/create', notification, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+  try {
+      await axios.post('http://localhost:4000/Notifications/create', notification, {
+          headers: { 'Content-Type': 'application/json' },
+      });
 
-       
-        fetchUserNotifications(userId);
+      fetchUserNotifications(userId);
 
-        savedNotifications.push(NotificationsKey);
-        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
-    } catch (error) {
-        console.error('Error creating notification:', error);
-    }
+      // Save the key to avoid duplicates
+      savedNotifications.push(NotificationsKey);
+      localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+  } catch (error) {
+      console.error('Error creating notification:', error);
+  }
 }, [currentUser, fetchUserNotifications]);
+
   
   
 const handleClearOptions = async () => {
@@ -304,40 +301,72 @@ useEffect(() => {
   }
 }, [currentUser, fetchUserNotifications]);
 
-  useEffect(() => {
-    if (currentDocument) {
+useEffect(() => {
+  if (currentDocument) {
       const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
       const NotificationsKey = `balance-negative-${currentDocument.id || ''}`;
-  
-      const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-      if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(NotificationsKey)) {
-        createNotification(
-          currentUser.id,
-          `Your balance has gone negative. Current balance: ₱${balance}`,
-          NotificationsKey
-        );
+
+      // Retrieve saved notifications from localStorage
+      let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+      
+      // Check if the balance is negative and the notification hasn't been created already
+      if (
+          balance < 0 && 
+          previousBalance !== null && 
+          previousBalance >= 0 && 
+          !savedNotifications.includes(NotificationsKey)
+      ) {
+          // Create the notification
+          createNotification(
+              currentUser.id,
+              `Your balance has gone negative. Current balance: ₱${balance}`,
+              NotificationsKey
+          );
+
+          // Save the notification key to localStorage to avoid duplication on reload
+          savedNotifications.push(NotificationsKey);
+          localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
       }
-  
+
+      // Update the balance after checking
       setPreviousBalance(balance);
-    }
-  }, [currentDocument, createNotification, currentUser, previousBalance]);
+  }
+}, [currentDocument, createNotification, currentUser, previousBalance]);
+
   
   useEffect(() => {
+    const fetchAndProcessData = async (id, row) => {
+      try {
+        const response = await axios.get(`http://localhost:4000/jev/${id}`);
+        const { budgetExceeded } = response.data;
+  
+        // Check if `budgetExceeded` is true
+        if (budgetExceeded) {
+          const NotificationsKey = `budget-exceeded-${id || ''}`;
+          const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+  
+          // Create a notification only if it has not been created before
+          if (!savedNotifications.includes(NotificationsKey)) {
+            createNotification(
+              currentUser.id,
+              `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${row.amount}, Allocated Budget: ₱${row.budget}`,
+              NotificationsKey
+            );
+            
+            // Save the notification key to local storage to prevent duplicate notifications
+            savedNotifications.push(NotificationsKey);
+            localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to fetch details for ID ${id}:`, error);
+      }
+    };
+  
     if (jev && jev.length) {
       jev.forEach(row => {
-        const exceededBudget = row.budget > 0 && row.amount > row.budget;
-        const NotificationsKey = `budget-exceeded-${row.id || ''}`;
-  
-        const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-        if (exceededBudget && !savedNotifications.includes(NotificationsKey)) {
-          createNotification(
-            currentUser.id,
-            `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${row.amount}, Allocated Budget: ₱${row.budget}`,
-            NotificationsKey
-          );
-        }
+        // Fetch and process data based on row.id
+        fetchAndProcessData(row.id, row);
       });
     }
   }, [month, year, jev, createNotification, currentUser]);
@@ -360,20 +389,27 @@ useEffect(() => {
 
   useEffect(() => {
     if (currentDocument && currentDocument.budgetLimit > 0 && currentDocument.budgetLimitExceeded) {
-      const NotificationsKey = `budgetLimit-exceeded-${currentDocument.id || ''}`;
-  
-      const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-      if (!savedNotifications.includes(NotificationsKey)) {
-        createNotification(
-          currentUser.id,
-          `Attention: The budget limit for ${month} ${year} has been exceeded.`,
-  
-          NotificationsKey
-        );
-      }
+        const NotificationsKey = `budgetLimit-exceeded-${currentDocument.id || ''}`;
+
+        // Retrieve saved notifications from localStorage
+        const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+
+        // Check if the notification has already been created
+        if (!savedNotifications.includes(NotificationsKey)) {
+            // Create the notification
+            createNotification(
+                currentUser.id,
+                `Attention: The budget limit for ${month} ${year} has been exceeded.`,
+                NotificationsKey
+            );
+
+            // Save the notification key to localStorage to avoid duplicates
+            savedNotifications.push(NotificationsKey);
+            localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+        }
     }
-  }, [currentDocument, createNotification, currentUser, month, year]);
+}, [currentDocument, createNotification, currentUser, month, year]);
+
 
   const ITEM_HEIGHT = 48;
 
