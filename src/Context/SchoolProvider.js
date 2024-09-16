@@ -49,7 +49,8 @@ export const SchoolProvider = ({ children }) => {
 
     // States needed for adding LR
     const [isAdding, setIsAdding] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+    const isEditingRef = useRef(false);
+    const isSearchingRef = useRef(false);
     const [addOneRow, setAddOneRow] = useState(false);
     const [objectCodes, setObjectCodes] = useState([]);
 
@@ -356,32 +357,12 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [fetchUacs, objectCodes]); // Run effect only on mount and unmount
 
-    // useEffect(() => {
-    //     // Check if user is in school tab or dashboard
-    //     if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
-    //         // Define the interval duration (in milliseconds)
-    //         const intervalDuration = 5000; // 5 seconds
-
-    //         // Define the task to execute at each interval
-    //         const updateDocumentData = () => {
-    //             if (!isAdding && !isEditing) { // only fetch if user is not adding new LR
-    //                 fetchDocumentData();
-    //             }
-    //         };
-
-    //         // Set up the interval
-    //         const intervalId = setInterval(updateDocumentData, intervalDuration);
-
-    //         // Cleanup function to clear the interval
-    //         return () => clearInterval(intervalId);
-    //     }
-    // }, [fetchDocumentData, isAdding, isEditing, currentUser.schools, selected]);
-
     useEffect(() => {
         let timeoutId;
 
         const updateDocumentData = () => {
-            if (!isAdding && !isEditing) {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
                 fetchDocumentData().finally(() => {
                     // Set the next timeout after the fetch is complete
                     timeoutId = setTimeout(updateDocumentData, 10000); // 10 seconds
@@ -399,7 +380,7 @@ export const SchoolProvider = ({ children }) => {
         // Cleanup function to clear the timeout
         return () => clearTimeout(timeoutId);
 
-    }, [fetchDocumentData, isAdding, isEditing, currentUser.schools, selected]);
+    }, [fetchDocumentData, isAdding, currentUser.schools, selected]);
 
     return (
         <SchoolContext.Provider value={{
@@ -414,7 +395,8 @@ export const SchoolProvider = ({ children }) => {
             emptyDocument,
             addFields,
             isAdding, setIsAdding,
-            isEditing, setIsEditing,
+            isEditingRef,
+            isSearchingRef,
             addOneRow, setAddOneRow,
             currentSchool, setCurrentSchool,
             fetchDocumentData,

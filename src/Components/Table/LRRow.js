@@ -30,7 +30,7 @@ function LRRow(props) {
     const {
         addFields,
         isAdding,
-        setIsEditing,
+        isEditingRef,
         currentDocument,
         lr,
         updateLr,
@@ -53,7 +53,7 @@ function LRRow(props) {
     }, [isAdding, addFields, value]);
 
     const handleCellClick = (colId, rowId, event) => {
-        setIsEditing(true); // user clicked a cell
+        isEditingRef.current = true; // user clicked a cell
         setEditingCell({ colId, rowId });
         setInitialValue(event.target.value); // Save the initial value of the clicked cell
         setInputValue(event.target.value); // Set input value to the current value
@@ -62,7 +62,7 @@ function LRRow(props) {
     };
 
     const handleBlurCell = () => {
-        setIsEditing(false);
+        isEditingRef.current = false;
     }
 
     const handleDeleteOpen = (event, index) => {

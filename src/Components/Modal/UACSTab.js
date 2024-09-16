@@ -45,7 +45,7 @@ const columns = [
 ];
 
 export default function UACSTab() {
-    const { month, year, currentSchool, currentDocument, jev, setJev, updateJevById } = useSchoolContext();
+    const { month, year, currentSchool, currentDocument, jev, setJev, updateJevById, isEditingRef } = useSchoolContext();
     const [rowsPerPage, setRowsPerPage] = React.useState(4);
     const [page, setPage] = React.useState(0);
     const [inputValue, setInputValue] = React.useState('Initial Value');
@@ -74,6 +74,8 @@ export default function UACSTab() {
         // Find the index of the object with matching id
         const rowIndex = jev.findIndex(row => row.id === rowId);
 
+        isEditingRef.current = true;
+
         if (rowIndex !== -1) {
             // Copy the array to avoid mutating state directly
             const updatedRows = [...jev];
@@ -91,6 +93,7 @@ export default function UACSTab() {
 
     const handleInputBlur = async (colId, rowId) => {
         setEditingCell(null);
+        isEditingRef.current = false;
         // Perform any action when input is blurred (e.g., save the value)
         if (inputValue !== initialValue) {
             console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);

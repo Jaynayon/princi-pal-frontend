@@ -229,18 +229,23 @@ export function FilterDate() {
 }
 
 export function SchoolSearchFilter() {
-    const { setLr, isLoading, currentDocument } = useSchoolContext();
-    // const [input, setInput] = useState('');
+    const { setLr, isLoading, currentDocument, isEditingRef, isSearchingRef } = useSchoolContext();
+    const [input, setInput] = useState('');
     const [lrCopy, setLrCopy] = useState([]);
 
     const handleInputChange = (event) => {
-        console.log(event.target.value);
-        // setInput(event.target.value);
+        isEditingRef.current = true;
+        isSearchingRef.current = true;
+        setInput(event.target.value); // save input
         setLr(lookup(event.target.value));
     }
 
     const handleInputBlur = () => {
         //Something after searching
+        if (!input) {
+            isEditingRef.current = false;
+            isSearchingRef.current = false;
+        }
     }
 
     // Get the original copy of the LR
@@ -266,6 +271,8 @@ export function SchoolSearchFilter() {
         // Check if the filtered result is empty
         if (obj.length === 0) {
             // Return the original array if the keyword didn't match anything
+            isEditingRef.current = false;
+            isSearchingRef.current = false;
             return lrCopy;
         }
         return obj;
@@ -289,7 +296,7 @@ export function SchoolSearchFilter() {
                     style={styles.input}
                     placeholder='Search'
                     onChange={(event) => handleInputChange(event)}
-                    onBlur={handleInputBlur()}
+                    onBlur={() => handleInputBlur()}
                 />
             </Box>
         </React.Fragment>
