@@ -395,6 +395,8 @@ function DashboardPage(props) {
                     });
 
                     setUacsData(updatedUacsData);
+                } else {
+                    setUacsData(defaultUacsData)
                 }
             } catch (error) {
                 console.error('Error processing data:', error);
