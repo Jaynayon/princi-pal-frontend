@@ -86,6 +86,9 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
 
+
+
+
     useEffect(() => {
         // Change the chart type to 'bar' when 'Total' is selected
         if (selectedCategory === '19901020000') {
@@ -249,7 +252,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
 
 function DashboardPage(props) {
-    const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
+    const { currentUser, currentSchool, setCurrentSchool } = useNavigationContext();
     const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
@@ -411,6 +414,57 @@ function DashboardPage(props) {
         }
     };
 
+    // Sample data
+    const sampleUacsData = [
+        {
+            code: '5020502001',
+            name: 'Communication Expenses',
+            budget: jev[0]?.budget,
+            expenses: [5000, 0, 18000, 20000, 50000]//93,000
+        },
+        {
+            code: '5020402000',
+            name: 'Electricity Expenses',
+            budget: jev[1]?.budget,
+            expenses: [1000, 5000, 6000, 47000, 10000]
+        },
+        {
+            code: '5020503000',
+            name: 'Internet Subscription Expenses',
+            budget: jev[2]?.budget,
+            expenses: [0, 5000, 10000, 15000, 20000]
+        },
+        {
+            code: '5029904000',
+            name: 'Transpo/Delivery Expenses',
+            budget: jev[3]?.budget,
+            expenses: [0, 5000, 10000, 15000, 20000]
+        },
+        {
+            code: '5020201000',
+            name: 'Training Expenses',
+            budget: jev[4]?.budget,
+            expenses: [0, 5000, 10000, 15000, 20000]
+        },
+        {
+            code: '5020399000',
+            name: 'Other Supplies & Materials Expenses',
+            budget: jev[5]?.budget,
+            expenses: [0, 5000, 10000, 15000, 20000]
+        },
+        {
+            code: '1990101000',
+            name: 'Advances to Operating Expenses',
+            budget: jev[6]?.budget,
+            expenses: [0, 5000, 10000, 15000, 20000]
+        },
+        {
+            code: '19901020000',
+            name: 'Total',
+            budget: 500000,
+            expenses: [0, 5000, 7000, 26000, 150000]
+        }
+    ];
 
     console.log(jev)
 
@@ -435,9 +489,6 @@ function DashboardPage(props) {
                 ...editableAmounts,
                 [clickedButton]: { ...editableAmounts[clickedButton], amount: newValue }
             });
-            setError('');
-        } else {
-            setError('Please enter a valid number between 0 and 999,999 with up to 2 decimal places.');
         }
     };
 
@@ -459,15 +510,12 @@ function DashboardPage(props) {
                     ...editableAmounts,
                     [clickedButton]: { ...editableAmounts[clickedButton], amount: '' }
                 });
-                setError('');
                 setOpen(false);
             } else {
                 console.error('Failed to save budget limit');
-                setError('Failed to save budget limit. Please try again later.');
             }
         } catch (error) {
             console.error('Error saving budget limit:', error);
-            setError('Failed to save budget limit. Please try again later.');
         }
     };
 
