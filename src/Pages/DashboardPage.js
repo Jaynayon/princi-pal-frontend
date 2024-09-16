@@ -39,11 +39,11 @@ const calculateWeeklyExpenses = (expensesData) => {
     const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1; // +1 to include the final week
 
     // Helper function to get the start date of a specific week index
-    const getStartOfWeek = (weekIndex, startDate) => {
-        const start = new Date(startDate);
-        start.setDate(start.getDate() + weekIndex * 7);
-        return start;
-    };
+    // const getStartOfWeek = (weekIndex, startDate) => {
+    //     const start = new Date(startDate);
+    //     start.setDate(start.getDate() + weekIndex * 7);
+    //     return start;
+    // };
 
     // Helper function to determine the week index (relative to the earliest date)
     const getWeekIndex = (date) => {
@@ -70,13 +70,8 @@ const calculateWeeklyExpenses = (expensesData) => {
         if (weekIndex >= 0 && weekIndex < totalWeeks) {
             weeklyExpenses[objectCode][weekIndex] += amount;
         }
-
-        // Log the intermediate results for debugging
-        console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
-        console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
     });
 
-    console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
     return weeklyExpenses;
 };
 
@@ -85,9 +80,6 @@ const calculateWeeklyExpenses = (expensesData) => {
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
-
-
-
 
     useEffect(() => {
         // Change the chart type to 'bar' when 'Total' is selected
@@ -227,6 +219,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <div style={{ marginLeft: '10px' }}>
                                 <select
+                                    name="apex-chart-select-category"
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                     style={{
@@ -249,10 +242,60 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     );
 };
 
-
+// Sample data
+const defaultUacsData = [
+    {
+        code: '5020502001',
+        name: 'Communication Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]//93,000
+    },
+    {
+        code: '5020402000',
+        name: 'Electricity Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '5020503000',
+        name: 'Internet Subscription Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '5029904000',
+        name: 'Transpo/Delivery Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '5020201000',
+        name: 'Training Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '5020399000',
+        name: 'Other Supplies & Materials Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '1990101000',
+        name: 'Advances to Operating Expenses',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    },
+    {
+        code: '19901020000',
+        name: 'Total',
+        budget: 0,
+        expenses: [0, 0, 0, 0, 0]
+    }
+];
 
 function DashboardPage(props) {
-    const { currentUser, currentSchool, setCurrentSchool } = useNavigationContext();
+    const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
     const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
     const [selectedSchool, setSelectedSchool] = useState('');
     const [clickedButton, setClickedButton] = useState('');
@@ -262,29 +305,7 @@ function DashboardPage(props) {
     const [loadingSchools] = useState(false);
     const [schoolBudget] = useState(null);
 
-    const [uacsData, setUacsData] = useState([]);
-
-
-    // This function only runs when dependencies: currentSchool & currentUser are changed
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Log the specific fields (date, objectCode, and amount) for each LR row
-                if (lr && lr.length > 0) {
-                    lr.forEach(row => {
-                        console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
-                    });
-                } else {
-                    console.log('No LR data available');
-                }
-            } catch (error) {
-                console.error('Error fetching document data:', error);
-            }
-        };
-        fetchData();
-    }, [lr]); // Ensure to trigger whenever `lr` updates
-
+    const [uacsData, setUacsData] = useState(defaultUacsData);
 
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
@@ -304,66 +325,30 @@ function DashboardPage(props) {
     }, [initializeSelectedSchool, updateJev, updateLr]);
 
     useEffect(() => {
-        // Sample data
-        const sampleUacsData = [
-            {
-                code: '5020502001',
-                name: 'Communication Expenses',
-                budget: jev[0]?.budget,
-                expenses: [0, 0, 0, 0, 0]//93,000
-            },
-            {
-                code: '5020402000',
-                name: 'Electricity Expenses',
-                budget: jev[1]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '5020503000',
-                name: 'Internet Subscription Expenses',
-                budget: jev[2]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '5029904000',
-                name: 'Transpo/Delivery Expenses',
-                budget: jev[3]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '5020201000',
-                name: 'Training Expenses',
-                budget: jev[4]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '5020399000',
-                name: 'Other Supplies & Materials Expenses',
-                budget: jev[5]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '1990101000',
-                name: 'Advances to Operating Expenses',
-                budget: jev[6]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '19901020000',
-                name: 'Total',
-                budget: 500000,
-                expenses: [0, 0, 0, 0, 0]
-            }
-        ];
-
         const fetchData = async () => {
             try {
-                if (lr && lr.length > 0) {
+                if (lr?.length > 0 && jev?.length > 0) {
+                    // Dynamically generate UACS data from JEV array
+                    const uacsDataFromJev = jev.map(item => ({
+                        code: item.uacsCode,
+                        name: item.uacsName,
+                        budget: item.budget,
+                        expenses: [0, 0, 0, 0, 0] // Initialize expenses
+                    }));
+
+                    // Add the "Total" entry manually
+                    const totalEntry = {
+                        code: '19901020000',
+                        name: 'Total',
+                        budget: currentDocument.budget,
+                        expenses: [0, 0, 0, 0, 0] // Initialize expenses for "Total"
+                    };
+
                     // Calculate weekly expenses from the LR data
                     const weeklyExpenses = calculateWeeklyExpenses(lr);
 
                     // Update uacsData with the calculated weekly expenses
-                    const updatedUacsData = sampleUacsData.map(uacs => {
+                    const updatedUacsData = [...uacsDataFromJev, totalEntry].map(uacs => {
                         if (weeklyExpenses[uacs.code]) {
                             return {
                                 ...uacs,
@@ -371,9 +356,12 @@ function DashboardPage(props) {
                             };
                         }
                         return uacs;
+
                     });
 
                     setUacsData(updatedUacsData);
+                } else {
+                    setUacsData(defaultUacsData)
                 }
             } catch (error) {
                 console.error('Error processing data:', error);
@@ -381,12 +369,11 @@ function DashboardPage(props) {
         };
 
         fetchData();
-    }, [lr, jev]);
+    }, [lr, jev, currentDocument.budget]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
         setCurrentSchool(currentUser.schools.find(s => s.id === schoolId));
-        console.log('Selected school:', schoolId);
     };
 
     const updateDocumentById = async (docId, value) => {
@@ -404,69 +391,12 @@ function DashboardPage(props) {
             if (response.ok) {
                 console.log('Budget limit updated successfully:', data);
                 return true;
-            } else {
-                console.error('Failed to update budget limit:', data);
-                return false;
             }
         } catch (error) {
             console.error('Error updating budget limit:', error);
             return false;
         }
     };
-
-    // Sample data
-    const sampleUacsData = [
-        {
-            code: '5020502001',
-            name: 'Communication Expenses',
-            budget: jev[0]?.budget,
-            expenses: [5000, 0, 18000, 20000, 50000]//93,000
-        },
-        {
-            code: '5020402000',
-            name: 'Electricity Expenses',
-            budget: jev[1]?.budget,
-            expenses: [1000, 5000, 6000, 47000, 10000]
-        },
-        {
-            code: '5020503000',
-            name: 'Internet Subscription Expenses',
-            budget: jev[2]?.budget,
-            expenses: [0, 5000, 10000, 15000, 20000]
-        },
-        {
-            code: '5029904000',
-            name: 'Transpo/Delivery Expenses',
-            budget: jev[3]?.budget,
-            expenses: [0, 5000, 10000, 15000, 20000]
-        },
-        {
-            code: '5020201000',
-            name: 'Training Expenses',
-            budget: jev[4]?.budget,
-            expenses: [0, 5000, 10000, 15000, 20000]
-        },
-        {
-            code: '5020399000',
-            name: 'Other Supplies & Materials Expenses',
-            budget: jev[5]?.budget,
-            expenses: [0, 5000, 10000, 15000, 20000]
-        },
-        {
-            code: '1990101000',
-            name: 'Advances to Operating Expenses',
-            budget: jev[6]?.budget,
-            expenses: [0, 5000, 10000, 15000, 20000]
-        },
-        {
-            code: '19901020000',
-            name: 'Total',
-            budget: 500000,
-            expenses: [0, 5000, 7000, 26000, 150000]
-        }
-    ];
-
-    console.log(jev)
 
 
     const handleOpen = (text) => {
@@ -489,13 +419,15 @@ function DashboardPage(props) {
                 ...editableAmounts,
                 [clickedButton]: { ...editableAmounts[clickedButton], amount: newValue }
             });
+            setError('');
+        } else {
+            setError('Please enter a valid number between 0 and 999,999 with up to 2 decimal places.');
         }
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         const updatedAmount = editableAmounts[clickedButton];
-        console.log('Document ID:', currentDocument.id);
 
         try {
             const isUpdated = await updateDocumentById(currentDocument.id, updatedAmount.amount);
@@ -510,19 +442,20 @@ function DashboardPage(props) {
                     ...editableAmounts,
                     [clickedButton]: { ...editableAmounts[clickedButton], amount: '' }
                 });
+                setError('');
                 setOpen(false);
             } else {
-                console.error('Failed to save budget limit');
+                setError('Failed to save budget limit. Please try again later.');
             }
         } catch (error) {
-            console.error('Error saving budget limit:', error);
+            setError('Failed to save budget limit. Please try again later.');
         }
     };
 
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
         let displayTitle = title;
-        if (title === 'monthlyBudget') displayTitle = 'Monthly Budget';
+        if (title === 'monthlyExpense') displayTitle = 'Monthly Expense';
         else if (title === 'budgetLimit') displayTitle = 'Budget Limit';
         else if (title === 'totalBalance') displayTitle = 'Total Balance';
 
@@ -539,11 +472,11 @@ function DashboardPage(props) {
                     flexDirection: 'column',
                     height: 160,
                     textAlign: 'left',
-                    paddingLeft: (displayTitle === 'Monthly Budget' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
+                    paddingLeft: (displayTitle === 'Monthly Expense' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
                 }}
             >
                 {displayTitle}
-                {displayTitle === 'Monthly Budget' && (
+                {displayTitle === 'Monthly Expense' && (
                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
 
                 )}
@@ -551,8 +484,19 @@ function DashboardPage(props) {
                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 )}
                 {displayTitle === 'Budget Limit' && (
-                    <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                        <EditIcon sx={{ width: '30px', height: '30px' }} />
+                    <Button
+                        onClick={() => handleOpen(title)}
+                        className={clickedButton === title ? 'clicked' : ''}
+                        style={{
+                            display: currentUser.position !== "Principal" && "none",
+                            position: 'absolute',
+                            top: '10px', right: '10px',
+                            background: 'none',
+                            border: 'none',
+                            padding: 0
+                        }}
+                    >
+                        <EditIcon sx={{ display: false, width: '30px', height: '30px' }} />
                     </Button>
                 )}
                 {displayTitle === 'Total Balance' && (
@@ -611,7 +555,7 @@ function DashboardPage(props) {
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
                 <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{`${month} ${year}`}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget : Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Expense : Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Budget Limit: Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Balance: Php {((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)).toFixed(2)}</p>
             </Paper>
@@ -657,6 +601,7 @@ function DashboardPage(props) {
                             <FilterDate />
                             <Box style={{ paddingRight: '10px' }}>
                                 <Select
+                                    name="dashboard-school-select"
                                     value={selectedSchool}
                                     onChange={(event) => handleSchoolSelect(event.target.value)}
                                     displayEmpty
@@ -708,7 +653,7 @@ function DashboardPage(props) {
                         }}>
                         <Grid container >
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('monthlyBudget')}
+                                {renderEditableCard('monthlyExpense')}
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                                 {renderEditableCard('budgetLimit')}

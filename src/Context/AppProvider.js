@@ -57,7 +57,6 @@ export const AppProvider = ({ children }) => {
 
             if (response.data.isMatch) {
                 fetchData();
-                window.location.href = "http://localhost:3000";
             }
 
             return response.data;
@@ -111,7 +110,7 @@ export const AppProvider = ({ children }) => {
         <AppContext.Provider value={{
             isLoggedIn, setIsLoggedIn,
             isSuperAdmin, setIsSuperAdmin,
-            currentUser,
+            currentUser, setCurrentUser,
             validateToken,
             getUserById,
             authenticateUser

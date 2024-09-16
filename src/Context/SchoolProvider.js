@@ -31,7 +31,7 @@ const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (sta
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool, setCurrentSchool, currentUser } = useNavigationContext();
+    const { currentSchool, setCurrentSchool, currentUser, selected } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -49,7 +49,10 @@ export const SchoolProvider = ({ children }) => {
 
     // States needed for adding LR
     const [isAdding, setIsAdding] = useState(false);
+    const isEditingRef = useRef(false);
+    const isSearchingRef = useRef(false);
     const [addOneRow, setAddOneRow] = useState(false);
+    const [objectCodes, setObjectCodes] = useState([]);
 
     // Document, LR, and JEV entities
     const [currentDocument, setCurrentDocument] = useState(emptyDocument);
@@ -58,13 +61,9 @@ export const SchoolProvider = ({ children }) => {
 
     const fetchDocumentData = useCallback(async () => {
         try {
-            console.log(`${year} ${month}`);
-            console.log(currentSchool);
             if (currentSchool) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`)
-
-                console.log(response.data)
-                setCurrentDocument(response.data);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`);
+                setCurrentDocument(response.data || emptyDocument);
             }
         } catch (error) {
             setCurrentDocument(emptyDocument)
@@ -74,15 +73,22 @@ export const SchoolProvider = ({ children }) => {
 
     const fetchDocumentBySchoolId = useCallback(async (schoolId) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${schoolId}/${year}/${month}`)
-
-            console.log(response.data)
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${schoolId}/${year}/${month}`);
             setCurrentDocument(response.data);
         } catch (error) {
             setCurrentDocument(emptyDocument)
             console.error('Error fetching document:', error);
         }
     }, [setCurrentDocument, year, month]);
+
+    const fetchUacs = useCallback(async () => {
+        try {
+            const response = await axios.get('http://localhost:4000/uacs/all');
+            setObjectCodes(response.data || []);
+        } catch (error) {
+            console.error('Error validating token:', error);
+        }
+    }, [setObjectCodes]);
 
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
@@ -196,9 +202,6 @@ export const SchoolProvider = ({ children }) => {
     const getDocumentBySchoolIdYear = async (school_id, year) => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}`)
-            if (response) {
-                console.log(response.data);
-            }
             return response.data
         } catch (error) {
             console.log(error.response.data)
@@ -212,10 +215,7 @@ export const SchoolProvider = ({ children }) => {
         try {
             if (currentDocument.id !== 0) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
-                setJev(response.data || [])
-                // Handle response as needed
-                console.log(response.data);
-
+                setJev(response.data || []);
             } else {
                 setJev([]); //meaning it's empty 
             }
@@ -239,9 +239,6 @@ export const SchoolProvider = ({ children }) => {
                     'Content-Type': 'application/json'
                 }
             })
-            if (response) {
-                console.log(response.data);
-            }
             return response.status === 200;
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
@@ -254,9 +251,7 @@ export const SchoolProvider = ({ children }) => {
         try {
             if (currentDocument.id !== 0) {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
-                setLr(response.data || [])
-                // Handle response as needed
-                console.log(response.data);
+                setLr(response.data || []);
             } else {
                 setLr([]); //meaning it's empty 
             }
@@ -343,19 +338,49 @@ export const SchoolProvider = ({ children }) => {
             orsBursNo: '',
             particulars: '',
             amount: 0,
-            objectCode: '5020502001', //predefined option
+            objectCode: objectCodes[0].code, //predefined option '5020502001'
             payee: '',
             natureOfPayment: 'Cash'
         }
 
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
-    }, [])
+    }, [objectCodes]);
 
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
-        console.log(currentSchool);
-    }, [fetchDocumentData, currentSchool]); // Run effect only on mount and unmount
+    }, [fetchDocumentData, year, month]);
+
+    useEffect(() => {
+        if (objectCodes.length === 0) {
+            fetchUacs();
+        }
+    }, [fetchUacs, objectCodes]); // Run effect only on mount and unmount
+
+    useEffect(() => {
+        let timeoutId;
+
+        const updateDocumentData = () => {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
+                fetchDocumentData().finally(() => {
+                    // Set the next timeout after the fetch is complete
+                    timeoutId = setTimeout(updateDocumentData, 10000); // 10 seconds
+                });
+            } else {
+                timeoutId = setTimeout(updateDocumentData, 10000); // 10 seconds
+            }
+        };
+
+        // Check if user is in school tab or dashboard
+        if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
+            updateDocumentData();
+        }
+
+        // Cleanup function to clear the timeout
+        return () => clearTimeout(timeoutId);
+
+    }, [fetchDocumentData, isAdding, currentUser.schools, selected]);
 
     return (
         <SchoolContext.Provider value={{
@@ -367,15 +392,19 @@ export const SchoolProvider = ({ children }) => {
             lr, setLr, updateLr,
             jev, setJev, updateJev,
             currentDocument, setCurrentDocument,
+            emptyDocument,
             addFields,
             isAdding, setIsAdding,
+            isEditingRef,
+            isSearchingRef,
             addOneRow, setAddOneRow,
             currentSchool, setCurrentSchool,
             fetchDocumentData,
             fetchDocumentBySchoolId,
             createNewDocument, updateDocumentById, getDocumentBySchoolIdYear,
             createLrByDocId, deleteLrByid, updateLrById,
-            updateJevById
+            updateJevById,
+            objectCodes
         }}>
             {children}
         </SchoolContext.Provider>

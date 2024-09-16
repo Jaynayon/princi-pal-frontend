@@ -37,17 +37,14 @@ function App() {
       <Route element={<Root />}>
         <Route
           index
-          //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <WelcomePage />}
           element={getWelcomeElement(WelcomePage, DashboardPage)}
         />
         <Route
           path="/login"
-          //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Login />}
           element={getWelcomeElement(LoginPage, DashboardPage)}
         />
         <Route
           path="/register"
-          //element={isLoggedIn ? <PageWithNavigation page={<Dashboard />} /> : <Registration />}
           element={getWelcomeElement(RegistrationPage, DashboardPage)}
         />
         <Route

@@ -16,6 +16,7 @@ import Stack from '@mui/material/Stack';
 import InputAdornment from '@mui/material/InputAdornment';
 import { VisibilityOff as VisibilityOffIcon, Visibility as VisibilityIcon, Lock as LockIcon, Person as PersonIcon, Email as EmailIcon } from '@mui/icons-material';
 import { useNavigationContext } from '../Context/NavigationProvider';
+import { useAppContext } from '../Context/AppProvider';
 
 const DemoPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2),
@@ -58,7 +59,8 @@ const ButtonWrapper = styled('div')({
 
 function SettingsPage() {
     const [anchorEl, setAnchorEl] = useState(null);
-    const { currentUser, updateUserPassword, updateUserAvatar } = useNavigationContext();  // Assuming updateUserAvatar is in your context
+    const { currentUser, setCurrentUser } = useAppContext();
+    const { updateUserPassword, updateUserAvatar } = useNavigationContext();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -72,6 +74,7 @@ function SettingsPage() {
     const userId = currentUser.id;
 
     const handleClick = (event) => {
+        event.stopPropagation();  // Prevents event bubbling to affect popover
         setAnchorEl(event.currentTarget);
     };
 
@@ -79,26 +82,14 @@ function SettingsPage() {
         setAnchorEl(null);
     };
 
-    const handleColorChange = async (color) => {
-        try {
-            const response = await axios.patch(`http://localhost:4000/users/${userId}/avatar`, {
+    const handleColorChange = (color) => {
+        setAnchorEl(null);
+        if (currentUser.avatar !== color) {
+            setCurrentUser((prevUser) => ({
+                ...prevUser,
                 avatar: color
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-    
-            if (response.status === 200) {
-                const successMessage = response.data;
-                console.log(successMessage); // Optionally handle success message
-                currentUser.avatar = color;
-                handleClose();
-            } else {
-                console.error("Failed to update avatar color:", response.data);
-            }
-        } catch (error) {
-            console.error("Error updating avatar color:", error);
+            }));
+            updateUserAvatar(currentUser?.id, color);
         }
     };
     const open = Boolean(anchorEl);
@@ -113,11 +104,44 @@ function SettingsPage() {
         return regex.test(input);
     };
 
-    const handlePasswordChange = (setter, value) => {
-        const isValid = validatePassword(value);
-        setErrorMessage(isValid ? '' : 'Password does not meet requirements');
-        setter(value);
+    const handlePasswordChange = (value) => {
+        setNewPassword(value);
+        if (confirmPassword && value !== confirmPassword) {
+            setErrorMessage("Passwords do not match");
+        } else {
+            if (value === "") {
+                setErrorMessage("");
+                setMessage("");
+            } else {
+                setErrorMessage(validatePassword(value) ? '' : 'Password does not meet requirements');
+                setMessage("");
+            }
+        }
     };
+
+    const blurPasswordChange = () => {
+        if (newPassword !== confirmPassword) {
+            setMessage("Passwords do not match");
+        } else {
+            setMessage("");
+        }
+    }
+
+    const handleConfirmPasswordChange = (value) => {
+        setConfirmPassword(value);
+
+        if (newPassword && value !== newPassword) {
+            setMessage("Passwords do not match");
+        } else {
+            if (value === "") {
+                setMessage("");
+                setErrorMessage("");
+            } else {
+                setMessage(validatePassword(value) ? '' : 'Password does not meet requirements');
+                setErrorMessage("");
+            }
+        }
+    }
 
     const handlePasswordUpdate = async () => {
         if (newPassword !== confirmPassword) {
@@ -155,8 +179,8 @@ function SettingsPage() {
                         <AvatarContainer>
                             <Avatar sx={{ bgcolor: currentUser.avatar, width: 130, height: 130, marginBottom: '15px' }} />
                             <FabWrapper>
-                                <Fab size="small" color="black" aria-label="add">
-                                    <AddIcon aria-describedby={id} onClick={handleClick} />
+                                <Fab size="small" color="black" aria-label="add" onClick={handleClick}>
+                                    <AddIcon aria-describedby={id} variant="contained" />
                                 </Fab>
                                 <Popover
                                     id={id}
@@ -185,7 +209,7 @@ function SettingsPage() {
                                         ))}
                                     </Stack>
                                     <Stack direction="row" spacing={1} sx={{ p: 2 }}>
-                                        {[brown[500], deepOrange[500], yellow[500], indigo[500], pink[500]].map((color, index) => (
+                                        {[brown[500], blue[500], yellow[500], indigo[500], pink[500]].map((color, index) => (
                                             <Avatar
                                                 key={index}
                                                 sx={{ bgcolor: color, width: 30, height: 30, cursor: 'pointer' }}
@@ -283,7 +307,8 @@ function SettingsPage() {
                                 label="New Password"
                                 margin="normal"
                                 value={newPassword}
-                                onChange={(e) => handlePasswordChange(setNewPassword, e.target.value)}
+                                onChange={(e) => handlePasswordChange(e.target.value)}
+                                onBlur={blurPasswordChange}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -305,7 +330,8 @@ function SettingsPage() {
                                 label="Confirm Password"
                                 margin="normal"
                                 value={confirmPassword}
-                                onChange={(e) => handlePasswordChange(setConfirmPassword, e.target.value)}
+                                onChange={(e) => handleConfirmPasswordChange(e.target.value)}
+                                onBlur={blurPasswordChange}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -319,6 +345,7 @@ function SettingsPage() {
                                     ),
                                 }}
                             />
+                            {message && <Typography variant="caption" color={message === "Password updated successfully" ? "green" : "red"}>{message}</Typography>}
                             <ButtonWrapper>
                                 <Button
                                     variant="contained"
@@ -329,7 +356,6 @@ function SettingsPage() {
                                     Save Changes
                                 </Button>
                             </ButtonWrapper>
-                            {message && <Typography variant="caption" color={message.includes("successfully") ? "success" : "error"}>{message}</Typography>}
                         </TextFieldWrapper>
                     </Grid>
                 </Grid>

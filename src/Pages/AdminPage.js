@@ -4,12 +4,10 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { Container, TextField, IconButton, Button, InputAdornment, Tabs, Tab } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
-import { Link } from 'react-router-dom'; // Import Link for navigation
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -540,13 +538,6 @@ function AdminPage(props) {
             console.log(`${cookieName} cookie not found.`);
         }
     };
-
-    const defaultTheme = createTheme({
-        typography: {
-            fontFamily: "Mulish",
-        },
-        //navStyle: styling[navStyle], //default or light
-    });
 
     return (
         <Container

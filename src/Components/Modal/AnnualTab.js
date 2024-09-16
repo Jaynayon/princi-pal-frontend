@@ -74,16 +74,22 @@ const getStyles = (name, personName) => ({
 });
 
 export default function AnnualTab() {
-    const { month, months, year, currentSchool, jev, getDocumentBySchoolIdYear } = useSchoolContext();
+    const { month, months, year, currentSchool, jev, getDocumentBySchoolIdYear, isEditingRef } = useSchoolContext();
     const [documentsByYear, setDocumentsByYear] = React.useState([]);
     const [tabMonth, setTabMonth] = React.useState(month); // Initally get current month value
     const [selectedDocument, setSelectedDocument] = React.useState(null); // Initially get current Document value
     const [input, setInput] = React.useState(0);
     const [confirmOpen, setConfirmOpen] = React.useState(false);
 
-    const handleConfirmClose = () => setConfirmOpen(false);
+    const handleConfirmClose = () => {
+        setConfirmOpen(false);
+        isEditingRef.current = false;
+    }
 
-    const handleConfirmOpen = () => setConfirmOpen(true);
+    const handleConfirmOpen = () => {
+        setConfirmOpen(true);
+        isEditingRef.current = true;
+    }
 
     const getDocumentsByYear = React.useCallback(async () => {
         try {
@@ -125,6 +131,7 @@ export default function AnnualTab() {
     const handleInputChange = (event) => {
         let modifiedValue = event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
         setInput(modifiedValue);
+        isEditingRef.current = true;
     }
 
     const formatNumberDisplay = (number) => {
@@ -156,6 +163,7 @@ export default function AnnualTab() {
             }>
                 <FormControl variant="standard" sx={{ m: 2, minWidth: 90 }}>
                     <Select
+                        name={"document-month-select"}
                         sx={{ fontSize: 13, fontWeight: "bold" }}
                         labelId="demo-simple-select-standard-label"
                         id="demo-simple-select-standard"
@@ -202,10 +210,7 @@ export default function AnnualTab() {
                         }
                     }}
                     // onClick={(event) => handleCellClick(column.id, row.id, event)}
-                    onChange={(event) =>
-                        handleInputChange(event)
-                    }
-                // onBlur={() => handleInputBlur(column.id, row.id)}
+                    onChange={(e) => handleInputChange(e)}
                 // onKeyDown={(e) => {
                 //     if (e.key === 'Enter') {
                 //         e.preventDefault();
