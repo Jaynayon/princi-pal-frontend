@@ -36,11 +36,6 @@ import CustomizedSwitches from "./CustomizedSwitches";
 import NavigationSearchBar from "./NavigationSearchBar";
 import { useSchoolContext } from '../../Context/SchoolProvider';
 
-// Static object testing
-const User = {
-  name: "Jay Nayon",
-  email: "jay.nayonjr@cit.edu",
-};
 
 const drawerWidth = 220;
 
@@ -218,7 +213,7 @@ const createNotification = useCallback(async (userId, details, NotificationsKey)
     } catch (error) {
         console.error('Error creating notification:', error);
     }
-}, [fetchUserNotifications]);
+}, [currentUser, fetchUserNotifications]);
   
   
 const handleClearOptions = async () => {
@@ -255,7 +250,7 @@ const handleAcceptNotification = async (notificationId) => {
     if (!notificationId) {
       throw new Error("Invalid request: notificationId is required.");
     }
-    const response = await axios.post(`http://localhost:4000/associations/approve/${notificationId}`, {
+      await axios.post(`http://localhost:4000/associations/approve/${notificationId}`, {
      
     });
     const updateNotificationUrl = `http://localhost:4000/Notifications/accept/${notificationId}`;
@@ -283,7 +278,7 @@ const handleRejectNotification = async (notificationId) => {
     }
 
     const rejectNotificationUrl = `http://localhost:4000/Notifications/reject/${notificationId}`;
-    const rejectResponse = await axios.put(rejectNotificationUrl);
+      await axios.put(rejectNotificationUrl);
 
 
     const deleteAssociation = `http://localhost:4000/associations/delete/${notificationId}`;
@@ -345,7 +340,7 @@ useEffect(() => {
         }
       });
     }
-  }, [jev, createNotification, currentUser]);
+  }, [month, year, jev, createNotification, currentUser]);
   
   useEffect(() => {
     if (currentDocument && currentDocument.budgetLimit > 0) {
@@ -361,7 +356,7 @@ useEffect(() => {
         );
       }
     }
-  }, [currentDocument, createNotification, currentUser]);
+  }, [month, year, currentDocument, createNotification, currentUser]);
 
   useEffect(() => {
     if (currentDocument && currentDocument.budgetLimit > 0 && currentDocument.budgetLimitExceeded) {
