@@ -190,7 +190,13 @@ export default function UACSTab() {
                                                     {column.id === "budget" ?
                                                         <TextField
                                                             variant="standard"
-                                                            value={column.id === "budget" ? formatNumberDisplay(value, column.id, row.id) : value}
+                                                            // Disable editing cash advance operating expenses
+                                                            disabled={row.uacsCode === "1990101000"}
+                                                            value={
+                                                                row.uacsCode === "1990101000" ?
+                                                                    row.amount :
+                                                                    formatNumberDisplay(value, column.id, row.id)
+                                                            }
                                                             inputProps={{
                                                                 inputMode: 'numeric', // For mobile devices to show numeric keyboard
                                                                 pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
