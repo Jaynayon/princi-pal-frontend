@@ -146,22 +146,49 @@ function PeoplePage(props) {
                 },
                 body: JSON.stringify(associationRequest), // Sending the correct request object
             });
-
+    
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Error: ${errorText}`);
             }
-
+    
             const data = await response.json();
-            console.log('Success:', data);
-
-            // Update table/fetch user after accept
-            fetchUsers();
+            const { userId, assocId, schoolId } = data;  // Fetch schoolId from the response
+    
+            // Fetch school name using the schoolId
+            axios.get(`http://localhost:4000/schools/${schoolId}`)
+                .then(schoolResponse => {
+                    const schoolName = schoolResponse.data.fullName || 'your school'; // Use fetched school name or default
+    
+                    console.log('Application accepted successfully:', data);
+    
+                    // Create notification payload
+                    const notificationPayload = {
+                        userId,  // Use userId from the approval response
+                        details: `Congratulations! Your application to join the association at ${schoolName} has been accepted.`,
+                        assocId
+                    };
+    
+                    // Send the notification to the user
+                    axios.post('http://localhost:4000/Notifications/create', notificationPayload)
+                        .then(() => {
+                            console.log("Notification created successfully.");
+                        })
+                        .catch(error => {
+                            console.error("Error creating notification:", error.response ? error.response.data : error.message);
+                        });
+    
+                    // Update table/fetch user after accept
+                    fetchUsers();
+                })
+                .catch(error => {
+                    console.error("Error fetching school details:", error.response ? error.response.data : error.message);
+                });
         } catch (error) {
             console.error('Error:', error);
         }
     };
-
+    
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);

@@ -41,44 +41,101 @@ const NavigationSearchBar = () => {
       .catch(error => {
         console.error("There was an error fetching the school data!", error);
       });
+      
+    // Load applied schools from local storage
+    const savedAppliedSchools = JSON.parse(localStorage.getItem('appliedSchools')) || [];
+    setAppliedSchools(savedAppliedSchools);
   }, []);
 
-  const handleApplySchool = async () => {
-    try {
-      // Ensure selectedSchool has the required ID or value for the API request
-      const response = await axios.post('http://localhost:4000/associations/apply', {
-        userId: currentUser.id, // Replace with appropriate user ID
-        schoolId: selectedSchool.id // Assuming selectedSchool has an 'id' property
-      });
-      console.log("Application submitted successfully.");
-      console.log("Response data:", response.data);
-      // Update appliedSchools state if needed
-      setAppliedSchools([...appliedSchools, selectedSchool.fullName]); // Add school to applied list
-      handleClose(); // Close the dialog
-    } catch (error) {
-      console.error("Error applying to school:", error);
-      // Handle error scenario
+  useEffect(() => {
+    // Save applied schools to local storage whenever it changes
+    localStorage.setItem('appliedSchools', JSON.stringify(appliedSchools));
+  }, [appliedSchools]);
+
+  useEffect(() => {
+    const loadAppliedSchools = async () => {
+      try {
+        // Optionally fetch applied schools from an API if available
+        // const response = await axios.get('http://localhost:4000/applied-schools');
+        // setAppliedSchools(response.data);
+  
+        // For simplicity, load from local storage
+        const savedAppliedSchools = JSON.parse(localStorage.getItem('appliedSchools')) || [];
+        setAppliedSchools(savedAppliedSchools);
+      } catch (error) {
+        console.error("Error loading applied schools:", error);
+      }
+    };
+  
+    loadAppliedSchools();
+  }, []);
+  
+
+useEffect(() => {
+  // Save applied schools to local storage whenever it changes
+  localStorage.setItem('appliedSchools', JSON.stringify(appliedSchools));
+}, [appliedSchools]);
+
+const handleApplySchool = async () => {
+  try {
+    // Apply to the school
+    const response = await axios.post('http://localhost:4000/associations/apply', {
+      userId: currentUser.id, // Replace with appropriate user ID
+      schoolId: selectedSchool.id // Assuming selectedSchool has an 'id' property
+    });
+
+    console.log("Application submitted successfully.");
+    console.log("Response data:", response.data);
+
+    // Extract the association ID from the response or another source
+    const assocId = response.data.id; // Ensure this is the correct field
+    console.log("Association ID:", assocId);
+
+    if (!assocId) {
+      throw new Error('Association ID not found in response');
     }
-  };
+
+    // Fetch the association status to check if it was approved
+    const associationResponse = await axios.get(`http://localhost:4000/associations/${assocId}`);
+    console.log("Association response data:", associationResponse.data);
+
+    if (associationResponse.data.approved) {
+      // Remove the school from appliedSchools if the application was approved
+      setAppliedSchools(prevAppliedSchools => {
+        const updatedSchools = prevAppliedSchools.filter(school => school !== selectedSchool.fullName);
+        console.log("Updated applied schools:", updatedSchools);
+        return updatedSchools;
+      });
+    } else {
+      // Add school to applied list if not approved yet
+      setAppliedSchools(prevAppliedSchools => {
+        const updatedSchools = [...prevAppliedSchools, selectedSchool.fullName];
+        console.log("Updated applied schools (not approved):", updatedSchools);
+        return updatedSchools;
+      });
+    }
+
+    handleClose(); // Close the dialog
+  } catch (error) {
+    console.error("Error applying to school:", error);
+    // Handle error scenario
+  }
+};
 
   const handleClickOpen = (school) => {
     setSelectedSchool(school); // Set the selected school
     setOpen(true); // Open the dialog
   };
 
-  // Ensure selectedSchool has an id property for the API request
-
   const handleRemoveSchool = async (schoolToRemove) => {
     try {
-      // Assuming you have access to the current user's ID and the school ID
       await axios.delete(`http://localhost:4000/associations/${currentUser.id}/${selectedSchool.id}`);
       console.log("Association removed successfully.");
 
-      // Update appliedSchools state if needed
-      const updatedSchools = appliedSchools.filter(
-        (school) => school !== schoolToRemove
+      // Update appliedSchools state
+      setAppliedSchools(prevAppliedSchools => 
+        prevAppliedSchools.filter((school) => school !== schoolToRemove)
       );
-      setAppliedSchools(updatedSchools);
     } catch (error) {
       console.error("Error removing school:", error);
       // Handle error scenario

@@ -214,23 +214,29 @@ const createNotification = useCallback(async (userId, details, NotificationsKey)
   
   
 const handleClearOptions = async () => {
-  if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
-    console.log('No current user or school ID');
+  // Check if the current user is available
+  if (!currentUser || !currentUser.id) {
+    console.log('No current user ID');
     return;
   }
 
   try {
+    // Proceed with deleting notifications for the user
     await axios.delete(`http://localhost:4000/Notifications/user/${currentUser.id}`);
 
+    // Clear options after deletion
     setOptions([]);
 
+    // Manage localStorage for notifications
     let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
     let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
 
+    // Move saved notifications to the deleted notifications list
     savedNotifications.forEach(NotificationsKey => {
       deletedNotifications.push(NotificationsKey);
     });
 
+    // Update localStorage
     localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
     localStorage.removeItem('createdNotifications');
   } catch (error) {
@@ -239,6 +245,7 @@ const handleClearOptions = async () => {
     handleMenuClose();
   }
 };
+
 
   
 
