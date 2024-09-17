@@ -334,42 +334,54 @@ useEffect(() => {
 }, [currentDocument, createNotification, currentUser, previousBalance]);
 
   
-  useEffect(() => {
-    const fetchAndProcessData = async (id, row) => {
-      try {
-        const response = await axios.get(`http://localhost:4000/jev/${id}`);
-        const { budgetExceeded } = response.data;
-  
-        // Check if `budgetExceeded` is true
-        if (budgetExceeded) {
-          const NotificationsKey = `budget-exceeded-${id || ''}`;
-          const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-          // Create a notification only if it has not been created before
-          if (!savedNotifications.includes(NotificationsKey)) {
-            createNotification(
-              currentUser.id,
-              `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${row.amount}, Allocated Budget: ₱${row.budget}`,
-              NotificationsKey
-            );
-            
-            // Save the notification key to local storage to prevent duplicate notifications
-            savedNotifications.push(NotificationsKey);
-            localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
-          }
+useEffect(() => {
+  const fetchAndProcessData = async (id, row) => {
+    try {
+      const response = await axios.get(`http://localhost:4000/jev/${id}`);
+      const { budgetExceeded, amount } = response.data;
+
+      console.log('Response data:', response.data);
+
+      // Create a notification if budgetExceeded is true AND amount is greater than budget
+      if (budgetExceeded && amount > row.budget) {
+        const NotificationsKey = `budget-exceeded-${id || ''}`;
+
+        // Create a notification
+        const notificationMessage = `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${amount}, Allocated Budget: ₱${row.budget}`;
+        
+        createNotification(
+          currentUser.id,
+          notificationMessage,
+          NotificationsKey
+        );
+
+        // Log the created notification data
+        console.log('Created notification:', {
+          userId: currentUser.id,
+          message: notificationMessage,
+          notificationKey: NotificationsKey
+        });
+        
+        // Save the notification key to local storage to prevent duplicate notifications
+        const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+        if (!savedNotifications.includes(NotificationsKey)) {
+          savedNotifications.push(NotificationsKey);
+          localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
         }
-      } catch (error) {
-        console.error(`Failed to fetch details for ID ${id}:`, error);
       }
-    };
-  
-    if (jev && jev.length) {
-      jev.forEach(row => {
-        // Fetch and process data based on row.id
-        fetchAndProcessData(row.id, row);
-      });
+
+    } catch (error) {
+      console.error(`Failed to fetch details for ID ${id}:`, error);
     }
-  }, [month, year, jev, createNotification, currentUser]);
+  };
+
+  if (jev && jev.length) {
+    jev.forEach(row => {
+      // Fetch and process data based on row.id
+      fetchAndProcessData(row.id, row);
+    });
+  }
+}, [month, year, jev, createNotification, currentUser]);
   
   useEffect(() => {
     if (currentDocument && currentDocument.budgetLimit > 0) {
