@@ -349,13 +349,16 @@ useEffect(() => {
 
       console.log('Response data:', response.data);
 
-      // Create a notification if budgetExceeded is true AND amount is greater than budget
-      if (budgetExceeded && amount > row.budget) {
-        const NotificationsKey = `budget-exceeded-${id || ''}`;
+      // Check if amount exceeds the budget and budgetExceeded is true
+      if (amount > row.budget && budgetExceeded) {
+        // Create a unique key for the notification with a timestamp
+        const timestamp = new Date().toISOString();
+        const NotificationsKey = `budget-exceeded-${id}-${timestamp}`;
 
-        // Create a notification
+        // Create a notification message
         const notificationMessage = `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${amount}, Allocated Budget: ₱${row.budget}`;
         
+        // Create a notification
         createNotification(
           currentUser.id,
           notificationMessage,
@@ -371,10 +374,8 @@ useEffect(() => {
         
         // Save the notification key to local storage to prevent duplicate notifications
         const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-        if (!savedNotifications.includes(NotificationsKey)) {
-          savedNotifications.push(NotificationsKey);
-          localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
-        }
+        savedNotifications.push(NotificationsKey);
+        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
       }
 
     } catch (error) {
@@ -389,6 +390,7 @@ useEffect(() => {
     });
   }
 }, [month, year, jev, createNotification, currentUser]);
+
   
   useEffect(() => {
     if (currentDocument && currentDocument.budgetLimit > 0) {
