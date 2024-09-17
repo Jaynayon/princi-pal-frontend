@@ -5,20 +5,9 @@ import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 
-const objectCodes = [
-    { code: "5020502001", name: "Communication Expenses" },
-    { code: "5020402000", name: "Electricity Expenses" },
-    { code: "5020503000", name: "Internet Subscription Expenses" },
-    { code: "5029904000", name: "Transpo/Delivery Expenses" },
-    { code: "5020201000", name: "Training Expenses" },
-    { code: "5020399000", name: "Other Suplies & Materials Expenses" },
-    { code: "1990101000", name: "Advances to Operating Expenses" }
-]
-
 function UacsDateFilter(props) {
-    //const [anchorEl, setAnchorEl] = React.useState(null);
-    const { fetchDocumentData, updateLrById } = useSchoolContext();
-    const { value, rowId, handleInputChange } = props
+    const { fetchDocumentData, updateLrById, objectCodes } = useSchoolContext();
+    const { value, rowId, handleInputChange, name } = props
     const [selectedCode, setSelectedCode] = useState(value);
 
     const ITEM_HEIGHT = 48;
@@ -78,14 +67,16 @@ function UacsDateFilter(props) {
     };
 
     return (
-        <FormControl sx={{
-            minWidth: 90,
-            display: 'flex',
-            alignItems: 'center',
-            flexDirection: 'row',
-            justifyContent: "flex-start"
-        }}>
+        <FormControl
+            sx={{
+                minWidth: 90,
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: 'row',
+                justifyContent: "flex-start"
+            }}>
             <Select
+                name={name}
                 displayEmpty
                 value={selectedCode}
                 onChange={handleChangeMonth}
@@ -103,7 +94,7 @@ function UacsDateFilter(props) {
                 }}
                 inputProps={{ 'aria-label': 'Without label' }}
             >
-                {objectCodes.map((item) => (
+                {objectCodes && objectCodes.map((item) => (
                     <MenuItem
                         key={item.code}
                         value={item.code}

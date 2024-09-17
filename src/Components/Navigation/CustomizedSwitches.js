@@ -62,6 +62,7 @@ export default function CustomizedSwitches({ setter }) {
   return (
     <FormGroup>
       <FormControlLabel
+        name='theme-switch-button'
         control={<MaterialUISwitch sx={{ m: 1 }} defaultChecked={false} />}
         label="Theme"
         onClick={handleChange}

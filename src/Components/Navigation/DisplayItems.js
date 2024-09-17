@@ -259,94 +259,94 @@ export const ProfileTab = () => {
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
                         <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
-                        <TextField 
-                            sx={{ width: '100%' }} 
-                            disabled 
-                            id="username-field" 
-                            label="Username" 
-                            defaultValue={currentUser.username} 
-                            margin="normal"
-                            InputProps={{
-                                startAdornment: (
-                                <InputAdornment position="start">
-                                    <PersonIcon />
-                                </InputAdornment>
-                                ),
-                            }} 
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="username-field"
+                                label="Username"
+                                defaultValue={currentUser.username}
+                                margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
-                            <TextField 
-                            sx={{ width: '100%' }} 
-                            disabled 
-                            id="first-name-field" 
-                            label="First Name" 
-                            defaultValue={currentUser.fname + " "} 
-                            margin="normal"
-                            InputProps={{
-                                startAdornment: (
-                                <InputAdornment position="start">
-                                    <PersonIcon />
-                                </InputAdornment>
-                                ),
-                            }} 
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="first-name-field"
+                                label="First Name"
+                                defaultValue={currentUser.fname + " "}
+                                margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
-                            <TextField 
-                            sx={{ width: '100%' }} 
-                            disabled 
-                            id="middle-name-field" 
-                            label="Middle Name" 
-                            defaultValue={currentUser.mname + " "} 
-                            margin="normal"
-                            InputProps={{
-                                startAdornment: (
-                                <InputAdornment position="start">
-                                    <PersonIcon />
-                                </InputAdornment>
-                                ),
-                            }} 
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="middle-name-field"
+                                label="Middle Name"
+                                defaultValue={currentUser.mname + " "}
+                                margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
-                            <TextField 
-                            sx={{ width: '100%' }} 
-                            disabled 
-                            id="last-name-field" 
-                            label="Last Name" 
-                            defaultValue={currentUser.lname} 
-                            margin="normal"
-                            InputProps={{
-                                startAdornment: (
-                                <InputAdornment position="start">
-                                    <PersonIcon />
-                                </InputAdornment>
-                                ),
-                            }} 
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="last-name-field"
+                                label="Last Name"
+                                defaultValue={currentUser.lname}
+                                margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
-                            <TextField 
-                            sx={{ width: '100%' }} 
-                            disabled 
-                            id="email-field" 
-                            label="Email" 
-                            defaultValue={currentUser.email} 
-                            margin="normal"
-                            InputProps={{
-                                startAdornment: (
-                                <InputAdornment position="start">
-                                    <EmailIcon />
-                                </InputAdornment>
-                                ),
-                            }}
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="email-field"
+                                label="Email"
+                                defaultValue={currentUser.email}
+                                margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
-                            <TextField 
-                            disabled 
-                            id="role-field" 
-                            label="Role" 
-                            defaultValue={currentUser.position} 
-                            margin="normal"
-                            InputProps={{
-                                startAdornment: (
-                                <InputAdornment position="start">
-                                    <PersonIcon />
-                                </InputAdornment>
-                                ),
-                            }}
+                            <TextField
+                                disabled
+                                id="role-field"
+                                label="Role"
+                                defaultValue={currentUser.position}
+                                margin="normal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Stack>
                     </Stack>
