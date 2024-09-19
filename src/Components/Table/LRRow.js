@@ -12,6 +12,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UacsFilter from '../Filters/UacsFilter';
 import HistoryModal from '../Modal/HistoryModal';
+import LRDate from '../Filters/LRDate';
 
 function LRRow(props) {
     const { page, rowsPerPage } = props;
@@ -249,49 +250,52 @@ function LRRow(props) {
                                                 />
                                             </Box>
                                             :
-                                            <Box
-                                                style={
-                                                    editingCell &&
-                                                        editingCell.colId === column.id &&
-                                                        editingCell.rowId === row.id &&
-                                                        row.id !== 3
-                                                        ? styles.divInput
-                                                        : null
-                                                }
-                                            >
-                                                <TextField
-                                                    //variant='standard'
-                                                    id={lr?.id}
-                                                    value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
-                                                    error={isError(column.id, row.id)}
-                                                    helperText={displayError(column.id, row.id)}
-                                                    sx={{
-                                                        "& fieldset": { border: row.id !== 3 && 'none' }
-                                                    }}
-                                                    FormHelperTextProps={{ style: { position: "absolute", bottom: "-20px" } }}
-                                                    InputProps={{
-                                                        //disableUnderline: true,
-                                                        style: {
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            flexDirection: 'row',
-                                                            justifyContent: "flex-start",
-                                                            fontSize: 14,
-                                                            height: 40
-                                                        }
-                                                    }}
-                                                    onChange={(event) =>
-                                                        handleInputChange(column.id, row.id, event)
+                                            column.id === "date" ?
+                                                <LRDate />
+                                                :
+                                                <Box
+                                                    style={
+                                                        editingCell &&
+                                                            editingCell.colId === column.id &&
+                                                            editingCell.rowId === row.id &&
+                                                            row.id !== 3
+                                                            ? styles.divInput
+                                                            : null
                                                     }
-                                                    onBlur={() => handleInputBlur(column.id, row.id)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            e.preventDefault();
-                                                            e.target.blur(); // Invoke handleLogin on Enter key press
+                                                >
+                                                    <TextField
+                                                        //variant='standard'
+                                                        id={lr?.id}
+                                                        value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
+                                                        error={isError(column.id, row.id)}
+                                                        helperText={displayError(column.id, row.id)}
+                                                        sx={{
+                                                            "& fieldset": { border: row.id !== 3 && 'none' }
+                                                        }}
+                                                        FormHelperTextProps={{ style: { position: "absolute", bottom: "-20px" } }}
+                                                        InputProps={{
+                                                            //disableUnderline: true,
+                                                            style: {
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                flexDirection: 'row',
+                                                                justifyContent: "flex-start",
+                                                                fontSize: 14,
+                                                                height: 40
+                                                            }
+                                                        }}
+                                                        onChange={(event) =>
+                                                            handleInputChange(column.id, row.id, event)
                                                         }
-                                                    }}
-                                                />
-                                            </Box>
+                                                        onBlur={() => handleInputBlur(column.id, row.id)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault();
+                                                                e.target.blur(); // Invoke handleLogin on Enter key press
+                                                            }
+                                                        }}
+                                                    />
+                                                </Box>
                                         }
                                     </TableCell>
                                 );
