@@ -35,16 +35,7 @@ const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
 
 export default function LRDate({ rowId, colId, selected, onChange }) {
     const [startDate, setStartDate] = useState(new Date(selected) || new Date());
-    const { updateLrById, years, months } = useSchoolContext();
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString); // Convert to Date object
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based, so +1
-        const day = date.getDate().toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        return `${month}/${day}/${year}`; // Return formatted date as MM/DD/YYYY
-    };
+    const { formatDate, updateLrById, years, months } = useSchoolContext();
 
     const dateOnBlur = async (date) => {
         try {
