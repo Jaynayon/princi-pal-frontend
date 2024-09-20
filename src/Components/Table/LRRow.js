@@ -10,9 +10,9 @@ import { Menu, TextField } from '@mui/material';
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import UacsFilter from '../Filters/UacsFilter';
+import UacsSelect from '../Select/UacsSelect';
 import HistoryModal from '../Modal/HistoryModal';
-import LRDate from '../Filters/LRDate';
+import LRDate from '../Picker/LRDate';
 import "react-datepicker/dist/react-datepicker.css";
 
 function LRRow(props) {
@@ -22,7 +22,6 @@ function LRRow(props) {
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
-    const [dateError, setDateError] = useState(false);
     const [open, setOpen] = React.useState(false);
 
     const handleOpen = () => setOpen(true);
@@ -31,6 +30,7 @@ function LRRow(props) {
 
     const {
         addFields,
+        formatDate,
         isAdding,
         isEditingRef,
         currentDocument,
@@ -110,40 +110,28 @@ function LRRow(props) {
             // setReload(!reload); //just to reload school.js to fetch lr data
             updateLr(); //just to reload school.js to fetch lr data
         }
-        setDateError(false); //reset date error state
     }
 
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
         console.log("accept");
         const rowIndex = lr.findIndex(row => row.id === rowId);
-        if (!dateError) {
-            if (lr[rowIndex]["date"] === "") {
-                setDateError(true)
+        if (lr[rowIndex]["date"] === "") {
+            console.log("this is the case")
+        } else {
+            const rowIndex = lr.findIndex(row => row.id === rowId);
+            // jev length upon initialization will always be > 2 or not null/undefined
+            if (!currentDocument?.id || !jev || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
+                await createNewDocument(lr[rowIndex], month);
             } else {
-                const rowIndex = lr.findIndex(row => row.id === rowId);
-                // jev length upon initialization will always be > 2 or not null/undefined
-                if (!currentDocument?.id || !jev || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
-                    await createNewDocument(lr[rowIndex], month);
-                } else {
-                    try {
-                        await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
-                    } catch (error) {
-                        console.error('Error creating LR: ', error);
-                    }
+                try {
+                    await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                } catch (error) {
+                    console.error('Error creating LR: ', error);
                 }
             }
         }
     }
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString); // Convert to Date object
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based, so +1
-        const day = date.getDate().toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        return `${month}/${day}/${year}`; // Return formatted date as MM/DD/YYYY
-    };
 
     const handleInputChange = async (colId, rowId, event) => {
 
@@ -183,10 +171,6 @@ function LRRow(props) {
             }
             console.log('Value saved:', inputValue);
         }
-        // Perform validation for new row/addFields/ add row feature
-        else {
-            if (colId === "date") { setDateError(!isValidDateFormat(inputValue)); }
-        }
     };
 
     // Function to format a number with commas and two decimal places
@@ -200,7 +184,7 @@ function LRRow(props) {
 
     const displayError = (colId, rowId) => {
         const rowIndex = lr.findIndex(row => row.id === rowId);
-        if (colId === "date" && rowId === 3 && dateError) {
+        if (colId === "date" && rowId === 3) {
             if (lr[rowIndex]["date"] === "") {
                 return "Empty field"
             }
@@ -209,18 +193,10 @@ function LRRow(props) {
     }
 
     const isError = (colId, rowId) => {
-        if (colId === "date" && rowId === 3 && dateError) {
+        if (colId === "date" && rowId === 3) {
             return true;
         }
         return false;
-    }
-
-    function isValidDateFormat(dateString) {
-        // Define the regex pattern for m/d/yyyy or mm/dd/yyyy
-        const regexPattern = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{4}$/;
-
-        // Check if the date string matches the regex pattern
-        return regexPattern.test(dateString);
     }
 
     return (
@@ -244,63 +220,60 @@ function LRRow(props) {
                                             {
                                                 minWidth: column.minWidth,
                                                 maxWidth: column.maxWidth,
-                                            }
+                                            },
                                         ]}
                                         onClick={(event) => handleCellClick(column.id, row.id, event)}
                                         onBlur={() => handleBlurCell()}
                                     >
-                                        {/*UACS field*/}
-                                        {column.id === "objectCode" ?
-                                            <Box sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}>
-                                                <UacsFilter
-                                                    name={`lr-uacs-filter-${lr?.id}`}
-                                                    value={value} // objectCode value
-                                                    rowId={row.id} // lr id
-                                                    handleInputChange={handleInputChange} //handle input change on current row
-                                                />
-                                            </Box>
-                                            :
-                                            column.id === "date" ?
-                                                <LRDate
-                                                    selected={selectedDate}
-                                                    colId={column.id}
-                                                    rowId={row.id}
-                                                    onChange={handleInputChange}
-                                                />
-                                                :
-                                                <Box
-                                                    style={
-                                                        editingCell &&
-                                                            editingCell.colId === column.id &&
-                                                            editingCell.rowId === row.id &&
-                                                            row.id !== 3
-                                                            ? styles.divInput
-                                                            : null
-                                                    }
-                                                >
+                                        {(() => {
+                                            const isObjectCodeColumn = column.id === "objectCode";
+                                            const isDateColumn = column.id === "date";
+                                            const isEditing = editingCell?.colId === column.id && editingCell?.rowId === row.id && row.id !== 3;
+
+                                            if (isDateColumn) {
+                                                return (
+                                                    <LRDate
+                                                        selected={selectedDate}
+                                                        colId={column.id}
+                                                        rowId={row.id}
+                                                        onChange={handleInputChange}
+                                                    />
+                                                );
+                                            }
+
+                                            if (isObjectCodeColumn) {
+                                                return (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <UacsSelect
+                                                            name={`lr-uacs-filter-${lr?.id}`}
+                                                            value={value} // objectCode value
+                                                            rowId={row.id} // lr id
+                                                            handleInputChange={handleInputChange} //handle input change on current row
+                                                        />
+                                                    </Box>
+                                                );
+                                            }
+
+                                            return (
+                                                <Box style={isEditing ? styles.divInput : null}>
                                                     <TextField
-                                                        //variant='standard'
                                                         id={lr?.id}
                                                         value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
                                                         error={isError(column.id, row.id)}
                                                         helperText={displayError(column.id, row.id)}
-                                                        sx={{
-                                                            "& fieldset": { border: row.id !== 3 && 'none' }
+                                                        sx={{ "& fieldset": { border: row.id !== 3 && 'none' } }}
+                                                        FormHelperTextProps={{
+                                                            style: { position: "absolute", bottom: "-20px" },
                                                         }}
-                                                        FormHelperTextProps={{ style: { position: "absolute", bottom: "-20px" } }}
                                                         InputProps={{
-                                                            //disableUnderline: true,
                                                             style: {
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 flexDirection: 'row',
                                                                 justifyContent: "flex-start",
                                                                 fontSize: 14,
-                                                                height: 40
-                                                            }
+                                                                height: 40,
+                                                            },
                                                         }}
                                                         onChange={(event) =>
                                                             handleInputChange(column.id, row.id, event)
@@ -309,12 +282,13 @@ function LRRow(props) {
                                                         onKeyDown={(e) => {
                                                             if (e.key === 'Enter') {
                                                                 e.preventDefault();
-                                                                e.target.blur(); // Invoke handleLogin on Enter key press
+                                                                e.target.blur(); // Blur input on Enter key press
                                                             }
                                                         }}
                                                     />
                                                 </Box>
-                                        }
+                                            );
+                                        })()}
                                     </TableCell>
                                 );
                             })}
