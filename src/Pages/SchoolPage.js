@@ -115,7 +115,7 @@ function SchoolPage(props) {
         updateLr();
         updateJev();
         setIsAdding(false); //reset state to allow addFields again
-    }, [currentDocument, updateLr, updateJev, setIsAdding]);
+    }, [currentDocument, updateLr, updateJev, setIsAdding, value]); // Listen to "value" when changing tabs; reset isAdding
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
