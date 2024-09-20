@@ -214,7 +214,8 @@ export const SchoolProvider = ({ children }) => {
     const updateJev = useCallback(async () => {
         try {
             if (currentDocument.id !== 0) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
+                // const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/jev/documents/${currentDocument.id}`);
                 setJev(response.data || []);
             } else {
                 setJev([]); //meaning it's empty 
