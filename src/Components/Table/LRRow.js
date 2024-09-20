@@ -14,6 +14,7 @@ import UacsSelect from '../Select/UacsSelect';
 import HistoryModal from '../Modal/HistoryModal';
 import LRDate from '../Picker/LRDate';
 import "react-datepicker/dist/react-datepicker.css";
+import NatureOfPaymentSelect from '../Select/NatureOfPaymentSelect';
 
 function LRRow(props) {
     const { page, rowsPerPage } = props;
@@ -226,6 +227,7 @@ function LRRow(props) {
                                         onBlur={() => handleBlurCell()}
                                     >
                                         {(() => {
+                                            const isNatureOfPayment = column.id === "natureOfPayment";
                                             const isObjectCodeColumn = column.id === "objectCode";
                                             const isDateColumn = column.id === "date";
                                             const isEditing = editingCell?.colId === column.id && editingCell?.rowId === row.id && row.id !== 3;
@@ -245,8 +247,21 @@ function LRRow(props) {
                                                 return (
                                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                         <UacsSelect
-                                                            name={`lr-uacs-filter-${lr?.id}`}
+                                                            name={`lr-uacs-select-${lr?.id}`}
                                                             value={value} // objectCode value
+                                                            rowId={row.id} // lr id
+                                                            handleInputChange={handleInputChange} //handle input change on current row
+                                                        />
+                                                    </Box>
+                                                );
+                                            }
+
+                                            if (isNatureOfPayment) {
+                                                return (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <NatureOfPaymentSelect
+                                                            name={`lr-nature-payment-select-${lr?.id}`}
+                                                            value={value} // natureOfPayment value
                                                             rowId={row.id} // lr id
                                                             handleInputChange={handleInputChange} //handle input change on current row
                                                         />
