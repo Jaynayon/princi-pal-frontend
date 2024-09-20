@@ -331,10 +331,19 @@ export const SchoolProvider = ({ children }) => {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // Convert to Date object
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based, so +1
+        const day = date.getDate().toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${month}/${day}/${year}`; // Return formatted date as MM/DD/YYYY
+    };
+
     const addFields = useCallback((isAdding) => {
         let newLr = {
             id: 3,
-            date: '',
+            date: formatDate(new Date()), //default date: today
             orsBursNo: '',
             particulars: '',
             amount: 0,
@@ -393,7 +402,7 @@ export const SchoolProvider = ({ children }) => {
             jev, setJev, updateJev,
             currentDocument, setCurrentDocument,
             emptyDocument,
-            addFields,
+            addFields, formatDate,
             isAdding, setIsAdding,
             isEditingRef,
             isSearchingRef,
