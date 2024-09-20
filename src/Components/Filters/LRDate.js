@@ -7,6 +7,7 @@ import { useSchoolContext } from "../../Context/SchoolProvider";
 // Custom input component using forwardRef
 const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
     <input
+        ref={ref} // Pass the ref to the input element
         type="text"
         style={{
             backgroundColor: "transparent",
@@ -17,11 +18,10 @@ const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
             height: 40,
             width: "110px"
         }}
+        readOnly
         value={value}
         onClick={onClick}
         onChange={onChange}
-        ref={ref} // Pass the ref to the input element
-        readOnly
         // Handle focus styles directly
         onFocus={(e) => {
             e.target.style.outline = "none";
@@ -33,8 +33,8 @@ const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
     />
 ));
 
-export default function LRDate({ rowId, colId, selected, onBlur }) {
-    const [startDate, setStartDate] = useState(new Date(selected));
+export default function LRDate({ rowId, colId, selected, onChange }) {
+    const [startDate, setStartDate] = useState(new Date(selected) || new Date());
     const { updateLrById, years, months } = useSchoolContext();
 
     const formatDate = (dateString) => {
@@ -48,10 +48,14 @@ export default function LRDate({ rowId, colId, selected, onBlur }) {
 
     const dateOnBlur = async (date) => {
         try {
-            console.log(formatDate(date))
-            // const formattedDate = date.toISOString(); // Convert date to string format
-            await updateLrById(colId, rowId, formatDate(date)); // Pass serialized date (string)
-            console.log(formatDate(date));
+            const formattedDate = formatDate(date);
+            // Update cells to any date fields that already have data/LR
+            if (rowId !== 3) {
+                await updateLrById(colId, rowId, formattedDate);
+            } else {
+                // Call the on change function that updates the LR state rowId === 3
+                onChange(colId, rowId, formattedDate)
+            }
         } catch (error) {
             console.error("Error updating LR by ID:", error);
         }
@@ -110,10 +114,8 @@ export default function LRDate({ rowId, colId, selected, onBlur }) {
             )}
             selected={startDate}
             onChange={(date) => {
-                console.log("gawas")
                 setStartDate(date);
                 dateOnBlur(date)
-                // if (onChange) onChange(date); // Trigger the parent's onChange if provided
             }}
             customInput={<CustomInput />}
         />

@@ -13,6 +13,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UacsFilter from '../Filters/UacsFilter';
 import HistoryModal from '../Modal/HistoryModal';
 import LRDate from '../Filters/LRDate';
+import "react-datepicker/dist/react-datepicker.css";
 
 function LRRow(props) {
     const { page, rowsPerPage } = props;
@@ -57,7 +58,7 @@ function LRRow(props) {
         isEditingRef.current = true; // user clicked a cell
         setEditingCell({ colId, rowId });
         setInitialValue(event.target.value); // Save the initial value of the clicked cell
-        setInputValue(event.target.value); // Set input value to the current value
+        setInputValue(event.target.value || event); // Set input value to the current value
         console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
@@ -135,8 +136,19 @@ function LRRow(props) {
         }
     }
 
-    const handleInputChange = (colId, rowId, event) => {
-        let modifiedValue = event.target.value
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // Convert to Date object
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based, so +1
+        const day = date.getDate().toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${month}/${day}/${year}`; // Return formatted date as MM/DD/YYYY
+    };
+
+    const handleInputChange = async (colId, rowId, event) => {
+
+        let modifiedValue = colId === "date" ? formatDate(event) : event.target.value
+
         // Find the index of the object with matching id
         const rowIndex = lr.findIndex(row => row.id === rowId);
 
@@ -221,6 +233,7 @@ function LRRow(props) {
                         <TableRow key={uniqueKey} hover role="checkbox" tabIndex={-1}>
                             {props.columns.map((column) => {
                                 const value = row[column.id];
+                                const selectedDate = value ? new Date(value) : new Date();
 
                                 return (
                                     <TableCell
@@ -251,7 +264,12 @@ function LRRow(props) {
                                             </Box>
                                             :
                                             column.id === "date" ?
-                                                <LRDate />
+                                                <LRDate
+                                                    selected={selectedDate}
+                                                    colId={column.id}
+                                                    rowId={row.id}
+                                                    onChange={handleInputChange}
+                                                />
                                                 :
                                                 <Box
                                                     style={
