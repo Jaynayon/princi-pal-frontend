@@ -5,7 +5,7 @@ import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 
-function UacsDateFilter(props) {
+export default function UacsSelect(props) {
     const { fetchDocumentData, updateLrById, objectCodes } = useSchoolContext();
     const { value, rowId, handleInputChange, name } = props
     const [selectedCode, setSelectedCode] = useState(value);
@@ -110,5 +110,3 @@ function UacsDateFilter(props) {
         </FormControl>
     );
 }
-
-export default UacsDateFilter;
