@@ -142,6 +142,28 @@ export const SchoolProvider = ({ children }) => {
         }
     }, []);
 
+    const initializeDocuments = useCallback(async (annualBudget) => {
+        try {
+            if (currentSchool) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_DOC}/initialize`, {
+                    schoolId: currentSchool.id,
+                    month,
+                    year,
+                    annualBudget
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                return response.status === 201;
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+            return null;
+        }
+    }, [currentSchool, month, year]);
+
     const createNewDocument = useCallback(async (obj, month, cashAdvanceValue) => {
         try {
             if (currentSchool) {
@@ -412,6 +434,7 @@ export const SchoolProvider = ({ children }) => {
             fetchDocumentData,
             fetchDocumentBySchoolId,
             createNewDocument, updateDocumentById, getDocumentBySchoolIdYear,
+            initializeDocuments,
             createLrByDocId, deleteLrByid, updateLrById,
             updateJevById,
             objectCodes
