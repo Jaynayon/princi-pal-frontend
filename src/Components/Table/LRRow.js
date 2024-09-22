@@ -42,10 +42,7 @@ function LRRow(props) {
         setLr,
         fetchDocumentData,
         createLrByDocId,
-        value,
-        createNewDocument,
-        month,
-        jev
+        value
     } = useSchoolContext();
 
     useEffect(() => {
@@ -115,22 +112,16 @@ function LRRow(props) {
 
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
-        console.log("accept");
-        const rowIndex = lr.findIndex(row => row.id === rowId);
-        if (lr[rowIndex]["date"] === "") {
-            console.log("this is the case")
-        } else {
+        try {
+            console.log("accept");
             const rowIndex = lr.findIndex(row => row.id === rowId);
-            // jev length upon initialization will always be > 2 or not null/undefined
-            if (!currentDocument?.id || !jev || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
-                await createNewDocument(lr[rowIndex], month);
+            if (lr[rowIndex]["date"] === "") {
+                console.log("Empty date")
             } else {
-                try {
-                    await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
-                } catch (error) {
-                    console.error('Error creating LR: ', error);
-                }
+                await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
             }
+        } catch (error) {
+            console.error('Error creating LR: ', error);
         }
     }
 
@@ -176,11 +167,14 @@ function LRRow(props) {
 
     // Function to format a number with commas and two decimal places
     const formatNumber = (number, colId, rowId) => {
-        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
+        const formattedNumber = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(number);
         if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
             return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
         }
-        return "₱" + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return (`₱${formattedNumber}`);
     };
 
     const displayError = (colId, rowId) => {
