@@ -1,5 +1,5 @@
+import React, { useEffect, useState } from 'react';
 import '../App.css';
-import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Paper,
@@ -9,8 +9,14 @@ import {
     Grid,
     Box,
     Button,
-    Typography
+    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from '@mui/material';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+
 
 import {
     FilterDate,
@@ -67,6 +73,8 @@ function SchoolPage(props) {
     const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleOpen = () => {
         setOpen(true);
@@ -125,6 +133,41 @@ function SchoolPage(props) {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+    };
+
+    const createNotification = async (details) => {
+        try {
+            const notification = {
+                details,
+                timestamp: new Date().toISOString(),
+                // Add any other necessary fields
+            };
+            await axios.post(`http://localhost:4000/Notifications/create`, notification);
+            setNotificationMessage(details);
+            setDialogOpen(true);
+        } catch (error) {
+            console.error('Error creating notification:', error.response ? error.response.data : error.details);
+        }
+    };
+    
+
+    // Check balance whenever currentDocument changes
+    useEffect(() => {
+        if (currentDocument) {
+            const cashAdvance = currentDocument.cashAdvance || 0;
+            const budget = currentDocument.budget || 0;
+            const balance = cashAdvance - budget;
+    
+            if (balance < 0) {
+                createNotification('Balance is negative!');
+            }
+        }
+    }, [currentDocument]);
+    
+
+    // Handle dialog close
+    const handleDialogClose = () => {
+        setDialogOpen(false);
     };
 
     return (
@@ -242,6 +285,35 @@ function SchoolPage(props) {
                     </Paper>
                 </Grid>
             </Grid>
+            <Dialog
+                open={dialogOpen}
+                onClose={handleDialogClose}
+                sx={{
+                    '& .MuiDialog-paper': {
+                        width: '400px',
+                        height: '250px',
+                        maxWidth: 'none',
+                        border: '1px solid red', // Add red border
+                        borderRadius: '8px' // Optional: to round the corners
+                    }
+                }} // Set equal width and height
+            >
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', paddingTop: 4 }}>
+                    <ReportProblemIcon sx={{ fontSize: '3rem', color: 'red', marginRight: 1 }} />
+                    <Typography variant="h5" sx={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+                        Alert
+                    </Typography>
+                </DialogTitle>
+                <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', paddingTop: 2 }}>
+                    <Typography variant="body1" sx={{ fontSize: '2.3rem' }}>
+                        {notificationMessage}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="primary">
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container >
     );
 }
