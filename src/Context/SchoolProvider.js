@@ -6,15 +6,6 @@ export const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 
-const emptyDocument = {
-    id: 0,
-    budget: 0,
-    cashAdvance: 0,
-    claimant: "",
-    sds: "",
-    headAccounting: ""
-}
-
 // Initialize current date to get current month and year
 const currentDate = new Date();
 const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
@@ -28,6 +19,17 @@ const months = [
 // Dynamic year starting from year 2021
 const startYear = 2021;
 const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (startYear + i).toString());
+
+const emptyDocument = {
+    id: 0,
+    year: currentYear,
+    month: currentMonth,
+    budget: 0,
+    cashAdvance: 0,
+    claimant: "",
+    sds: "",
+    headAccounting: ""
+}
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
