@@ -12,6 +12,8 @@ import {
     TableHead,
     TableRow,
 } from '@mui/material';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 
 import { useSchoolContext } from '../../Context/SchoolProvider';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
@@ -118,6 +120,18 @@ export default function BudgetAllocationContent() {
         }
     }, [documentsByYear, month]);
 
+    const ChipInfo = () => {
+        const budgetSet = documentsByYear.some(doc => doc.month === month && doc.annualBudget > 0);
+        return (
+            <Chip
+                label={budgetSet ? "The annual budget has been set." : "The annual budget has not been set."}
+                size="small"
+                color={budgetSet ? "success" : "warning"}
+                variant="outlined"
+            />
+        );
+    };
+
     return (
         <React.Fragment>
             <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
@@ -129,55 +143,62 @@ export default function BudgetAllocationContent() {
             <Box sx={
                 {
                     display: "flex",
-                    flexDirection: "row",
+                    flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
-                    height: 80,
+                    height: "100%",
                     width: "100%",
                     borderRadius: 5,
                     border: "1px solid #c7c7c7",
                     mt: 1.5,
-                    mb: 1.5,
-                    p: 3
+                    p: 3,
+                    pb: 2
                 }
             }>
-                <TextField
-                    disabled={documentsByYear.some(doc => doc.month === month && doc.annualBudget > 0)}
-                    variant="standard"
-                    value={formatAnnualNumberDisplay(input)}
-                    inputProps={{
-                        inputMode: 'numeric', // For mobile devices to show numeric keyboard
-                        pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
-                    }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                ₱{/* Replace this with your desired currency symbol */}
-                            </InputAdornment>
-                        ),
-                        style: {
-                            display: 'flex',
-                            alignItems: 'center',
-                            flexDirection: 'row',
-                            justifyContent: "flex-start",
-                            fontWeight: "bold",
-                            borderRadius: 10,
-                            fontSize: 13,
-                            height: 30
-                        }
-                    }}
-                    onClick={handleInputClick}
-                    onBlur={handleInputBlur}
-                    onChange={(e) => handleInputChange(e)}
-                />
-                <Button
-                    disabled={documentsByYear.some(doc => doc.month === month && doc.annualBudget > 0) || !input || input < 1}
-                    sx={[styles.button, { fontSize: 13, ml: 2, mb: 2, maxHeight: 35 }]}
-                    onClick={handleConfirmOpen}
-                    variant="contained"
-                >
-                    Save
-                </Button>
+                <Stack spacing={1} sx={{ alignItems: 'center' }}>
+                    <Stack direction="row" spacing={1}>
+                        <TextField
+                            disabled={documentsByYear.some(doc => doc.month === month && doc.annualBudget > 0)}
+                            variant="standard"
+                            value={formatAnnualNumberDisplay(input)}
+                            inputProps={{
+                                inputMode: 'numeric', // For mobile devices to show numeric keyboard
+                                pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
+                            }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        ₱{/* Replace this with your desired currency symbol */}
+                                    </InputAdornment>
+                                ),
+                                style: {
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    flexDirection: 'row',
+                                    justifyContent: "flex-start",
+                                    fontWeight: "bold",
+                                    borderRadius: 10,
+                                    fontSize: 13,
+                                    height: 30
+                                }
+                            }}
+                            onClick={handleInputClick}
+                            onBlur={handleInputBlur}
+                            onChange={(e) => handleInputChange(e)}
+                        />
+                        <Button
+                            disabled={documentsByYear.some(doc => doc.month === month && doc.annualBudget > 0) || !input || input < 1}
+                            sx={[styles.button, { fontSize: 13, ml: 2, mb: 2, maxHeight: 35 }]}
+                            onClick={handleConfirmOpen}
+                            variant="contained"
+                        >
+                            Save
+                        </Button>
+                    </Stack>
+                    <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
+                        <ChipInfo />
+                    </Stack>
+                </Stack>
             </Box>
             <TableContainer sx={{ mt: 2, maxHeight: 250 }}>
                 <Table stickyHeader aria-label="sticky table">
