@@ -23,7 +23,8 @@ function LRRow(props) {
     const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
+    const [error, setError] = useState(true);
 
     const handleOpen = () => setOpen(true);
 
@@ -36,7 +37,6 @@ function LRRow(props) {
         isEditingRef,
         currentDocument,
         lr,
-        updateLr,
         updateLrById,
         deleteLrByid,
         setLr,
@@ -45,18 +45,25 @@ function LRRow(props) {
         value
     } = useSchoolContext();
 
-    useEffect(() => {
-        console.log("RecordsRow useEffect")
-        if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
-            addFields(isAdding);
+    const createLrByDocumentId = async (doc_id, obj) => {
+        try {
+            const response = await createLrByDocId(doc_id, obj);
+            if (response) {
+                console.log(`LR is created`);
+            } else {
+                console.log("LR not created");
+            }
+            await fetchDocumentData();
+        } catch (error) {
+            console.error('Error fetching document:', error);
         }
-    }, [isAdding, addFields, value]);
+    }
 
     const handleCellClick = (colId, rowId, event) => {
         isEditingRef.current = true; // user clicked a cell
         setEditingCell({ colId, rowId });
         setInitialValue(event.target.value); // Save the initial value of the clicked cell
-        setInputValue(event.target.value || event); // Set input value to the current value
+        setInputValue(colId === "date" ? event : event.target.value); // Set input value to the current value
         console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
@@ -76,57 +83,24 @@ function LRRow(props) {
     };
 
     const handleDelete = async (rowId) => {
-        // Implement delete functionality here
-        console.log("Delete button clicked for row at index:", selectedIndex);
-        console.log("Delete lr id: " + rowId)
         await deleteLrByid(rowId);
         handleMenuClose();
     };
 
-    const createLrByDocumentId = async (doc_id, obj) => {
-        try {
-            const response = await createLrByDocId(doc_id, obj);
-            if (response) {
-                console.log(`LR is created`);
-            } else {
-                console.log("LR not created");
-            }
-            await fetchDocumentData();
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    }
-
-    //If lr length is greater than one; reload to fetch documents and lr createLrByDocId
-    //else, set lr to empty
+    // Fetch document data to get Document and LR; reload
     const handleNewRecordCancel = async () => {
-        console.log("cancel");
         await fetchDocumentData();
-        if (lr.length > 1) {
-            await fetchDocumentData();
-        } else {
-            // setReload(!reload); //just to reload school.js to fetch lr data
-            updateLr(); //just to reload school.js to fetch lr data
-        }
     }
 
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
-        try {
-            console.log("accept");
+        if (!error) {
             const rowIndex = lr.findIndex(row => row.id === rowId);
-            if (lr[rowIndex]["date"] === "") {
-                console.log("Empty date")
-            } else {
-                await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
-            }
-        } catch (error) {
-            console.error('Error creating LR: ', error);
+            await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
         }
     }
 
     const handleInputChange = async (colId, rowId, event) => {
-
         let modifiedValue = colId === "date" ? formatDate(event) : event.target.value
 
         // Find the index of the object with matching id
@@ -135,6 +109,12 @@ function LRRow(props) {
         if (colId === "amount") {
             // Replace any characters that are not digits or periods
             modifiedValue = modifiedValue.replace(/[^0-9.]/g, '');
+            console.log(modifiedValue)
+            if (modifiedValue === 0 || modifiedValue === "" || !modifiedValue) {
+                setError(true);
+            } else {
+                setError(false);
+            }
         }
 
         if (rowIndex !== -1) {
@@ -177,22 +157,22 @@ function LRRow(props) {
         return (`₱${formattedNumber}`);
     };
 
-    const displayError = (colId, rowId) => {
-        const rowIndex = lr.findIndex(row => row.id === rowId);
-        if (colId === "date" && rowId === 3) {
-            if (lr[rowIndex]["date"] === "") {
-                return "Empty field"
+    const isError = (colId, rowId, value) => {
+        if (colId === "amount" && rowId === 3) {
+            if (value === "" || value === 0 || !value) {
+                return true;
             }
-            return "Invalid format";
-        }
-    }
-
-    const isError = (colId, rowId) => {
-        if (colId === "date" && rowId === 3) {
-            return true;
         }
         return false;
     }
+
+    useEffect(() => {
+        console.log("RecordsRow useEffect")
+        if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
+            setError(true); // set error to true by default per LR adding
+            addFields(isAdding);
+        }
+    }, [isAdding, addFields, value]);
 
     return (
         <React.Fragment>
@@ -268,8 +248,8 @@ function LRRow(props) {
                                                     <TextField
                                                         id={lr?.id}
                                                         value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
-                                                        error={isError(column.id, row.id)}
-                                                        helperText={displayError(column.id, row.id)}
+                                                        error={isError(column.id, row.id, value)}
+                                                        helperText={isError(column.id, row.id, value) && "Empty field"}
                                                         sx={{ "& fieldset": { border: row.id !== 3 && 'none' } }}
                                                         FormHelperTextProps={{
                                                             style: { position: "absolute", bottom: "-20px" },
