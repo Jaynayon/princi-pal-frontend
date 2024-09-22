@@ -5,7 +5,9 @@ import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 
-function UacsDateFilter(props) {
+const options = ["Cash", "Cheque"];
+
+export default function NatureOfPaymentSelect(props) {
     const { fetchDocumentData, updateLrById, objectCodes } = useSchoolContext();
     const { value, rowId, handleInputChange, name } = props
     const [selectedCode, setSelectedCode] = useState(value);
@@ -31,9 +33,9 @@ function UacsDateFilter(props) {
         };
     }
 
-    const updateLrByIdUacs = async (value) => {
+    const updateLrByIdNature = async (value) => {
         try {
-            const response = await updateLrById("objectCode", rowId, value);
+            const response = await updateLrById("natureOfPayment", rowId, value);
             if (response) {
                 console.log(`LR with id: ${rowId} is updated`);
             } else {
@@ -58,11 +60,11 @@ function UacsDateFilter(props) {
         // updates the row state in RecordsRow
         // mainly used in addFields feature where a new object is inserted
         // with the id == 3
-        handleInputChange("objectCode", rowId, event);
+        handleInputChange("natureOfPayment", rowId, event);
 
         // Only applies if it's not the new row
         if (rowId !== 3) {
-            updateLrByIdUacs(value);
+            updateLrByIdNature(value);
         }
     };
 
@@ -94,14 +96,14 @@ function UacsDateFilter(props) {
                 }}
                 inputProps={{ 'aria-label': 'Without label' }}
             >
-                {objectCodes && objectCodes.map((item) => (
+                {options.map((item) => (
                     <MenuItem
-                        key={item.code}
-                        value={item.code}
-                        style={getStyles(item.name, item)}
+                        key={`${item}-${rowId}`}
+                        value={item}
+                        style={getStyles(item)}
                     >
                         <Typography variant="inherit" noWrap>
-                            {item.code + ` (${item.name})`}
+                            {item}
                         </Typography>
 
                     </MenuItem>
@@ -110,5 +112,3 @@ function UacsDateFilter(props) {
         </FormControl>
     );
 }
-
-export default UacsDateFilter;

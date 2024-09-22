@@ -24,8 +24,8 @@ import { useSchoolContext } from '../Context/SchoolProvider';
 import DocumentTable from '../Components/Table/LRTable';
 import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
-import BudgetModal from '../Components/Modal/BudgetModal';
 import { useNavigationContext } from '../Context/NavigationProvider';
+import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -64,13 +64,19 @@ export function a11yProps(index) {
 
 function SchoolPage(props) {
     const { currentUser } = useNavigationContext();
-    const { year, month, setIsAdding, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
+    const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
 
-    const handleOpen = () => setOpen(true);
+    const handleOpen = () => {
+        setOpen(true);
+        isEditingRef.current = true;
+    }
 
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false);
+        isEditingRef.current = false;
+    }
 
     const exportDocument = async () => {
         setExportIsLoading(true);  // Start loading
@@ -115,7 +121,7 @@ function SchoolPage(props) {
         updateLr();
         updateJev();
         setIsAdding(false); //reset state to allow addFields again
-    }, [currentDocument, updateLr, updateJev, setIsAdding]);
+    }, [currentDocument, updateLr, updateJev, setIsAdding, value]); // Listen to "value" when changing tabs; reset isAdding
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -170,7 +176,7 @@ function SchoolPage(props) {
                                         height: "100%",
                                     }}
                                     >
-                                        <DocumentSummary />
+                                        <DocumentSummary setOpen={() => handleOpen()} />
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} sm={4} md={4} lg={6}>
@@ -215,9 +221,9 @@ function SchoolPage(props) {
                                         sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
                                         onClick={handleOpen}
                                     >
-                                        Budget
+                                        Budget Allocation
                                     </Button>
-                                    <BudgetModal
+                                    <BudgetAllocationModal
                                         open={open}
                                         handleClose={handleClose}
                                     />
