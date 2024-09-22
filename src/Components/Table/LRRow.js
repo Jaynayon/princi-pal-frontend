@@ -46,9 +46,9 @@ function LRRow(props) {
         value
     } = useSchoolContext();
 
-    const createLrByDocumentId = async (doc_id, obj) => {
+    const createLrByDocumentId = async (doc_id, obj, approved) => {
         try {
-            const response = await createLrByDocId(doc_id, obj);
+            const response = await createLrByDocId(doc_id, obj, approved);
             if (response) {
                 console.log(`LR is created`);
             } else {
@@ -97,7 +97,13 @@ function LRRow(props) {
     const handleNewRecordAccept = async (rowId) => {
         if (!error) {
             const rowIndex = lr.findIndex(row => row.id === rowId);
-            await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+            // If LR amount to be inserted will exceed Document monthly budget
+            // set LR status to false
+            if ((Number(lr[rowIndex].amount) + currentDocument.budget) > currentDocument.cashAdvance) {
+                await createLrByDocumentId(currentDocument.id, lr[rowIndex], false);
+            } else {
+                await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+            }
         }
     }
 
