@@ -11,6 +11,10 @@ import {
     Button,
     Typography
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import Badge from "@mui/material/Badge";
+import IconButton from "@mui/material/IconButton";
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 import {
     FilterDate,
@@ -26,6 +30,7 @@ import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
+import ApprovalModal from '../Components/Modal/ApprovalModal';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -62,10 +67,20 @@ export function a11yProps(index) {
     };
 }
 
+const StyledBadge = styled(Badge)(({ theme }) => ({
+    '& .MuiBadge-badge': {
+        right: -3,
+        top: 13,
+        border: `2px solid ${theme.palette.background.paper}`,
+        padding: '0 4px',
+    },
+}));
+
 function SchoolPage(props) {
     const { currentUser } = useNavigationContext();
     const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
+    const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
 
     const handleOpen = () => {
@@ -76,6 +91,14 @@ function SchoolPage(props) {
     const handleClose = () => {
         setOpen(false);
         isEditingRef.current = false;
+    }
+
+    const handleOpenApproval = () => {
+        setOpenApproval(true);
+    }
+
+    const handleCloseApproval = () => {
+        setOpenApproval(false);
     }
 
     const exportDocument = async () => {
@@ -206,6 +229,7 @@ function SchoolPage(props) {
                             <Grid item xs={12} md={12} lg={12}>
                                 <Box sx={{
                                     display: 'flex',
+                                    flexDirection: 'row',
                                     overflow: 'auto', //if overflow, hide it
                                     overflowWrap: "break-word",
                                 }}>
@@ -215,7 +239,6 @@ function SchoolPage(props) {
                                         aria-label="basic tabs example">
                                         <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
                                         <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
-
                                     </Tabs>
                                     <Button
                                         sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
@@ -223,10 +246,19 @@ function SchoolPage(props) {
                                     >
                                         Budget Allocation
                                     </Button>
-                                    <BudgetAllocationModal
-                                        open={open}
-                                        handleClose={handleClose}
-                                    />
+                                    <IconButton
+                                        aria-label="open-approval"
+                                        onClick={handleOpenApproval}
+                                        sx={{
+                                            color: "#C5C7CD",
+                                            marginLeft: "auto",
+                                            pr: 3
+                                        }}
+                                    >
+                                        <StyledBadge badgeContent={2} color="secondary">
+                                            <FactCheckIcon />
+                                        </StyledBadge>
+                                    </IconButton>
                                 </Box>
                             </Grid>
                             {/*Document Tables*/}
@@ -242,6 +274,14 @@ function SchoolPage(props) {
                     </Paper>
                 </Grid>
             </Grid>
+            <ApprovalModal
+                open={openApproval}
+                handleClose={handleCloseApproval}
+            />
+            <BudgetAllocationModal
+                open={open}
+                handleClose={handleClose}
+            />
         </Container >
     );
 }
