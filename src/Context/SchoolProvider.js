@@ -47,12 +47,13 @@ export const SchoolProvider = ({ children }) => {
     const prevMonthRef = useRef(monthIndex === 0 ? 11 : monthIndex);
     const prevYearRef = useRef(monthIndex === 0 ? (yearIndex === 0 ? years.length - 1 : yearIndex - 1) : yearIndex);
 
-    // States needed for adding LR
+    // States needed for adding, searching, or editing entities
     const [isAdding, setIsAdding] = useState(false);
     const isEditingRef = useRef(false);
     const isSearchingRef = useRef(false);
     const [addOneRow, setAddOneRow] = useState(false);
     const [objectCodes, setObjectCodes] = useState([]);
+    const [isEditable, setIsEditable] = useState(false);
 
     // Document, LR, and JEV entities
     const [currentDocument, setCurrentDocument] = useState(emptyDocument);
@@ -378,10 +379,26 @@ export const SchoolProvider = ({ children }) => {
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
     }, [objectCodes]);
 
+    // Function to check if the document is editable
+    const isDocumentEditable = (docYear, docMonth) => {
+        const monthOrder = months.findIndex(month => month === docMonth);
+        const currentMonthOrder = months.findIndex(month => month === currentMonth);
+        const documentDate = new Date(docYear, monthOrder);
+        const twoMonthsAgo = new Date(currentYear, currentMonthOrder - 2, 1); // Date two months behind the current month
+
+        return documentDate >= twoMonthsAgo;
+    };
+
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
     }, [fetchDocumentData, year, month]);
+
+    useEffect(() => {
+        // Assuming document.year and document.month are provided in numeric format
+        const editable = isDocumentEditable(currentDocument.year, currentDocument.month);
+        setIsEditable(editable);
+    }, [currentDocument]);
 
     useEffect(() => {
         if (objectCodes.length === 0) {
@@ -429,6 +446,7 @@ export const SchoolProvider = ({ children }) => {
             isAdding, setIsAdding,
             isEditingRef,
             isSearchingRef,
+            isEditable,
             addOneRow, setAddOneRow,
             currentSchool, setCurrentSchool,
             fetchDocumentData,

@@ -35,6 +35,7 @@ function LRRow(props) {
         formatDate,
         isAdding,
         isEditingRef,
+        isEditable,
         currentDocument,
         lr,
         updateLrById,
@@ -195,7 +196,8 @@ function LRRow(props) {
                                             {
                                                 minWidth: column.minWidth,
                                                 maxWidth: column.maxWidth,
-                                            },
+                                                pointerEvents: !isEditable && 'none' // disallow editing
+                                            }
                                         ]}
                                         onClick={(event) => handleCellClick(column.id, row.id, event)}
                                         onBlur={() => handleBlurCell()}
@@ -324,7 +326,13 @@ function LRRow(props) {
                                             onClose={handleMenuClose}
                                         >
                                             <MenuItem onClick={() => handleOpen()}>History</MenuItem>
-                                            <MenuItem sx={{ color: "red" }} onClick={() => handleDelete(row.id)}>Delete</MenuItem>
+                                            <MenuItem
+                                                disabled={!isEditable}
+                                                sx={{ color: "red" }}
+                                                onClick={() => handleDelete(row.id)}
+                                            >
+                                                Delete
+                                            </MenuItem>
                                         </Menu>
                                     </Box>
                                 )}
