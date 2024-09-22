@@ -47,12 +47,13 @@ export const SchoolProvider = ({ children }) => {
     const prevMonthRef = useRef(monthIndex === 0 ? 11 : monthIndex);
     const prevYearRef = useRef(monthIndex === 0 ? (yearIndex === 0 ? years.length - 1 : yearIndex - 1) : yearIndex);
 
-    // States needed for adding LR
+    // States needed for adding, searching, or editing entities
     const [isAdding, setIsAdding] = useState(false);
     const isEditingRef = useRef(false);
     const isSearchingRef = useRef(false);
     const [addOneRow, setAddOneRow] = useState(false);
     const [objectCodes, setObjectCodes] = useState([]);
+    const [isEditable, setIsEditable] = useState(false);
 
     // Document, LR, and JEV entities
     const [currentDocument, setCurrentDocument] = useState(emptyDocument);
@@ -142,6 +143,28 @@ export const SchoolProvider = ({ children }) => {
         }
     }, []);
 
+    const initializeDocuments = useCallback(async (annualBudget) => {
+        try {
+            if (currentSchool) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_DOC}/initialize`, {
+                    schoolId: currentSchool.id,
+                    month,
+                    year,
+                    annualBudget
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                return response.status === 201;
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+            return null;
+        }
+    }, [currentSchool, month, year]);
+
     const createNewDocument = useCallback(async (obj, month, cashAdvanceValue) => {
         try {
             if (currentSchool) {
@@ -214,7 +237,8 @@ export const SchoolProvider = ({ children }) => {
     const updateJev = useCallback(async () => {
         try {
             if (currentDocument.id !== 0) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
+                // const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/jev/documents/${currentDocument.id}`);
                 setJev(response.data || []);
             } else {
                 setJev([]); //meaning it's empty 
@@ -331,10 +355,19 @@ export const SchoolProvider = ({ children }) => {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // Convert to Date object
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based, so +1
+        const day = date.getDate().toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${month}/${day}/${year}`; // Return formatted date as MM/DD/YYYY
+    };
+
     const addFields = useCallback((isAdding) => {
         let newLr = {
             id: 3,
-            date: '',
+            date: formatDate(new Date()), //default date: today
             orsBursNo: '',
             particulars: '',
             amount: 0,
@@ -346,10 +379,26 @@ export const SchoolProvider = ({ children }) => {
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
     }, [objectCodes]);
 
+    // Function to check if the document is editable
+    const isDocumentEditable = (docYear, docMonth) => {
+        const monthOrder = months.findIndex(month => month === docMonth);
+        const currentMonthOrder = months.findIndex(month => month === currentMonth);
+        const documentDate = new Date(docYear, monthOrder);
+        const twoMonthsAgo = new Date(currentYear, currentMonthOrder - 2, 1); // Date two months behind the current month
+
+        return documentDate >= twoMonthsAgo;
+    };
+
     useEffect(() => {
         console.log("SchoolProvider useEffect: update document");
         fetchDocumentData();
     }, [fetchDocumentData, year, month]);
+
+    useEffect(() => {
+        // Assuming document.year and document.month are provided in numeric format
+        const editable = isDocumentEditable(currentDocument.year, currentDocument.month);
+        setIsEditable(editable);
+    }, [currentDocument]);
 
     useEffect(() => {
         if (objectCodes.length === 0) {
@@ -393,15 +442,17 @@ export const SchoolProvider = ({ children }) => {
             jev, setJev, updateJev,
             currentDocument, setCurrentDocument,
             emptyDocument,
-            addFields,
+            addFields, formatDate,
             isAdding, setIsAdding,
             isEditingRef,
             isSearchingRef,
+            isEditable,
             addOneRow, setAddOneRow,
             currentSchool, setCurrentSchool,
             fetchDocumentData,
             fetchDocumentBySchoolId,
             createNewDocument, updateDocumentById, getDocumentBySchoolIdYear,
+            initializeDocuments,
             createLrByDocId, deleteLrByid, updateLrById,
             updateJevById,
             objectCodes

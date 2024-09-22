@@ -103,6 +103,7 @@ export default function LRTable() {
                                     key={column.id}
                                     align={column.align}
                                     style={{
+                                        zIndex: 1,
                                         minWidth: column.minWidth,
                                         maxWidth: column.maxWidth,
                                     }}
