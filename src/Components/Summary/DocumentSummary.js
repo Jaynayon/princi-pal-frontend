@@ -7,12 +7,16 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 
-function DocumentSummary(props) {
+function DocumentSummary({ setOpen }) {
     const { currentDocument, setIsAdding, value } = useSchoolContext();
 
     const handleAddButtonClick = () => {
         if (value === 0) { //can only add row if on LR & RCD tab
-            setIsAdding(true); // Set isAdding to true when button is clicked
+            if (currentDocument.id !== 0) {
+                setIsAdding(true); // Set isAdding to true when button is clicked
+            } else {
+                setOpen();
+            }
         }
     };
 
