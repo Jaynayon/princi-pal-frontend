@@ -360,7 +360,7 @@ const styles = {
     },
     divInput: {
         borderRadius: "8px",
-        border: "1px solid #ccc",
+        boxShadow: "0 0 0 2px #1976d2",
         background: "transparent",
         outline: "none",
     }
