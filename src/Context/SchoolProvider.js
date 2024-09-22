@@ -60,6 +60,7 @@ export const SchoolProvider = ({ children }) => {
     // Document, LR, and JEV entities
     const [currentDocument, setCurrentDocument] = useState(emptyDocument);
     const [lr, setLr] = useState([]);
+    const [lrNotApproved, setLrNotApproved] = useState([]);
     const [jev, setJev] = useState([]);
 
     const fetchDocumentData = useCallback(async () => {
@@ -93,7 +94,7 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [setObjectCodes]);
 
-    const createLrByDocId = useCallback(async (documentsId, obj) => {
+    const createLrByDocId = useCallback(async (documentsId, obj, approved) => {
         try {
             if (currentDocument && currentUser) {
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_LR}/create`, {
@@ -105,7 +106,8 @@ export const SchoolProvider = ({ children }) => {
                     amount: obj.amount,
                     objectCode: obj.objectCode,
                     payee: obj.payee,
-                    natureOfPayment: obj.natureOfPayment
+                    natureOfPayment: obj.natureOfPayment,
+                    approved
                 }, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -276,13 +278,18 @@ export const SchoolProvider = ({ children }) => {
     const updateLr = useCallback(async () => {
         try {
             if (currentDocument.id !== 0) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/approved`);
+                const notApproved = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/unapproved`);
                 setLr(response.data || []);
+                setLrNotApproved(notApproved.data || []);
+                console.log(notApproved.data)
             } else {
                 setLr([]); //meaning it's empty 
+                setLrNotApproved([]);
             }
         } catch (error) {
             setLr([]);
+            setLrNotApproved([]);
             console.error('Error fetching lr:', error);
         }
     }, [currentDocument, setLr]);
@@ -312,6 +319,9 @@ export const SchoolProvider = ({ children }) => {
                 break;
             case "natureOfPayment":
                 obj.natureOfPayment = value;
+                break;
+            case "approved":
+                obj.approved = value;
                 break;
             default:
                 console.warn("Invalid colId:", colId); // Handle unexpected colId
@@ -441,6 +451,7 @@ export const SchoolProvider = ({ children }) => {
             year, setYear,
             months, years,
             lr, setLr, updateLr,
+            lrNotApproved,
             jev, setJev, updateJev,
             currentDocument, setCurrentDocument,
             emptyDocument,

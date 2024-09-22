@@ -78,7 +78,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 function SchoolPage(props) {
     const { currentUser } = useNavigationContext();
-    const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
+    const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, lrNotApproved, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
@@ -255,7 +255,7 @@ function SchoolPage(props) {
                                             pr: 3
                                         }}
                                     >
-                                        <StyledBadge badgeContent={2} color="secondary">
+                                        <StyledBadge badgeContent={lrNotApproved.length} color="secondary">
                                             <FactCheckIcon />
                                         </StyledBadge>
                                     </IconButton>
