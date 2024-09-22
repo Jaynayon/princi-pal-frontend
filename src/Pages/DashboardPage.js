@@ -96,10 +96,13 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     }, [selectedCategory]);
 
     const generateSeries = () => {
+        if (!uacsData || uacsData.length === 0) {
+            return []; // Return an empty array if data is not available
+        }
         if (selectedCategory === '19901020000') {
             // Aggregate expenses from all UACS categories for "Total"
             const totalExpenses = uacsData.slice(0, -1).map(uacs => {
-                return uacs.expenses.reduce((acc, expense) => acc + expense, 0); // Sum of expenses for each category
+                return uacs?.expenses?.reduce((acc, expense) => acc + expense, 0) || 0; // Ensure uacs.expenses exists
             });
             return [
                 {
@@ -109,7 +112,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
             ];
         } else {
             const selectedUacs = uacsData.find(uacs => uacs.code === selectedCategory);
-            if (selectedUacs) {
+            if (selectedUacs && selectedUacs.expenses) {
                 return [
                     {
                         name: "Actual Expenses",
@@ -117,11 +120,13 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                     }
                 ];
             } else {
-                return []; // Return empty array if no category is found
+                return []; // Return empty array if no category or expenses are found
             }
         }
     };
-
+    
+    const safeString = (value) => (value ? value.toString() : '');
+    
     const generateOptions = (budget, maxExpense, chartType, categories) => ({
         chart: {
             height: 350,
@@ -206,45 +211,113 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         ? Math.max(...uacsData.slice(0, -1).map(uacs => uacs.expenses.reduce((acc, expense) => acc + expense, 0)))
         : Math.max(...selectedUacs.expenses);
 
+    // Data for stacked bar chart
+    const stackedSeries = uacsData.map(({ name, expenses }) => ({
+        name,
+        data: Array(12).fill(0).map((_, i) => {
+            // Assuming `expenses` includes monthly data (mock or real)
+            return expenses.reduce((acc, expense, idx) => {
+                // You can adjust this to calculate expenses per month
+                const monthIndex = idx % 12; // Mock for each month (replace with real logic)
+                if (monthIndex === i) {
+                    acc += expense;
+                }
+                return acc;
+            }, 0);
+        })
+    }));
+
+    // Options for stacked bar chart
+    const stackedOptions = {
+        chart: {
+            type: 'bar',
+            stacked: true,
+            height: 350,
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+            },
+        },
+        xaxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        },
+        yaxis: {
+            title: {
+                text: 'Expenses (PHP)',
+            },
+        },
+    };
+
+    // Pie chart data (e.g., category-wise distribution)
+    const pieSeries = uacsData.map(({ expenses }) =>
+        expenses.reduce((acc, expense) => acc + expense, 0)
+    );
+
+    const pieOptions = {
+        labels: uacsData.map(({ name }) => name),
+        chart: {
+            type: 'pie',
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+
     return (
         <div>
             {uacsData.length === 0 ? (
                 <Typography variant="body1">No data available.</Typography>
             ) : (
                 <div style={{ position: 'relative', marginBottom: '40px' }}>
-                    {/* Render the line chart based on selected category */}
-                    <div>
-                        <ReactApexChart
-                            options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
-                            series={generateSeries()}
-                            type={chartType}
-                            height={350}
-                        />
-                        {/* Container for x-axis labels and dropdown */}
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                            <div style={{ marginLeft: '10px' }}>
-                                <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    style={{
-                                        width: '100px', // Set the width to make it smaller
-                                        padding: '5px'
-                                    }}
-                                >
-                                    {uacsData.map((uacs) => (
-                                        <option key={uacs.code} value={uacs.code}>
-                                            {uacs.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Main Graph */}
+                    <ReactApexChart
+                        options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
+                        series={generateSeries()}
+                        type={chartType}
+                        height={350}
+                    />
+
+                    {/* Stacked Bar Chart and Pie Chart Below */}
+                    <Grid container spacing={2} style={{ marginTop: '40px' }}>
+                        <Grid item xs={12} md={6}>
+                            <Paper elevation={3}>
+                                <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
+                                <ReactApexChart
+                                    options={stackedOptions}
+                                    series={stackedSeries}
+                                    type="bar"
+                                    height={350}
+                                />
+                            </Paper>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                            <Paper elevation={3}>
+                                <Typography variant="h6" align="center">Expense Distribution</Typography>
+                                <ReactApexChart
+                                    options={pieOptions}
+                                    series={pieSeries}
+                                    type="pie"
+                                    height={350}
+                                />
+                            </Paper>
+                        </Grid>
+                    </Grid>
                 </div>
             )}
         </div>
     );
 };
+
 
 
 
