@@ -94,7 +94,7 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [setObjectCodes]);
 
-    const createLrByDocId = useCallback(async (documentsId, obj, approved) => {
+    const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
             if (currentDocument && currentUser) {
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_LR}/create`, {
@@ -106,8 +106,7 @@ export const SchoolProvider = ({ children }) => {
                     amount: obj.amount,
                     objectCode: obj.objectCode,
                     payee: obj.payee,
-                    natureOfPayment: obj.natureOfPayment,
-                    approved
+                    natureOfPayment: obj.natureOfPayment
                 }, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -401,10 +400,10 @@ export const SchoolProvider = ({ children }) => {
         return documentDate >= twoMonthsAgo;
     };
 
-    useEffect(() => {
-        console.log("SchoolProvider useEffect: update document");
-        fetchDocumentData();
-    }, [fetchDocumentData, year, month]);
+    // useEffect(() => {
+    //     console.log("SchoolProvider useEffect: update document");
+    //     fetchDocumentData();
+    // }, [fetchDocumentData, year, month]);
 
     useEffect(() => {
         // Assuming document.year and document.month are provided in numeric format

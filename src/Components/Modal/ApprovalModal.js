@@ -15,13 +15,24 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import { useAppContext } from '../../Context/AppProvider';
+import axios from 'axios';
 
 export default function ApprovalModal({ open, handleClose }) {
     const { currentUser } = useAppContext();
     const { lrNotApproved, deleteLrByid, updateLrById } = useSchoolContext();
 
     const handleReject = async (id) => {
-        await deleteLrByid(id);
+        try {
+            const lastHistory = await getLastLrHistory(id);
+            console.log(lastHistory)
+            if (lastHistory.lrCopy) {
+                await deleteLrByid(id);
+            } else {
+                await updateLrById("amount", id, lastHistory.oldValue);
+            }
+        } catch (e) {
+            console.error(e);
+        }
         handleClose();
     };
 
@@ -29,6 +40,22 @@ export default function ApprovalModal({ open, handleClose }) {
         await updateLrById("approved", id, true);
         handleClose();
     };
+
+    const getLastLrHistory = async (id) => {
+        try {
+            if (id) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_HISTORY}/lr/${id}/last`);
+                return response.data;
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+        }
+    }
+
+    const formatAmount = (value) => new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
 
     return (
         <Box >
@@ -81,10 +108,19 @@ export default function ApprovalModal({ open, handleClose }) {
                                                     { label: "Particulars", value: item.particulars },
                                                     { label: "Object Code", value: item.objectCode },
                                                     { label: "Nature Of Payment", value: item.natureOfPayment },
-                                                    { label: "Amount", value: item.amount },
+                                                    { label: "New Amount", value: item.amount },
                                                 ].map((lr, idx) => (
                                                     <Typography variant="body2" key={`${item.id}-${idx}`}>
-                                                        {lr.label}: <span style={{ fontWeight: "bold" }}>{lr.value}</span>
+                                                        {lr.label}: <span style={{
+                                                            fontWeight: 'bold',
+                                                            backgroundColor: lr.label === "New Amount" ? '#32b14a' : '#e2e4e5',  // Dark green text for contrast
+                                                            color: lr.label === "New Amount" && '#fff',
+                                                            padding: '1px 6px',
+                                                            borderRadius: '5px',
+                                                            display: 'inline-block'
+                                                        }}>
+                                                            {lr.label === "New Amount" ? `₱${formatAmount(lr.value)}` : lr.value}
+                                                        </span>
                                                     </Typography>
                                                 ))}
                                             </AccordionDetails>
