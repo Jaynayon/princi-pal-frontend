@@ -269,15 +269,32 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                 <Typography variant="body1">No data available.</Typography>
             ) : (
                 <div style={{ position: 'relative', marginBottom: '40px' }}>
-                    {}
                     <ReactApexChart
                         options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
                         series={generateSeries()}
                         type={chartType}
                         height={350}
                     />
-
-                    {}
+    
+                    {/* Container for x-axis labels and dropdown */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            style={{
+                                width: '150px', // Set the width to make it smaller
+                                padding: '5px'
+                            }}
+                        >
+                            {uacsData.map((uacs) => (
+                                <option key={uacs.code} value={uacs.code}>
+                                    {uacs.name}
+                                </option>
+                            ))}
+                            <option value="19901020000">Total</option> {/* Adding the Total category */}
+                        </select>
+                    </div>
+    
                     <Grid container spacing={2} style={{ marginTop: '40px' }}>
                         <Grid item xs={12} md={6}>
                             <Paper elevation={3}>
@@ -290,7 +307,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                                 />
                             </Paper>
                         </Grid>
-
+    
                         <Grid item xs={12} md={6}>
                             <Paper elevation={3}>
                                 <Typography variant="h6" align="center">Expense Distribution</Typography>
@@ -307,7 +324,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
             )}
         </div>
     );
-};
+};    
 
 
 
