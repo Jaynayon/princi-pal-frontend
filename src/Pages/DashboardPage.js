@@ -17,61 +17,54 @@ import { useSchoolContext } from '../Context/SchoolProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 
 const calculateWeeklyExpenses = (expensesData) => {
-    // Initialize an empty object to hold the weekly totals for each UACS category
     const weeklyExpenses = {};
-
-    // Convert date strings to Date objects
     const dates = expensesData.map(({ date }) => new Date(date));
     const earliestDate = new Date(Math.min(...dates));
     const latestDate = new Date(Math.max(...dates));
 
-    // Helper function to get the difference in weeks between two dates
     const getWeekDifference = (startDate, endDate) => {
         const start = new Date(startDate);
         const end = new Date(endDate);
         const timeDiff = end - start;
-        const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert time difference to days
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
         const maxWeeks = Math.ceil(daysDiff / 7) <= 12 ? Math.ceil(daysDiff / 7) : 12;
-        return maxWeeks; // Convert days to weeks
+        return maxWeeks; 
     };
 
-    // Calculate the total number of weeks between the earliest and latest date
-    const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1; // +1 to include the final week
+    const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1; 
 
-    // Helper function to get the start date of a specific week index
     const getStartOfWeek = (weekIndex, startDate) => {
         const start = new Date(startDate);
         start.setDate(start.getDate() + weekIndex * 7);
         return start;
     };
 
-    // Helper function to determine the week index (relative to the earliest date)
+   
     const getWeekIndex = (date) => {
         const startOfWeek = new Date(earliestDate);
-        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Move to the start of the week
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); 
         const timeDiff = date - startOfWeek;
-        const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert time difference to days
-        return Math.floor(daysDiff / 7); // Convert days to week index
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24); 
+        return Math.floor(daysDiff / 7); 
     };
 
-    // Initialize weekly expenses for all object codes
+
     expensesData.forEach(({ objectCode }) => {
         if (!weeklyExpenses[objectCode]) {
             weeklyExpenses[objectCode] = new Array(totalWeeks).fill(0);
         }
     });
 
-    // Process each expense entry
+ 
     expensesData.forEach(({ date, objectCode, amount }) => {
         const expenseDate = new Date(date);
         const weekIndex = getWeekIndex(expenseDate);
 
-        // Add the amount to the appropriate week index
         if (weekIndex >= 0 && weekIndex < totalWeeks) {
             weeklyExpenses[objectCode][weekIndex] += amount;
         }
 
-        // Log the intermediate results for debugging
+   
         console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
         console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
     });
@@ -86,8 +79,11 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
 
+    console.log('uacsData:', uacsData);
+    console.log('Selected Category:', selectedCategory);
+
     useEffect(() => {
-        // Change the chart type to 'bar' when 'Total' is selected
+
         if (selectedCategory === '19901020000') {
             setChartType('bar');
         } else {
@@ -97,12 +93,11 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
     const generateSeries = () => {
         if (!uacsData || uacsData.length === 0) {
-            return []; // Return an empty array if data is not available
+            return []; 
         }
         if (selectedCategory === '19901020000') {
-            // Aggregate expenses from all UACS categories for "Total"
             const totalExpenses = uacsData.slice(0, -1).map(uacs => {
-                return uacs?.expenses?.reduce((acc, expense) => acc + expense, 0) || 0; // Ensure uacs.expenses exists
+                return uacs?.expenses?.reduce((acc, expense) => acc + expense, 0) || 0;
             });
             return [
                 {
@@ -120,12 +115,13 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                     }
                 ];
             } else {
-                return []; // Return empty array if no category or expenses are found
+                return []; 
             }
         }
     };
     
-    const safeString = (value) => (value ? value.toString() : '');
+  
+
     
     const generateOptions = (budget, maxExpense, chartType, categories) => ({
         chart: {
@@ -138,7 +134,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         plotOptions: {
             bar: {
                 horizontal: false,
-                columnWidth: '60%', // Adjust column width for a better fit
+                columnWidth: '60%', 
             }
         },
         dataLabels: {
@@ -147,18 +143,18 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         stroke: {
             show: true,
             width: 2,
-            colors: ['#0000FF'] // Blue line color for expenses
+            colors: ['#0000FF'] 
         },
         grid: {
             row: {
-                colors: ['#f3f3f3', 'transparent'], // alternating grid colors
+                colors: ['#f3f3f3', 'transparent'], 
                 opacity: 0.5
             }
         },
         xaxis: {
             categories: categories,
             labels: {
-                rotate: -45, // Rotate labels if needed for better fit
+                rotate: -45,
                 style: {
                     fontSize: '12px'
                 }
@@ -168,7 +164,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
             title: {
                 text: 'Amount (PHP)'
             },
-            max: Math.max(budget, maxExpense), // Ensure Y-axis is high enough to show the budget
+            max: Math.max(budget, maxExpense), 
         },
         annotations: {
             yaxis: [
@@ -193,17 +189,15 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         return <Typography variant="body1"></Typography>;
     }
 
-    // Helper function to generate dynamic week labels
     const generateWeekLabels = (numberOfWeeks) => {
         return Array.from({ length: numberOfWeeks }, (_, i) => `Week ${i + 1}`);
     };
 
     let weekLength = uacsData.find(item => item.code === selectedCategory).expenses.length;
-
-    // Determine the categories for the x-axis dynamically
     const categories = selectedCategory === '19901020000'
-        ? uacsData.slice(0, -1).map(uacs => uacs.name) // Exclude the 'Total' category itself
-        : generateWeekLabels(weekLength >= 12 ? 12 : weekLength); // Dynamically generate based on the number of weeks
+    ? uacsData.slice(0, -1).map(uacs => uacs.name) 
+    : generateWeekLabels(weekLength >= 12 ? 12 : weekLength);
+
 
 
     const budgetToUse = selectedCategory === '19901020000' ? budgetLimit : selectedUacs.budget;
@@ -211,14 +205,11 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         ? Math.max(...uacsData.slice(0, -1).map(uacs => uacs.expenses.reduce((acc, expense) => acc + expense, 0)))
         : Math.max(...selectedUacs.expenses);
 
-    // Data for stacked bar chart
     const stackedSeries = uacsData.map(({ name, expenses }) => ({
         name,
         data: Array(12).fill(0).map((_, i) => {
-            // Assuming `expenses` includes monthly data (mock or real)
             return expenses.reduce((acc, expense, idx) => {
-                // You can adjust this to calculate expenses per month
-                const monthIndex = idx % 12; // Mock for each month (replace with real logic)
+                const monthIndex = idx % 12; 
                 if (monthIndex === i) {
                     acc += expense;
                 }
@@ -227,7 +218,6 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         })
     }));
 
-    // Options for stacked bar chart
     const stackedOptions = {
         chart: {
             type: 'bar',
@@ -249,28 +239,29 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         },
     };
 
-    // Pie chart data (e.g., category-wise distribution)
     const pieSeries = uacsData.map(({ expenses }) =>
-        expenses.reduce((acc, expense) => acc + expense, 0)
+        (expenses || []).reduce((acc, expense) => acc + expense, 0)
     );
 
     const pieOptions = {
-        labels: uacsData.map(({ name }) => name),
+        labels: uacsData.map(({ name }) => name || 'Unknown'),
         chart: {
             type: 'pie',
+            height: 350,
         },
         responsive: [{
             breakpoint: 480,
             options: {
                 chart: {
                     width: 200
-                },
-                legend: {
-                    position: 'bottom'
                 }
             }
-        }]
+        }],
+        legend: {
+            show: false 
+        }
     };
+
 
     return (
         <div>
@@ -278,7 +269,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                 <Typography variant="body1">No data available.</Typography>
             ) : (
                 <div style={{ position: 'relative', marginBottom: '40px' }}>
-                    {/* Main Graph */}
+                    {}
                     <ReactApexChart
                         options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
                         series={generateSeries()}
@@ -286,7 +277,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                         height={350}
                     />
 
-                    {/* Stacked Bar Chart and Pie Chart Below */}
+                    {}
                     <Grid container spacing={2} style={{ marginTop: '40px' }}>
                         <Grid item xs={12} md={6}>
                             <Paper elevation={3}>
@@ -353,15 +344,15 @@ function DashboardPage(props) {
             }
         };
         fetchData();
-    }, [lr]); // Ensure to trigger whenever `lr` updates
+    }, [lr]); 
 
 
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
             if (currentSchool) {
-                setSelectedSchool(currentSchool.id); // Ensure a valid value
+                setSelectedSchool(currentSchool.id); 
             } else {
-                setSelectedSchool(currentUser.schools[0].id); // Ensure a valid value
+                setSelectedSchool(currentUser.schools[0].id); 
             }
 
         }
@@ -374,13 +365,12 @@ function DashboardPage(props) {
     }, [initializeSelectedSchool, updateJev, updateLr]);
 
     useEffect(() => {
-        // Sample data
         const sampleUacsData = [
             {
                 code: '5020502001',
                 name: 'Communication Expenses',
                 budget: jev[0]?.budget,
-                expenses: [0, 0, 0, 0, 0]//93,000
+                expenses: [0, 0, 0, 0, 0]
             },
             {
                 code: '5020402000',
@@ -555,7 +545,7 @@ function DashboardPage(props) {
             return null;
         }
         const totalBalance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
-        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black'; // Condition for balance color
+        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black'; 
     
         return (
             <Paper
@@ -583,7 +573,7 @@ function DashboardPage(props) {
                     </Button>
                 )}
                 {displayTitle === 'Total Balance' && (
-                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold', color: totalBalanceColor }}> {/* Retain margin */}
+                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold', color: totalBalanceColor }}> {}
                      Php {totalBalance.toFixed(2)}
                  </p>
                 )}
@@ -627,7 +617,7 @@ function DashboardPage(props) {
 
     const renderSummaryCard = () => {
         const totalBalance = (currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0);
-        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black'; // Condition for balance color
+        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black'; 
     
         return (
             <Paper
@@ -637,7 +627,7 @@ function DashboardPage(props) {
                     flexDirection: 'column',
                     height: 380,
                     textAlign: 'left',
-                    marginBottom: '15px', // Retain margin
+                    marginBottom: '15px', 
                 }}
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
