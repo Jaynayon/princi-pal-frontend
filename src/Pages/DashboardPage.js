@@ -262,7 +262,6 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         }
     };
 
-
     return (
         <div>
             {uacsData.length === 0 ? (
@@ -291,44 +290,44 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                                     {uacs.name}
                                 </option>
                             ))}
-                            <option value="19901020000">Total</option> {/* Adding the Total category */}
                         </select>
                     </div>
     
                     <Grid container spacing={2} style={{ marginTop: '40px' }}>
-                        <Grid item xs={12} md={6}>
-                            <Paper elevation={3}>
-                                <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
-                                <ReactApexChart
-                                    options={stackedOptions}
-                                    series={stackedSeries}
-                                    type="bar"
-                                    height={350}
-                                />
-                            </Paper>
-                        </Grid>
-    
-                        <Grid item xs={12} md={6}>
-                            <Paper elevation={3}>
-                                <Typography variant="h6" align="center">Expense Distribution</Typography>
-                                <ReactApexChart
-                                    options={pieOptions}
-                                    series={pieSeries}
-                                    type="pie"
-                                    height={350}
-                                />
-                            </Paper>
-                        </Grid>
-                    </Grid>
+    {/* Make the stacked chart wider */}
+    <Grid item xs={20} md={15}> {}
+        <Paper elevation={1} style={{ marginLeft: '-15px',marginRight: '10px',padding: '20px', height: '350px' }}> {/* Set fixed height */}
+            <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
+            <ReactApexChart
+                options={stackedOptions}
+                series={stackedSeries}
+                type="bar"
+                height={280} // Keep this height unchanged
+                style={{ width: '100%' }} // Ensure it takes full width
+            />
+        </Paper>
+    </Grid>
+
+    {/* Adjust the pie chart's width accordingly */}
+    <Grid item xs={20} md={6}> {/* Changed from 4 to 3 */}
+        <Paper elevation={1} style={{ marginLeft: '-15px',padding: '20px', height: '350px' }}> {/* Match height for alignment */}
+            <Typography variant="h6" align="center">Expense Distribution</Typography>
+            <ReactApexChart
+                options={pieOptions}
+                series={pieSeries}
+                type="pie"
+                height={280} // Keep this height for alignment
+                style={{ width: '100%' }} // Ensure it takes full width
+            />
+        </Paper>
+    </Grid>
+</Grid>
                 </div>
             )}
         </div>
     );
-};    
-
-
-
-
+    
+}
 function DashboardPage(props) {
     const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
     const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
