@@ -84,6 +84,17 @@ function AdminPage(props) {
     const [school, setSchool] = useState('');
     const [user, setUser] = useState('');
 
+    const [uacs, setUacs] = useState({
+        name: '',
+        code: ''
+    });
+    const [uacsError, setUacsError] = useState({
+        name: false,
+        code: false
+    })
+
+    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+
     const createUserPrincipal = async (adminId, fname, mname, lname, username, email, password) => {
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_URL_USER}/create/principal`, {
@@ -219,7 +230,6 @@ function AdminPage(props) {
             nameExists = await getSchoolName(value);
             console.log(nameExists)
 
-            //!nameExists ? setIntegrateSchoolError(true) : setIntegrateSchoolError(false);
             if (!nameExists) {
                 setIntegrateSchoolError(true)
                 setErrorMessage("School doesn't exist");
@@ -522,8 +532,6 @@ function AdminPage(props) {
         return false;
     }
 
-    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-
     const handleLogout = () => {
         logoutUser('jwt');
         setLogoutDialogOpen(false); // Close dialog after logout
@@ -538,6 +546,73 @@ function AdminPage(props) {
             console.log(`${cookieName} cookie not found.`);
         }
     };
+
+    const getUacsByCodeOrName = async (value) => {
+        try {
+            const response = await axios.post(`http://localhost:4000/uacs/nameOrCode`, {
+                nameOrCode: value
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            return response?.data || null;
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+
+    }
+
+    const createUacs = async () => {
+        try {
+            const response = await axios.post(`http://localhost:4000/uacs/create`, {
+                name: uacs["name"],
+                code: uacs["code"]
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            setUacs({
+                name: "",
+                code: ""
+            })
+
+            return response.data || null;
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+
+    }
+
+    const handleUacsChange = (key, value) => {
+        setIsTyping(true);
+        setUacs({
+            ...uacs,
+            [key]: value
+        });
+    };
+
+    const handleUacsBlur = async (key, value) => {
+        const uacs = await getUacsByCodeOrName(value);
+        if (uacs) {
+            setUacsError({
+                ...uacsError,
+                [key]: true
+            });
+        } else {
+            setUacsError({
+                ...uacsError,
+                [key]: false
+            });
+        }
+        console.log(uacsError);
+        setIsTyping(false);
+    }
 
     return (
         <Container
@@ -591,6 +666,7 @@ function AdminPage(props) {
                             <Tab label="Create Principal" />
                             <Tab label="Create School" />
                             <Tab label="Integrate Principal" />
+                            <Tab label="Create UACS" />
                         </Tabs>
                         <Button onClick={() => setLogoutDialogOpen(true)}>Logout</Button>
                     </Box>
@@ -738,7 +814,7 @@ function AdminPage(props) {
                                             }
                                             onClick={() => handleSchoolSubmit()}
                                         >
-                                            Create School
+                                            Create
                                         </Button>
                                     </Grid>
                                 </Grid>
@@ -799,7 +875,69 @@ function AdminPage(props) {
                                             }
                                             onClick={() => handleIntegrateSubmit()}
                                         >
-                                            Integrate Principal
+                                            Integrate
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+
+                            </Box>
+                        )}
+
+                        {tabValue === 3 && (
+                            <Box sx={{ width: "100%", display: "flex", justifyContent: "center", maxWidth: "400px", marginBottom: "10%" }}>
+                                {/* Integrate Principal Form */}
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12}>
+                                        <Typography component="p">Add new Unified Accounts Code Structure (UACS)</Typography>
+                                        <TextField
+                                            variant="outlined"
+                                            label="Uacs Name"
+                                            sx={{
+                                                m: 1,
+                                                width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
+                                                backgroundColor: "#DBF0FD",
+                                                '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" },
+                                                borderRadius: '8px'
+                                            }}
+                                            value={uacs["name"]}
+                                            error={uacsError["name"]}
+                                            helperText={uacsError["name"] && "UACS name already exists"}
+                                            onBlur={(event) => handleUacsBlur("name", event.target.value)}
+                                            onChange={(event) => handleUacsChange("name", event.target.value)}
+                                        />
+                                        <TextField
+                                            variant="outlined"
+                                            label="Object Code"
+                                            sx={{
+                                                m: 1,
+                                                width: 'calc(100% - 2rem)',  // Adjust width to fit padding and margins
+                                                backgroundColor: "#DBF0FD",
+                                                '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" },
+                                                borderRadius: '8px'
+                                            }}
+                                            value={uacs["code"]}
+                                            error={uacsError["code"]}
+                                            helperText={uacsError["code"] && "UACS code already exists"}
+                                            onBlur={(event) => handleUacsBlur("code", event.target.value)}
+                                            onChange={(event) => handleUacsChange("code", event.target.value)}
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            sx={{
+                                                width: 'calc(100% - 2rem)',  // Match width with TextField
+                                                mt: 1, // Margin top to space from TextField
+                                                backgroundColor: "#4a99d3",
+                                                '&:hover': { backgroundColor: "#474bca" }
+                                            }}
+                                            disabled={
+                                                (uacs["code"] === "" || uacs["name"] === "") ||
+                                                (uacsError["code"] || uacsError["name"]) ||
+                                                isTyping
+                                            }
+                                            onClick={() => createUacs()}
+                                        >
+                                            Create
                                         </Button>
                                     </Grid>
                                 </Grid>
