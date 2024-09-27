@@ -80,13 +80,19 @@ export function DisplayItems() {
 
     function logoutUser(cookieName) {
         // Check if the cookie exists
-        if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
-            // Overwrite the cookie with an empty value and a path that matches the original cookie's path
-            document.cookie = `${cookieName}=; path=/;`;
-            console.log(`${cookieName} cookie removed.`);
-            window.location.href = "http://localhost:3000/";
+        // if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
+        //     // Overwrite the cookie with an empty value and a path that matches the original cookie's path
+        //     document.cookie = `${cookieName}=; path=/;`;
+        //     console.log(`${cookieName} cookie removed.`);
+        //     window.location.href = "http://localhost:3000/";
+        // } else {
+        //     console.log(`${cookieName} cookie not found.`);
+        // }
+        if (JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))) {
+            window.localStorage.removeItem("LOCAL_STORAGE_TOKEN")
+            window.location.href = "https://localhost:3000/";
         } else {
-            console.log(`${cookieName} cookie not found.`);
+            console.log("Local storage item not found");
         }
     }
 

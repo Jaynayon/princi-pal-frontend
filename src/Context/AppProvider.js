@@ -55,6 +55,9 @@ export const AppProvider = ({ children }) => {
                 }
             });
 
+            // set local storage
+            window.localStorage.setItem("LOCAL_STORAGE_TOKEN", JSON.stringify(response.data.token));
+
             if (response.data.isMatch) {
                 fetchData();
             }
@@ -68,16 +71,17 @@ export const AppProvider = ({ children }) => {
 
     const fetchData = useCallback(async () => {
         try {
-            const jwtCookie = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('jwt='));
+            // const jwtCookie = document.cookie
+            //     .split('; ')
+            //     .find(row => row.startsWith('jwt='));
+            const jwtToken = JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"));
 
-            if (jwtCookie) {
-                const token = jwtCookie.split('=')[1];
-                console.log('JWT Token:', token);
+            if (jwtToken) {
+                // const token = jwtCookie.split('=')[1];
+                console.log('JWT Token:', jwtToken);
 
                 // Call to validate the token
-                const data = await validateToken(token);
+                const data = await validateToken(jwtToken);
                 console.log(data);
 
                 if (data) { // access data.id
