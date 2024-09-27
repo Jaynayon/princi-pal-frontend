@@ -533,19 +533,25 @@ function AdminPage(props) {
     }
 
     const handleLogout = () => {
-        logoutUser('jwt');
+        // logoutUser('jwt');
+        if (JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))) {
+            window.localStorage.removeItem("LOCAL_STORAGE_TOKEN")
+            window.location.href = "https://localhost:3000/";
+        } else {
+            console.log("Local storage item not found");
+        }
         setLogoutDialogOpen(false); // Close dialog after logout
     };
 
-    const logoutUser = (cookieName) => {
-        if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
-            document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-            console.log(`${cookieName} cookie removed.`);
-            window.location.href = "/"; // Redirect after logout
-        } else {
-            console.log(`${cookieName} cookie not found.`);
-        }
-    };
+    // const logoutUser = (cookieName) => {
+    //     if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
+    //         document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    //         console.log(`${cookieName} cookie removed.`);
+    //         window.location.href = "/"; // Redirect after logout
+    //     } else {
+    //         console.log(`${cookieName} cookie not found.`);
+    //     }
+    // };
 
     const getUacsByCodeOrName = async (value) => {
         try {
