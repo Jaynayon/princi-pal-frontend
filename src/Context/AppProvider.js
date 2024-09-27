@@ -7,7 +7,7 @@ export const useAppContext = () => useContext(AppContext);
 
 //Function that allows us to accept credentials
 const instance = axios.create({
-    baseURL: 'http://localhost:4000', // Set your backend URL
+    baseURL: `${process.env.REACT_APP_API_URL_BASE}`, // Set your backend URL
     withCredentials: true, // Enable sending cookies with cross-origin requests
 });
 
