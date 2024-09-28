@@ -39,7 +39,7 @@ TabPanel.propTypes = {
     value: PropTypes.any.isRequired,
 };
 
-function AdminPage(props) {
+function AdminPage() {
     const [tabValue, setTabValue] = useState(0);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
@@ -60,50 +60,19 @@ function AdminPage(props) {
     return (
         <Container
             maxWidth={false}
-            style={{
-                width: "100vw",
-                height: "100vh",
-                position: "relative",
-                overflow: "auto",
-                backgroundImage: `url(/bg.png)`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-            }}
+            style={styles.outer_container}
         >
             <Container
                 maxWidth="md"
-                style={{
-                    minHeight: "100vh",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    position: "relative",
-                    zIndex: 1,
-                    paddingTop: "64px",
-                    padding: "0 1rem",
-                }}
+                style={styles.inner_container}
             >
                 <Typography
                     variant="h4"
-                    style={{ marginBottom: "2rem", marginTop: "2rem", fontFamily: "Mulish", color: "#000", textAlign: "center" }}
+                    style={styles.title}
                 >
                     Admin Page
                 </Typography>
-
-                <Paper
-                    style={{
-                        width: '100%',
-                        padding: '2rem',
-                        borderRadius: '10px',
-                        margin: 'auto',
-                        position: 'relative',
-                        bottom: '20px',
-                        left: '0',
-                        right: '0',
-                        zIndex: 1,
-                    }}
-                >
+                <Paper style={styles.paper} >
                     <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                         <Tabs value={tabValue} onChange={handleTabChange} centered>
                             <Tab label="Create Principal" />
@@ -116,19 +85,7 @@ function AdminPage(props) {
                     </Box>
 
                     {/* Tab Content */}
-                    <Box
-                        sx={{
-                            minHeight: "60vh",
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            paddingTop: "3rem",
-                            width: "100%",
-                            maxWidth: "700px", // Adjust if needed
-                            margin: "0 auto", // Center align horizontally
-                        }}
-                    >
+                    <Box sx={styles.content}>
                         {tabValue === 0 && (<CreatePrincipalTab />)}
 
                         {tabValue === 1 && (<CreateSchoolTab />)}
@@ -160,6 +117,58 @@ function AdminPage(props) {
             </Dialog>
         </Container>
     );
+}
+
+const styles = {
+    outer_container: {
+        width: "100vw",
+        height: "100vh",
+        position: "relative",
+        overflow: "auto",
+        backgroundImage: `url(/bg.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+    },
+    inner_container: {
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+        zIndex: 1,
+        paddingTop: "64px",
+        padding: "0 1rem",
+    },
+    title: {
+        marginBottom: "2rem",
+        marginTop: "2rem",
+        fontFamily: "Mulish",
+        color: "#000",
+        textAlign: "center"
+    },
+    paper: {
+        width: '100%',
+        padding: '2rem',
+        borderRadius: '10px',
+        margin: 'auto',
+        position: 'relative',
+        bottom: '20px',
+        left: '0',
+        right: '0',
+        zIndex: 1,
+    },
+    content: {
+        minHeight: "60vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingTop: "3rem",
+        width: "100%",
+        maxWidth: "700px", // Adjust if needed
+        margin: "0 auto", // Center align horizontally
+    }
 }
 
 export default AdminPage;
