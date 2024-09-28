@@ -3,10 +3,6 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { Container, Button, Tabs, Tab } from '@mui/material';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
 
 import PropTypes from 'prop-types';
 import CreatePositionTab from '../Components/Tabs/CreatePositionTab';
@@ -14,6 +10,7 @@ import CreateUacsTab from '../Components/Tabs/CreateUacsTab';
 import CreatePrincipalTab from '../Components/Tabs/CreatePrincipalTab';
 import CreateSchoolTab from '../Components/Tabs/CreateSchoolTab';
 import CreateIntegrateTab from '../Components/Tabs/CreateIntegrateTab';
+import LogoutDialog from '../Components/Modal/LogoutDialog';
 
 // TabPanel component for displaying content based on the active tab
 const TabPanel = ({ children, value, index }) => {
@@ -45,16 +42,6 @@ function AdminPage() {
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
-    };
-
-    const handleLogout = () => {
-        if (JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))) {
-            window.localStorage.removeItem("LOCAL_STORAGE_TOKEN")
-            window.location.href = "https://localhost:3000/";
-        } else {
-            console.log("Local storage item not found");
-        }
-        setLogoutDialogOpen(false); // Close dialog after logout
     };
 
     return (
@@ -100,21 +87,10 @@ function AdminPage() {
             </Container>
 
             {/* Logout confirmation dialog */}
-            <Dialog open={logoutDialogOpen} onClose={() => setLogoutDialogOpen(false)} aria-labelledby="logout-dialog-title" maxWidth="xs" fullWidth>
-                <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
-                <DialogContent sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-end", p: 0 }}>
-                    <DialogActions>
-                        <Box>
-                            <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
-                                Cancel
-                            </Button>
-                            <Button onClick={handleLogout} color="primary">
-                                Logout
-                            </Button>
-                        </Box>
-                    </DialogActions>
-                </DialogContent>
-            </Dialog>
+            <LogoutDialog
+                open={logoutDialogOpen}
+                onClose={() => setLogoutDialogOpen(false)}
+            />
         </Container>
     );
 }

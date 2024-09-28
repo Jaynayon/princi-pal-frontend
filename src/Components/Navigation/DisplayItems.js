@@ -27,10 +27,10 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import { Typography } from '@mui/material';
 import { useAppContext } from '../../Context/AppProvider';
+import LogoutDialog from '../Modal/LogoutDialog';
 
 export function DisplayItems() {
     const theme = useTheme();
@@ -78,31 +78,6 @@ export function DisplayItems() {
         return null;
     };
 
-    function logoutUser(cookieName) {
-        // Check if the cookie exists
-        // if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
-        //     // Overwrite the cookie with an empty value and a path that matches the original cookie's path
-        //     document.cookie = `${cookieName}=; path=/;`;
-        //     console.log(`${cookieName} cookie removed.`);
-        //     window.location.href = "http://localhost:3000/";
-        // } else {
-        //     console.log(`${cookieName} cookie not found.`);
-        // }
-        if (JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))) {
-            window.localStorage.removeItem("LOCAL_STORAGE_TOKEN")
-            window.location.href = "https://localhost:3000/";
-        } else {
-            console.log("Local storage item not found");
-        }
-    }
-
-    const handleLogout = (e) => {
-        // Remove local storage to reset initial selected state
-        window.localStorage.removeItem("LOCAL_STORAGE_SELECTED");
-        e.preventDefault();
-        logoutUser('jwt');
-    };
-
     return (
         <>
             {list.map((item, index) => (
@@ -143,32 +118,10 @@ export function DisplayItems() {
                 </React.Fragment>
             ))}
             {/* Logout confirmation dialog */}
-            <Dialog
+            <LogoutDialog
                 open={logoutDialogOpen}
                 onClose={() => setLogoutDialogOpen(false)}
-                aria-labelledby="logout-dialog-title"
-                maxWidth="xs"
-                fullWidth
-            >
-                <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
-                <DialogContent sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: " flex-end",
-                    p: 0
-                }}>
-                    <DialogActions>
-                        <Box>
-                            <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
-                                Cancel
-                            </Button>
-                            <Button onClick={handleLogout} color="primary">
-                                Logout
-                            </Button>
-                        </Box>
-                    </DialogActions>
-                </DialogContent>
-            </Dialog>
+            />
         </>
     );
 }
