@@ -18,7 +18,7 @@ export default function CreateUacsTab() {
 
     const getUacsByCodeOrName = async (value) => {
         try {
-            const response = await axios.post(`http://localhost:4000/uacs/nameOrCode`, {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_UACS}/nameOrCode`, {
                 nameOrCode: value
             }, {
                 headers: {
@@ -36,7 +36,7 @@ export default function CreateUacsTab() {
 
     const createUacs = async () => {
         try {
-            const response = await axios.post(`http://localhost:4000/uacs/create`, {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_UACS}/create`, {
                 name: uacs["name"],
                 code: uacs["code"]
             }, {

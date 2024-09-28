@@ -12,7 +12,7 @@ export default function CreatePositionTab() {
 
     const getPositionByName = async (value) => {
         try {
-            const response = await axios.get(`http://localhost:4000/positions/name/${value}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_POS}/name/${value}`);
 
             return response?.data || null;
         } catch (e) {
@@ -24,7 +24,7 @@ export default function CreatePositionTab() {
 
     const createPosition = async () => {
         try {
-            const response = await axios.post(`http://localhost:4000/positions/create`, {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_POS}/create`, {
                 name: position,
             }, {
                 headers: {
