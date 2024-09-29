@@ -8,7 +8,7 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 const options = ["Cash", "Cheque"];
 
 export default function NatureOfPaymentSelect(props) {
-    const { fetchDocumentData, updateLrById, objectCodes } = useSchoolContext();
+    const { fetchDocumentData, updateLrById } = useSchoolContext();
     const { value, rowId, handleInputChange, name } = props
     const [selectedCode, setSelectedCode] = useState(value);
 
@@ -23,13 +23,13 @@ export default function NatureOfPaymentSelect(props) {
         },
     };
 
-    function getStyles(name) {
+    function getStyles(item, selectedValue) {
         return {
             fontWeight: "600",
             color:
-                objectCodes.indexOf(name) === -1
-                    ? null
-                    : "#176AF6"
+                item === selectedValue
+                    ? "#176AF6"
+                    : null
         };
     }
 
@@ -52,14 +52,8 @@ export default function NatureOfPaymentSelect(props) {
             target: { value },
         } = event;
 
-        setSelectedCode(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+        setSelectedCode(value);
 
-        // updates the row state in RecordsRow
-        // mainly used in addFields feature where a new object is inserted
-        // with the id == 3
         handleInputChange("natureOfPayment", rowId, event);
 
         // Only applies if it's not the new row
@@ -100,7 +94,7 @@ export default function NatureOfPaymentSelect(props) {
                     <MenuItem
                         key={`${item}-${rowId}`}
                         value={item}
-                        style={getStyles(item)}
+                        style={getStyles(item, value)}
                     >
                         <Typography variant="inherit" noWrap>
                             {item}

@@ -8,12 +8,12 @@ import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 
 function DocumentSummary({ setOpen }) {
-    const { currentDocument, setIsAdding, value, isEditable } = useSchoolContext();
+    const { currentDocument, setIsAdding, value, isEditable, isAdding } = useSchoolContext();
 
     const handleAddButtonClick = () => {
         if (value === 0) { //can only add row if on LR & RCD tab
             if (currentDocument.id !== 0) {
-                setIsAdding(true); // Set isAdding to true when button is clicked
+                setIsAdding(!isAdding); // Set isAdding to true when button is clicked
             } else {
                 setOpen();
             }
@@ -33,7 +33,7 @@ function DocumentSummary({ setOpen }) {
                 sx={{ alignSelf: "center" }}
                 onClick={handleAddButtonClick}
             >
-                <AddBoxIcon sx={{ fontSize: 25, color: !isEditable ? '#e0e0e0' : '#20A0F0' }} />
+                <AddBoxIcon sx={{ fontSize: 25, color: !isEditable ? '#e0e0e0' : '#00ee60' }} />
             </IconButton>
             <Grid container pb={1} >
                 <Grid item xs={12} md={4} lg={4}>

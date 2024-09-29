@@ -21,13 +21,13 @@ export default function UacsSelect(props) {
         },
     };
 
-    function getStyles(name) {
+    function getStyles(item, selectedValue) {
         return {
             fontWeight: "600",
             color:
-                objectCodes.indexOf(name) === -1
-                    ? null
-                    : "#176AF6"
+                item === selectedValue
+                    ? "#176AF6"
+                    : null
         };
     }
 
@@ -98,7 +98,7 @@ export default function UacsSelect(props) {
                     <MenuItem
                         key={item.code}
                         value={item.code}
-                        style={getStyles(item.name, item)}
+                        style={getStyles(item.code, value)}
                     >
                         <Typography variant="inherit" noWrap>
                             {item.code + ` (${item.name})`}
