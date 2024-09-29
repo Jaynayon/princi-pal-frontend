@@ -28,7 +28,7 @@ import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 
 function PeoplePage(props) {
-    const [member, setMember] = useState('Member');
+    const [member, setMember] = useState('');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -60,7 +60,7 @@ function PeoplePage(props) {
             console.error('Error fetching association:', error);
         }
     }, [currentUser, selectedValue]);
-
+    
     //currentUser association, which will change per school
     //to fetch the user from the school she belong
     // Function to fetch users by school ID
@@ -68,7 +68,6 @@ function PeoplePage(props) {
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`, { schoolId: selectedValue });
             setRows(response.data); // Update the state with the fetched data
-            console.log(response.data)
         } catch (error) {
             console.error('Error fetching users:', error);
         }
@@ -117,14 +116,14 @@ function PeoplePage(props) {
             console.error("Cannot fetch applications: School ID is missing.");
         }
     };
-
+    
     //
     useEffect(() => {
         // Assuming the current school is set based on some logic or user interaction
         if (selectedValue) {
             setCurrentSchool({ id: selectedValue });
         }
-    }, [selectedValue]);
+    }, [selectedValue]);    
 
     const handleClose = (value) => {
         setOpen(false);
@@ -137,9 +136,9 @@ function PeoplePage(props) {
         </Avatar>
     );
 
-    const handleAccept = async (associationRequest) => {
+        const handleAccept = async (associationRequest) => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, {
+            const response = await fetch('http://localhost:4000/associations/approve', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -154,9 +153,6 @@ function PeoplePage(props) {
 
             const data = await response.json();
             console.log('Success:', data);
-
-            // Update table/fetch user after accept
-            fetchUsers();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -194,11 +190,9 @@ function PeoplePage(props) {
 
     const confirmDelete = async () => {
         try {
-            if (rows[selectedIndex]) {
+            if (selectedIndex && rows[selectedIndex]) {
                 const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
-
-                console.log(`${userId} and ${schoolId}`)
                 // Make an API call to delete the user association
                 const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`);
                 console.log("User deleted successfully. " + response.data);
@@ -270,60 +264,58 @@ function PeoplePage(props) {
         setDropdownAnchorEl(null);
     };
 
-    const handleInvite = () => {
+    /*const handleInvite = () => {
         if (inviteEmail.trim() === '') {
             setInvitationMessage('Please enter a valid email.');
             return;
         }
-
+    
         console.log("Inviting email:", inviteEmail);
-
+    
         const invitePayload = {
-            email: inviteEmail,
-            schoolId: currentSchool.id,
-            admin: member === 'Admin'
+            email: inviteEmail, // or another identifier
+            schoolId: currentSchool.id // Ensure you have the correct schoolId
         };
-
+    
         axios.post('http://localhost:4000/associations/invite', invitePayload)
             .then(response => {
-                const invitedUserId = response.data.userId; // Ensure userId is correctly obtained
-                const schoolId = response.data.schoolId;
-
-                // Fetch school name using the schoolId
-                axios.get(`http://localhost:4000/schools/${schoolId}`)
-                    .then(schoolResponse => {
-                        const schoolName = schoolResponse.data.fullName || 'your school'; // Use fetched school name or default
-
-                        console.log("Invitation sent successfully:", response.data);
-                        setInvitationMessage('Invitation sent successfully!');
-
-                        // Create notification payload for the invited user
-                        const notificationPayload = {
-                            userId: invitedUserId, // Use the userId from response data
-                            details: `You have been invited to join the association at ${schoolName}.`,
-                            assocId: response.data.id
-                        };
-
-                        // Send the notification to the invited user
-                        axios.post('http://localhost:4000/Notifications/create', notificationPayload)
-                            .then(() => {
-                                console.log("Notification created successfully.");
-                            })
-                            .catch(error => {
-                                console.error("Error creating notification:", error.response ? error.response.data : error.message);
-                            });
-                    })
-                    .catch(error => {
-                        console.error("Error fetching school details:", error.response ? error.response.data : error.message);
-                    });
+                console.log("Invitation sent successfully:", response.data);
+                setInvitationMessage('Invitation sent successfully!');
             })
             .catch(error => {
                 console.error("Error inviting member:", error.response ? error.response.data : error.message);
                 setInvitationMessage('Failed to send invitation. Please try again.');
             });
-
+    
         setInviteEmail('');
-    };
+    };*/
+
+    const handleInvite = () => {
+        if (inviteEmail.trim() === '') {
+            setInvitationMessage('Please enter a valid email.');
+            return;
+        }
+        
+        console.log("Inviting email:", inviteEmail);
+        
+        const invitePayload = {
+            email: inviteEmail,
+            schoolId: currentSchool.id,
+            admin: member === 'Admin' // Set the admin status based on dropdown selection
+        };
+        
+        axios.post('http://localhost:4000/associations/invite', invitePayload)
+            .then(response => {
+                console.log("Invitation sent successfully:", response.data);
+                setInvitationMessage('Invitation sent successfully!');
+            })
+            .catch(error => {
+                console.error("Error inviting member:", error.response ? error.response.data : error.message);
+                setInvitationMessage('Failed to send invitation. Please try again.');
+            });
+        
+        setInviteEmail('');
+    };    
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
@@ -360,20 +352,19 @@ function PeoplePage(props) {
                                 value={inviteEmail}
                                 onChange={(e) => setInviteEmail(e.target.value)}
                             />
-                            <FormControl sx={{ minWidth: 120 }}>
-                                <InputLabel name="demo-select-small-label">Role</InputLabel>
-                                <Select
-                                    name="demo-select-role"
-                                    labelId="demo-select-small-label"
-                                    id="demo-select-small"
-                                    value={member}
-                                    label="Role"
-                                    onChange={(event) => setMember(event.target.value)}
-                                >
-                                    <MenuItem value="Member">Member</MenuItem>
-                                    <MenuItem value="Admin">Admin</MenuItem>
-                                </Select>
-                            </FormControl>
+                            <FormControl sx={{ minWidth: 120 }} size="53px">
+                            <InputLabel id="demo-select-small-label">Role</InputLabel>
+                            <Select
+                                labelId="demo-select-small-label"
+                                id="demo-select-small"
+                                value={member}
+                                label="Role"
+                                onChange={(event) => setMember(event.target.value)}
+                            >
+                                <MenuItem value="Member">Member</MenuItem>
+                                <MenuItem value="Admin">Admin</MenuItem>
+                            </Select>
+                        </FormControl>
                             <Button
                                 sx={{ width: "20%", height: "55px" }}
                                 variant="contained"
@@ -387,7 +378,6 @@ function PeoplePage(props) {
                             <FormControl sx={{ minWidth: 150 }} >
                                 <InputLabel id="demo-select-small-label">School Filter</InputLabel>
                                 <Select
-                                    name="user-school-filter"
                                     labelId="demo-select-small-label"
                                     id="demo-select-small"
                                     value={selectedValue}
@@ -410,7 +400,7 @@ function PeoplePage(props) {
                                 </Button>
                                 <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
-                                    <List sx={{ p: 3 }}>
+                                    <List>
                                         {applications.length === 0 ? (
                                             <ListItem>
                                                 <ListItemText primary="No applications found." />
@@ -445,7 +435,6 @@ function PeoplePage(props) {
                                 <FormControl sx={{ minWidth: 150 }} >
                                     <InputLabel id="demo-select-small-label">School Filter</InputLabel>
                                     <Select
-                                        name="user-school-filter"
                                         labelId="demo-select-small-label"
                                         id="demo-select-small"
                                         value={selectedValue}
