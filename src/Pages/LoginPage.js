@@ -20,7 +20,7 @@ const LoginPage = () => {
     const handleBtnRegister = () => {
         // Logic for handling register button click
         // Redirect to the registration page
-        window.location.href = "http://localhost:3000/register";
+        window.location.href = "https://localhost:3000/register";
     };
 
     const handleLogin = async () => {
