@@ -252,7 +252,7 @@ export function SchoolSearchFilter() {
     const getCurrentLr = useCallback(async () => {
         try {
             if (!isLoading && currentDocument.id !== 0) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/approved`);
                 setLrCopy(response.data || []);
             }
         } catch (error) {

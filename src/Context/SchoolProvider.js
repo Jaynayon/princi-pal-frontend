@@ -6,15 +6,6 @@ export const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 
-const emptyDocument = {
-    id: 0,
-    budget: 0,
-    cashAdvance: 0,
-    claimant: "",
-    sds: "",
-    headAccounting: ""
-}
-
 // Initialize current date to get current month and year
 const currentDate = new Date();
 const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
@@ -28,6 +19,17 @@ const months = [
 // Dynamic year starting from year 2021
 const startYear = 2021;
 const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (startYear + i).toString());
+
+const emptyDocument = {
+    id: 0,
+    year: currentYear,
+    month: currentMonth,
+    budget: 0,
+    cashAdvance: 0,
+    claimant: "",
+    sds: "",
+    headAccounting: ""
+}
 
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
@@ -58,6 +60,7 @@ export const SchoolProvider = ({ children }) => {
     // Document, LR, and JEV entities
     const [currentDocument, setCurrentDocument] = useState(emptyDocument);
     const [lr, setLr] = useState([]);
+    const [lrNotApproved, setLrNotApproved] = useState([]);
     const [jev, setJev] = useState([]);
 
     const fetchDocumentData = useCallback(async () => {
@@ -84,7 +87,7 @@ export const SchoolProvider = ({ children }) => {
 
     const fetchUacs = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:4000/uacs/all');
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_UACS}/all`);
             setObjectCodes(response.data || []);
         } catch (error) {
             console.error('Error validating token:', error);
@@ -274,13 +277,18 @@ export const SchoolProvider = ({ children }) => {
     const updateLr = useCallback(async () => {
         try {
             if (currentDocument.id !== 0) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/approved`);
+                const notApproved = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/unapproved`);
                 setLr(response.data || []);
+                setLrNotApproved(notApproved.data || []);
+                console.log(notApproved.data)
             } else {
                 setLr([]); //meaning it's empty 
+                setLrNotApproved([]);
             }
         } catch (error) {
             setLr([]);
+            setLrNotApproved([]);
             console.error('Error fetching lr:', error);
         }
     }, [currentDocument, setLr]);
@@ -310,6 +318,9 @@ export const SchoolProvider = ({ children }) => {
                 break;
             case "natureOfPayment":
                 obj.natureOfPayment = value;
+                break;
+            case "approved":
+                obj.approved = value;
                 break;
             default:
                 console.warn("Invalid colId:", colId); // Handle unexpected colId
@@ -389,10 +400,10 @@ export const SchoolProvider = ({ children }) => {
         return documentDate >= twoMonthsAgo;
     };
 
-    useEffect(() => {
-        console.log("SchoolProvider useEffect: update document");
-        fetchDocumentData();
-    }, [fetchDocumentData, year, month]);
+    // useEffect(() => {
+    //     console.log("SchoolProvider useEffect: update document");
+    //     fetchDocumentData();
+    // }, [fetchDocumentData, year, month]);
 
     useEffect(() => {
         // Assuming document.year and document.month are provided in numeric format
@@ -439,6 +450,7 @@ export const SchoolProvider = ({ children }) => {
             year, setYear,
             months, years,
             lr, setLr, updateLr,
+            lrNotApproved,
             jev, setJev, updateJev,
             currentDocument, setCurrentDocument,
             emptyDocument,

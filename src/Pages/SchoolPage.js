@@ -15,8 +15,10 @@ import {
     DialogContent,
     DialogActions,
 } from '@mui/material';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-
+import { styled } from '@mui/material/styles';
+import Badge from "@mui/material/Badge";
+import IconButton from "@mui/material/IconButton";
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 import {
     FilterDate,
@@ -32,6 +34,7 @@ import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
+import ApprovalModal from '../Components/Modal/ApprovalModal';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -68,10 +71,20 @@ export function a11yProps(index) {
     };
 }
 
+const StyledBadge = styled(Badge)(({ theme }) => ({
+    '& .MuiBadge-badge': {
+        right: -3,
+        top: 13,
+        border: `2px solid ${theme.palette.background.paper}`,
+        padding: '0 4px',
+    },
+}));
+
 function SchoolPage(props) {
     const { currentUser } = useNavigationContext();
-    const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, updateLr, updateJev, value, setValue } = useSchoolContext();
+    const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, lrNotApproved, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
+    const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -84,6 +97,14 @@ function SchoolPage(props) {
     const handleClose = () => {
         setOpen(false);
         isEditingRef.current = false;
+    }
+
+    const handleOpenApproval = () => {
+        setOpenApproval(true);
+    }
+
+    const handleCloseApproval = () => {
+        setOpenApproval(false);
     }
 
     const exportDocument = async () => {
@@ -249,6 +270,7 @@ function SchoolPage(props) {
                             <Grid item xs={12} md={12} lg={12}>
                                 <Box sx={{
                                     display: 'flex',
+                                    flexDirection: 'row',
                                     overflow: 'auto', //if overflow, hide it
                                     overflowWrap: "break-word",
                                 }}>
@@ -258,7 +280,6 @@ function SchoolPage(props) {
                                         aria-label="basic tabs example">
                                         <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
                                         <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
-
                                     </Tabs>
                                     <Button
                                         sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
@@ -266,10 +287,19 @@ function SchoolPage(props) {
                                     >
                                         Budget Allocation
                                     </Button>
-                                    <BudgetAllocationModal
-                                        open={open}
-                                        handleClose={handleClose}
-                                    />
+                                    <IconButton
+                                        aria-label="open-approval"
+                                        onClick={handleOpenApproval}
+                                        sx={{
+                                            color: "#C5C7CD",
+                                            marginLeft: "auto",
+                                            pr: 3
+                                        }}
+                                    >
+                                        <StyledBadge badgeContent={lrNotApproved.length} color="secondary">
+                                            <FactCheckIcon />
+                                        </StyledBadge>
+                                    </IconButton>
                                 </Box>
                             </Grid>
                             {/*Document Tables*/}
@@ -285,35 +315,14 @@ function SchoolPage(props) {
                     </Paper>
                 </Grid>
             </Grid>
-            <Dialog
-                open={dialogOpen}
-                onClose={handleDialogClose}
-                sx={{
-                    '& .MuiDialog-paper': {
-                        width: '400px',
-                        height: '250px',
-                        maxWidth: 'none',
-                        border: '1px solid red', // Add red border
-                        borderRadius: '8px' // Optional: to round the corners
-                    }
-                }} // Set equal width and height
-            >
-                <DialogTitle sx={{ display: 'flex', alignItems: 'center', paddingTop: 4 }}>
-                    <ReportProblemIcon sx={{ fontSize: '3rem', color: 'red', marginRight: 1 }} />
-                    <Typography variant="h5" sx={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                        Alert
-                    </Typography>
-                </DialogTitle>
-                <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', paddingTop: 2 }}>
-                    <Typography variant="body1" sx={{ fontSize: '2.3rem' }}>
-                        {notificationMessage}
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDialogClose} color="primary">
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ApprovalModal
+                open={openApproval}
+                handleClose={handleCloseApproval}
+            />
+            <BudgetAllocationModal
+                open={open}
+                handleClose={handleClose}
+            />
         </Container >
     );
 }
