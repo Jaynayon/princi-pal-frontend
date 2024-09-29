@@ -47,7 +47,7 @@ const RegistrationPage = () => {
   const handleBtnLogin = () => {
     // Logic for handling register button click
     // Redirect to the registration page
-    window.location.href = "http://localhost:3000/login";
+    window.location.href = "https://localhost:3000/login";
   }
 
   const validateEmail = (input) => {
