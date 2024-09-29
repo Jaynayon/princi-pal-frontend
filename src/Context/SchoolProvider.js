@@ -87,7 +87,7 @@ export const SchoolProvider = ({ children }) => {
 
     const fetchUacs = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:4000/uacs/all');
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_UACS}/all`);
             setObjectCodes(response.data || []);
         } catch (error) {
             console.error('Error validating token:', error);
