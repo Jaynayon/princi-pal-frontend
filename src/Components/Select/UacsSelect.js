@@ -5,7 +5,7 @@ import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 
-function UacsDateFilter(props) {
+export default function UacsSelect(props) {
     const { fetchDocumentData, updateLrById, objectCodes } = useSchoolContext();
     const { value, rowId, handleInputChange, name } = props
     const [selectedCode, setSelectedCode] = useState(value);
@@ -21,13 +21,13 @@ function UacsDateFilter(props) {
         },
     };
 
-    function getStyles(name) {
+    function getStyles(item, selectedValue) {
         return {
             fontWeight: "600",
             color:
-                objectCodes.indexOf(name) === -1
-                    ? null
-                    : "#176AF6"
+                item === selectedValue
+                    ? "#176AF6"
+                    : null
         };
     }
 
@@ -98,7 +98,7 @@ function UacsDateFilter(props) {
                     <MenuItem
                         key={item.code}
                         value={item.code}
-                        style={getStyles(item.name, item)}
+                        style={getStyles(item.code, value)}
                     >
                         <Typography variant="inherit" noWrap>
                             {item.code + ` (${item.name})`}
@@ -110,5 +110,3 @@ function UacsDateFilter(props) {
         </FormControl>
     );
 }
-
-export default UacsDateFilter;

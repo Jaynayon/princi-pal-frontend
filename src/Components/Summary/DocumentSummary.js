@@ -7,12 +7,16 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 
-function DocumentSummary(props) {
-    const { currentDocument, setIsAdding, value } = useSchoolContext();
+function DocumentSummary({ setOpen }) {
+    const { currentDocument, setIsAdding, value, isEditable, isAdding } = useSchoolContext();
 
     const handleAddButtonClick = () => {
         if (value === 0) { //can only add row if on LR & RCD tab
-            setIsAdding(true); // Set isAdding to true when button is clicked
+            if (currentDocument.id !== 0) {
+                setIsAdding(!isAdding); // Set isAdding to true when button is clicked
+            } else {
+                setOpen();
+            }
         }
     };
 
@@ -25,10 +29,11 @@ function DocumentSummary(props) {
     return (
         <React.Fragment>
             <IconButton
+                disabled={!isEditable}
                 sx={{ alignSelf: "center" }}
                 onClick={handleAddButtonClick}
             >
-                <AddBoxIcon sx={{ fontSize: 25, color: '#20A0F0' }} />
+                <AddBoxIcon sx={{ fontSize: 25, color: !isEditable ? '#e0e0e0' : '#00ee60' }} />
             </IconButton>
             <Grid container pb={1} >
                 <Grid item xs={12} md={4} lg={4}>

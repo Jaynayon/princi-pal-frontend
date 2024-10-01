@@ -149,205 +149,246 @@ export default function Navigation({ children }) {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
- 
+
   const fetchUserNotifications = useCallback(async (userId) => {
     if (!userId) {
-        console.log('No user ID');
-        return;
+      console.log('No user ID');
+      return;
     }
 
     console.log('Fetching notifications for user ID:', userId);
     setLoading(true);
     try {
-        // Updated URL structure based on new endpoint for fetching notifications via association
-        const response = await axios.get(`http://localhost:4000/Notifications/user/${userId}/all`);
-        console.log('Fetched notifications data:', response.data);
+      const response = await axios.get(`http://localhost:4000/Notifications/user/${userId}/all`);
+      console.log('Fetched notifications data:', response.data);
 
-        if (Array.isArray(response.data)) {
-            console.log('Number of notifications:', response.data.length);
-            setOptions(response.data.reverse()); // Reverse to show newest notifications first
-        } else {
-            console.error('Unexpected response format:', response.data);
-        }
+      if (Array.isArray(response.data)) {
+        console.log('Number of notifications:', response.data.length);
+        // Reverse to show newest notifications first
+        setOptions(response.data.reverse());
+      } else {
+        console.error('Unexpected response format:', response.data);
+      }
 
-        setError(null);
+      setError(null);
     } catch (error) {
-        setError(error.message);
-        console.error('Error fetching notifications:', error);
+      setError(error.message);
+      console.error('Error fetching notifications:', error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-}, []);
+  }, []);
 
-const createNotification = useCallback(async (userId, details, NotificationsKey) => {
+
+  const createNotification = useCallback(async (userId, details, NotificationsKey) => {
     if (!currentUser || !currentUser.id) {
-        console.log('No current user or user ID');
-        return;
+      console.log('No current user or user ID');
+      return;
     }
 
     let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
     let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
 
     if (savedNotifications.includes(NotificationsKey) || deletedNotifications.includes(NotificationsKey)) {
-        console.log('Notification key already exists or is deleted');
-        return;
+      console.log('Notification key already exists or is deleted');
+      return;
     }
 
-    const notification = {
-        userId: userId,
-        details,
-    };
+    const notification = { userId, details };
 
     try {
-        await axios.post('http://localhost:4000/Notifications/create', notification, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+      await axios.post('http://localhost:4000/Notifications/create', notification, {
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-       
-        fetchUserNotifications(userId);
+      fetchUserNotifications(userId);
 
-        savedNotifications.push(NotificationsKey);
-        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+      // Save the key to avoid duplicates
+      savedNotifications.push(NotificationsKey);
+      localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
     } catch (error) {
-        console.error('Error creating notification:', error);
+      console.error('Error creating notification:', error);
     }
-}, [currentUser, fetchUserNotifications]);
-  
-  
-const handleClearOptions = async () => {
-  if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
-    console.log('No current user or school ID');
-    return;
-  }
+  }, [currentUser, fetchUserNotifications]);
 
-  try {
-    await axios.delete(`http://localhost:4000/Notifications/user/${currentUser.id}`);
 
-    setOptions([]);
 
-    let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-    let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
-
-    savedNotifications.forEach(NotificationsKey => {
-      deletedNotifications.push(NotificationsKey);
-    });
-
-    localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
-    localStorage.removeItem('createdNotifications');
-  } catch (error) {
-    console.error('Error clearing notifications:', error);
-  } finally {
-    handleMenuClose();
-  }
-};
-
-  
-
-const handleAcceptNotification = async (notificationId) => {
-  try {
-    if (!notificationId) {
-      throw new Error("Invalid request: notificationId is required.");
+  const handleClearOptions = async () => {
+    if (!currentUser || !currentUser.id || !currentSchool || !currentSchool.id) {
+      console.log('No current user or school ID');
+      return;
     }
+
+    try {
+      await axios.delete(`http://localhost:4000/Notifications/user/${currentUser.id}`);
+
+      setOptions([]);
+
+      let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+      let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
+
+      savedNotifications.forEach(NotificationsKey => {
+        deletedNotifications.push(NotificationsKey);
+      });
+
+      localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
+      localStorage.removeItem('createdNotifications');
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+    } finally {
+      handleMenuClose();
+    }
+  };
+
+
+
+  const handleAcceptNotification = async (notificationId) => {
+    try {
+      if (!notificationId) {
+        throw new Error("Invalid request: notificationId is required.");
+      }
       await axios.post(`http://localhost:4000/associations/approve/${notificationId}`, {
-     
-    });
-    const updateNotificationUrl = `http://localhost:4000/Notifications/accept/${notificationId}`;
-        await axios.put(updateNotificationUrl, {
-          details: 'You accepted the invitation',
-          hasButtons: false
-        });
 
-  } catch (error) {
-    if (error.response) {
-      console.error('Server Error:', error.response.data);
-    } else if (error.request) {
-      console.error('No Response:', error.request);
-    } else {
-      console.error('Error:', error.message);
+      });
+      const updateNotificationUrl = `http://localhost:4000/Notifications/accept/${notificationId}`;
+      await axios.put(updateNotificationUrl, {
+        details: 'You accepted the invitation',
+        hasButtons: false
+      });
+
+    } catch (error) {
+      if (error.response) {
+        console.error('Server Error:', error.response.data);
+      } else if (error.request) {
+        console.error('No Response:', error.request);
+      } else {
+        console.error('Error:', error.message);
+      }
     }
-  }
-};
+  };
 
 
-const handleRejectNotification = async (notificationId) => {
-  try {
-    if (!notificationId) {
-      throw new Error("Invalid request: notificationId is required.");
-    }
+  const handleRejectNotification = async (notificationId) => {
+    try {
+      if (!notificationId) {
+        throw new Error("Invalid request: notificationId is required.");
+      }
 
-    const rejectNotificationUrl = `http://localhost:4000/Notifications/reject/${notificationId}`;
+      const rejectNotificationUrl = `http://localhost:4000/Notifications/reject/${notificationId}`;
       await axios.put(rejectNotificationUrl);
 
 
-    const deleteAssociation = `http://localhost:4000/associations/delete/${notificationId}`;
-        await axios.delete(deleteAssociation);
+      const deleteAssociation = `http://localhost:4000/associations/delete/${notificationId}`;
+      await axios.delete(deleteAssociation);
 
-        const deleteNotification = `http://localhost:4000/Notifications/${notificationId}`;
-        await axios.delete(deleteNotification);   
+      const deleteNotification = `http://localhost:4000/Notifications/${notificationId}`;
+      await axios.delete(deleteNotification);
 
-  } catch (error) {
-    if (error.response) {
-      console.error('Server Error:', error.response.data);
-    } else if (error.request) {
-      console.error('No Response:', error.request);
-    } else {
-      console.error('Error:', error.message);
+    } catch (error) {
+      if (error.response) {
+        console.error('Server Error:', error.response.data);
+      } else if (error.request) {
+        console.error('No Response:', error.request);
+      } else {
+        console.error('Error:', error.message);
+      }
     }
-  }
-};
+  };
 
-useEffect(() => {
-  if (currentUser && currentUser.id) {
-    fetchUserNotifications(currentUser.id);
-  }
-}, [currentUser, fetchUserNotifications]);
+  useEffect(() => {
+    if (currentUser && currentUser.id) {
+      fetchUserNotifications(currentUser.id);
+    }
+  }, [currentUser, fetchUserNotifications]);
 
   useEffect(() => {
     if (currentDocument) {
       const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
       const NotificationsKey = `balance-negative-${currentDocument.id || ''}`;
-  
-      const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-      if (balance < 0 && previousBalance !== null && previousBalance >= 0 && !savedNotifications.includes(NotificationsKey)) {
+
+      // Retrieve saved notifications from localStorage
+      let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+
+      // Check if the balance is negative and the notification hasn't been created already
+      if (
+        balance < 0 &&
+        previousBalance !== null &&
+        previousBalance >= 0 &&
+        !savedNotifications.includes(NotificationsKey)
+      ) {
+        // Create the notification
         createNotification(
           currentUser.id,
           `Your balance has gone negative. Current balance: ₱${balance}`,
           NotificationsKey
         );
+
+        // Save the notification key to localStorage to avoid duplication on reload
+        savedNotifications.push(NotificationsKey);
+        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
       }
-  
+
+      // Update the balance after checking
       setPreviousBalance(balance);
     }
   }, [currentDocument, createNotification, currentUser, previousBalance]);
-  
-  useEffect(() => {
-    if (jev && jev.length) {
-      jev.forEach(row => {
-        const exceededBudget = row.budget > 0 && row.amount > row.budget;
-        const NotificationsKey = `budget-exceeded-${row.id || ''}`;
-  
-        const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-        if (exceededBudget && !savedNotifications.includes(NotificationsKey)) {
-          createNotification(
-            currentUser.id,
-            `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${row.amount}, Allocated Budget: ₱${row.budget}`,
-            NotificationsKey
-          );
-        }
-      });
-    }
-  }, [month, year, jev, createNotification, currentUser]);
-  
+
+
+  // useEffect(() => {
+  //   const fetchAndProcessData = async (id, row) => {
+  //     try {
+  //       const response = await axios.get(`http://localhost:4000/jev/${id}`);
+  //       const { budgetExceeded, amount } = response.data;
+
+  //       console.log('Response data:', response.data);
+
+  //       // Create a notification if budgetExceeded is true AND amount is greater than budget
+  //       if (budgetExceeded && amount > row.budget) {
+  //         const NotificationsKey = `budget-exceeded-${id || ''}`;
+
+  //         // Create a notification
+  //         const notificationMessage = `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${amount}, Allocated Budget: ₱${row.budget}`;
+
+  //         createNotification(
+  //           currentUser.id,
+  //           notificationMessage,
+  //           NotificationsKey
+  //         );
+
+  //         // Log the created notification data
+  //         console.log('Created notification:', {
+  //           userId: currentUser.id,
+  //           message: notificationMessage,
+  //           notificationKey: NotificationsKey
+  //         });
+
+  //         // Save the notification key to local storage to prevent duplicate notifications
+  //         const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+  //         if (!savedNotifications.includes(NotificationsKey)) {
+  //           savedNotifications.push(NotificationsKey);
+  //           localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+  //         }
+  //       }
+
+  //     } catch (error) {
+  //       console.error(`Failed to fetch details for ID ${id}:`, error);
+  //     }
+  //   };
+
+  //   if (jev && jev.length) {
+  //     jev.forEach(row => {
+  //       // Fetch and process data based on row.id
+  //       fetchAndProcessData(row.id, row);
+  //     });
+  //   }
+  // }, [month, year, jev, createNotification, currentUser]);
+
   useEffect(() => {
     if (currentDocument && currentDocument.budgetLimit > 0) {
       const NotificationsKey = `budgetLimit-positive-${currentDocument.id || ''}`;
-  
+
       const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
+
       if (!savedNotifications.includes(NotificationsKey)) {
         createNotification(
           currentUser.id,
@@ -361,19 +402,26 @@ useEffect(() => {
   useEffect(() => {
     if (currentDocument && currentDocument.budgetLimit > 0 && currentDocument.budgetLimitExceeded) {
       const NotificationsKey = `budgetLimit-exceeded-${currentDocument.id || ''}`;
-  
+
+      // Retrieve saved notifications from localStorage
       const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
+
+      // Check if the notification has already been created
       if (!savedNotifications.includes(NotificationsKey)) {
+        // Create the notification
         createNotification(
           currentUser.id,
           `Attention: The budget limit for ${month} ${year} has been exceeded.`,
-  
           NotificationsKey
         );
+
+        // Save the notification key to localStorage to avoid duplicates
+        savedNotifications.push(NotificationsKey);
+        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
       }
     }
   }, [currentDocument, createNotification, currentUser, month, year]);
+
 
   const ITEM_HEIGHT = 48;
 
@@ -538,25 +586,25 @@ useEffect(() => {
                       open={Boolean(anchorEl)}
                       onClose={handleMenuClose}
                       PaperProps={{
-                          style: {
-                              maxHeight: ITEM_HEIGHT * 13,
-                              width: '42ch',
-                              position: 'fixed',
-                          },
+                        style: {
+                          maxHeight: ITEM_HEIGHT * 13,
+                          width: '42ch',
+                          position: 'fixed',
+                        },
                       }}
-                  >
+                    >
                       <Typography variant="subtitle1" sx={{ paddingLeft: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                          Notifications
-                          <DeleteOutlineIcon sx={{ ml: 25 }} onClick={handleClearOptions} />
+                        Notifications
+                        <DeleteOutlineIcon sx={{ ml: 25 }} onClick={handleClearOptions} />
                       </Typography>
 
                       <Tabs
-                          value={0}
-                          variant="fullWidth"
-                          textColor="primary"
-                          indicatorColor="primary"
+                        value={0}
+                        variant="fullWidth"
+                        textColor="primary"
+                        indicatorColor="primary"
                       >
-                          <Tab label="All" />
+                        <Tab label="All" />
                       </Tabs>
                       {loading && <Typography sx={{ padding: '16px' }}>Loading...</Typography>}
                       {error && <Typography sx={{ padding: '16px', color: 'red' }}>Error: {error}</Typography>}
@@ -569,8 +617,8 @@ useEffect(() => {
                               {option.details}
                               {option.hasButtons && (
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                  <Button 
-                                    onClick={() => handleAcceptNotification(option.id)} 
+                                  <Button
+                                    onClick={() => handleAcceptNotification(option.id)}
                                     sx={{ marginRight: '8px' }}
                                   >
                                     Accept
@@ -587,7 +635,7 @@ useEffect(() => {
                           </div>
                         );
                       })}
-                  </Menu>
+                    </Menu>
                   </Box>
                 </Toolbar>
               </AppBar>
