@@ -33,22 +33,34 @@ const NavigationSearchBar = () => {
   const [schools, setSchools] = useState([]);
 
   useEffect(() => {
+    const getSchools = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/schools/all', {
+          headers: {
+            'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+          }
+        });
+        console.log(response.data)
+        setSchools(response.data);
+      } catch (e) {
+        console.error("There was an error ", e);
+      }
+    }
+
     // Fetch school data from the API when the component mounts
-    axios.get('http://localhost:4000/schools/all')
-      .then(response => {
-        setSchools(response.data); // Assuming the API returns an array of school objects with a `fullName` property
-      })
-      .catch(error => {
-        console.error("There was an error fetching the school data!", error);
-      });
+    getSchools();
   }, []);
 
   const handleApplySchool = async () => {
     try {
       // Ensure selectedSchool has the required ID or value for the API request
-      const response = await axios.post('http://localhost:4000/associations/apply', {
+      const response = await axios.post('http://localhost:4000/api/associations/apply', {
         userId: currentUser.id, // Replace with appropriate user ID
         schoolId: selectedSchool.id // Assuming selectedSchool has an 'id' property
+      }, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
       });
       console.log("Application submitted successfully.");
       console.log("Response data:", response.data);
@@ -71,7 +83,11 @@ const NavigationSearchBar = () => {
   const handleRemoveSchool = async (schoolToRemove) => {
     try {
       // Assuming you have access to the current user's ID and the school ID
-      await axios.delete(`http://localhost:4000/associations/${currentUser.id}/${selectedSchool.id}`);
+      await axios.delete(`http://localhost:4000/api/associations/${currentUser.id}/${selectedSchool.id}`, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
+      });
       console.log("Association removed successfully.");
 
       // Update appliedSchools state if needed
