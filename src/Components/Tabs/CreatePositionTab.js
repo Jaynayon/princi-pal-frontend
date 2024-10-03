@@ -12,7 +12,11 @@ export default function CreatePositionTab() {
 
     const getPositionByName = async (value) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL_POS}/name/${value}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_POS}/name/${value}`, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
 
             return response?.data || null;
         } catch (e) {
@@ -28,7 +32,8 @@ export default function CreatePositionTab() {
                 name: position,
             }, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             });
 
