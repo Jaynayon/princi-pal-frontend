@@ -17,7 +17,7 @@ export default function LogoutDialog({ open, onClose }) {
         // Remove token
         if (JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))) {
             window.localStorage.removeItem("LOCAL_STORAGE_TOKEN")
-            window.location.href = "https://localhost:3000/";
+            window.location.href = `${process.env.REACT_APP_FRONTEND_URL}`;
         } else {
             console.log("Local storage item not found");
         }
