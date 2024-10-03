@@ -335,7 +335,7 @@ function DashboardPage(props) {
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
-    const [error, setError] = useState('');
+    const [setError] = useState('');
     const [loadingSchools] = useState(false);
     const [schoolBudget] = useState(null);
 
