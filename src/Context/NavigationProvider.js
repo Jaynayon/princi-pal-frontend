@@ -52,7 +52,7 @@ export const NavigationProvider = ({ children }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            })
+            });
 
             if (response) {
                 console.log(response.data)
@@ -96,7 +96,8 @@ export const NavigationProvider = ({ children }) => {
                 newPassword,
             }, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             });
 
@@ -113,7 +114,8 @@ export const NavigationProvider = ({ children }) => {
                 avatar,
             }, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             });
 
@@ -208,10 +210,6 @@ export const NavigationProvider = ({ children }) => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
     }, [selected]);
 
-    // useEffect(() => {
-    //     window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
-    // }, [isLoggedIn]);
-
     return (
         <NavigationContext.Provider value={{
             list,
@@ -227,7 +225,8 @@ export const NavigationProvider = ({ children }) => {
             createUser,
             validateUsernameEmail,
             updateUserPassword,
-            updateUserAvatar
+            updateUserAvatar,
+            // header
         }}>
             {children}
         </NavigationContext.Provider>

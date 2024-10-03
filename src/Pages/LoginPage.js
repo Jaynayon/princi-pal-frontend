@@ -20,7 +20,7 @@ const LoginPage = () => {
     const handleBtnRegister = () => {
         // Logic for handling register button click
         // Redirect to the registration page
-        window.location.href = "https://localhost:3000/register";
+        window.location.href = `${process.env.REACT_APP_FRONTEND_URL}/register`;
     };
 
     const handleLogin = async () => {

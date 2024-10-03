@@ -19,10 +19,9 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemAvatar, ListItemText } from '@mui/material';
+import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 import axios from 'axios'; // Import Axios for making HTTP requests
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
@@ -54,6 +53,10 @@ function PeoplePage(props) {
             const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
                 userId: currentUser.id,
                 schoolId: selectedValue
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
             });
             setCurrentAssociation(response.data); // Update the state with the fetched data
         } catch (error) {
@@ -66,7 +69,12 @@ function PeoplePage(props) {
     // Function to fetch users by school ID
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`, { schoolId: selectedValue });
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`,
+                { schoolId: selectedValue }, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
             setRows(response.data); // Update the state with the fetched data
             console.log(response.data)
         } catch (error) {
@@ -100,19 +108,22 @@ function PeoplePage(props) {
         //fetchUsers(); // Fetch users belonging to the selected school
     };
 
-    const handleClickOpen = () => {
+    const handleClickOpen = async () => {
         console.log("Current School State:", currentSchool); // Debugging line
         if (currentSchool && currentSchool.id) {
-            console.log(`Fetching applications from: http://localhost:4000/associations/applications/${currentSchool.id}`);
+            console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
             setOpen(true);
-            axios.get(`http://localhost:4000/associations/applications/${currentSchool.id}`)
-                .then(response => {
-                    console.log("Applications fetched:", response.data); // Debugging line
-                    setApplications(response.data);
-                })
-                .catch(error => {
-                    console.error("Error fetching applications:", error.response ? error.response.data : error.message);
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
                 });
+                console.log("Applications fetched:", response.data); // Debugging line
+                setApplications(response.data);
+            } catch (e) {
+                console.error(e);
+            }
         } else {
             console.error("Cannot fetch applications: School ID is missing.");
         }
@@ -131,18 +142,13 @@ function PeoplePage(props) {
         //setSelectedValue(value);
     };
 
-    const schoolAvatar = (
-        <Avatar>
-            <SchoolIcon />
-        </Avatar>
-    );
-
     const handleAccept = async (associationRequest) => {
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 body: JSON.stringify(associationRequest), // Sending the correct request object
             });
@@ -200,7 +206,11 @@ function PeoplePage(props) {
 
                 console.log(`${userId} and ${schoolId}`)
                 // Make an API call to delete the user association
-                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`);
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
                 console.log("User deleted successfully. " + response.data);
                 // Remove the deleted row from the state
                 setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
@@ -244,6 +254,10 @@ function PeoplePage(props) {
                 const response = await axios.patch(endpoint, {
                     userId: rows[selectedIndex].id,
                     schoolId: rows[selectedIndex].schoolId // changed to rows[selectedIndex].schoolId from selectedIndex
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
                 });
 
                 console.log(response)
@@ -284,13 +298,21 @@ function PeoplePage(props) {
             admin: member === 'Admin'
         };
 
-        axios.post('http://localhost:4000/associations/invite', invitePayload)
+        axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/invite`, invitePayload, {
+            headers: {
+                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+            }
+        })
             .then(response => {
                 const invitedUserId = response.data.userId; // Ensure userId is correctly obtained
                 const schoolId = response.data.schoolId;
 
                 // Fetch school name using the schoolId
-                axios.get(`http://localhost:4000/schools/${schoolId}`)
+                axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/${schoolId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                })
                     .then(schoolResponse => {
                         const schoolName = schoolResponse.data.fullName || 'your school'; // Use fetched school name or default
 
@@ -305,7 +327,11 @@ function PeoplePage(props) {
                         };
 
                         // Send the notification to the invited user
-                        axios.post('http://localhost:4000/Notifications/create', notificationPayload)
+                        axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notificationPayload, {
+                            headers: {
+                                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                            }
+                        })
                             .then(() => {
                                 console.log("Notification created successfully.");
                             })
@@ -411,12 +437,12 @@ function PeoplePage(props) {
                                 <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
                                     <List sx={{ p: 3 }}>
-                                        {applications.length === 0 ? (
+                                        {applications?.length === 0 ? (
                                             <ListItem>
                                                 <ListItemText primary="No applications found." />
                                             </ListItem>
                                         ) : (
-                                            applications.map(application => (
+                                            applications?.map(application => (
                                                 <ListItem key={application.id} disableGutters>
                                                     <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
                                                     <Button

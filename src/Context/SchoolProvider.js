@@ -66,7 +66,11 @@ export const SchoolProvider = ({ children }) => {
     const fetchDocumentData = useCallback(async () => {
         try {
             if (currentSchool) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
                 setCurrentDocument(response.data || emptyDocument);
             }
         } catch (error) {
@@ -77,7 +81,11 @@ export const SchoolProvider = ({ children }) => {
 
     const fetchDocumentBySchoolId = useCallback(async (schoolId) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${schoolId}/${year}/${month}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${schoolId}/${year}/${month}`, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
             setCurrentDocument(response.data);
         } catch (error) {
             setCurrentDocument(emptyDocument)
@@ -87,7 +95,11 @@ export const SchoolProvider = ({ children }) => {
 
     const fetchUacs = useCallback(async () => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL_UACS}/all`);
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_UACS}/all`, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
             setObjectCodes(response.data || []);
         } catch (error) {
             console.error('Error validating token:', error);
@@ -109,7 +121,8 @@ export const SchoolProvider = ({ children }) => {
                     natureOfPayment: obj.natureOfPayment
                 }, {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
 
@@ -134,7 +147,8 @@ export const SchoolProvider = ({ children }) => {
         try {
             const response = await axios.patch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, payload, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             })
 
@@ -156,7 +170,8 @@ export const SchoolProvider = ({ children }) => {
                     annualBudget
                 }, {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
 
@@ -184,7 +199,8 @@ export const SchoolProvider = ({ children }) => {
                     year: yearValue
                 }, {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
 
@@ -227,12 +243,14 @@ export const SchoolProvider = ({ children }) => {
 
     const getDocumentBySchoolIdYear = async (school_id, year) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}`)
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}`, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
             return response.data
         } catch (error) {
             console.log(error.response.data)
-            //console.error('Error fetching lrs by document id:', error.message);
-            //throw new Error("Get lr failed. Please try again later.");
             return null;
         }
     };
@@ -240,8 +258,11 @@ export const SchoolProvider = ({ children }) => {
     const updateJev = useCallback(async () => {
         try {
             if (currentDocument.id !== 0) {
-                // const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/jev/documents/${currentDocument.id}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/jev/documents/${currentDocument.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
                 setJev(response.data || []);
             } else {
                 setJev([]); //meaning it's empty 
@@ -263,13 +284,13 @@ export const SchoolProvider = ({ children }) => {
         try {
             const response = await axios.patch(`${process.env.REACT_APP_API_URL_JEV}/${rowId}`, obj, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             })
             return response.status === 200;
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
-            //throw new Error("Get lr failed. Please try again later.");
             return null;
         }
     };
@@ -277,8 +298,16 @@ export const SchoolProvider = ({ children }) => {
     const updateLr = useCallback(async () => {
         try {
             if (currentDocument.id !== 0) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/approved`);
-                const notApproved = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/unapproved`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/approved`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                const notApproved = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/unapproved`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
                 setLr(response.data || []);
                 setLrNotApproved(notApproved.data || []);
                 console.log(notApproved.data)
@@ -330,7 +359,8 @@ export const SchoolProvider = ({ children }) => {
         try {
             const response = await axios.patch(`${process.env.REACT_APP_API_URL_LR}/${rowId}`, obj, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             })
 
@@ -349,7 +379,11 @@ export const SchoolProvider = ({ children }) => {
     const deleteLrByid = async (rowId) => {
         try {
             if (currentUser) {
-                const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}/user/${currentUser.id}`)
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}/user/${currentUser.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
                 if (response) {
                     console.log(response.data)
                 }
@@ -399,11 +433,6 @@ export const SchoolProvider = ({ children }) => {
 
         return documentDate >= twoMonthsAgo;
     };
-
-    // useEffect(() => {
-    //     console.log("SchoolProvider useEffect: update document");
-    //     fetchDocumentData();
-    // }, [fetchDocumentData, year, month]);
 
     useEffect(() => {
         // Assuming document.year and document.month are provided in numeric format
