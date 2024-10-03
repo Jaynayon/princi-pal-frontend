@@ -310,6 +310,7 @@ export const SchoolProvider = ({ children }) => {
                 });
                 setLr(response.data || []);
                 setLrNotApproved(notApproved.data || []);
+                console.log(notApproved.data)
             } else {
                 setLr([]); //meaning it's empty 
                 setLrNotApproved([]);

@@ -35,7 +35,7 @@ const NavigationSearchBar = () => {
   useEffect(() => {
     const getSchools = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/schools/all', {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
           headers: {
             'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
           }
@@ -54,7 +54,7 @@ const NavigationSearchBar = () => {
   const handleApplySchool = async () => {
     try {
       // Ensure selectedSchool has the required ID or value for the API request
-      const response = await axios.post('http://localhost:4000/api/associations/apply', {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/apply`, {
         userId: currentUser.id, // Replace with appropriate user ID
         schoolId: selectedSchool.id // Assuming selectedSchool has an 'id' property
       }, {
@@ -83,7 +83,7 @@ const NavigationSearchBar = () => {
   const handleRemoveSchool = async (schoolToRemove) => {
     try {
       // Assuming you have access to the current user's ID and the school ID
-      await axios.delete(`http://localhost:4000/api/associations/${currentUser.id}/${selectedSchool.id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${currentUser.id}/${selectedSchool.id}`, {
         headers: {
           'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
         }
