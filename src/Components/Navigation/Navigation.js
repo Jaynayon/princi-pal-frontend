@@ -258,7 +258,7 @@ export default function Navigation({ children }) {
       if (!notificationId) {
         throw new Error("Invalid request: notificationId is required.");
       }
-      await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve/${notificationId}`, {
+      await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve/${notificationId}`, {}, {
         headers: {
           'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
         }
@@ -292,7 +292,7 @@ export default function Navigation({ children }) {
       }
 
       const rejectNotificationUrl = `${process.env.REACT_APP_API_URL_NOTIF}/reject/${notificationId}`;
-      await axios.put(rejectNotificationUrl, {
+      await axios.put(rejectNotificationUrl, {}, {
         headers: {
           'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
         }

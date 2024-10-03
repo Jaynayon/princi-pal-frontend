@@ -108,13 +108,13 @@ function PeoplePage(props) {
         //fetchUsers(); // Fetch users belonging to the selected school
     };
 
-    const handleClickOpen = () => {
+    const handleClickOpen = async () => {
         console.log("Current School State:", currentSchool); // Debugging line
         if (currentSchool && currentSchool.id) {
             console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
             setOpen(true);
             try {
-                const response = axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
                     headers: {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
@@ -148,6 +148,7 @@ function PeoplePage(props) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 body: JSON.stringify(associationRequest), // Sending the correct request object
             });
@@ -436,12 +437,12 @@ function PeoplePage(props) {
                                 <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
                                     <List sx={{ p: 3 }}>
-                                        {applications.length === 0 ? (
+                                        {applications?.length === 0 ? (
                                             <ListItem>
                                                 <ListItemText primary="No applications found." />
                                             </ListItem>
                                         ) : (
-                                            applications.map(application => (
+                                            applications?.map(application => (
                                                 <ListItem key={application.id} disableGutters>
                                                     <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
                                                     <Button
