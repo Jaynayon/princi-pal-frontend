@@ -135,7 +135,7 @@ const displayTitle = (selected) => {
 
 export default function Navigation({ children }) {
   const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser } = useNavigationContext();
-  const { month, year, currentDocument, jev, currentSchool } = useSchoolContext();
+  const { month, year, currentDocument, currentSchool } = useSchoolContext();
   const [anchorEl, setAnchorEl] = useState(null);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -159,7 +159,11 @@ export default function Navigation({ children }) {
     console.log('Fetching notifications for user ID:', userId);
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:4000/Notifications/user/${userId}/all`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL_NOTIF}/user/${userId}/all`, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
+      });
       console.log('Fetched notifications data:', response.data);
 
       if (Array.isArray(response.data)) {
@@ -197,8 +201,11 @@ export default function Navigation({ children }) {
     const notification = { userId, details };
 
     try {
-      await axios.post('http://localhost:4000/Notifications/create', notification, {
-        headers: { 'Content-Type': 'application/json' },
+      await axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notification, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        },
       });
 
       fetchUserNotifications(userId);
@@ -220,7 +227,11 @@ export default function Navigation({ children }) {
     }
 
     try {
-      await axios.delete(`http://localhost:4000/Notifications/user/${currentUser.id}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL_NOTIF}/user/${currentUser.id}`, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
+      });
 
       setOptions([]);
 
@@ -247,13 +258,19 @@ export default function Navigation({ children }) {
       if (!notificationId) {
         throw new Error("Invalid request: notificationId is required.");
       }
-      await axios.post(`http://localhost:4000/associations/approve/${notificationId}`, {
-
+      await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve/${notificationId}`, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
       });
-      const updateNotificationUrl = `http://localhost:4000/Notifications/accept/${notificationId}`;
+      const updateNotificationUrl = `${process.env.REACT_APP_API_URL_NOTIF}/accept/${notificationId}`;
       await axios.put(updateNotificationUrl, {
         details: 'You accepted the invitation',
-        hasButtons: false
+        hasButtons: false,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
       });
 
     } catch (error) {
@@ -274,15 +291,27 @@ export default function Navigation({ children }) {
         throw new Error("Invalid request: notificationId is required.");
       }
 
-      const rejectNotificationUrl = `http://localhost:4000/Notifications/reject/${notificationId}`;
-      await axios.put(rejectNotificationUrl);
+      const rejectNotificationUrl = `${process.env.REACT_APP_API_URL_NOTIF}/reject/${notificationId}`;
+      await axios.put(rejectNotificationUrl, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
+      });
 
 
-      const deleteAssociation = `http://localhost:4000/associations/delete/${notificationId}`;
-      await axios.delete(deleteAssociation);
+      const deleteAssociation = `${process.env.REACT_APP_API_URL_ASSOC}/delete/${notificationId}`;
+      await axios.delete(deleteAssociation, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
+      });
 
-      const deleteNotification = `http://localhost:4000/Notifications/${notificationId}`;
-      await axios.delete(deleteNotification);
+      const deleteNotification = `${process.env.REACT_APP_API_URL_NOTIF}/${notificationId}`;
+      await axios.delete(deleteNotification, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
+      });
 
     } catch (error) {
       if (error.response) {

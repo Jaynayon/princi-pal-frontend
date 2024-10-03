@@ -305,7 +305,7 @@ function PeoplePage(props) {
                         };
 
                         // Send the notification to the invited user
-                        axios.post('http://localhost:4000/Notifications/create', notificationPayload)
+                        axios.post('http://localhost:4000/notifications/create', notificationPayload)
                             .then(() => {
                                 console.log("Notification created successfully.");
                             })
