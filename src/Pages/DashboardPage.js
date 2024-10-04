@@ -65,11 +65,11 @@ const calculateWeeklyExpenses = (expensesData) => {
         }
 
    
-        console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
-        console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
+        //console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
+        //console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
     });
 
-    console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
+    //console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
     return weeklyExpenses;
 };
 
@@ -79,8 +79,8 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
 
-    console.log('uacsData:', uacsData);
-    console.log('Selected Category:', selectedCategory);
+    //console.log('uacsData:', uacsData);
+    //console.log('Selected Category:', selectedCategory);
 
     useEffect(() => {
 
@@ -335,7 +335,7 @@ function DashboardPage(props) {
     const [clickedButton, setClickedButton] = useState('');
     const [editableAmounts, setEditableAmounts] = useState({});
     const [open, setOpen] = useState(false);
-    const [setError] = useState('');
+    const [error, setError] = useState('');
     const [loadingSchools] = useState(false);
     const [schoolBudget] = useState(null);
 
@@ -350,7 +350,7 @@ function DashboardPage(props) {
                 // Log the specific fields (date, objectCode, and amount) for each LR row
                 if (lr && lr.length > 0) {
                     lr.forEach(row => {
-                        console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
+                        //console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
                     });
                 } else {
                     console.log('No LR data available');
@@ -467,7 +467,7 @@ function DashboardPage(props) {
 
     const updateDocumentById = async (docId, value) => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, {
+            const response = await fetch(`http://localhost:4000/documents/${docId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
