@@ -99,7 +99,7 @@ function PeoplePage(props) {
         //fetchUsers(); // Fetch users belonging to the selected school
     };
 
-    const handleClickOpen = () => {
+    /*const handleClickOpen = () => {
         console.log("Current School State:", currentSchool); // Debugging line
         if (currentSchool && currentSchool.id) {
             console.log(`Fetching applications from: http://localhost:4000/associations/applications/${currentSchool.id}`);
@@ -115,7 +115,7 @@ function PeoplePage(props) {
         } else {
             console.error("Cannot fetch applications: School ID is missing.");
         }
-    };
+    };*/
     
     //
     useEffect(() => {
@@ -135,6 +135,24 @@ function PeoplePage(props) {
             <SchoolIcon />
         </Avatar>
     );
+
+        const handleClickOpen = () => {
+            console.log("Current School State:", currentSchool); // Debugging line
+            if (currentSchool && currentSchool.id) {
+                console.log(`Fetching applications from: http://localhost:4000/associations/applications/${currentSchool.id}`);
+                setOpen(true);
+                axios.get(`http://localhost:4000/associations/applications/${currentSchool.id}`)
+                    .then(response => {
+                        console.log("Applications fetched:", response.data); // Debugging line
+                        setApplications(response.data);
+                    })
+                    .catch(error => {
+                        console.error("Error fetching applications:", error.response ? error.response.data : error.message);
+                    });
+            } else {
+                console.error("Cannot fetch applications: School ID is missing.");
+            }
+        };
 
         const handleAccept = async (associationRequest) => {
         try {
@@ -158,6 +176,27 @@ function PeoplePage(props) {
         }
     };
 
+    const handleReject = async (application) => {
+        try {
+            const response = await fetch('http://localhost:4000/associations/reject', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(application),
+            });
+    
+            if (response.ok) {
+                console.log('User rejected successfully');
+                // Update the UI - for example, remove the application from the list
+                setApplications(applications.filter(app => app.id !== application.userId));
+            } else {
+                console.error('Error rejecting user:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error rejecting user:', error);
+        }
+    };    
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);
@@ -398,7 +437,7 @@ function PeoplePage(props) {
                                 <Button variant="outlined" onClick={handleClickOpen}>
                                     Open Application Dialog
                                 </Button>
-                                <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
+                                <Dialog onClose={handleClose} open={open} sx={{ margin: 2, '& .MuiDialog-paper': { minWidth: 400 }, margin: 2 }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
                                     <List>
                                         {applications.length === 0 ? (
@@ -409,16 +448,29 @@ function PeoplePage(props) {
                                             applications.map(application => (
                                                 <ListItem key={application.id} disableGutters>
                                                     <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
-                                                    <Button
-                                                        onClick={() => {
-                                                            handleAccept({ userId: application.id, schoolId: application.schoolId });
-                                                            handleClose();  // Close the dialog after accepting
-                                                        }}
-                                                        variant="contained"
-                                                        color="primary"
-                                                    >
-                                                        Accept
-                                                    </Button>
+                                                    <Box display="flex" justifyContent="space-between" gap={1}>
+                                                        <Button
+                                                            onClick={() => {
+                                                                handleAccept({ userId: application.id, schoolId: application.schoolId });
+                                                                handleClose();  // Close the dialog after accepting
+                                                            }}
+                                                            variant="contained"
+                                                            color="primary"
+                                                        >
+                                                            Accept
+                                                        </Button>
+
+                                                        <Button
+                                                            onClick={() => {
+                                                                handleReject({ userId: application.id, schoolId: application.schoolId });
+                                                                handleClose();  // Close the dialog after rejecting
+                                                            }}
+                                                            variant="contained"
+                                                            color="secondary"
+                                                        >
+                                                            Reject
+                                                        </Button>
+                                                    </Box>
                                                 </ListItem>
                                             ))
                                         )}
