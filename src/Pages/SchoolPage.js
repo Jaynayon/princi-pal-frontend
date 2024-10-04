@@ -112,7 +112,10 @@ function SchoolPage(props) {
                     year,
                     month
                 }, {
-                    responseType: 'blob' // Set the response type to 'blob' to handle binary data
+                    responseType: 'blob',  // Set the response type to 'blob' to handle binary data
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
                 });
 
                 // Extract blob data from the response

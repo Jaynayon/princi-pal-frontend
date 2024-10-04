@@ -19,10 +19,9 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemAvatar, ListItemText } from '@mui/material';
+import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 import axios from 'axios'; // Import Axios for making HTTP requests
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
@@ -54,6 +53,10 @@ function PeoplePage(props) {
             const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
                 userId: currentUser.id,
                 schoolId: selectedValue
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
             });
             setCurrentAssociation(response.data); // Update the state with the fetched data
         } catch (error) {
@@ -66,7 +69,12 @@ function PeoplePage(props) {
     // Function to fetch users by school ID
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`, { schoolId: selectedValue });
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`,
+                { schoolId: selectedValue }, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
             setRows(response.data); // Update the state with the fetched data
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -102,16 +110,19 @@ function PeoplePage(props) {
     /*const handleClickOpen = () => {
         console.log("Current School State:", currentSchool); // Debugging line
         if (currentSchool && currentSchool.id) {
-            console.log(`Fetching applications from: http://localhost:4000/associations/applications/${currentSchool.id}`);
+            console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
             setOpen(true);
-            axios.get(`http://localhost:4000/associations/applications/${currentSchool.id}`)
-                .then(response => {
-                    console.log("Applications fetched:", response.data); // Debugging line
-                    setApplications(response.data);
-                })
-                .catch(error => {
-                    console.error("Error fetching applications:", error.response ? error.response.data : error.message);
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
                 });
+                console.log("Applications fetched:", response.data); // Debugging line
+                setApplications(response.data);
+            } catch (e) {
+                console.error(e);
+            }
         } else {
             console.error("Cannot fetch applications: School ID is missing.");
         }
@@ -160,6 +171,7 @@ function PeoplePage(props) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 body: JSON.stringify(associationRequest), // Sending the correct request object
             });
@@ -233,7 +245,11 @@ function PeoplePage(props) {
                 const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
                 // Make an API call to delete the user association
-                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`);
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
                 console.log("User deleted successfully. " + response.data);
                 // Remove the deleted row from the state
                 setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
@@ -277,6 +293,10 @@ function PeoplePage(props) {
                 const response = await axios.patch(endpoint, {
                     userId: rows[selectedIndex].id,
                     schoolId: rows[selectedIndex].schoolId // changed to rows[selectedIndex].schoolId from selectedIndex
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
                 });
 
                 console.log(response)
@@ -342,9 +362,51 @@ function PeoplePage(props) {
             schoolId: currentSchool.id,
             admin: member === 'Admin' // Set the admin status based on dropdown selection
         };
-        
-        axios.post('http://localhost:4000/associations/invite', invitePayload)
+
+        axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/invite`, invitePayload, {
+            headers: {
+                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+            }
+        })
             .then(response => {
+                const invitedUserId = response.data.userId; // Ensure userId is correctly obtained
+                const schoolId = response.data.schoolId;
+
+                // Fetch school name using the schoolId
+                axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/${schoolId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                })
+                    .then(schoolResponse => {
+                        const schoolName = schoolResponse.data.fullName || 'your school'; // Use fetched school name or default
+
+                        console.log("Invitation sent successfully:", response.data);
+                        setInvitationMessage('Invitation sent successfully!');
+
+                        // Create notification payload for the invited user
+                        const notificationPayload = {
+                            userId: invitedUserId, // Use the userId from response data
+                            details: `You have been invited to join the association at ${schoolName}.`,
+                            assocId: response.data.id
+                        };
+
+                        // Send the notification to the invited user
+                        axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notificationPayload, {
+                            headers: {
+                                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                            }
+                        })
+                            .then(() => {
+                                console.log("Notification created successfully.");
+                            })
+                            .catch(error => {
+                                console.error("Error creating notification:", error.response ? error.response.data : error.message);
+                            });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching school details:", error.response ? error.response.data : error.message);
+                    });
                 console.log("Invitation sent successfully:", response.data);
                 setInvitationMessage('Invitation sent successfully!');
             })
@@ -439,13 +501,13 @@ function PeoplePage(props) {
                                 </Button>
                                 <Dialog onClose={handleClose} open={open} sx={{ margin: 2, '& .MuiDialog-paper': { minWidth: 400 }, margin: 2 }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
-                                    <List>
+                                    <List sx={{ p: 3 }}>
                                         {applications.length === 0 ? (
                                             <ListItem>
                                                 <ListItemText primary="No applications found." />
                                             </ListItem>
                                         ) : (
-                                            applications.map(application => (
+                                            applications?.map(application => (
                                                 <ListItem key={application.id} disableGutters>
                                                     <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
                                                     <Box display="flex" justifyContent="space-between" gap={1}>

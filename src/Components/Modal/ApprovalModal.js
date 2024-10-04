@@ -44,7 +44,11 @@ export default function ApprovalModal({ open, handleClose }) {
     const getLastLrHistory = async (id) => {
         try {
             if (id) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_HISTORY}/lr/${id}/last`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_HISTORY}/lr/${id}/last`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
                 return response.data;
             }
         } catch (error) {
