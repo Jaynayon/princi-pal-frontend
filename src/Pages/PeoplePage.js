@@ -27,7 +27,7 @@ import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 
 function PeoplePage(props) {
-    const [member, setMember] = useState('');
+    const [member, setMember] = useState('Member');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -106,27 +106,6 @@ function PeoplePage(props) {
         setSelectedValue(event.target.value); // Update selected school
         //fetchUsers(); // Fetch users belonging to the selected school
     };
-
-    /*const handleClickOpen = () => {
-        console.log("Current School State:", currentSchool); // Debugging line
-        if (currentSchool && currentSchool.id) {
-            console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
-            setOpen(true);
-            try {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                    }
-                });
-                console.log("Applications fetched:", response.data); // Debugging line
-                setApplications(response.data);
-            } catch (e) {
-                console.error(e);
-            }
-        } else {
-            console.error("Cannot fetch applications: School ID is missing.");
-        }
-    };*/
     
     //
     useEffect(() => {
@@ -141,74 +120,66 @@ function PeoplePage(props) {
         //setSelectedValue(value);
     };
 
-    const schoolAvatar = (
+    /*const schoolAvatar = (
         <Avatar>
             <SchoolIcon />
         </Avatar>
-    );
+    );*/
 
-        const handleClickOpen = () => {
+        const handleClickOpen = async () => {
             console.log("Current School State:", currentSchool); // Debugging line
             if (currentSchool && currentSchool.id) {
-                console.log(`Fetching applications from: http://localhost:4000/associations/applications/${currentSchool.id}`);
+                console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
                 setOpen(true);
-                axios.get(`http://localhost:4000/associations/applications/${currentSchool.id}`)
-                    .then(response => {
-                        console.log("Applications fetched:", response.data); // Debugging line
-                        setApplications(response.data);
-                    })
-                    .catch(error => {
-                        console.error("Error fetching applications:", error.response ? error.response.data : error.message);
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                        }
                     });
+                    console.log("Applications fetched:", response.data); // Debugging line
+                    setApplications(response.data);
+                } catch (e) {
+                    console.error(e);
+                }
             } else {
                 console.error("Cannot fetch applications: School ID is missing.");
             }
         };
 
         const handleAccept = async (associationRequest) => {
-        try {
-            const response = await fetch('http://localhost:4000/associations/approve', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                },
-                body: JSON.stringify(associationRequest), // Sending the correct request object
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Error: ${errorText}`);
+            try {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+        
+                console.log('Success:', response.data); // Axios already parsed the JSON
+            } catch (error) {
+                console.error("Error approving user:", error.response ? error.response.data : error.message); // Axios handles the error better
             }
-
-            const data = await response.json();
-            console.log('Success:', data);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
-
-    const handleReject = async (application) => {
-        try {
-            const response = await fetch('http://localhost:4000/associations/reject', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(application),
-            });
-    
-            if (response.ok) {
-                console.log('User rejected successfully');
-                // Update the UI - for example, remove the application from the list
+        };
+        
+        const handleReject = async (application) => {
+            try {
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/reject`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    },
+                    data: application // Pass the application object as data in the DELETE request
+                });
+        
+                console.log('User rejected successfully:', response.data);
+        
+                // Update the UI by removing the rejected application from the list
                 setApplications(applications.filter(app => app.id !== application.userId));
-            } else {
-                console.error('Error rejecting user:', response.statusText);
+            } catch (error) {
+                console.error('Error rejecting user:', error.response ? error.response.data : error.message);
             }
-        } catch (error) {
-            console.error('Error rejecting user:', error);
-        }
-    };    
+        };    
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);
