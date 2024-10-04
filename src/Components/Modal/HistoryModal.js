@@ -40,7 +40,11 @@ export default function HistoryModal({ open, handleClose, handleCloseParent, ind
             try {
                 console.log(lr[index].id);
                 if (lr) {
-                    const response = await axios.get(`${process.env.REACT_APP_API_URL_HISTORY}/lr/${lr[index].id}`);
+                    const response = await axios.get(`${process.env.REACT_APP_API_URL_HISTORY}/lr/${lr[index].id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                        }
+                    });
                     console.log(response.data);
                     setHistory(response.data);
                 }

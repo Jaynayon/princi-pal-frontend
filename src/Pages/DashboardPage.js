@@ -467,7 +467,7 @@ function DashboardPage(props) {
 
     const updateDocumentById = async (docId, value) => {
         try {
-            const response = await fetch(`http://localhost:4000/documents/${docId}`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
