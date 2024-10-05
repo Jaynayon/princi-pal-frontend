@@ -29,46 +29,22 @@ const NavigationSearchBar = () => {
   const [schools, setSchools] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:4000/schools/all')
-      .then(response => {
+    const getSchools = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
+          headers: {
+            'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+          }
+        });
+        console.log(response.data)
         setSchools(response.data);
-      })
-      .catch(error => {
-        console.error("There was an error fetching the school data!", error);
-      });
-
-    const savedAppliedSchools = JSON.parse(localStorage.getItem('appliedSchools')) || [];
-    setAppliedSchools(savedAppliedSchools);
-
-    const dialogStatus = JSON.parse(localStorage.getItem('dialogStatus')) || { open: false, school: null };
-    if (dialogStatus.open && dialogStatus.school) {
-      setSelectedSchool(dialogStatus.school);
-      setOpen(true);
+      } catch (e) {
+        console.error("There was an error ", e);
+      }
     }
-  }, []);
 
-  useEffect(() => {
-    const updateAppliedSchools = async () => {
-      const savedAppliedSchools = JSON.parse(localStorage.getItem('appliedSchools')) || [];
-      const updatedSchools = await Promise.all(savedAppliedSchools.map(async (school) => {
-        try {
-          const associationResponse = await axios.get(`http://localhost:4000/associations/${school.assocId}`);
-          return {
-            ...school,
-            approved: associationResponse.data.approved
-          };
-        } catch (error) {
-          console.error(`Error fetching approval status for ${school.fullName}:`, error);
-          return school;  // Return the school without modification if there's an error
-        }
-      }));
-
-      const nonApprovedSchools = updatedSchools.filter(school => !school.approved);
-      setAppliedSchools(nonApprovedSchools);
-      localStorage.setItem('appliedSchools', JSON.stringify(nonApprovedSchools));
-    };
-
-    updateAppliedSchools();
+    // Fetch school data from the API when the component mounts
+    getSchools();
   }, []);
 
   useEffect(() => {
@@ -77,31 +53,20 @@ const NavigationSearchBar = () => {
 
   const handleApplySchool = async () => {
     try {
-      const response = await axios.post('http://localhost:4000/associations/apply', {
-        userId: currentUser.id,
-        schoolId: selectedSchool.id
+      // Ensure selectedSchool has the required ID or value for the API request
+      const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/apply`, {
+        userId: currentUser.id, // Replace with appropriate user ID
+        schoolId: selectedSchool.id // Assuming selectedSchool has an 'id' property
+      }, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
       });
-
-      const assocId = response.data.id;
-
-      if (!assocId) {
-        throw new Error('Association ID not found in response');
-      }
-
-      const associationResponse = await axios.get(`http://localhost:4000/associations/${assocId}`);
-
-      if (associationResponse.data.approved) {
-        setAppliedSchools(prevAppliedSchools =>
-          prevAppliedSchools.filter(school => school.fullName !== selectedSchool.fullName)
-        );
-        handleClose(true);
-      } else {
-        setAppliedSchools(prevAppliedSchools => [
-          ...prevAppliedSchools,
-          { id: selectedSchool.id, fullName: selectedSchool.fullName, assocId, approved: false }
-        ]);
-        handleClose(false);
-      }
+      console.log("Application submitted successfully.");
+      console.log("Response data:", response.data);
+      // Update appliedSchools state if needed
+      setAppliedSchools([...appliedSchools, selectedSchool.fullName]); // Add school to applied list
+      handleClose(); // Close the dialog
     } catch (error) {
       console.error("Error applying to school:", error);
     }
@@ -115,8 +80,19 @@ const NavigationSearchBar = () => {
 
   const handleRemoveSchool = async (assocId, schoolToRemove) => {
     try {
-      await axios.delete(`http://localhost:4000/associations/${assocId}`); // Remove association from the backend
-      setAppliedSchools(prevAppliedSchools => prevAppliedSchools.filter(school => school.fullName !== schoolToRemove));
+      // Assuming you have access to the current user's ID and the school ID
+      await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${currentUser.id}/${selectedSchool.id}`, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
+      });
+      console.log("Association removed successfully.");
+
+      // Update appliedSchools state if needed
+      const updatedSchools = appliedSchools.filter(
+        (school) => school !== schoolToRemove
+      );
+      setAppliedSchools(updatedSchools);
     } catch (error) {
       console.error("Error removing school:", error);
     }

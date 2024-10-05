@@ -31,19 +31,6 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    const getUserById = async (user_id) => {
-        try {
-            const response = await instance.get(`${process.env.REACT_APP_API_URL_USER}/${user_id}`)
-            if (response) {
-                console.log(response.data);
-            }
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching user:', error);
-            throw new Error("Get user failed. Please try again later.");
-        }
-    };
-
     const authenticateUser = async (email, password) => {
         try {
             const response = await instance.post(`${process.env.REACT_APP_API_URL_AUTH}/login`, {
@@ -69,15 +56,28 @@ export const AppProvider = ({ children }) => {
         }
     };
 
+    const getUserById = async (user_id, token) => {
+        try {
+            const response = await instance.get(`${process.env.REACT_APP_API_URL_USER}/${user_id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            if (response) {
+                console.log(response.data);
+            }
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            throw new Error("Get user failed. Please try again later.");
+        }
+    };
+
     const fetchData = useCallback(async () => {
         try {
-            // const jwtCookie = document.cookie
-            //     .split('; ')
-            //     .find(row => row.startsWith('jwt='));
             const jwtToken = JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"));
 
             if (jwtToken) {
-                // const token = jwtCookie.split('=')[1];
                 console.log('JWT Token:', jwtToken);
 
                 // Call to validate the token
@@ -85,7 +85,7 @@ export const AppProvider = ({ children }) => {
                 console.log(data);
 
                 if (data) { // access data.id
-                    const user = await getUserById(data.id);
+                    const user = await getUserById(data.id, jwtToken);
                     user.position === "Super administrator" && setIsSuperAdmin(true); //is admin
                     setIsLoggedIn(true);
                     setCurrentUser(user);
