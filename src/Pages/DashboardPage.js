@@ -75,15 +75,12 @@ const calculateWeeklyExpenses = (expensesData) => {
 
 
 //Apex Chart
+// Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
 
-    //console.log('uacsData:', uacsData);
-    //console.log('Selected Category:', selectedCategory);
-
     useEffect(() => {
-
         if (selectedCategory === '19901020000') {
             setChartType('bar');
         } else {
@@ -93,7 +90,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
     const generateSeries = () => {
         if (!uacsData || uacsData.length === 0) {
-            return []; 
+            return [];
         }
         if (selectedCategory === '19901020000') {
             const totalExpenses = uacsData.slice(0, -1).map(uacs => {
@@ -115,74 +112,75 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                     }
                 ];
             } else {
-                return []; 
+                return [];
             }
         }
     };
-    
-  
 
-    
-    const generateOptions = (budget, maxExpense, chartType, categories) => ({
-        chart: {
-            height: 350,
-            type: chartType,
-            zoom: {
-                enabled: false
-            }
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: '60%', 
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            show: true,
-            width: 2,
-            colors: ['#0000FF'] 
-        },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], 
-                opacity: 0.5
-            }
-        },
-        xaxis: {
-            categories: categories,
-            labels: {
-                rotate: -45,
-                style: {
-                    fontSize: '12px'
+    const generateOptions = (budget, maxExpense, chartType, categories) => {
+        const annotations = selectedCategory === '19901020000' ? [
+            {
+                y: budget,
+                borderColor: '#FF0000',
+                label: {
+                    borderColor: '#FF0000',
+                    style: {
+                        color: '#fff',
+                        background: '#FF0000'
+                    },
+                    text: 'Budget Limit'
                 }
             }
-        },
-        yaxis: {
-            title: {
-                text: 'Amount (PHP)'
+        ] : []; // Remove the red line for non-total categories
+
+        return {
+            chart: {
+                height: 350,
+                type: chartType,
+                zoom: {
+                    enabled: false
+                }
             },
-            max: Math.max(budget, maxExpense), 
-        },
-        annotations: {
-            yaxis: [
-                {
-                    y: budget,
-                    borderColor: '#FF0000',
-                    label: {
-                        borderColor: '#FF0000',
-                        style: {
-                            color: '#fff',
-                            background: '#FF0000'
-                        },
-                        text: 'Budget Limit'
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '60%',
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['#0000FF']
+            },
+            grid: {
+                row: {
+                    colors: ['#f3f3f3', 'transparent'],
+                    opacity: 0.5
+                }
+            },
+            xaxis: {
+                categories: categories,
+                labels: {
+                    rotate: -45,
+                    style: {
+                        fontSize: '12px'
                     }
                 }
-            ]
-        }
-    });
+            },
+            yaxis: {
+                title: {
+                    text: 'Amount (PHP)'
+                },
+                max: Math.max(budget, maxExpense),
+            },
+            annotations: {
+                yaxis: annotations // Conditionally add the red line for the total category
+            }
+        };
+    };
 
     const selectedUacs = uacsData.find(uacs => uacs.code === selectedCategory);
     if (!selectedUacs && selectedCategory !== '19901020000') {
@@ -195,10 +193,8 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
 
     let weekLength = uacsData.find(item => item.code === selectedCategory).expenses.length;
     const categories = selectedCategory === '19901020000'
-    ? uacsData.slice(0, -1).map(uacs => uacs.name) 
-    : generateWeekLabels(weekLength >= 12 ? 12 : weekLength);
-
-
+        ? uacsData.slice(0, -1).map(uacs => uacs.name)
+        : generateWeekLabels(weekLength >= 12 ? 12 : weekLength);
 
     const budgetToUse = selectedCategory === '19901020000' ? budgetLimit : selectedUacs.budget;
     const maxExpense = selectedCategory === '19901020000'
@@ -209,7 +205,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         name,
         data: Array(12).fill(0).map((_, i) => {
             return expenses.reduce((acc, expense, idx) => {
-                const monthIndex = idx % 12; 
+                const monthIndex = idx % 12;
                 if (monthIndex === i) {
                     acc += expense;
                 }
@@ -258,7 +254,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
             }
         }],
         legend: {
-            show: false 
+            show: false
         }
     };
 
@@ -274,7 +270,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                         type={chartType}
                         height={350}
                     />
-    
+
                     {/* Container for x-axis labels and dropdown */}
                     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
                         <select
@@ -292,42 +288,43 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                             ))}
                         </select>
                     </div>
-    
-                    <Grid container spacing={2} style={{ marginTop: '40px' }}>
-    {/* Make the stacked chart wider */}
-    <Grid item xs={20} md={15}> {}
-        <Paper elevation={1} style={{ marginLeft: '-15px',marginRight: '10px',padding: '20px', height: '350px' }}> {/* Set fixed height */}
-            <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
-            <ReactApexChart
-                options={stackedOptions}
-                series={stackedSeries}
-                type="bar"
-                height={280} // Keep this height unchanged
-                style={{ width: '100%' }} // Ensure it takes full width
-            />
-        </Paper>
-    </Grid>
 
-    {/* Adjust the pie chart's width accordingly */}
-    <Grid item xs={20} md={6}> {/* Changed from 4 to 3 */}
-        <Paper elevation={1} style={{ marginLeft: '-15px',padding: '20px', height: '350px' }}> {/* Match height for alignment */}
-            <Typography variant="h6" align="center">Expense Distribution</Typography>
-            <ReactApexChart
-                options={pieOptions}
-                series={pieSeries}
-                type="pie"
-                height={280} // Keep this height for alignment
-                style={{ width: '100%' }} // Ensure it takes full width
-            />
-        </Paper>
-    </Grid>
-</Grid>
+                    <Grid container spacing={2} style={{ marginTop: '40px' }}>
+                        {/* Make the stacked chart wider */}
+                        <Grid item xs={20} md={15}>
+                            <Paper elevation={1} style={{ marginLeft: '-15px', marginRight: '10px', padding: '20px', height: '350px' }}>
+                                <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
+                                <ReactApexChart
+                                    options={stackedOptions}
+                                    series={stackedSeries}
+                                    type="bar"
+                                    height={280}
+                                    style={{ width: '100%' }}
+                                />
+                            </Paper>
+                        </Grid>
+
+                        {/* Adjust the pie chart's width accordingly */}
+                        <Grid item xs={20} md={6}>
+                            <Paper elevation={1} style={{ marginLeft: '-15px', padding: '20px', height: '350px' }}>
+                                <Typography variant="h6" align="center">Expense Distribution</Typography>
+                                <ReactApexChart
+                                    options={pieOptions}
+                                    series={pieSeries}
+                                    type="pie"
+                                    height={280}
+                                    style={{ width: '100%' }}
+                                />
+                            </Paper>
+                        </Grid>
+                    </Grid>
                 </div>
             )}
         </div>
     );
-    
-}
+};
+
+
 function DashboardPage(props) {
     const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
     const { currentDocument, year, month, setCurrentDocument, jev, updateJev, lr, updateLr } = useSchoolContext();
