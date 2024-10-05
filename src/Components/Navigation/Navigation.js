@@ -134,13 +134,12 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser } = useNavigationContext();
+  const { open, toggleDrawer, selected, navStyle, mobileMode, currentUser, options, setOptions, fetchUserNotifications, } = useNavigationContext();
   const { month, year, currentDocument, currentSchool } = useSchoolContext();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [previousBalance, setPreviousBalance] = useState(null);
+
 
   const handleMenuOpen = async (event) => {
     setAnchorEl(event.currentTarget);
@@ -149,75 +148,6 @@ export default function Navigation({ children }) {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
- 
- const fetchUserNotifications = useCallback(async (userId) => {
-    if (!userId) {
-        console.log('No user ID');
-        return;
-    }
-
-    console.log('Fetching notifications for user ID:', userId);
-    setLoading(true);
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL_NOTIF}/user/${userId}/all`, {
-        headers: {
-          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-        }
-      });
-      console.log('Fetched notifications data:', response.data);
-
-        if (Array.isArray(response.data)) {
-            console.log('Number of notifications:', response.data.length);
-            // Reverse to show newest notifications first
-            setOptions(response.data.reverse());
-        } else {
-            console.error('Unexpected response format:', response.data);
-        }
-
-        setError(null);
-    } catch (error) {
-        setError(error.message);
-        console.error('Error fetching notifications:', error);
-    } finally {
-        setLoading(false);
-    }
-}, []);
-
-
-const createNotification = useCallback(async (userId, details, NotificationsKey) => {
-  if (!currentUser || !currentUser.id) {
-      console.log('No current user or user ID');
-      return;
-  }
-
-  let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  let deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications')) || [];
-
-  if (savedNotifications.includes(NotificationsKey) || deletedNotifications.includes(NotificationsKey)) {
-      console.log('Notification key already exists or is deleted');
-      return;
-  }
-
-  const notification = { userId, details };
-
-    try {
-      await axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notification, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-        },
-      });
-
-      fetchUserNotifications(userId);
-
-      // Save the key to avoid duplicates
-      savedNotifications.push(NotificationsKey);
-      localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
-  } catch (error) {
-      console.error('Error creating notification:', error);
-  }
-}, [currentUser, fetchUserNotifications]);
-
   
   
 const handleClearOptions = async () => {
@@ -255,9 +185,6 @@ const handleClearOptions = async () => {
     handleMenuClose();
   }
 };
-
-
-  
 
   const handleAcceptNotification = async (notificationId) => {
     try {
@@ -330,133 +257,71 @@ const handleRejectNotification = async (notificationId) => {
   }
 };
 
-  useEffect(() => {
-    if (currentUser && currentUser.id) {
-      fetchUserNotifications(currentUser.id);
-    }
-  }, [currentUser, fetchUserNotifications]);
+useEffect(() => {
+  if (currentDocument && currentDocument.budgetLimit > 0) {
+    const NotificationsKey = `budgetLimit-positive-${currentDocument.id || ''}`;
+    const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+    if (!savedNotifications.includes(NotificationsKey)) {
+      const notificationPayload = {
+        userId: currentUser.id,
+        details: `The budget limit for ${month} ${year} has been set to ₱${currentDocument.budgetLimit}.`,
+        timestamp: new Date().toISOString(),
+      };
 
-  useEffect(() => {
-    if (currentDocument) {
-      const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
-      const NotificationsKey = `balance-negative-${currentDocument.id || ''}`;
-
-      // Retrieve saved notifications from localStorage
-      let savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-
-      // Check if the balance is negative and the notification hasn't been created already
-      if (
-        balance < 0 &&
-        previousBalance !== null &&
-        previousBalance >= 0 &&
-        !savedNotifications.includes(NotificationsKey)
-      ) {
-        // Create the notification
-        createNotification(
-          currentUser.id,
-          `Your balance has gone negative. Current balance: ₱${balance}`,
-          NotificationsKey
-        );
-
-        // Save the notification key to localStorage to avoid duplication on reload
-        savedNotifications.push(NotificationsKey);
-        localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
-      }
-
-      // Update the balance after checking
-      setPreviousBalance(balance);
-    }
-  }, [currentDocument, createNotification, currentUser, previousBalance]);
-
-
-  // useEffect(() => {
-  //   const fetchAndProcessData = async (id, row) => {
-  //     try {
-  //       const response = await axios.get(`http://localhost:4000/jev/${id}`);
-  //       const { budgetExceeded, amount } = response.data;
-
-  //       console.log('Response data:', response.data);
-
-  //       // Create a notification if budgetExceeded is true AND amount is greater than budget
-  //       if (budgetExceeded && amount > row.budget) {
-  //         const NotificationsKey = `budget-exceeded-${id || ''}`;
-
-  //         // Create a notification
-  //         const notificationMessage = `As of ${month} ${year}, the expenditure for UACS ${row.uacsName} has surpassed the designated budget. Current Expenditure: ₱${amount}, Allocated Budget: ₱${row.budget}`;
-
-  //         createNotification(
-  //           currentUser.id,
-  //           notificationMessage,
-  //           NotificationsKey
-  //         );
-
-  //         // Log the created notification data
-  //         console.log('Created notification:', {
-  //           userId: currentUser.id,
-  //           message: notificationMessage,
-  //           notificationKey: NotificationsKey
-  //         });
-
-  //         // Save the notification key to local storage to prevent duplicate notifications
-  //         const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  //         if (!savedNotifications.includes(NotificationsKey)) {
-  //           savedNotifications.push(NotificationsKey);
-  //           localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
-  //         }
-  //       }
-
-  //     } catch (error) {
-  //       console.error(`Failed to fetch details for ID ${id}:`, error);
-  //     }
-  //   };
-
-  //   if (jev && jev.length) {
-  //     jev.forEach(row => {
-  //       // Fetch and process data based on row.id
-  //       fetchAndProcessData(row.id, row);
-  //     });
-  //   }
-  // }, [month, year, jev, createNotification, currentUser]);
-
-  useEffect(() => {
-    if (currentDocument && currentDocument.budgetLimit > 0) {
-      const NotificationsKey = `budgetLimit-positive-${currentDocument.id || ''}`;
-  
-      const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-  
-      if (!savedNotifications.includes(NotificationsKey)) {
-        createNotification(
-          currentUser.id,
-          `The budget limit for ${month} ${year} has been set to ₱${currentDocument.budgetLimit}.`,
-          NotificationsKey
-        );
-      }
-    }
-  }, [month, year, currentDocument, createNotification, currentUser]);
-
-  useEffect(() => {
-    if (currentDocument && currentDocument.budgetLimit > 0 && currentDocument.budgetLimitExceeded) {
-        const NotificationsKey = `budgetLimit-exceeded-${currentDocument.id || ''}`;
-
-        // Retrieve saved notifications from localStorage
-        const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
-
-        // Check if the notification has already been created
-        if (!savedNotifications.includes(NotificationsKey)) {
-            // Create the notification
-            createNotification(
-                currentUser.id,
-                `Attention: The budget limit for ${month} ${year} has been exceeded.`,
-                NotificationsKey
-            );
-
-            // Save the notification key to localStorage to avoid duplicates
-            savedNotifications.push(NotificationsKey);
-            localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+      axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notificationPayload, {
+        headers: {
+            Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
         }
+    })
+        .then(response => {
+          console.log("Notification created successfully:", response.data);
+          fetchUserNotifications(currentUser.id);
+          savedNotifications.push(NotificationsKey);
+          localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+        })
+        .catch(error => {
+          console.error("Error creating notification:", error.response ? error.response.data : error.message);
+        });
     }
-}, [currentDocument, createNotification, currentUser, month, year]);
+  }
+}, [currentDocument, currentUser, month, year, fetchUserNotifications]);
 
+useEffect(() => {
+  if (currentDocument && currentDocument.budgetLimit > 0 && currentDocument.budgetLimitExceeded) {
+    const NotificationsKey = `budgetLimit-exceeded-${currentDocument.id || ''}`;
+    const savedNotifications = JSON.parse(localStorage.getItem('createdNotifications')) || [];
+    if (!savedNotifications.includes(NotificationsKey)) {
+      const notificationPayload = {
+        userId: currentUser.id,
+        details: `Attention: The budget limit for ${month} ${year} has been exceeded.`,
+        timestamp: new Date().toISOString(),
+      };
+
+      axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notificationPayload, {
+        headers: {
+            Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        }
+    })
+        .then(response => {
+          console.log("Notification created successfully:", response.data);
+          fetchUserNotifications(currentUser.id);
+          savedNotifications.push(NotificationsKey);
+          localStorage.setItem('createdNotifications', JSON.stringify(savedNotifications));
+        })
+        .catch(error => {
+          const errorDetails = error.response ? JSON.stringify(error.response.data) : error.message;
+          console.error("Error creating notification:", errorDetails);
+        });
+    }
+  }
+}, [currentDocument, currentUser, month, year, fetchUserNotifications]);
+
+
+useEffect(() => {
+  if (currentUser && currentUser.id) {
+    fetchUserNotifications(currentUser.id);
+  }
+}, [currentUser, fetchUserNotifications]);
 
   const ITEM_HEIGHT = 48;
 

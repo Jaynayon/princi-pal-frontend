@@ -41,7 +41,7 @@ function PeoplePage(props) {
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
 
-    const { currentUser } = useNavigationContext();
+    const { currentUser, fetchUserNotifications } = useNavigationContext();
     const [currentAssocation, setCurrentAssociation] = useState('');
 
     const [currentSchool, setCurrentSchool] = useState({ id: null });
@@ -149,18 +149,51 @@ function PeoplePage(props) {
 
         const handleAccept = async (associationRequest) => {
             try {
+                // Sending request to approve the association
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+                    }
+                });
+                
+                console.log('Success:', response.data);
+        
+                // Extracting userId, assocId, and schoolId from the response
+                const { userId, assocId, schoolId } = response.data;
+        
+                // Fetch school name using the schoolId
+                const schoolResponse = await axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/${schoolId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
                     }
                 });
         
-                console.log('Success:', response.data); // Axios already parsed the JSON
+                const schoolName = schoolResponse.data.fullName || 'your school';
+        
+                // Creating notification payload
+                const notificationPayload = {
+                    userId,  // Use userId from the approval response
+                    details: `Congratulations! Your application to join the association at ${schoolName} has been accepted.`,
+                    assocId,
+                    timestamp: new Date().toISOString(),
+                };
+        
+                // Sending notification to the user
+                await axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notificationPayload, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+                    }
+                });
+        
+                console.log("Notification created successfully.");
+                fetchUserNotifications(currentUser.id); // Fetch the latest notifications for the current user
+        
             } catch (error) {
-                console.error("Error approving user:", error.response ? error.response.data : error.message); // Axios handles the error better
+                console.error("Error approving user:", error.response ? error.response.data : error.message);
             }
         };
+        
         
         const handleReject = async (application) => {
             try {
@@ -359,7 +392,8 @@ function PeoplePage(props) {
                         const notificationPayload = {
                             userId: invitedUserId, // Use the userId from response data
                             details: `You have been invited to join the association at ${schoolName}.`,
-                            assocId: response.data.id
+                            assocId: response.data.id,
+                            timestamp: new Date().toISOString(),
                         };
 
                         // Send the notification to the invited user

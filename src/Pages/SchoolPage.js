@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import '../App.css';
 import PropTypes from 'prop-types';
 import {
@@ -35,6 +35,7 @@ import DocumentSummary from '../Components/Summary/DocumentSummary';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
 import ApprovalModal from '../Components/Modal/ApprovalModal';
+import WarningIcon from '@mui/icons-material/Warning';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -81,12 +82,14 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 function SchoolPage(props) {
-    const { currentUser } = useNavigationContext();
+    const { currentUser, fetchUserNotifications } = useNavigationContext();
     const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, lrNotApproved, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
-    const [notificationMessage, setNotificationMessage] = useState('');
+    const previousBalanceRef = useRef(null);
+    const notificationKeysRef = useRef(new Set());
+    const isInitialLoad = useRef(true);const [notificationMessage, setNotificationMessage] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleOpen = () => {
@@ -159,34 +162,52 @@ function SchoolPage(props) {
         setValue(newValue);
     };
 
-    const createNotification = async (details) => {
-        try {
-            const notification = {
-                details,
-                timestamp: new Date().toISOString(),
-                // Add any other necessary fields
-            };
-            await axios.post(`http://localhost:4000/Notifications/create`, notification);
-            setNotificationMessage(details);
-            setDialogOpen(true);
-        } catch (error) {
-            console.error('Error creating notification:', error.response ? error.response.data : error.details);
-        }
-    };
-    
+useEffect(() => {
+    if (currentDocument) {
+        const { cashAdvance = 0, budget = 0 } = currentDocument;
+        const balance = cashAdvance - budget;
+        const previousBalance = previousBalanceRef.current;
+        const balanceChanged = balance !== previousBalance;
+        const balanceIsNegative = balance < 0;
+        const notificationKey = `negative-balance-${currentDocument.id}-${balance}`;
 
-    // Check balance whenever currentDocument changes
-    useEffect(() => {
-        if (currentDocument) {
-            const cashAdvance = currentDocument.cashAdvance || 0;
-            const budget = currentDocument.budget || 0;
-            const balance = cashAdvance - budget;
-    
-            if (balance < 0) {
-                createNotification('Balance is negative!');
+        if (!isInitialLoad.current && balanceIsNegative && balanceChanged) {
+            const notificationsSent = JSON.parse(localStorage.getItem('notificationsSent')) || {};
+            if (!notificationsSent[notificationKey]) { // Check if the notification has already been sent
+                const notification = {
+                    userId: currentUser.id,
+                    details: `Balance is negative!`,
+                    timestamp: new Date().toISOString(),
+                };
+
+                // Simulate an API call to create a notification with Authorization header
+                axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notification, {
+                    headers: {
+                        Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                })
+                .then(response => {
+                    console.log('Notification created:', `Balance is negative!`);
+                })
+                .catch(error => {
+                    console.error('Error creating notification:', error);
+                });
+
+                setNotificationMessage(`Balance is negative!`);
+
+                // Update local storage to reflect the notification was sent
+                notificationsSent[notificationKey] = true;
+                localStorage.setItem('notificationsSent', JSON.stringify(notificationsSent));
+
+                setDialogOpen(true); // Open dialog if a notification is created
+                fetchUserNotifications(currentUser.id);
             }
         }
-    }, [currentDocument]);
+        previousBalanceRef.current = balance; // Update the previous balance reference
+    }
+    isInitialLoad.current = false; // Mark initial load complete after first execution
+}, [currentDocument, fetchUserNotifications, currentUser, setNotificationMessage]);
+
     
 
     // Handle dialog close
@@ -326,6 +347,36 @@ function SchoolPage(props) {
                 open={open}
                 handleClose={handleClose}
             />
+            <Dialog 
+            open={dialogOpen} 
+            onClose={handleDialogClose}
+            maxWidth="md"  
+            PaperProps={{
+                sx: { 
+                    padding: 1, 
+                    minHeight: '290px', 
+                    minWidth: '390px', 
+                    border: '1px solid red', // Red border for the dialog
+                    borderRadius: '8px'  // Optional: smooth rounded corners
+                } 
+
+            }}
+        >
+            <DialogTitle>
+                <Box display="flex" alignItems="center">
+                    <WarningIcon sx={{ color: 'red', fontSize: 60, mr: 2 }} /> 
+                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>Warning</Typography> {/* Make warning bold */}
+                </Box>
+            </DialogTitle>
+            <DialogContent>
+                {/* Move notification message lower using marginTop */}
+                <Typography sx={{ fontSize: '2em', mt: 4 }}>{notificationMessage}</Typography> 
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleDialogClose} color="primary">
+                </Button>
+            </DialogActions>
+        </Dialog>
         </Container >
     );
 }

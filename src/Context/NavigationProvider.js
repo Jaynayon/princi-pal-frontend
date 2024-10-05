@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
+import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAppContext } from './AppProvider';
@@ -20,6 +20,34 @@ export const NavigationProvider = ({ children }) => {
     const prevOpenRef = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
+
+    const [options, setOptions] = useState([]);
+
+    const fetchUserNotifications = useCallback(async (userId) => {
+        if (!userId) {
+            console.log('No user ID provided');
+            return;
+        }
+    
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_NOTIF}/user/${userId}/all`, {
+                headers: {
+                    Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`  // Assuming a Bearer token is used for authentication
+                }
+            });
+            if (Array.isArray(response.data)) {
+                const sortedNotifications = response.data
+                    .filter(notification => notification.details !== "Balance is negative!")
+                    .sort((a, b) => new Date(b.date) - new Date(a.date)); // Correcting sorting order to newest first
+                setOptions(sortedNotifications);
+            } else {
+                console.error('Unexpected response format:', response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    }, []);
+    
 
     const toggleDrawer = () => {
         setOpen(prevOpen => {
@@ -210,6 +238,16 @@ export const NavigationProvider = ({ children }) => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
     }, [selected]);
 
+    useEffect(() => {
+        if (currentUser?.id) {
+            const intervalId = setInterval(() => {
+                fetchUserNotifications(currentUser.id);
+            }, 5000); // Fetch every 10 seconds
+
+            return () => clearInterval(intervalId); // Clean up on component unmount
+        }
+    }, [currentUser, fetchUserNotifications]);
+
     return (
         <NavigationContext.Provider value={{
             list,
@@ -226,6 +264,9 @@ export const NavigationProvider = ({ children }) => {
             validateUsernameEmail,
             updateUserPassword,
             updateUserAvatar,
+            options,
+            setOptions,
+            fetchUserNotifications,
             // header
         }}>
             {children}
