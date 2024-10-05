@@ -9,7 +9,7 @@ import TextField from '@mui/material/TextField';
 import ReactApexChart from 'react-apexcharts';
 import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
-import { FilterDate } from '../Components/Filters/FilterDate';
+import FilterDate from '../Components/Filters/FilterDate';
 import Select from '@mui/material/Select';
 import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';

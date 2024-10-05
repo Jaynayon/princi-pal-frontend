@@ -16,10 +16,8 @@ import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 
-import {
-    FilterDate,
-    SchoolSearchFilter
-} from '../Components/Filters/FilterDate';
+import FilterDate from '../Components/Filters/FilterDate';
+import SchoolSearchFilter from '../Components/Filters/SchoolSearchFilter';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 
