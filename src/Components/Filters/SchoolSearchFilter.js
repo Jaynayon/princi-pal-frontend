@@ -3,6 +3,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import axios from 'axios';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 export default function SchoolSearchFilter() {
     const { setLr, isLoading, currentDocument, isEditingRef, isSearchingRef } = useSchoolContext();
@@ -19,9 +23,17 @@ export default function SchoolSearchFilter() {
     const handleInputBlur = () => {
         //Something after searching
         if (!input) {
+            console.log("this was logged kay way sud")
             isEditingRef.current = false;
             isSearchingRef.current = false;
         }
+    }
+
+    const handleClearInput = () => {
+        setInput("");
+        setLr(lrCopy);
+        isEditingRef.current = false;
+        isSearchingRef.current = false;
     }
 
     // Get the original copy of the LR
@@ -71,12 +83,24 @@ export default function SchoolSearchFilter() {
                 }}
             >
                 <SearchIcon sx={styles.icon} />
-                <input
+                <TextField
+                    sx={styles.input}
+                    variant='standard'
                     name={"lr-search-input"}
-                    style={styles.input}
                     placeholder='Search'
+                    value={input}
                     onChange={(event) => handleInputChange(event)}
                     onBlur={() => handleInputBlur()}
+                    InputProps={{
+                        endAdornment: input && (
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => handleClearInput()}>
+                                    <CancelIcon sx={{ fontSize: '20px' }} />
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                        disableUnderline: true,
+                    }}
                 />
             </Box>
         </React.Fragment>
@@ -89,14 +113,19 @@ const styles = {
         backgroundColor: 'white'
     },
     input: {
-        fontFamily: 'Mulish-SemiBold',
-        fontSize: '13px',
-        color: "#4B506D",
         marginLeft: '5px',
-        textTransform: 'none',
         background: "transparent",
-        outline: "none",
-        border: 'none',
-        width: '400px'
+        width: '400px',
+        "& fieldset": { border: 'none' },
+        "& input::placeholder": {
+            fontSize: '13px', // Customize the font size here
+            fontFamily: 'Mulish-SemiBold', // Example to keep font-family consistent
+            color: "#4B506D", // Customize the placeholder color if needed
+        },
+        "& input": {
+            fontSize: '13px', // Customize font size for input value here
+            fontFamily: 'Mulish-SemiBold', // Customize font family
+            color: "#4B506D", // Customize the input text color if needed
+        },
     }
 }
