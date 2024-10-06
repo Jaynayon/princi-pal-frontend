@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import MenuItem from '@mui/material/MenuItem';
-import { Menu, TextField } from '@mui/material';
+import { Menu } from '@mui/material';
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -15,12 +15,11 @@ import HistoryModal from '../Modal/HistoryModal';
 import LRDate from '../Picker/LRDate';
 import "react-datepicker/dist/react-datepicker.css";
 import NatureOfPaymentSelect from '../Select/NatureOfPaymentSelect';
+import LRTextField from '../Input/LRTextField';
 
 function LRRow(props) {
     const { page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
-    const [inputValue, setInputValue] = useState('Initial Value');
-    const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [open, setOpen] = useState(false);
@@ -38,7 +37,6 @@ function LRRow(props) {
         isEditable,
         currentDocument,
         lr,
-        updateLrById,
         deleteLrByid,
         setLr,
         fetchDocumentData,
@@ -63,8 +61,6 @@ function LRRow(props) {
     const handleCellClick = (colId, rowId, event) => {
         isEditingRef.current = true; // user clicked a cell
         setEditingCell({ colId, rowId });
-        setInitialValue(event.target.value); // Save the initial value of the clicked cell
-        setInputValue(colId === "date" ? event : event.target.value); // Set input value to the current value
         console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
@@ -127,45 +123,10 @@ function LRRow(props) {
 
             // Update the state with the modified rows
             setLr(updatedRows);
-            setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
         } else {
             console.error(`Row with id ${rowId} not found`);
         }
     };
-
-    const handleInputBlur = async (colId, rowId) => {
-        setEditingCell(null);
-        // Perform any action when input is blurred (e.g., save the value)
-        // Only applies if it's not the new row
-        if (rowId !== 3) {
-            if (inputValue !== initialValue) {
-                console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-                await updateLrById(colId, rowId, inputValue);
-            }
-            console.log('Value saved:', inputValue);
-        }
-    };
-
-    // Function to format a number with commas and two decimal places
-    const formatNumber = (number, colId, rowId) => {
-        const formattedNumber = new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(number);
-        if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
-            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
-        }
-        return (`₱${formattedNumber}`);
-    };
-
-    const isError = (colId, rowId, value) => {
-        if (colId === "amount" && rowId === 3) {
-            if (value === "" || value === 0 || !value) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     useEffect(() => {
         console.log("RecordsRow useEffect")
@@ -247,35 +208,13 @@ function LRRow(props) {
 
                                             return (
                                                 <Box style={isEditing ? styles.divInput : null}>
-                                                    <TextField
-                                                        id={lr?.id}
-                                                        value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
-                                                        error={isError(column.id, row.id, value)}
-                                                        helperText={isError(column.id, row.id, value) && "Empty field"}
-                                                        sx={{ "& fieldset": { border: row.id !== 3 && 'none' } }}
-                                                        FormHelperTextProps={{
-                                                            style: { position: "absolute", bottom: "-20px" },
-                                                        }}
-                                                        InputProps={{
-                                                            style: {
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                flexDirection: 'row',
-                                                                justifyContent: "flex-start",
-                                                                fontSize: 14,
-                                                                height: 40,
-                                                            },
-                                                        }}
-                                                        onChange={(event) =>
-                                                            handleInputChange(column.id, row.id, event)
-                                                        }
-                                                        onBlur={() => handleInputBlur(column.id, row.id)}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter') {
-                                                                e.preventDefault();
-                                                                e.target.blur(); // Blur input on Enter key press
-                                                            }
-                                                        }}
+                                                    <LRTextField
+                                                        row={row}
+                                                        column={column}
+                                                        editingCell={editingCell}
+                                                        setEditingCell={setEditingCell}
+                                                        value={value}
+                                                        setError={setError}
                                                     />
                                                 </Box>
                                             );
