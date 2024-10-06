@@ -4,7 +4,7 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 
 export default function LRTextField(props) {
     const { column, row, editingCell, value, setEditingCell, setError } = props
-    const { lr, setLr, updateLrById } = useSchoolContext();
+    const { lr, updateLrById } = useSchoolContext();
     const [input, setInput] = useState(value || ""); // Pass the data by value
 
     const handleChange = async (event) => {
@@ -30,30 +30,22 @@ export default function LRTextField(props) {
         const rowIndex = lr.findIndex(row => row.id === rowId);
 
         if (rowIndex !== -1) {
-            // Copy the array to avoid mutating state directly
-            const updatedRows = [...lr];
-
-            const modifiedInput = colId === "amount" ? Number(input) : input
+            // .trim removes spaces from both start and the end of the string.
+            const modifiedInput = colId === "amount" ? Number(input) : input.trim()
             const modifiedValue = colId === "amount" ? Number(value) : value
-
-            // Update the specific property of the object
-            updatedRows[rowIndex][colId] = modifiedInput;
 
             try {
                 if (rowId !== 3) {
                     if (modifiedInput !== modifiedValue) {
                         console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-                        await updateLrById(colId, rowId, input.trim()); // removes spaces from both start and the end of the string.
+                        await updateLrById(colId, rowId, input);
                         console.log('Value saved:', value);
+                    } else {
+                        setInput(value);
                     }
                 }
             } catch (e) {
                 console.error(e);
-            } finally {
-                // Update the state with the modified rows
-                if (modifiedInput !== modifiedValue) {
-                    setLr(updatedRows);
-                }
             }
         } else {
             console.error(`Row with id ${rowId} not found`);
