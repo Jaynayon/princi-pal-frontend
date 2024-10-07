@@ -264,54 +264,55 @@ return (
             <Typography variant="body1">No data available.</Typography>
         ) : (
             <div style={{ position: 'relative', marginBottom: '40px' }}>
-                <ReactApexChart
-                    options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
-                    series={generateSeries()}
-                    type={chartType}
-                    height={350}
-                />
+            <ReactApexChart
+                options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
+                series={generateSeries()}
+                type={chartType}
+                height={350}
+            />
 
-{/* Container for x-axis labels and dropdown */}
-<div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
-    <select
-        value={selectedCategory}
-        onChange={(e) => setSelectedCategory(e.target.value)}
-        style={{
-            width: '800px', // Increased width for a bigger dropdown
-            padding: '10px', // Increased padding for a larger click area
-            fontSize: '16px', // Increased font size for better readability
-            border: '1px solid #ccc', // Set border color
-            borderRadius: '4px', // Rounded corners
-            backgroundColor: '#f0f0f0', // Background color
-            color: '#333', // Font color
-            cursor: 'pointer', // Change cursor on hover
-        }}
-    >
-        {uacsData.map((uacs) => (
-            <option key={uacs.code} value={uacs.code}>
-                {uacs.name}
-            </option>
-        ))}
-    </select>
-</div>
+            {/* Container for x-axis labels and dropdown */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
+                <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    style={{
+                        width: '800px', // Increased width for a bigger dropdown
+                        padding: '10px', // Increased padding for a larger click area
+                        fontSize: '16px', // Increased font size for better readability
+                        border: '1px solid #ccc', // Set border color
+                        borderRadius: '4px', // Rounded corners
+                        backgroundColor: '#f0f0f0', // Background color
+                        color: '#333', // Font color
+                        cursor: 'pointer', // Change cursor on hover
+                    }}
+                >
+                    {uacsData.map((uacs) => (
+                        <option key={uacs.code} value={uacs.code}>
+                            {uacs.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-
-                {/* Custom layout for the charts */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
-                    {/* Stacked bar chart Paper, wider */}
-                    <Paper elevation={1} style={{ padding: '20px', height: '350px', width: '1000px' }}>
+            {/* Custom layout for the charts */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
+                {/* Container for stacked bar chart and pie chart */}
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    {/* Stacked bar chart Paper */}
+                    <Paper elevation={1} style={{ marginLeft: '370px', padding: '20px', height: '420px', width: '800px' }}>
                         <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
                         <ReactApexChart
                             options={stackedOptions}
                             series={stackedSeries}
                             type="bar"
-                            height={280}
+                            height={350} // Adjusted height for the chart
                             style={{ width: '100%' }}
                         />
                     </Paper>
 
-                    {/* Pie chart Paper, square */}
-                    <Paper elevation={1} style={{ padding: '20px', height: '350px', width: '800px', marginLeft: '20px' }}>
+                    {/* Pie chart Paper, wider */}
+                    <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '310px', marginLeft: '10px' }}>
                         <Typography variant="h6" align="center">Expense Distribution</Typography>
                         <ReactApexChart
                             options={pieOptions}
@@ -323,10 +324,10 @@ return (
                     </Paper>
                 </div>
             </div>
-        )}
-    </div>
+        </div>
+    )}
+</div>
 );
-
 };
 
 
