@@ -10,13 +10,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Avatar from "@mui/material/Avatar";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import axios from "axios";
 import { useNavigationContext } from "../../Context/NavigationProvider";
-
-const POSITIONS = ["ADAS", "ADOF"];
 
 const NavigationSearchBar = () => {
   const { currentUser } = useNavigationContext();
@@ -24,97 +19,103 @@ const NavigationSearchBar = () => {
   const [open, setOpen] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState("");
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
-  const [select, setSelect] = useState("ADAS");
   const [appliedSchools, setAppliedSchools] = useState([]);
   const [schools, setSchools] = useState([]);
 
   useEffect(() => {
+    const userAppliedSchoolsKey = `appliedSchools_${currentUser.id}`;
+    const userDialogStatusKey = `dialogStatus_${currentUser.id}`;
+    
     axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
       headers: {
-        Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+        Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
       },
     })
-      .then(response => {
-        setSchools(response.data);
-      })
-      .catch(error => {
-        console.error("There was an error fetching the school data!", error);
-      });
+    .then((response) => {
+      setSchools(response.data);
+    })
+    .catch((error) => {
+      console.error("There was an error fetching the school data!", error);
+    });
 
-    const savedAppliedSchools = JSON.parse(localStorage.getItem('appliedSchools')) || [];
+    // Load user-specific applied schools from local storage
+    const savedAppliedSchools = JSON.parse(localStorage.getItem(userAppliedSchoolsKey)) || [];
     setAppliedSchools(savedAppliedSchools);
 
-    const dialogStatus = JSON.parse(localStorage.getItem('dialogStatus')) || { open: false, school: null };
+    // Load user-specific dialog status
+    const dialogStatus = JSON.parse(localStorage.getItem(userDialogStatusKey)) || { open: false, school: null };
     if (dialogStatus.open && dialogStatus.school) {
       setSelectedSchool(dialogStatus.school);
       setOpen(true);
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
+    const userAppliedSchoolsKey = `appliedSchools_${currentUser.id}`;
     const updateAppliedSchools = async () => {
-      const savedAppliedSchools = JSON.parse(localStorage.getItem('appliedSchools')) || [];
+      const savedAppliedSchools = JSON.parse(localStorage.getItem(userAppliedSchoolsKey)) || [];
       const updatedSchools = await Promise.all(savedAppliedSchools.map(async (school) => {
         try {
           const associationResponse = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/${school.assocId}`, {
             headers: {
-              Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-            }
+              Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+            },
           });
           return {
             ...school,
-            approved: associationResponse.data.approved
+            approved: associationResponse.data.approved,
           };
         } catch (error) {
           console.error(`Error fetching approval status for ${school.fullName}:`, error);
-          return school; 
+          return school; // Return the school unchanged if there's an error
         }
       }));
 
-      const nonApprovedSchools = updatedSchools.filter(school => !school.approved);
+      const nonApprovedSchools = updatedSchools.filter((school) => !school.approved);
       setAppliedSchools(nonApprovedSchools);
-      localStorage.setItem('appliedSchools', JSON.stringify(nonApprovedSchools));
+      localStorage.setItem(userAppliedSchoolsKey, JSON.stringify(nonApprovedSchools));
     };
 
     updateAppliedSchools();
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('appliedSchools', JSON.stringify(appliedSchools));
-  }, [appliedSchools]);
+    const userAppliedSchoolsKey = `appliedSchools_${currentUser.id}`;
+    localStorage.setItem(userAppliedSchoolsKey, JSON.stringify(appliedSchools));
+  }, [appliedSchools, currentUser]);
 
   const handleApplySchool = async () => {
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/apply`, {
         userId: currentUser.id,
-        schoolId: selectedSchool.id
+        schoolId: selectedSchool.id,
       }, {
         headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-        }
-      });      
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+        },
+      });
 
       const assocId = response.data.id;
 
       if (!assocId) {
-        throw new Error('Association ID not found in response');
+        throw new Error("Association ID not found in response");
       }
 
       const associationResponse = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/${assocId}`, {
         headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-        }
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+        },
       });
 
       if (associationResponse.data.approved) {
-        setAppliedSchools(prevAppliedSchools =>
-          prevAppliedSchools.filter(school => school.fullName !== selectedSchool.fullName)
+        setAppliedSchools((prevAppliedSchools) =>
+          prevAppliedSchools.filter((school) => school.fullName !== selectedSchool.fullName)
         );
         handleClose(true);
       } else {
-        setAppliedSchools(prevAppliedSchools => [
+        setAppliedSchools((prevAppliedSchools) => [
           ...prevAppliedSchools,
-          { id: selectedSchool.id, fullName: selectedSchool.fullName, assocId, approved: false }
+          { id: selectedSchool.id, fullName: selectedSchool.fullName, assocId, approved: false },
         ]);
         handleClose(false);
       }
@@ -126,28 +127,29 @@ const NavigationSearchBar = () => {
   const handleClickOpen = (school) => {
     setSelectedSchool(school);
     setOpen(true);
-    localStorage.setItem('dialogStatus', JSON.stringify({ open: true, school: school }));
+    const userDialogStatusKey = `dialogStatus_${currentUser.id}`;
+    localStorage.setItem(userDialogStatusKey, JSON.stringify({ open: true, school: school }));
   };
 
   const handleRemoveSchool = async (assocId, schoolToRemove) => {
     try {
-      axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${assocId}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${assocId}`, {
         headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-        }
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+        },
       });
-      
+
       // Update the state by filtering out the removed school
-      setAppliedSchools(prevAppliedSchools => prevAppliedSchools.filter(school => school.fullName !== schoolToRemove));
+      setAppliedSchools((prevAppliedSchools) => prevAppliedSchools.filter((school) => school.fullName !== schoolToRemove));
     } catch (error) {
       console.error("Error removing the school:", error);
     }
   };
-  
 
   const handleClose = (approved) => {
     setOpen(false);
-    localStorage.setItem('dialogStatus', JSON.stringify({ open: false, school: null }));
+    const userDialogStatusKey = `dialogStatus_${currentUser.id}`;
+    localStorage.setItem(userDialogStatusKey, JSON.stringify({ open: false, school: null }));
   };
 
   const handleInputChange = (event) => {
@@ -234,13 +236,6 @@ const NavigationSearchBar = () => {
             <br />
             Provide information to request access to this organization.
           </DialogContentText>
-          <FormControl sx={{ m: 1, minWidth: 100 }} size="small">
-            <Select value={select} onChange={(e) => setSelect(e.target.value)} autoWidth variant="standard">
-              {POSITIONS.map((position, index) => (
-                <MenuItem key={index} value={position}>{position}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
           <DialogActions>
             <Button onClick={handleApplySchool} autoFocus>
               Apply
@@ -253,4 +248,3 @@ const NavigationSearchBar = () => {
 };
 
 export default NavigationSearchBar;
-

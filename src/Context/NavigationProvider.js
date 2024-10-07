@@ -32,13 +32,12 @@ export const NavigationProvider = ({ children }) => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL_NOTIF}/user/${userId}/all`, {
                 headers: {
-                    Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`  // Assuming a Bearer token is used for authentication
+                Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`  // Assuming a Bearer token is used for authentication
                 }
             });
             if (Array.isArray(response.data)) {
                 const sortedNotifications = response.data
-                    .filter(notification => notification.details !== "Balance is negative!")
-                    .sort((a, b) => new Date(b.date) - new Date(a.date)); // Correcting sorting order to newest first
+                    // .filter(notification => notification.details !== "Balance is negative!")
                 setOptions(sortedNotifications);
             } else {
                 console.error('Unexpected response format:', response.data);
@@ -240,9 +239,15 @@ export const NavigationProvider = ({ children }) => {
 
     useEffect(() => {
         if (currentUser?.id) {
+            fetchUserNotifications(currentUser.id);
+        }
+    }, [currentUser, fetchUserNotifications]);
+
+    useEffect(() => {
+        if (currentUser?.id) {
             const intervalId = setInterval(() => {
                 fetchUserNotifications(currentUser.id);
-            }, 5000); // Fetch every 10 seconds
+            }, 10000); // Fetch every 10 seconds
 
             return () => clearInterval(intervalId); // Clean up on component unmount
         }

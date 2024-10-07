@@ -318,8 +318,8 @@ useEffect(() => {
 
 
 useEffect(() => {
-  if (currentUser && currentUser.id) {
-    fetchUserNotifications(currentUser.id);
+  if (currentUser?.id) {
+      fetchUserNotifications(currentUser.id);
   }
 }, [currentUser, fetchUserNotifications]);
 

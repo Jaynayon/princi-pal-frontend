@@ -429,6 +429,12 @@ function PeoplePage(props) {
         (row && row.email && row.email.toLowerCase().includes(searchValue.toLowerCase()))
     );
 
+    useEffect(() => {
+        if (currentUser?.id) {
+            fetchUserNotifications(currentUser.id);
+        }
+    }, [currentUser, fetchUserNotifications]);
+
     return (
         <Container className="test" maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
             <Grid container spacing={2}>

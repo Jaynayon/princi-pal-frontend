@@ -90,7 +90,7 @@ function SchoolPage(props) {
     const previousBalanceRef = useRef(null);
     const notificationKeysRef = useRef(new Set());
     const isInitialLoad = useRef(true);const [notificationMessage, setNotificationMessage] = useState('');
-    const [dialogOpen, setDialogOpen] = useState(false);
+    // const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleOpen = () => {
         setOpen(true);
@@ -199,7 +199,7 @@ useEffect(() => {
                 notificationsSent[notificationKey] = true;
                 localStorage.setItem('notificationsSent', JSON.stringify(notificationsSent));
 
-                setDialogOpen(true); // Open dialog if a notification is created
+                // setDialogOpen(true); // Open dialog if a notification is created
                 fetchUserNotifications(currentUser.id);
             }
         }
@@ -208,12 +208,18 @@ useEffect(() => {
     isInitialLoad.current = false; // Mark initial load complete after first execution
 }, [currentDocument, fetchUserNotifications, currentUser, setNotificationMessage]);
 
+
+useEffect(() => {
+    if (currentUser?.id) {
+        fetchUserNotifications(currentUser.id);
+    }
+}, [currentUser, fetchUserNotifications]);
     
 
     // Handle dialog close
-    const handleDialogClose = () => {
-        setDialogOpen(false);
-    };
+    // const handleDialogClose = () => {
+    //     setDialogOpen(false);
+    // };
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -347,36 +353,6 @@ useEffect(() => {
                 open={open}
                 handleClose={handleClose}
             />
-            <Dialog 
-            open={dialogOpen} 
-            onClose={handleDialogClose}
-            maxWidth="md"  
-            PaperProps={{
-                sx: { 
-                    padding: 1, 
-                    minHeight: '290px', 
-                    minWidth: '390px', 
-                    border: '1px solid red', // Red border for the dialog
-                    borderRadius: '8px'  // Optional: smooth rounded corners
-                } 
-
-            }}
-        >
-            <DialogTitle>
-                <Box display="flex" alignItems="center">
-                    <WarningIcon sx={{ color: 'red', fontSize: 60, mr: 2 }} /> 
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>Warning</Typography> {/* Make warning bold */}
-                </Box>
-            </DialogTitle>
-            <DialogContent>
-                {/* Move notification message lower using marginTop */}
-                <Typography sx={{ fontSize: '2em', mt: 4 }}>{notificationMessage}</Typography> 
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleDialogClose} color="primary">
-                </Button>
-            </DialogActions>
-        </Dialog>
         </Container >
     );
 }
