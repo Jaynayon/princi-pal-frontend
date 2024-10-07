@@ -233,6 +233,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                 text: 'Expenses (PHP)',
             },
         },
+        colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
     };
 
     const pieSeries = uacsData.map(({ expenses }) =>
@@ -255,7 +256,8 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         }],
         legend: {
             show: false
-        }
+        },
+        colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
     };
 
 return (
