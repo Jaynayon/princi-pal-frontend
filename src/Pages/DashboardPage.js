@@ -258,70 +258,75 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         }
     };
 
-    return (
-        <div>
-            {uacsData.length === 0 ? (
-                <Typography variant="body1">No data available.</Typography>
-            ) : (
-                <div style={{ position: 'relative', marginBottom: '40px' }}>
-                    <ReactApexChart
-                        options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
-                        series={generateSeries()}
-                        type={chartType}
-                        height={350}
-                    />
+return (
+    <div>
+        {uacsData.length === 0 ? (
+            <Typography variant="body1">No data available.</Typography>
+        ) : (
+            <div style={{ position: 'relative', marginBottom: '40px' }}>
+                <ReactApexChart
+                    options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
+                    series={generateSeries()}
+                    type={chartType}
+                    height={350}
+                />
 
-                    {/* Container for x-axis labels and dropdown */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            style={{
-                                width: '150px', // Set the width to make it smaller
-                                padding: '5px'
-                            }}
-                        >
-                            {uacsData.map((uacs) => (
-                                <option key={uacs.code} value={uacs.code}>
-                                    {uacs.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+{/* Container for x-axis labels and dropdown */}
+<div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
+    <select
+        value={selectedCategory}
+        onChange={(e) => setSelectedCategory(e.target.value)}
+        style={{
+            width: '800px', // Increased width for a bigger dropdown
+            padding: '10px', // Increased padding for a larger click area
+            fontSize: '16px', // Increased font size for better readability
+            border: '1px solid #ccc', // Set border color
+            borderRadius: '4px', // Rounded corners
+            backgroundColor: '#f0f0f0', // Background color
+            color: '#333', // Font color
+            cursor: 'pointer', // Change cursor on hover
+        }}
+    >
+        {uacsData.map((uacs) => (
+            <option key={uacs.code} value={uacs.code}>
+                {uacs.name}
+            </option>
+        ))}
+    </select>
+</div>
 
-                    <Grid container spacing={2} style={{ marginTop: '40px' }}>
-                        {/* Make the stacked chart wider */}
-                        <Grid item xs={20} md={15}>
-                            <Paper elevation={1} style={{ marginLeft: '-15px', marginRight: '10px', padding: '20px', height: '350px' }}>
-                                <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
-                                <ReactApexChart
-                                    options={stackedOptions}
-                                    series={stackedSeries}
-                                    type="bar"
-                                    height={280}
-                                    style={{ width: '100%' }}
-                                />
-                            </Paper>
-                        </Grid>
 
-                        {/* Adjust the pie chart's width accordingly */}
-                        <Grid item xs={20} md={6}>
-                            <Paper elevation={1} style={{ marginLeft: '-15px', padding: '20px', height: '350px' }}>
-                                <Typography variant="h6" align="center">Expense Distribution</Typography>
-                                <ReactApexChart
-                                    options={pieOptions}
-                                    series={pieSeries}
-                                    type="pie"
-                                    height={280}
-                                    style={{ width: '100%' }}
-                                />
-                            </Paper>
-                        </Grid>
-                    </Grid>
+                {/* Custom layout for the charts */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
+                    {/* Stacked bar chart Paper, wider */}
+                    <Paper elevation={1} style={{ padding: '20px', height: '350px', width: '1000px' }}>
+                        <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
+                        <ReactApexChart
+                            options={stackedOptions}
+                            series={stackedSeries}
+                            type="bar"
+                            height={280}
+                            style={{ width: '100%' }}
+                        />
+                    </Paper>
+
+                    {/* Pie chart Paper, square */}
+                    <Paper elevation={1} style={{ padding: '20px', height: '350px', width: '800px', marginLeft: '20px' }}>
+                        <Typography variant="h6" align="center">Expense Distribution</Typography>
+                        <ReactApexChart
+                            options={pieOptions}
+                            series={pieSeries}
+                            type="pie"
+                            height={280}
+                            style={{ width: '100%' }}
+                        />
+                    </Paper>
                 </div>
-            )}
-        </div>
-    );
+            </div>
+        )}
+    </div>
+);
+
 };
 
 
@@ -464,16 +469,17 @@ function DashboardPage(props) {
 
     const updateDocumentById = async (docId, value) => {
         try {
-            const response = await fetch(`http://localhost:4000/documents/${docId}`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 body: JSON.stringify({ budgetLimit: value })
             });
-
+    
             const data = await response.json();
-
+    
             if (response.ok) {
                 console.log('Budget limit updated successfully:', data);
                 return true;
@@ -486,7 +492,7 @@ function DashboardPage(props) {
             return false;
         }
     };
-
+    
 
     console.log(jev)
 
@@ -547,6 +553,7 @@ function DashboardPage(props) {
         }
     };
 
+    
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
         let displayTitle = title;
