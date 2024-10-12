@@ -34,15 +34,25 @@ export default function DisplaySchools() {
         return text.toLowerCase().replace(/\s+/g, '-');
     }
 
-    const handleSelectedSingle = () => {
-        setSelected(currentUser.schools[0].name)
-        setCurrentSchool(currentUser.schools[0]);
+    const handleSelection = (index) => {
+        if (index) {
+            setSelected(currentUser.schools[index].name);
+            setCurrentSchool(currentUser.schools[index]);
+        } else {
+            setSelected(currentUser.schools[0].name)
+            setCurrentSchool(currentUser.schools[0]);
+        }
     }
 
-    const handleSelectedMultiple = (index) => {
-        setSelected(currentUser.schools[index].name);
-        setCurrentSchool(currentUser.schools[index]);
-    }
+    // const handleSelectedSingle = () => {
+    //     setSelected(currentUser.schools[0].name)
+    //     setCurrentSchool(currentUser.schools[0]);
+    // }
+
+    // const handleSelectedMultiple = (index) => {
+    //     setSelected(currentUser.schools[index].name);
+    //     setCurrentSchool(currentUser.schools[index]);
+    // }
 
     const handleClick = () => {
         setOpenSub(!openSub);
@@ -128,7 +138,7 @@ export default function DisplaySchools() {
                                             component={Link}
                                             to={'/schools/' + transformSchoolNameText(item.name)}
                                             selected={selected === item.name}
-                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(index)}
+                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelection(index)}
                                             sx={theme.navStyle.button}
                                         >
                                             <ListItemText
@@ -154,7 +164,7 @@ export default function DisplaySchools() {
                         to={'/schools/' + transformSchoolNameText(currentUser.schools[0].name)}
                         sx={theme.navStyle.button}
                         selected={selected === currentUser.schools[0].name}
-                        onClick={/*() => { setSelected(currentUser.schools[0].name) }*/() => handleSelectedSingle()}
+                        onClick={() => handleSelection()}
                     >
                         <ListItemIcon
                             sx={{
