@@ -115,7 +115,6 @@ const NavigationSearchBar = () => {
       console.error("Error applying to school:", error);
     }
   };
-  
 
   const handleClickOpen = (school) => {
     setSelectedSchool(school);
