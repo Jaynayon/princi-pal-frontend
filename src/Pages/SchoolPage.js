@@ -1,5 +1,5 @@
+import React, { useEffect, useState, useRef } from 'react';
 import '../App.css';
-import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Paper,
@@ -9,7 +9,11 @@ import {
     Grid,
     Box,
     Button,
-    Typography
+    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Badge from "@mui/material/Badge";
@@ -31,6 +35,7 @@ import DocumentSummary from '../Components/Summary/DocumentSummary';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
 import ApprovalModal from '../Components/Modal/ApprovalModal';
+import WarningIcon from '@mui/icons-material/Warning';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -77,11 +82,12 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 function SchoolPage(props) {
-    const { currentUser } = useNavigationContext();
+    const { currentUser} = useNavigationContext();
     const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, lrNotApproved, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
+    // const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleOpen = () => {
         setOpen(true);
