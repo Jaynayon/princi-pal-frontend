@@ -11,13 +11,13 @@ export default function LRTextField(props) {
         if (rowIndex !== -1) {
             // Copy the array to avoid mutating state directly
             const updatedRows = [...lr];
-    
+
             // Update the specific property of the object
             updatedRows[rowIndex] = {
                 ...updatedRows[rowIndex],
                 [colId]: modifiedValue
             };
-    
+
             // Update the state with the modified rows
             setLr(updatedRows);
         }
@@ -37,7 +37,11 @@ export default function LRTextField(props) {
             setError(false);
         }
 
-        updateRowState(rowIndex, column.id, modifiedValue);
+        // Only update the state if the row is not the total row
+        if (row.id === 3) {
+            updateRowState(rowIndex, column.id, modifiedValue);
+        }
+
         setInput(modifiedValue);
     };
 
@@ -56,8 +60,8 @@ export default function LRTextField(props) {
                 if (rowId !== 3 && modifiedInput !== modifiedValue) {
                     console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
                     await updateLrById(colId, rowId, input);
-                    console.log('Value saved:', value);
                 } else {
+                    console.log('Value saved:', value);
                     setInput(value);
                 }
             } catch (e) {
