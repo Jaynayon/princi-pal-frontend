@@ -50,7 +50,7 @@ export default function NotificationTab() {
             // Set up polling for notifications every 30 seconds
             const interval = setInterval(() => {
                 fetchNotifications(currentUser.id);
-            }, 30000); // 30 seconds interval
+            }, 3000); 
     
             // Clean up the interval on component unmount
             return () => clearInterval(interval);
@@ -211,7 +211,6 @@ export default function NotificationTab() {
                 </Tabs>
 
                 {loading && <Typography sx={{ padding: '16px' }}>Loading...</Typography>}
-                {error && <Typography sx={{ padding: '16px', color: 'red' }}>Error: {error}</Typography>}
                 {Array.isArray(notifications) && notifications.length === 0 && !loading && (
                     <Typography sx={{ padding: '16px' }}>No notifications available.</Typography>
                 )}
