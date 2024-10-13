@@ -41,7 +41,7 @@ function PeoplePage(props) {
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
 
-    const { currentUser } = useNavigationContext();
+    const { currentUser} = useNavigationContext();
     const [currentAssocation, setCurrentAssociation] = useState('');
 
     const [currentSchool, setCurrentSchool] = useState({ id: null });
@@ -149,18 +149,21 @@ function PeoplePage(props) {
 
         const handleAccept = async (associationRequest) => {
             try {
+                // Sending request to approve the association
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
                     }
                 });
+                
+                console.log('Success:', response.data);
         
-                console.log('Success:', response.data); // Axios already parsed the JSON
             } catch (error) {
-                console.error("Error approving user:", error.response ? error.response.data : error.message); // Axios handles the error better
+                console.error("Error approving user:", error.response ? error.response.data : error.message);
             }
         };
+        
         
         const handleReject = async (application) => {
             try {
@@ -325,59 +328,21 @@ function PeoplePage(props) {
             setInvitationMessage('Please enter a valid email.');
             return;
         }
-        
+    
         console.log("Inviting email:", inviteEmail);
-        
+    
         const invitePayload = {
             email: inviteEmail,
             schoolId: currentSchool.id,
-            admin: member === 'Admin' // Set the admin status based on dropdown selection
+            admin: member === 'Admin'
         };
-
+    
         axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/invite`, invitePayload, {
             headers: {
                 'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
             }
         })
             .then(response => {
-                const invitedUserId = response.data.userId; // Ensure userId is correctly obtained
-                const schoolId = response.data.schoolId;
-
-                // Fetch school name using the schoolId
-                axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/${schoolId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                    }
-                })
-                    .then(schoolResponse => {
-                        const schoolName = schoolResponse.data.fullName || 'your school'; // Use fetched school name or default
-
-                        console.log("Invitation sent successfully:", response.data);
-                        setInvitationMessage('Invitation sent successfully!');
-
-                        // Create notification payload for the invited user
-                        const notificationPayload = {
-                            userId: invitedUserId, // Use the userId from response data
-                            details: `You have been invited to join the association at ${schoolName}.`,
-                            assocId: response.data.id
-                        };
-
-                        // Send the notification to the invited user
-                        axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notificationPayload, {
-                            headers: {
-                                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                            }
-                        })
-                            .then(() => {
-                                console.log("Notification created successfully.");
-                            })
-                            .catch(error => {
-                                console.error("Error creating notification:", error.response ? error.response.data : error.message);
-                            });
-                    })
-                    .catch(error => {
-                        console.error("Error fetching school details:", error.response ? error.response.data : error.message);
-                    });
                 console.log("Invitation sent successfully:", response.data);
                 setInvitationMessage('Invitation sent successfully!');
             })
@@ -385,9 +350,10 @@ function PeoplePage(props) {
                 console.error("Error inviting member:", error.response ? error.response.data : error.message);
                 setInvitationMessage('Failed to send invitation. Please try again.');
             });
-        
+    
         setInviteEmail('');
-    };    
+    };
+    
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>

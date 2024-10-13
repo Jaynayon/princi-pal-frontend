@@ -381,7 +381,8 @@ function DashboardPage(props) {
             const response = await fetch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                     Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 body: JSON.stringify({ budgetLimit: value })
             });

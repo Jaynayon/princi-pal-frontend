@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
+import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAppContext } from './AppProvider';
@@ -20,6 +20,7 @@ export const NavigationProvider = ({ children }) => {
     const prevOpenRef = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
+    
 
     const toggleDrawer = () => {
         setOpen(prevOpen => {
@@ -210,6 +211,7 @@ export const NavigationProvider = ({ children }) => {
         window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
     }, [selected]);
 
+
     return (
         <NavigationContext.Provider value={{
             list,
@@ -225,7 +227,7 @@ export const NavigationProvider = ({ children }) => {
             createUser,
             validateUsernameEmail,
             updateUserPassword,
-            updateUserAvatar,
+            updateUserAvatar
             // header
         }}>
             {children}
