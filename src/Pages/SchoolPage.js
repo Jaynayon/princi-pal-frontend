@@ -82,14 +82,11 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 function SchoolPage(props) {
-    const { currentUser, fetchUserNotifications } = useNavigationContext();
+    const { currentUser} = useNavigationContext();
     const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, lrNotApproved, updateLr, updateJev, value, setValue } = useSchoolContext();
     const [open, setOpen] = React.useState(false);
     const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
-    const previousBalanceRef = useRef(null);
-    const notificationKeysRef = useRef(new Set());
-    const isInitialLoad = useRef(true);const [notificationMessage, setNotificationMessage] = useState('');
     // const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleOpen = () => {
@@ -161,65 +158,6 @@ function SchoolPage(props) {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-
-useEffect(() => {
-    if (currentDocument) {
-        const { cashAdvance = 0, budget = 0 } = currentDocument;
-        const balance = cashAdvance - budget;
-        const previousBalance = previousBalanceRef.current;
-        const balanceChanged = balance !== previousBalance;
-        const balanceIsNegative = balance < 0;
-        const notificationKey = `negative-balance-${currentDocument.id}-${balance}`;
-
-        if (!isInitialLoad.current && balanceIsNegative && balanceChanged) {
-            const notificationsSent = JSON.parse(localStorage.getItem('notificationsSent')) || {};
-            if (!notificationsSent[notificationKey]) { // Check if the notification has already been sent
-                const notification = {
-                    userId: currentUser.id,
-                    details: `Balance is negative!`,
-                    timestamp: new Date().toISOString(),
-                };
-
-                // Simulate an API call to create a notification with Authorization header
-                axios.post(`${process.env.REACT_APP_API_URL_NOTIF}/create`, notification, {
-                    headers: {
-                        Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                    }
-                })
-                .then(response => {
-                    console.log('Notification created:', `Balance is negative!`);
-                })
-                .catch(error => {
-                    console.error('Error creating notification:', error);
-                });
-
-                setNotificationMessage(`Balance is negative!`);
-
-                // Update local storage to reflect the notification was sent
-                notificationsSent[notificationKey] = true;
-                localStorage.setItem('notificationsSent', JSON.stringify(notificationsSent));
-
-                // setDialogOpen(true); // Open dialog if a notification is created
-                fetchUserNotifications(currentUser.id);
-            }
-        }
-        previousBalanceRef.current = balance; // Update the previous balance reference
-    }
-    isInitialLoad.current = false; // Mark initial load complete after first execution
-}, [currentDocument, fetchUserNotifications, currentUser, setNotificationMessage]);
-
-
-useEffect(() => {
-    if (currentUser?.id) {
-        fetchUserNotifications(currentUser.id);
-    }
-}, [currentUser, fetchUserNotifications]);
-    
-
-    // Handle dialog close
-    // const handleDialogClose = () => {
-    //     setDialogOpen(false);
-    // };
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>

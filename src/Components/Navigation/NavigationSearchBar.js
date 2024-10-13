@@ -38,11 +38,9 @@ const NavigationSearchBar = () => {
       console.error("There was an error fetching the school data!", error);
     });
 
-    // Load user-specific applied schools from local storage
     const savedAppliedSchools = JSON.parse(localStorage.getItem(userAppliedSchoolsKey)) || [];
     setAppliedSchools(savedAppliedSchools);
 
-    // Load user-specific dialog status
     const dialogStatus = JSON.parse(localStorage.getItem(userDialogStatusKey)) || { open: false, school: null };
     if (dialogStatus.open && dialogStatus.school) {
       setSelectedSchool(dialogStatus.school);
@@ -67,13 +65,13 @@ const NavigationSearchBar = () => {
           };
         } catch (error) {
           console.error(`Error fetching approval status for ${school.fullName}:`, error);
-          return school; // Return the school unchanged if there's an error
+          return school;
         }
       }));
 
-      const nonApprovedSchools = updatedSchools.filter((school) => !school.approved);
-      setAppliedSchools(nonApprovedSchools);
-      localStorage.setItem(userAppliedSchoolsKey, JSON.stringify(nonApprovedSchools));
+      const nonRejectedSchools = updatedSchools.filter((school) => !school.rejected);
+      setAppliedSchools(nonRejectedSchools);
+      localStorage.setItem(userAppliedSchoolsKey, JSON.stringify(nonRejectedSchools));
     };
 
     updateAppliedSchools();
@@ -115,7 +113,7 @@ const NavigationSearchBar = () => {
       } else {
         setAppliedSchools((prevAppliedSchools) => [
           ...prevAppliedSchools,
-          { id: selectedSchool.id, fullName: selectedSchool.fullName, assocId, approved: false },
+          { id: selectedSchool.id, fullName: selectedSchool.fullName, assocId, approved: false, rejected: false },
         ]);
         handleClose(false);
       }
@@ -139,7 +137,6 @@ const NavigationSearchBar = () => {
         },
       });
 
-      // Update the state by filtering out the removed school
       setAppliedSchools((prevAppliedSchools) => prevAppliedSchools.filter((school) => school.fullName !== schoolToRemove));
     } catch (error) {
       console.error("Error removing the school:", error);
@@ -159,6 +156,7 @@ const NavigationSearchBar = () => {
   const filteredSchools = schools.filter((school) =>
     school.fullName && school.fullName.toLowerCase().includes(query.toLowerCase())
   );
+
 
   return (
     <Box style={{ width: "400px", position: "relative" }}>
