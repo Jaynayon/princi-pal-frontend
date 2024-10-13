@@ -10,6 +10,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Avatar from "@mui/material/Avatar";
+import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { useNavigationContext } from "../../Context/NavigationProvider";
 
@@ -17,152 +18,167 @@ const NavigationSearchBar = () => {
   const { currentUser } = useNavigationContext();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [selectedSchool, setSelectedSchool] = useState("");
+  const [selectedSchool, setSelectedSchool] = useState(null);
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
-  const [appliedSchools, setAppliedSchools] = useState([]);
+  const [appliedSchools, setAppliedSchools] = useState([]); // Store full school objects along with assocId
   const [schools, setSchools] = useState([]);
 
+  // Fetch all available schools on component mount
   useEffect(() => {
-    const userAppliedSchoolsKey = `appliedSchools_${currentUser.id}`;
-    const userDialogStatusKey = `dialogStatus_${currentUser.id}`;
-    
-    axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
-      headers: {
-        Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-      },
-    })
-    .then((response) => {
-      setSchools(response.data);
-    })
-    .catch((error) => {
-      console.error("There was an error fetching the school data!", error);
-    });
-
-    const savedAppliedSchools = JSON.parse(localStorage.getItem(userAppliedSchoolsKey)) || [];
-    setAppliedSchools(savedAppliedSchools);
-
-    const dialogStatus = JSON.parse(localStorage.getItem(userDialogStatusKey)) || { open: false, school: null };
-    if (dialogStatus.open && dialogStatus.school) {
-      setSelectedSchool(dialogStatus.school);
-      setOpen(true);
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    const userAppliedSchoolsKey = `appliedSchools_${currentUser.id}`;
-    const updateAppliedSchools = async () => {
-      const savedAppliedSchools = JSON.parse(localStorage.getItem(userAppliedSchoolsKey)) || [];
-      const updatedSchools = await Promise.all(savedAppliedSchools.map(async (school) => {
-        try {
-          const associationResponse = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/${school.assocId}`, {
-            headers: {
-              Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-            },
-          });
-          return {
-            ...school,
-            approved: associationResponse.data.approved,
-          };
-        } catch (error) {
-          console.error(`Error fetching approval status for ${school.fullName}:`, error);
-          return school;
+    let isMounted = true;
+    axios
+      .get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
+        headers: {
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+        },
+      })
+      .then((response) => {
+        if (isMounted) {
+          setSchools(response.data);
         }
-      }));
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the school data!", error);
+      });
 
-      const nonRejectedSchools = updatedSchools.filter((school) => !school.rejected);
-      setAppliedSchools(nonRejectedSchools);
-      localStorage.setItem(userAppliedSchoolsKey, JSON.stringify(nonRejectedSchools));
+    return () => {
+      isMounted = false;
     };
+  }, []);
 
-    updateAppliedSchools();
-  }, [currentUser]);
+  // Fetch applied schools when the Application Inbox is opened
+  const handleClickOpenApplicationInbox = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL_ASSOC}/applications/user/${currentUser.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+          }
+        }
+      );
+      console.log("Applied schools response:", response.data); // Check if fullName and assocId are included
+      setAppliedSchools(response.data); // Set applied schools
+      setOpenApplicationInbox(true); // Open the Application Inbox dialog
+    } catch (error) {
+      console.error("Error fetching applied schools:", error);
+    }
+  };
 
-  useEffect(() => {
-    const userAppliedSchoolsKey = `appliedSchools_${currentUser.id}`;
-    localStorage.setItem(userAppliedSchoolsKey, JSON.stringify(appliedSchools));
-  }, [appliedSchools, currentUser]);
+  const handleClickCloseApplicationInbox = () => {
+    setOpenApplicationInbox(false);
+  };
 
+  // Apply to a school and get assocId and fullName from the response
   const handleApplySchool = async () => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/apply`, {
-        userId: currentUser.id,
-        schoolId: selectedSchool.id,
-      }, {
-        headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL_ASSOC}/apply`,
+        {
+          userId: currentUser.id,
+          schoolId: selectedSchool.id
         },
-      });
-
-      const assocId = response.data.id;
-
-      if (!assocId) {
-        throw new Error("Association ID not found in response");
-      }
-
-      const associationResponse = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/${assocId}`, {
-        headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-        },
-      });
-
-      if (associationResponse.data.approved) {
+        {
+          headers: {
+            Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+          }
+        }
+      );
+  
+      // Log the full response data to inspect its structure
+      console.log("Full response data:", response.data);
+  
+      // Safely check the structure of response.data and assign values
+      const assocId = response.data?.id;
+      const school = response.data?.school || selectedSchool;
+      const isApproved = response.data?.isApproved;
+  
+      console.log("Application submitted successfully:", { assocId, school, isApproved });
+  
+      if (isApproved) {
+        // If the association is approved, remove the school from the appliedSchools list
         setAppliedSchools((prevAppliedSchools) =>
-          prevAppliedSchools.filter((school) => school.fullName !== selectedSchool.fullName)
+          prevAppliedSchools.filter((appliedSchool) => appliedSchool.id !== school.id)
         );
-        handleClose(true);
+        console.log("School removed from applied schools because it is approved.");
       } else {
+        // If the association is not yet approved, add the school to the appliedSchools list
         setAppliedSchools((prevAppliedSchools) => [
           ...prevAppliedSchools,
-          { id: selectedSchool.id, fullName: selectedSchool.fullName, assocId, approved: false, rejected: false },
+          { ...school, assocId } // Add school and assocId to the appliedSchools array
         ]);
-        handleClose(false);
+        console.log("School added to applied schools list.");
       }
+  
+      handleClose(); // Close the selected school dialog
     } catch (error) {
       console.error("Error applying to school:", error);
     }
   };
+  
 
   const handleClickOpen = (school) => {
     setSelectedSchool(school);
     setOpen(true);
-    const userDialogStatusKey = `dialogStatus_${currentUser.id}`;
-    localStorage.setItem(userDialogStatusKey, JSON.stringify({ open: true, school: school }));
   };
 
-  const handleRemoveSchool = async (assocId, schoolToRemove) => {
+  // Remove school and delete association when the user clicks cancel
+  const handleRemoveSchool = async (schoolToRemove) => {
     try {
+      const assocId = schoolToRemove.assocId;
+      if (!assocId) {
+        console.error("No assocId found for the selected school.");
+        return;
+      }
+
+      // Delete the association using the assocId
       await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${assocId}`, {
         headers: {
           Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-        },
+        }
       });
 
-      setAppliedSchools((prevAppliedSchools) => prevAppliedSchools.filter((school) => school.fullName !== schoolToRemove));
+      // Remove the school from the appliedSchools state
+      setAppliedSchools((prevAppliedSchools) =>
+        prevAppliedSchools.filter((school) => school.id !== schoolToRemove.id)
+      );
     } catch (error) {
       console.error("Error removing the school:", error);
     }
   };
 
-  const handleClose = (approved) => {
+  const handleClose = () => {
     setOpen(false);
-    const userDialogStatusKey = `dialogStatus_${currentUser.id}`;
-    localStorage.setItem(userDialogStatusKey, JSON.stringify({ open: false, school: null }));
   };
 
   const handleInputChange = (event) => {
     setQuery(event.target.value);
   };
 
-  const filteredSchools = schools.filter((school) =>
-    school.fullName && school.fullName.toLowerCase().includes(query.toLowerCase())
+  const filteredSchools = schools.filter(
+    (school) => school.fullName?.toLowerCase().includes(query.toLowerCase())
   );
 
+  if (currentUser.position === 'Principal') {
+    return (
+      <Box style={{ width: "400px", position: "relative", textAlign: "center", padding: "20px" }}>
+        
+      </Box>
+    );
+  }
 
   return (
     <Box style={{ width: "400px", position: "relative" }}>
-      <Box component="form" sx={{ p: "2px 4px", display: "flex", alignItems: "center", width: "100%" }}>
+      <Box
+        component="form"
+        sx={{
+          p: "2px 4px",
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
         <InputBase
-          name="school-search-input"
           sx={{ ml: 1, flex: 1, textAlign: "right" }}
           placeholder=""
           value={query}
@@ -174,63 +190,125 @@ const NavigationSearchBar = () => {
         </IconButton>
       </Box>
       {query && (
-        <ul style={{
-          listStyleType: "none", padding: 0, position: "absolute", width: "100%",
-          maxHeight: "600px", overflowY: "auto", backgroundColor: "#fff",
-          border: "1px solid #ccc", boxShadow: "0px 8px 16px 0px rgba(0,0,0,0.2)",
-          color: "#424242", textAlign: "start", zIndex: 999,
-        }}>
+        <ul
+          style={{
+            listStyleType: "none",
+            padding: 0,
+            position: "absolute",
+            width: "100%",
+            maxHeight: "600px",
+            overflowY: "auto",
+            backgroundColor: "#fff",
+            border: "1px solid #ccc",
+            boxShadow: "0px 8px 16px 0px rgba(0,0,0,0.2)",
+            color: "#424242",
+            textAlign: "start",
+            zIndex: 999,
+          }}
+        >
           <li
             style={{
-              textAlign: "end", padding: "8px 16px", borderBottom: "1px solid #ccc",
-              textDecoration: "underline", cursor: "pointer",
+              textAlign: "end",
+              padding: "8px 16px",
+              borderBottom: "1px solid #ccc",
+              textDecoration: "underline",
+              cursor: "pointer",
             }}
-            onClick={() => setOpenApplicationInbox(true)}
+            onClick={handleClickOpenApplicationInbox}
           >
             Application Inbox
           </li>
-          <Dialog open={openApplicationInbox} onClose={() => setOpenApplicationInbox(false)}>
-            <DialogTitle>{"Application Inbox"}</DialogTitle>
+          <Dialog
+            open={openApplicationInbox}
+            onClose={handleClickCloseApplicationInbox}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 25px 0 0",
+              }}
+            >
+              <DialogTitle id="alert-dialog-title">Application Inbox</DialogTitle>
+              <span
+                onClick={handleClickCloseApplicationInbox}
+                style={{ cursor: "pointer", paddingTop: "8px" }}
+              >
+                <CloseIcon />
+              </span>
+            </div>
             {appliedSchools.length ? (
               appliedSchools.map((school, index) => (
-                !school.approved && (
-                  <DialogContent key={index} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
-                    <Avatar>C</Avatar>
-                    <DialogContentText>
-                      <span style={{ fontWeight: "bold" }}>{school.fullName}</span>
-                      <br />
-                      Your application is currently under review.
-                    </DialogContentText>
-                    <DialogActions>
-                      <Button onClick={() => handleRemoveSchool(school.assocId, school.fullName)} autoFocus>
-                        Cancel
-                      </Button>
-                    </DialogActions>
-                  </DialogContent>
-                )
+                <DialogContent
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "1rem",
+                  }}
+                  key={index}
+                >
+                  <Avatar>{school.fullName?.charAt(0).toUpperCase()}</Avatar> {/* Display first letter */}
+                  <DialogContentText id="alert-dialog-description">
+                    <span style={{ fontWeight: "bold" }}>{school.fullname}</span> {/* Full name */}
+                    <br />
+                    Your application is currently under review.
+                  </DialogContentText>
+                  <DialogActions>
+                    <Button onClick={() => handleRemoveSchool(school)} autoFocus>
+                      Cancel
+                    </Button>
+                  </DialogActions>
+                </DialogContent>
               ))
             ) : (
               <DialogContent>
-                <DialogContentText>No applied schools</DialogContentText>
+                <DialogContentText id="alert-dialog-description">
+                  No applied schools
+                </DialogContentText>
               </DialogContent>
             )}
           </Dialog>
           {filteredSchools.map((school, index) => (
-            <li key={index} style={{ padding: "8px 16px", borderBottom: "1px solid #ccc", cursor: "pointer", display: "flex", alignItems: "center", gap: "1rem" }}
+            <li
+              key={index}
+              style={{
+                padding: "8px 16px",
+                borderBottom: "1px solid #ccc",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+              }}
               onClick={() => handleClickOpen(school)}
             >
-              <Avatar>C</Avatar>
+              <Avatar>{school.fullName?.charAt(0).toUpperCase()}</Avatar>
               {school.fullName}
             </li>
           ))}
         </ul>
       )}
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{"Selected School"}</DialogTitle>
-        <DialogContent sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: "1rem" }}>
-          <Avatar>C</Avatar>
-          <DialogContentText>
-            <span style={{ fontWeight: "bold" }}>{selectedSchool.fullName}</span>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Selected School</DialogTitle>
+        <DialogContent
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "start",
+            gap: "1rem",
+          }}
+        >
+          <Avatar>{selectedSchool?.fullName?.charAt(0).toUpperCase()}</Avatar>
+          <DialogContentText id="alert-dialog-description">
+            <span style={{ fontWeight: "bold" }}>{selectedSchool?.fullName}</span>
             <br />
             Provide information to request access to this organization.
           </DialogContentText>
