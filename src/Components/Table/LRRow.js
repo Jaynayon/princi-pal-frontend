@@ -16,6 +16,7 @@ import LRDate from '../Picker/LRDate';
 import "react-datepicker/dist/react-datepicker.css";
 import NatureOfPaymentSelect from '../Select/NatureOfPaymentSelect';
 import LRTextField from '../Input/LRTextField';
+import ExceedWarningModal from '../Modal/ExceedWarningModal';
 
 function LRRow(props) {
     const { page, rowsPerPage } = props;
@@ -23,7 +24,12 @@ function LRRow(props) {
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [open, setOpen] = useState(false);
+    const [warningOpen, setWarningOpen] = useState(false);
     const [error, setError] = useState(true);
+
+    const handleWarningOpen = () => setWarningOpen(true);
+
+    const handleWarningClose = () => setWarningOpen(false);
 
     const handleOpen = () => setOpen(true);
 
@@ -279,6 +285,7 @@ function LRRow(props) {
                         </TableRow>
                     );
                 })}
+            <ExceedWarningModal open={warningOpen} onClose={handleWarningClose} />
             <HistoryModal open={open} handleClose={handleClose} handleCloseParent={handleMenuClose} index={selectedIndex} />
         </React.Fragment>
     );
