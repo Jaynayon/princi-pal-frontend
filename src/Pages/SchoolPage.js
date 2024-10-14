@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import '../App.css';
 import PropTypes from 'prop-types';
 import {
@@ -9,16 +9,13 @@ import {
     Grid,
     Box,
     Button,
-    Typography,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
+    Typography
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
 import FactCheckIcon from '@mui/icons-material/FactCheck';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 import FilterDate from '../Components/Filters/FilterDate';
 import SchoolSearchFilter from '../Components/Filters/SchoolSearchFilter';
@@ -33,7 +30,6 @@ import DocumentSummary from '../Components/Summary/DocumentSummary';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
 import ApprovalModal from '../Components/Modal/ApprovalModal';
-import WarningIcon from '@mui/icons-material/Warning';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -80,12 +76,24 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 function SchoolPage(props) {
-    const { currentUser} = useNavigationContext();
-    const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, lrNotApproved, updateLr, updateJev, value, setValue } = useSchoolContext();
+    const { currentUser } = useNavigationContext();
+    const {
+        year,
+        month,
+        setIsAdding,
+        isEditingRef,
+        currentDocument,
+        currentSchool,
+        lrNotApproved,
+        updateLr,
+        updateJev,
+        value,
+        setValue
+    } = useSchoolContext();
+
     const [open, setOpen] = React.useState(false);
     const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
-    // const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleOpen = () => {
         setOpen(true);
@@ -178,13 +186,14 @@ function SchoolPage(props) {
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: "center" }}>
                             <Typography
-                                sx={{ color: "#252733" }}
+                                sx={{ color: "#252733", fontWeight: "bold", fontSize: "1.2rem" }}
                                 component="h1"
                                 color="inherit"
                                 noWrap
                             >
                                 {`${month} ${year}`}
                             </Typography>
+                            <CalendarMonthIcon sx={{ ml: 1, color: "#f44133" }} />
                         </Box>
                     </Paper>
                 </Grid>
