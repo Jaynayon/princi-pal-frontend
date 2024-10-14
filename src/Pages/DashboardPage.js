@@ -578,7 +578,7 @@ function DashboardPage(props) {
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
         let displayTitle = title;
-        if (title === 'monthlyBudget') displayTitle = 'Monthly Budget';
+        if (title === 'totalExpenses') displayTitle = 'Total Expenses';
         else if (title === 'budgetLimit') displayTitle = 'Budget Limit';
         else if (title === 'totalBalance') displayTitle = 'Total Balance';
 
@@ -597,11 +597,11 @@ function DashboardPage(props) {
                     flexDirection: 'column',
                     height: 160,
                     textAlign: 'left',
-                    paddingLeft: (displayTitle === 'Monthly Budget' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
+                    paddingLeft: (displayTitle === 'Total Expenses' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
                 }}
             >
                 {displayTitle}
-                {displayTitle === 'Monthly Budget' && (
+                {displayTitle === 'Total Expenses' && (
                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
 
                 )}
@@ -773,7 +773,7 @@ function DashboardPage(props) {
                         }}>
                         <Grid container >
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('monthlyBudget')}
+                                {renderEditableCard('totalExpenses')}
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                                 {renderEditableCard('budgetLimit')}
