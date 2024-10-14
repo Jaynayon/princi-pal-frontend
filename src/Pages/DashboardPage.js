@@ -529,16 +529,25 @@ function DashboardPage(props) {
     const handleSubmit = async (event) => {
         event.preventDefault();
         const updatedAmount = editableAmounts[clickedButton];
-        console.log('Document ID:', currentDocument.id);
-
+    
+        // Get the monthly budget from the current document
+        const monthlyBudget = currentDocument?.budget ? parseFloat(currentDocument.budget) : 0;
+    
+        // Validate if the input amount exceeds the monthly budget
+        let finalBudgetLimit = parseFloat(updatedAmount.amount);
+        if (finalBudgetLimit > monthlyBudget) {
+            finalBudgetLimit = monthlyBudget;
+            setError(`The budget limit has been adjusted to match the monthly budget: Php ${monthlyBudget.toFixed(2)}`);
+        }
+    
         try {
-            const isUpdated = await updateDocumentById(currentDocument.id, updatedAmount.amount);
-
+            const isUpdated = await updateDocumentById(currentDocument.id, finalBudgetLimit);
+    
             if (isUpdated) {
                 console.log('Budget limit saved successfully');
                 setCurrentDocument({
                     ...currentDocument,
-                    budgetLimit: parseFloat(updatedAmount.amount)
+                    budgetLimit: finalBudgetLimit // Save the adjusted value
                 });
                 setEditableAmounts({
                     ...editableAmounts,
@@ -555,6 +564,7 @@ function DashboardPage(props) {
             setError('Failed to save budget limit. Please try again later.');
         }
     };
+    
 
     
     const renderEditableCard = (title) => {
