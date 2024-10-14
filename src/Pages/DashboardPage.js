@@ -15,6 +15,7 @@ import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
+import axios from 'axios';
 
 const calculateWeeklyExpenses = (expensesData) => {
     const weeklyExpenses = {};
@@ -72,6 +73,70 @@ const calculateWeeklyExpenses = (expensesData) => {
     //console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
     return weeklyExpenses;
 };
+
+const ApexStackedBar = ({ uacsData = [] }) => {
+    const { currentSchool } = useNavigationContext();
+    const { year } = useSchoolContext();
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        const fetchStackedData = async () => {
+            try {
+                if (currentSchool) {
+                    const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/jev/school/${currentSchool.id}/year/${year}/stackedbar`, {
+                        headers: {
+                            'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                        }
+                    });
+                    setData(response.data || []);
+                }
+            } catch (error) {
+                console.error('Error processing data:', error);
+                setData([]); // Fallback in-case no data is received
+            }
+        }
+
+        fetchStackedData();
+    }, [currentSchool, year]);
+
+    const stackedOptions = {
+        chart: {
+            type: 'bar',
+            stacked: true,
+            height: 350,
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+            },
+        },
+        xaxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        },
+        yaxis: {
+            title: {
+                text: 'Expenses (PHP)',
+            },
+        },
+        colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
+    };
+
+    return (
+        <React.Fragment>
+            {/* Stacked bar chart Paper */}
+            <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
+                <Typography variant="h6" align="center">Annual UACS Expenses</Typography>
+                <ReactApexChart
+                    options={stackedOptions}
+                    series={data}
+                    type="bar"
+                    height={350} // Adjusted height for the chart
+                    style={{ width: '100%' }}
+                />
+            </Paper>
+        </React.Fragment>
+    );
+}
 
 // Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
@@ -199,41 +264,6 @@ const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
         ? Math.max(...uacsData.slice(0, -1).map(uacs => uacs.expenses.reduce((acc, expense) => acc + expense, 0)))
         : Math.max(...selectedUacs.expenses);
 
-    const stackedSeries = uacsData.map(({ name, expenses }) => ({
-        name,
-        data: Array(12).fill(0).map((_, i) => {
-            return expenses.reduce((acc, expense, idx) => {
-                const monthIndex = idx % 12;
-                if (monthIndex === i) {
-                    acc += expense;
-                }
-                return acc;
-            }, 0);
-        })
-    }));
-
-    const stackedOptions = {
-        chart: {
-            type: 'bar',
-            stacked: true,
-            height: 350,
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-            },
-        },
-        xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        },
-        yaxis: {
-            title: {
-                text: 'Expenses (PHP)',
-            },
-        },
-        colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
-    };
-
     const pieSeries = uacsData.map(({ expenses }) =>
         (expenses || []).reduce((acc, expense) => acc + expense, 0)
     );
@@ -257,24 +287,6 @@ const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
         },
         colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
     };
-
-    if (type === "Stacked Bar") {
-        return (
-            <React.Fragment>
-                {/* Stacked bar chart Paper */}
-                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
-                    <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
-                    <ReactApexChart
-                        options={stackedOptions}
-                        series={stackedSeries}
-                        type="bar"
-                        height={350} // Adjusted height for the chart
-                        style={{ width: '100%' }}
-                    />
-                </Paper>
-            </React.Fragment>
-        )
-    }
 
     if (type === "Pie Chart") {
         return (
@@ -423,12 +435,6 @@ function DashboardPage(props) {
                 code: '5020399000',
                 name: 'Other Supplies & Materials Expenses',
                 budget: jev[5]?.budget,
-                expenses: [0, 0, 0, 0, 0]
-            },
-            {
-                code: '1990101000',
-                name: 'Advances to Operating Expenses',
-                budget: jev[6]?.budget,
                 expenses: [0, 0, 0, 0, 0]
             },
             {
@@ -796,12 +802,13 @@ function DashboardPage(props) {
                                 {renderSummaryCard()}
                             </Grid>
                             <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
-                                <ApexChart
+                                {/* <ApexChart
                                     type="Stacked Bar"
                                     uacsData={uacsData}
                                     budgetLimit={currentDocument?.budgetLimit}
                                     totalBudget={schoolBudget}
-                                />
+                                /> */}
+                                <ApexStackedBar uacsData={uacsData} />
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                                 <ApexChart
