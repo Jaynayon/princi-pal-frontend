@@ -28,10 +28,10 @@ const calculateWeeklyExpenses = (expensesData) => {
         const timeDiff = end - start;
         const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
         const maxWeeks = Math.ceil(daysDiff / 7) <= 12 ? Math.ceil(daysDiff / 7) : 12;
-        return maxWeeks; 
+        return maxWeeks;
     };
 
-    const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1; 
+    const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1;
 
     const getStartOfWeek = (weekIndex, startDate) => {
         const start = new Date(startDate);
@@ -39,13 +39,13 @@ const calculateWeeklyExpenses = (expensesData) => {
         return start;
     };
 
-   
+
     const getWeekIndex = (date) => {
         const startOfWeek = new Date(earliestDate);
-        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); 
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
         const timeDiff = date - startOfWeek;
-        const daysDiff = timeDiff / (1000 * 60 * 60 * 24); 
-        return Math.floor(daysDiff / 7); 
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+        return Math.floor(daysDiff / 7);
     };
 
 
@@ -55,7 +55,7 @@ const calculateWeeklyExpenses = (expensesData) => {
         }
     });
 
- 
+
     expensesData.forEach(({ date, objectCode, amount }) => {
         const expenseDate = new Date(date);
         const weekIndex = getWeekIndex(expenseDate);
@@ -64,7 +64,7 @@ const calculateWeeklyExpenses = (expensesData) => {
             weeklyExpenses[objectCode][weekIndex] += amount;
         }
 
-   
+
         //console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
         //console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
     });
@@ -73,10 +73,8 @@ const calculateWeeklyExpenses = (expensesData) => {
     return weeklyExpenses;
 };
 
-
-//Apex Chart
 // Apex Chart
-const ApexChart = ({ uacsData = [], budgetLimit }) => {
+const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
 
@@ -260,76 +258,80 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
     };
 
-return (
-    <div>
-        {uacsData.length === 0 ? (
+    if (type === "Stacked Bar") {
+        return (
+            <React.Fragment>
+                {/* Stacked bar chart Paper */}
+                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
+                    <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
+                    <ReactApexChart
+                        options={stackedOptions}
+                        series={stackedSeries}
+                        type="bar"
+                        height={350} // Adjusted height for the chart
+                        style={{ width: '100%' }}
+                    />
+                </Paper>
+            </React.Fragment>
+        )
+    }
+
+    if (type === "Pie Chart") {
+        return (
+            <React.Fragment>
+                {/* Pie chart Paper, wider */}
+                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
+                    <Typography variant="h6" align="center">Expense Distribution</Typography>
+                    <ReactApexChart
+                        options={pieOptions}
+                        series={pieSeries}
+                        type="pie"
+                        height={280}
+                        style={{ width: '100%' }}
+                    />
+                </Paper>
+            </React.Fragment>
+        )
+    }
+
+    return (
+        uacsData.length === 0 ? (
             <Typography variant="body1">No data available.</Typography>
         ) : (
-            <div style={{ position: 'relative', marginBottom: '40px' }}>
-            <ReactApexChart
-                options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
-                series={generateSeries()}
-                type={chartType}
-                height={350}
-            />
+            <div>
+                <ReactApexChart
+                    options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
+                    series={generateSeries()}
+                    type={chartType}
+                    height={350}
+                />
 
-            {/* Container for x-axis labels and dropdown */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
-                <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    style={{
-                        width: '800px', // Increased width for a bigger dropdown
-                        padding: '10px', // Increased padding for a larger click area
-                        fontSize: '16px', // Increased font size for better readability
-                        border: '1px solid #ccc', // Set border color
-                        borderRadius: '4px', // Rounded corners
-                        backgroundColor: '#f0f0f0', // Background color
-                        color: '#333', // Font color
-                        cursor: 'pointer', // Change cursor on hover
-                    }}
-                >
-                    {uacsData.map((uacs) => (
-                        <option key={uacs.code} value={uacs.code}>
-                            {uacs.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Custom layout for the charts */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
-                {/* Container for stacked bar chart and pie chart */}
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    {/* Stacked bar chart Paper */}
-                    <Paper elevation={1} style={{ marginLeft: '370px', padding: '20px', height: '420px', width: '800px' }}>
-                        <Typography variant="h6" align="center">Monthly UACS Expenses</Typography>
-                        <ReactApexChart
-                            options={stackedOptions}
-                            series={stackedSeries}
-                            type="bar"
-                            height={350} // Adjusted height for the chart
-                            style={{ width: '100%' }}
-                        />
-                    </Paper>
-
-                    {/* Pie chart Paper, wider */}
-                    <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '310px', marginLeft: '10px' }}>
-                        <Typography variant="h6" align="center">Expense Distribution</Typography>
-                        <ReactApexChart
-                            options={pieOptions}
-                            series={pieSeries}
-                            type="pie"
-                            height={280}
-                            style={{ width: '100%' }}
-                        />
-                    </Paper>
+                {/* Container for x-axis labels and dropdown */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        style={{
+                            width: '100%', // Increased width for a bigger dropdown
+                            padding: '10px', // Increased padding for a larger click area
+                            fontSize: '16px', // Increased font size for better readability
+                            border: '1px solid #ccc', // Set border color
+                            borderRadius: '4px', // Rounded corners
+                            backgroundColor: '#f0f0f0', // Background color
+                            color: '#333', // Font color
+                            cursor: 'pointer', // Change cursor on hover
+                        }}
+                    >
+                        {uacsData.map((uacs) => (
+                            <option key={uacs.code} value={uacs.code}>
+                                {uacs.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
-        </div>
-    )}
-</div>
-);
+        )
+    );
 };
 
 
@@ -365,15 +367,15 @@ function DashboardPage(props) {
             }
         };
         fetchData();
-    }, [lr]); 
+    }, [lr]);
 
 
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
             if (currentSchool) {
-                setSelectedSchool(currentSchool.id); 
+                setSelectedSchool(currentSchool.id);
             } else {
-                setSelectedSchool(currentUser.schools[0].id); 
+                setSelectedSchool(currentUser.schools[0].id);
             }
 
         }
@@ -476,13 +478,13 @@ function DashboardPage(props) {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                     Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 body: JSON.stringify({ budgetLimit: value })
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 console.log('Budget limit updated successfully:', data);
                 return true;
@@ -495,7 +497,7 @@ function DashboardPage(props) {
             return false;
         }
     };
-    
+
 
     console.log(jev)
 
@@ -529,20 +531,20 @@ function DashboardPage(props) {
     const handleSubmit = async (event) => {
         event.preventDefault();
         const updatedAmount = editableAmounts[clickedButton];
-    
+
         // Get the monthly budget from the current document
         const monthlyBudget = currentDocument?.budget ? parseFloat(currentDocument.budget) : 0;
-    
+
         // Validate if the input amount exceeds the monthly budget
         let finalBudgetLimit = parseFloat(updatedAmount.amount);
         if (finalBudgetLimit > monthlyBudget) {
             finalBudgetLimit = monthlyBudget;
             setError(`The budget limit has been adjusted to match the monthly budget: Php ${monthlyBudget.toFixed(2)}`);
         }
-    
+
         try {
             const isUpdated = await updateDocumentById(currentDocument.id, finalBudgetLimit);
-    
+
             if (isUpdated) {
                 console.log('Budget limit saved successfully');
                 setCurrentDocument({
@@ -564,9 +566,9 @@ function DashboardPage(props) {
             setError('Failed to save budget limit. Please try again later.');
         }
     };
-    
 
-    
+
+
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
         let displayTitle = title;
@@ -578,8 +580,8 @@ function DashboardPage(props) {
             return null;
         }
         const totalBalance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
-        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black'; 
-    
+        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
+
         return (
             <Paper
                 sx={{
@@ -606,9 +608,9 @@ function DashboardPage(props) {
                     </Button>
                 )}
                 {displayTitle === 'Total Balance' && (
-                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold', color: totalBalanceColor }}> {}
-                     Php {totalBalance.toFixed(2)}
-                 </p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold', color: totalBalanceColor }}> { }
+                        Php {totalBalance.toFixed(2)}
+                    </p>
                 )}
 
                 <Modal
@@ -650,17 +652,17 @@ function DashboardPage(props) {
 
     const renderSummaryCard = () => {
         const totalBalance = (currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0);
-        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black'; 
-    
+        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
+
         return (
             <Paper
                 sx={{
                     p: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    height: 380,
+                    height: "100%",
                     textAlign: 'left',
-                    marginBottom: '15px', 
+                    marginBottom: '15px',
                 }}
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
@@ -673,7 +675,7 @@ function DashboardPage(props) {
             </Paper>
         );
     };
-    
+
 
     if (!currentUser) {
         return null;
@@ -782,8 +784,7 @@ function DashboardPage(props) {
                                     sx={{
                                         p: 2,
                                         display: 'flex',
-                                        flexDirection: 'column',
-                                        height: 380,
+                                        flexDirection: 'column'
                                     }}
 
                                 >
@@ -793,6 +794,22 @@ function DashboardPage(props) {
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                                 {renderSummaryCard()}
+                            </Grid>
+                            <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
+                                <ApexChart
+                                    type="Stacked Bar"
+                                    uacsData={uacsData}
+                                    budgetLimit={currentDocument?.budgetLimit}
+                                    totalBudget={schoolBudget}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                <ApexChart
+                                    type="Pie Chart"
+                                    uacsData={uacsData}
+                                    budgetLimit={currentDocument?.budgetLimit}
+                                    totalBudget={schoolBudget}
+                                />
                             </Grid>
                         </Grid>
                     </Grid>
