@@ -4,22 +4,40 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 
 export default function LRTextField(props) {
     const { column, row, editingCell, value, setEditingCell, setError } = props
-    const { lr, updateLrById } = useSchoolContext();
+    const { lr, setLr, updateLrById } = useSchoolContext();
     const [input, setInput] = useState(value || ""); // Pass the data by value
 
-    const handleChange = async (event) => {
+    const updateRowState = (rowIndex, colId, modifiedValue) => {
+        if (rowIndex !== -1) {
+            // Copy the array to avoid mutating state directly
+            const updatedRows = [...lr];
+    
+            // Update the specific property of the object
+            updatedRows[rowIndex] = {
+                ...updatedRows[rowIndex],
+                [colId]: modifiedValue
+            };
+    
+            // Update the state with the modified rows
+            setLr(updatedRows);
+        }
+    };
+
+    const handleInputChange = async (event) => {
         let modifiedValue = event.target.value
+
+        // Find the index of the object with matching id
+        const rowIndex = lr.findIndex(r => r.id === row.id);
 
         if (column.id === "amount") {
             // Replace any characters that are not digits or periods
             modifiedValue = modifiedValue.replace(/[^0-9.]/g, '');
-            if (modifiedValue === 0 || modifiedValue === "" || !modifiedValue) {
-                setError(true);
-            } else {
-                setError(false);
-            }
+            setError(!modifiedValue || modifiedValue === "0");
+        } else {
+            setError(false);
         }
 
+        updateRowState(rowIndex, column.id, modifiedValue);
         setInput(modifiedValue);
     };
 
@@ -35,14 +53,12 @@ export default function LRTextField(props) {
             const modifiedValue = colId === "amount" ? Number(value) : value
 
             try {
-                if (rowId !== 3) {
-                    if (modifiedInput !== modifiedValue) {
-                        console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-                        await updateLrById(colId, rowId, input);
-                        console.log('Value saved:', value);
-                    } else {
-                        setInput(value);
-                    }
+                if (rowId !== 3 && modifiedInput !== modifiedValue) {
+                    console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
+                    await updateLrById(colId, rowId, input);
+                    console.log('Value saved:', value);
+                } else {
+                    setInput(value);
                 }
             } catch (e) {
                 console.error(e);
@@ -98,7 +114,7 @@ export default function LRTextField(props) {
                     height: 40,
                 },
             }}
-            onChange={(e) => handleChange(e)}
+            onChange={(e) => handleInputChange(e)}
             onBlur={() => handleBlur(column.id, row.id)}
             onKeyDown={(e) => {
                 if (e.key === 'Enter') {
