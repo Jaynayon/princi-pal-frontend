@@ -602,7 +602,7 @@ function DashboardPage(props) {
                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 )}
                 {displayTitle === 'Budget Limit' && (
-                    <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
+                    <Button sx={{ display: currentUser.position !== "Principal" && "none" }} onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
                         <EditIcon sx={{ width: '30px', height: '30px' }} />
                     </Button>
                 )}
