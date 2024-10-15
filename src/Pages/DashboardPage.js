@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import Container from '@mui/material/Container';
@@ -74,9 +74,7 @@ const calculateWeeklyExpenses = (expensesData) => {
     return weeklyExpenses;
 };
 
-const ApexStackedBar = ({ uacsData = [] }) => {
-    const { currentSchool } = useNavigationContext();
-    const { year } = useSchoolContext();
+const ApexAnnualReport = memo(({ currentSchool, year, type }) => {
     const [data, setData] = useState([]);
 
     useEffect(() => {
@@ -121,22 +119,66 @@ const ApexStackedBar = ({ uacsData = [] }) => {
         colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
     };
 
-    return (
-        <React.Fragment>
-            {/* Stacked bar chart Paper */}
-            <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
-                <Typography variant="h6" align="center">Annual UACS Expenses</Typography>
-                <ReactApexChart
-                    options={stackedOptions}
-                    series={data}
-                    type="bar"
-                    height={350} // Adjusted height for the chart
-                    style={{ width: '100%' }}
-                />
-            </Paper>
-        </React.Fragment>
+    const pieSeries = data.map(({ data }) =>
+        (data || []).reduce((acc, expense) => acc + expense, 0)
     );
-}
+
+    const pieOptions = {
+        labels: data.map(({ name }) => name || 'Unknown'),
+        chart: {
+            type: 'pie',
+            height: 350,
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                }
+            }
+        }],
+        legend: {
+            show: false
+        },
+        colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
+    };
+
+    if (type === "Stacked Bar") {
+        return (
+            <React.Fragment>
+                {/* Stacked bar chart Paper */}
+                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
+                    <Typography variant="h6" align="center">Annual UACS Expenditure by Month</Typography>
+                    <ReactApexChart
+                        options={stackedOptions}
+                        series={data}
+                        type="bar"
+                        height={350} // Adjusted height for the chart
+                        style={{ width: '100%' }}
+                    />
+                </Paper>
+            </React.Fragment>
+        );
+    }
+
+    if (type === "Pie Chart") {
+        return (
+            <React.Fragment>
+                {/* Pie chart Paper, wider */}
+                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
+                    <Typography variant="h6" align="center">Total Annual UACS Expenditure</Typography>
+                    <ReactApexChart
+                        options={pieOptions}
+                        series={pieSeries}
+                        type="pie"
+                        height={280}
+                        style={{ width: '100%' }}
+                    />
+                </Paper>
+            </React.Fragment>
+        );
+    }
+});
 
 // Apex Chart
 const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
@@ -264,48 +306,6 @@ const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
         ? Math.max(...uacsData.slice(0, -1).map(uacs => uacs.expenses.reduce((acc, expense) => acc + expense, 0)))
         : Math.max(...selectedUacs.expenses);
 
-    const pieSeries = uacsData.map(({ expenses }) =>
-        (expenses || []).reduce((acc, expense) => acc + expense, 0)
-    );
-
-    const pieOptions = {
-        labels: uacsData.map(({ name }) => name || 'Unknown'),
-        chart: {
-            type: 'pie',
-            height: 350,
-        },
-        responsive: [{
-            breakpoint: 480,
-            options: {
-                chart: {
-                    width: 200
-                }
-            }
-        }],
-        legend: {
-            show: false
-        },
-        colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
-    };
-
-    if (type === "Pie Chart") {
-        return (
-            <React.Fragment>
-                {/* Pie chart Paper, wider */}
-                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
-                    <Typography variant="h6" align="center">Expense Distribution</Typography>
-                    <ReactApexChart
-                        options={pieOptions}
-                        series={pieSeries}
-                        type="pie"
-                        height={280}
-                        style={{ width: '100%' }}
-                    />
-                </Paper>
-            </React.Fragment>
-        )
-    }
-
     return (
         uacsData.length === 0 ? (
             <Typography variant="body1">No data available.</Typography>
@@ -359,7 +359,6 @@ function DashboardPage(props) {
     const [schoolBudget] = useState(null);
 
     const [uacsData, setUacsData] = useState([]);
-
 
     // This function only runs when dependencies: currentSchool & currentUser are changed
 
@@ -504,10 +503,6 @@ function DashboardPage(props) {
         }
     };
 
-
-    console.log(jev)
-
-
     const handleOpen = (text) => {
         setOpen(true);
         setClickedButton(text);
@@ -572,8 +567,6 @@ function DashboardPage(props) {
             setError('Failed to save budget limit. Please try again later.');
         }
     };
-
-
 
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
@@ -802,21 +795,10 @@ function DashboardPage(props) {
                                 {renderSummaryCard()}
                             </Grid>
                             <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
-                                {/* <ApexChart
-                                    type="Stacked Bar"
-                                    uacsData={uacsData}
-                                    budgetLimit={currentDocument?.budgetLimit}
-                                    totalBudget={schoolBudget}
-                                /> */}
-                                <ApexStackedBar uacsData={uacsData} />
+                                <ApexAnnualReport type="Stacked Bar" currentSchool={currentSchool} year={year} />
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                <ApexChart
-                                    type="Pie Chart"
-                                    uacsData={uacsData}
-                                    budgetLimit={currentDocument?.budgetLimit}
-                                    totalBudget={schoolBudget}
-                                />
+                                <ApexAnnualReport type="Pie Chart" currentSchool={currentSchool} year={year} />
                             </Grid>
                         </Grid>
                     </Grid>
