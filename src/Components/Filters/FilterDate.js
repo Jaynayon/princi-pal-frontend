@@ -17,7 +17,7 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 export default function FilterDate() {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const { prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years } = useSchoolContext();
+    const { prevMonthRef, prevYearRef, month, setMonth, year, setYear, setIsAdding, isEditingRef, isSearchingRef, months, years } = useSchoolContext();
 
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -50,7 +50,16 @@ export default function FilterDate() {
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
 
+    // Reset states to allow fetching of data
+    const resetStates = () => {
+        setIsAdding(false);
+        isEditingRef.current = false;
+        isSearchingRef.current = false;
+    }
+
     const handleNextMonth = (event) => {
+        resetStates();
+
         prevMonthRef.current += 1;
         if (prevMonthRef.current > months.length - 1) {
             prevMonthRef.current = 0;
@@ -63,6 +72,8 @@ export default function FilterDate() {
     }
 
     const handlePrevMonth = (event) => {
+        resetStates();
+
         prevMonthRef.current -= 1;
         if (prevMonthRef.current < 0) {
             prevMonthRef.current = months.length - 1;
@@ -76,12 +87,16 @@ export default function FilterDate() {
     }
 
     const handleChangeMonth = (event) => {
+        resetStates();
+
         const { value } = event.target;
         prevMonthRef.current = months.indexOf(value);
         setMonth(value); // Set the value directly
     };
 
     const handleChangeYear = (event) => {
+        resetStates();
+
         const { value } = event.target;
         prevYearRef.current = years.indexOf(value);
         setYear(value); // Set the value directly
