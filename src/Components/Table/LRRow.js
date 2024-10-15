@@ -20,7 +20,10 @@ import ExceedWarningModal from '../Modal/ExceedWarningModal';
 
 function LRRow(props) {
     const { page, rowsPerPage } = props;
+
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
+    const [amountExceeded, setAmountExceeded] = useState({ docId: null, colId: null, rowId: null, exceeded: null, newValue: null });
+
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [open, setOpen] = useState(false);
@@ -64,10 +67,9 @@ function LRRow(props) {
         }
     }
 
-    const handleCellClick = (colId, rowId, event) => {
+    const handleCellClick = (colId, rowId) => {
         isEditingRef.current = true; // user clicked a cell
         setEditingCell({ colId, rowId });
-        console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
 
@@ -97,9 +99,21 @@ function LRRow(props) {
 
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
+        const rowIndex = lr.findIndex(row => row.id === rowId);
+        const newTotalExpenses = Number(lr[rowIndex].amount) + Number(currentDocument.budget);
+        console.log(newTotalExpenses)
         if (!error) {
-            const rowIndex = lr.findIndex(row => row.id === rowId);
-            await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+            if (newTotalExpenses > currentDocument.cashAdvance) {
+                setAmountExceeded({
+                    rowId: 3, // Adding row
+                    docId: currentDocument.id,
+                    exceeded: newTotalExpenses - currentDocument.cashAdvance,
+                    newValue: lr[rowIndex]
+                });
+                handleWarningOpen();
+            } else {
+                await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+            }
         }
     }
 
@@ -166,7 +180,7 @@ function LRRow(props) {
                                                 pointerEvents: !isEditable && 'none' // disallow editing
                                             }
                                         ]}
-                                        onClick={(event) => handleCellClick(column.id, row.id, event)}
+                                        onClick={() => handleCellClick(column.id, row.id)}
                                         onBlur={() => handleBlurCell()}
                                     >
                                         {(() => {
@@ -219,8 +233,10 @@ function LRRow(props) {
                                                         column={column}
                                                         editingCell={editingCell}
                                                         setEditingCell={setEditingCell}
+                                                        handleWarningOpen={handleWarningOpen}
                                                         value={value}
                                                         setError={setError}
+                                                        setAmountExceeded={setAmountExceeded}
                                                     />
                                                 </Box>
                                             );
@@ -285,8 +301,17 @@ function LRRow(props) {
                         </TableRow>
                     );
                 })}
-            <ExceedWarningModal open={warningOpen} onClose={handleWarningClose} />
-            <HistoryModal open={open} handleClose={handleClose} handleCloseParent={handleMenuClose} index={selectedIndex} />
+            <ExceedWarningModal
+                open={warningOpen}
+                onClose={handleWarningClose}
+                amountExceeded={amountExceeded}
+            />
+            <HistoryModal
+                open={open}
+                index={selectedIndex}
+                handleClose={handleClose}
+                handleCloseParent={handleMenuClose}
+            />
         </React.Fragment>
     );
 }

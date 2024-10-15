@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 
 export default function LRTextField(props) {
-    const { column, row, editingCell, value, setEditingCell, setError } = props
-    const { lr, setLr, updateLrById } = useSchoolContext();
+    const { column, row, editingCell, value, setEditingCell, handleWarningOpen, setError, setAmountExceeded } = props
+    const { lr, currentDocument, setLr, updateLrById } = useSchoolContext();
     const [input, setInput] = useState(value || ""); // Pass the data by value
 
     const updateRowState = (rowIndex, colId, modifiedValue) => {
@@ -56,10 +56,34 @@ export default function LRTextField(props) {
             const modifiedInput = colId === "amount" ? Number(input) : input.trim()
             const modifiedValue = colId === "amount" ? Number(value) : value
 
+            const totalExpenses = Number(currentDocument?.budget);
+            const monthlyBudget = Number(currentDocument?.cashAdvance);
+
             try {
                 if (rowId !== 3 && modifiedInput !== modifiedValue) {
                     console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-                    await updateLrById(colId, rowId, input);
+                    if (colId === "amount") {
+                        const difference = Math.abs(modifiedInput - modifiedValue);
+                        const newTotalExpenses = modifiedInput > modifiedValue
+                            ? totalExpenses + difference
+                            : totalExpenses - difference;
+
+                        // Pass necessary properties to LRRow
+                        setAmountExceeded({
+                            colId,
+                            rowId,
+                            exceeded: newTotalExpenses - monthlyBudget,
+                            newValue: input
+                        });
+
+                        if (newTotalExpenses > monthlyBudget) {
+                            handleWarningOpen();
+                        } else {
+                            await updateLrById(colId, rowId, input);
+                        }
+                    } else {
+                        await updateLrById(colId, rowId, input);
+                    }
                 } else {
                     console.log('Value saved:', value);
                     setInput(value);
