@@ -37,7 +37,7 @@ export default function LRDate({ rowId, colId, selected, onChange }) {
     const [startDate, setStartDate] = useState(new Date(selected) || new Date());
     const { formatDate, updateLrById, years, months } = useSchoolContext();
 
-    const dateOnBlur = async (date) => {
+    const dateOnChange = async (date) => {
         try {
             const formattedDate = formatDate(date);
             // Update cells to any date fields that already have data/LR
@@ -106,7 +106,7 @@ export default function LRDate({ rowId, colId, selected, onChange }) {
             selected={startDate}
             onChange={(date) => {
                 setStartDate(date);
-                dateOnBlur(date)
+                dateOnChange(date)
             }}
             customInput={<CustomInput />}
         />

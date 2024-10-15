@@ -1,5 +1,5 @@
 // React imports
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 // Material-UI imports
 import Box from '@mui/material/Box';
@@ -24,7 +24,6 @@ export default function DisplaySchools() {
     const { open, toggleDrawer, prevOpen, selected, setSelected, setCurrentSchool, currentUser, openSub, setOpenSub } = useNavigationContext();
 
     useEffect(() => {
-        // initializeSchool();
         if (!open) {
             setOpenSub(false);
         }
@@ -34,14 +33,14 @@ export default function DisplaySchools() {
         return text.toLowerCase().replace(/\s+/g, '-');
     }
 
-    const handleSelectedSingle = () => {
-        setSelected(currentUser.schools[0].name)
-        setCurrentSchool(currentUser.schools[0]);
-    }
-
-    const handleSelectedMultiple = (index) => {
-        setSelected(currentUser.schools[index].name);
-        setCurrentSchool(currentUser.schools[index]);
+    const handleSelection = (index) => {
+        if (index) {
+            setSelected(currentUser.schools[index].name);
+            setCurrentSchool(currentUser.schools[index]);
+        } else {
+            setSelected(currentUser.schools[0].name)
+            setCurrentSchool(currentUser.schools[0]);
+        }
     }
 
     const handleClick = () => {
@@ -52,12 +51,11 @@ export default function DisplaySchools() {
     };
 
     //If school is selected, return true
-    const selectSchool = () => {
-        return !(selected === 'Dashboard' || selected === 'Settings'
-            || selected === 'People' || selected === 'Logout');
-    }
+    const isSchoolSelected = () => {
+        return !['Dashboard', 'Settings', 'People', 'Logout'].includes(selected);
+    };
 
-    const styles = {
+    const styles = useMemo(() => ({
         icon: {
             color: theme.navStyle.color,
             fontSize: '19px',
@@ -69,7 +67,7 @@ export default function DisplaySchools() {
             color: theme.navStyle.bold,
             fontSize: '19px',
         },
-    }
+    }), [theme.navStyle.color, theme.navStyle.bold]);
 
     console.log(currentUser);
 
@@ -81,7 +79,7 @@ export default function DisplaySchools() {
                         sx={theme.navStyle.button}
                         onClick={handleClick}
                         selected={currentUser.schools.length > 1 ?
-                            !open ? selectSchool() : false
+                            !open ? isSchoolSelected() : false
                             : selected === currentUser.schools[0].name
                         } //button is only selected if the drawer is closed
                     >
@@ -94,7 +92,7 @@ export default function DisplaySchools() {
                             <SchoolIcon
                                 sx={{
                                     ...styles.icon,
-                                    color: selectSchool() ? theme.navStyle.bold : theme.navStyle.color
+                                    color: isSchoolSelected() ? theme.navStyle.bold : theme.navStyle.color
                                 }}
                             />
                         </ListItemIcon>
@@ -102,7 +100,7 @@ export default function DisplaySchools() {
                             primary={"School"}
                             primaryTypographyProps={{
                                 ...styles.text,
-                                ...(selectSchool()
+                                ...(isSchoolSelected()
                                     ? { color: theme.navStyle.bold, fontWeight: 'bold' }
                                     : { color: theme.navStyle.color }
                                 )
@@ -128,7 +126,7 @@ export default function DisplaySchools() {
                                             component={Link}
                                             to={'/schools/' + transformSchoolNameText(item.name)}
                                             selected={selected === item.name}
-                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelectedMultiple(index)}
+                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelection(index)}
                                             sx={theme.navStyle.button}
                                         >
                                             <ListItemText
@@ -154,7 +152,7 @@ export default function DisplaySchools() {
                         to={'/schools/' + transformSchoolNameText(currentUser.schools[0].name)}
                         sx={theme.navStyle.button}
                         selected={selected === currentUser.schools[0].name}
-                        onClick={/*() => { setSelected(currentUser.schools[0].name) }*/() => handleSelectedSingle()}
+                        onClick={() => handleSelection()}
                     >
                         <ListItemIcon
                             sx={{
