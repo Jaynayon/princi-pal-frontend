@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import Container from '@mui/material/Container';
@@ -15,74 +15,177 @@ import { Box, Button, MenuItem } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
+import axios from 'axios';
 
 const calculateWeeklyExpenses = (expensesData) => {
-    // Initialize an empty object to hold the weekly totals for each UACS category
     const weeklyExpenses = {};
-
-    // Convert date strings to Date objects
     const dates = expensesData.map(({ date }) => new Date(date));
     const earliestDate = new Date(Math.min(...dates));
     const latestDate = new Date(Math.max(...dates));
 
-    // Helper function to get the difference in weeks between two dates
     const getWeekDifference = (startDate, endDate) => {
         const start = new Date(startDate);
         const end = new Date(endDate);
         const timeDiff = end - start;
-        const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert time difference to days
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
         const maxWeeks = Math.ceil(daysDiff / 7) <= 12 ? Math.ceil(daysDiff / 7) : 12;
-        return maxWeeks; // Convert days to weeks
+        return maxWeeks;
     };
 
-    // Calculate the total number of weeks between the earliest and latest date
-    const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1; // +1 to include the final week
+    const totalWeeks = getWeekDifference(earliestDate, latestDate) + 1;
 
-    // Helper function to get the start date of a specific week index
-    // const getStartOfWeek = (weekIndex, startDate) => {
-    //     const start = new Date(startDate);
-    //     start.setDate(start.getDate() + weekIndex * 7);
-    //     return start;
-    // };
+    const getStartOfWeek = (weekIndex, startDate) => {
+        const start = new Date(startDate);
+        start.setDate(start.getDate() + weekIndex * 7);
+        return start;
+    };
 
-    // Helper function to determine the week index (relative to the earliest date)
+
     const getWeekIndex = (date) => {
         const startOfWeek = new Date(earliestDate);
-        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Move to the start of the week
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
         const timeDiff = date - startOfWeek;
-        const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert time difference to days
-        return Math.floor(daysDiff / 7); // Convert days to week index
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+        return Math.floor(daysDiff / 7);
     };
 
-    // Initialize weekly expenses for all object codes
+
     expensesData.forEach(({ objectCode }) => {
         if (!weeklyExpenses[objectCode]) {
             weeklyExpenses[objectCode] = new Array(totalWeeks).fill(0);
         }
     });
 
-    // Process each expense entry
+
     expensesData.forEach(({ date, objectCode, amount }) => {
         const expenseDate = new Date(date);
         const weekIndex = getWeekIndex(expenseDate);
 
-        // Add the amount to the appropriate week index
         if (weekIndex >= 0 && weekIndex < totalWeeks) {
             weeklyExpenses[objectCode][weekIndex] += amount;
         }
+
+
+        //console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
+        //console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
     });
 
+    //console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
     return weeklyExpenses;
 };
 
+const ApexAnnualReport = memo(({ currentSchool, year, type }) => {
+    const [data, setData] = useState([]);
 
-//Apex Chart
-const ApexChart = ({ uacsData = [], budgetLimit }) => {
+    useEffect(() => {
+        const fetchStackedData = async () => {
+            try {
+                if (currentSchool) {
+                    const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/jev/school/${currentSchool.id}/year/${year}/stackedbar`, {
+                        headers: {
+                            'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                        }
+                    });
+                    setData(response.data || []);
+                }
+            } catch (error) {
+                console.error('Error processing data:', error);
+                setData([]); // Fallback in-case no data is received
+            }
+        }
+
+        fetchStackedData();
+    }, [currentSchool, year]);
+
+    const stackedOptions = {
+        chart: {
+            type: 'bar',
+            stacked: true,
+            height: 350,
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+            },
+        },
+        xaxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        },
+        yaxis: {
+            title: {
+                text: 'Expenses (PHP)',
+            },
+        },
+        colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
+    };
+
+    const pieSeries = data.map(({ data }) =>
+        (data || []).reduce((acc, expense) => acc + expense, 0)
+    );
+
+    const pieOptions = {
+        labels: data.map(({ name }) => name || 'Unknown'),
+        chart: {
+            type: 'pie',
+            height: 350,
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                }
+            }
+        }],
+        legend: {
+            show: false
+        },
+        colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
+    };
+
+    if (type === "Stacked Bar") {
+        return (
+            <React.Fragment>
+                {/* Stacked bar chart Paper */}
+                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
+                    <Typography variant="h6" align="center">Annual UACS Expenditure by Month</Typography>
+                    <ReactApexChart
+                        options={stackedOptions}
+                        series={data}
+                        type="bar"
+                        height={350} // Adjusted height for the chart
+                        style={{ width: '100%' }}
+                    />
+                </Paper>
+            </React.Fragment>
+        );
+    }
+
+    if (type === "Pie Chart") {
+        return (
+            <React.Fragment>
+                {/* Pie chart Paper, wider */}
+                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
+                    <Typography variant="h6" align="center">Total Annual UACS Expenditure</Typography>
+                    <ReactApexChart
+                        options={pieOptions}
+                        series={pieSeries}
+                        type="pie"
+                        height={280}
+                        style={{ width: '100%' }}
+                    />
+                </Paper>
+            </React.Fragment>
+        );
+    }
+});
+
+// Apex Chart
+const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
     const [selectedCategory, setSelectedCategory] = useState('5020502001');
     const [chartType, setChartType] = useState('line');
 
     useEffect(() => {
-        // Change the chart type to 'bar' when 'Total' is selected
         if (selectedCategory === '19901020000') {
             setChartType('bar');
         } else {
@@ -91,10 +194,12 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
     }, [selectedCategory]);
 
     const generateSeries = () => {
+        if (!uacsData || uacsData.length === 0) {
+            return [];
+        }
         if (selectedCategory === '19901020000') {
-            // Aggregate expenses from all UACS categories for "Total"
             const totalExpenses = uacsData.slice(0, -1).map(uacs => {
-                return uacs.expenses.reduce((acc, expense) => acc + expense, 0); // Sum of expenses for each category
+                return uacs?.expenses?.reduce((acc, expense) => acc + expense, 0) || 0;
             });
             return [
                 {
@@ -104,7 +209,7 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
             ];
         } else {
             const selectedUacs = uacsData.find(uacs => uacs.code === selectedCategory);
-            if (selectedUacs) {
+            if (selectedUacs && selectedUacs.expenses) {
                 return [
                     {
                         name: "Actual Expenses",
@@ -112,89 +217,89 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
                     }
                 ];
             } else {
-                return []; // Return empty array if no category is found
+                return [];
             }
         }
     };
 
-    const generateOptions = (budget, maxExpense, chartType, categories) => ({
-        chart: {
-            height: 350,
-            type: chartType,
-            zoom: {
-                enabled: false
-            }
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: '60%', // Adjust column width for a better fit
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            show: true,
-            width: 2,
-            colors: ['#0000FF'] // Blue line color for expenses
-        },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // alternating grid colors
-                opacity: 0.5
-            }
-        },
-        xaxis: {
-            categories: categories,
-            labels: {
-                rotate: -45, // Rotate labels if needed for better fit
-                style: {
-                    fontSize: '12px'
+    const generateOptions = (budget, maxExpense, chartType, categories) => {
+        const annotations = selectedCategory === '19901020000' ? [
+            {
+                y: budget,
+                borderColor: '#FF0000',
+                label: {
+                    borderColor: '#FF0000',
+                    style: {
+                        color: '#fff',
+                        background: '#FF0000'
+                    },
+                    text: 'Budget Limit'
                 }
             }
-        },
-        yaxis: {
-            title: {
-                text: 'Amount (PHP)'
+        ] : []; // Remove the red line for non-total categories
+
+        return {
+            chart: {
+                height: 350,
+                type: chartType,
+                zoom: {
+                    enabled: false
+                }
             },
-            max: Math.max(budget, maxExpense), // Ensure Y-axis is high enough to show the budget
-        },
-        annotations: {
-            yaxis: [
-                {
-                    y: budget,
-                    borderColor: '#FF0000',
-                    label: {
-                        borderColor: '#FF0000',
-                        style: {
-                            color: '#fff',
-                            background: '#FF0000'
-                        },
-                        text: 'Budget Limit'
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '60%',
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['#0000FF']
+            },
+            grid: {
+                row: {
+                    colors: ['#f3f3f3', 'transparent'],
+                    opacity: 0.5
+                }
+            },
+            xaxis: {
+                categories: categories,
+                labels: {
+                    rotate: -45,
+                    style: {
+                        fontSize: '12px'
                     }
                 }
-            ]
-        }
-    });
+            },
+            yaxis: {
+                title: {
+                    text: 'Amount (PHP)'
+                },
+                max: Math.max(budget, maxExpense),
+            },
+            annotations: {
+                yaxis: annotations // Conditionally add the red line for the total category
+            }
+        };
+    };
 
     const selectedUacs = uacsData.find(uacs => uacs.code === selectedCategory);
     if (!selectedUacs && selectedCategory !== '19901020000') {
         return <Typography variant="body1"></Typography>;
     }
 
-    // Helper function to generate dynamic week labels
     const generateWeekLabels = (numberOfWeeks) => {
         return Array.from({ length: numberOfWeeks }, (_, i) => `Week ${i + 1}`);
     };
 
     let weekLength = uacsData.find(item => item.code === selectedCategory).expenses.length;
-
-    // Determine the categories for the x-axis dynamically
     const categories = selectedCategory === '19901020000'
-        ? uacsData.slice(0, -1).map(uacs => uacs.name) // Exclude the 'Total' category itself
-        : generateWeekLabels(weekLength >= 12 ? 12 : weekLength); // Dynamically generate based on the number of weeks
-
+        ? uacsData.slice(0, -1).map(uacs => uacs.name)
+        : generateWeekLabels(weekLength >= 12 ? 12 : weekLength);
 
     const budgetToUse = selectedCategory === '19901020000' ? budgetLimit : selectedUacs.budget;
     const maxExpense = selectedCategory === '19901020000'
@@ -202,97 +307,45 @@ const ApexChart = ({ uacsData = [], budgetLimit }) => {
         : Math.max(...selectedUacs.expenses);
 
     return (
-        <div>
-            {uacsData.length === 0 ? (
-                <Typography variant="body1">No data available.</Typography>
-            ) : (
-                <div style={{ position: 'relative', marginBottom: '40px' }}>
-                    {/* Render the line chart based on selected category */}
-                    <div>
-                        <ReactApexChart
-                            options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
-                            series={generateSeries()}
-                            type={chartType}
-                            height={350}
-                        />
-                        {/* Container for x-axis labels and dropdown */}
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                            <div style={{ marginLeft: '10px' }}>
-                                <select
-                                    name="apex-chart-select-category"
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    style={{
-                                        width: '100px', // Set the width to make it smaller
-                                        padding: '5px'
-                                    }}
-                                >
-                                    {uacsData.map((uacs) => (
-                                        <option key={uacs.code} value={uacs.code}>
-                                            {uacs.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+        uacsData.length === 0 ? (
+            <Typography variant="body1">No data available.</Typography>
+        ) : (
+            <div>
+                <ReactApexChart
+                    options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
+                    series={generateSeries()}
+                    type={chartType}
+                    height={350}
+                />
+
+                {/* Container for x-axis labels and dropdown */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '20px' }}>
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        style={{
+                            width: '100%', // Increased width for a bigger dropdown
+                            padding: '10px', // Increased padding for a larger click area
+                            fontSize: '16px', // Increased font size for better readability
+                            border: '1px solid #ccc', // Set border color
+                            borderRadius: '4px', // Rounded corners
+                            backgroundColor: '#f0f0f0', // Background color
+                            color: '#333', // Font color
+                            cursor: 'pointer', // Change cursor on hover
+                        }}
+                    >
+                        {uacsData.map((uacs) => (
+                            <option key={uacs.code} value={uacs.code}>
+                                {uacs.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-            )}
-        </div>
+            </div>
+        )
     );
 };
 
-// Sample data
-const defaultUacsData = [
-    {
-        code: '5020502001',
-        name: 'Communication Expenses',
-        budget: 0,
-        expenses: [0, 0, 0, 0, 0]//93,000
-    },
-    {
-        code: '5020402000',
-        name: 'Electricity Expenses',
-        budget: 0,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '5020503000',
-        name: 'Internet Subscription Expenses',
-        budget: 0,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '5029904000',
-        name: 'Transpo/Delivery Expenses',
-        budget: 0,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '5020201000',
-        name: 'Training Expenses',
-        budget: 0,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '5020399000',
-        name: 'Other Supplies & Materials Expenses',
-        budget: 0,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '1990101000',
-        name: 'Advances to Operating Expenses',
-        budget: 0,
-        expenses: [0, 0, 0, 0, 0]
-    },
-    {
-        code: '19901020000',
-        name: 'Total',
-        budget: 0,
-        expenses: [0, 0, 0, 0, 0]
-    }
-];
 
 function DashboardPage(props) {
     const { currentUser, currentSchool, setCurrentSchool, } = useNavigationContext();
@@ -305,14 +358,35 @@ function DashboardPage(props) {
     const [loadingSchools] = useState(false);
     const [schoolBudget] = useState(null);
 
-    const [uacsData, setUacsData] = useState(defaultUacsData);
+    const [uacsData, setUacsData] = useState([]);
+
+    // This function only runs when dependencies: currentSchool & currentUser are changed
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Log the specific fields (date, objectCode, and amount) for each LR row
+                if (lr && lr.length > 0) {
+                    lr.forEach(row => {
+                        //console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
+                    });
+                } else {
+                    console.log('No LR data available');
+                }
+            } catch (error) {
+                console.error('Error fetching document data:', error);
+            }
+        };
+        fetchData();
+    }, [lr]);
+
 
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
             if (currentSchool) {
-                setSelectedSchool(currentSchool.id); // Ensure a valid value
+                setSelectedSchool(currentSchool.id);
             } else {
-                setSelectedSchool(currentUser.schools[0].id); // Ensure a valid value
+                setSelectedSchool(currentUser.schools[0].id);
             }
 
         }
@@ -325,30 +399,59 @@ function DashboardPage(props) {
     }, [initializeSelectedSchool, updateJev, updateLr]);
 
     useEffect(() => {
+        const sampleUacsData = [
+            {
+                code: '5020502001',
+                name: 'Communication Expenses',
+                budget: jev[0]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020402000',
+                name: 'Electricity Expenses',
+                budget: jev[1]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020503000',
+                name: 'Internet Subscription Expenses',
+                budget: jev[2]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5029904000',
+                name: 'Transpo/Delivery Expenses',
+                budget: jev[3]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020201000',
+                name: 'Training Expenses',
+                budget: jev[4]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '5020399000',
+                name: 'Other Supplies & Materials Expenses',
+                budget: jev[5]?.budget,
+                expenses: [0, 0, 0, 0, 0]
+            },
+            {
+                code: '19901020000',
+                name: 'Total',
+                budget: 500000,
+                expenses: [0, 0, 0, 0, 0]
+            }
+        ];
+
         const fetchData = async () => {
             try {
-                if (lr?.length > 0 && jev?.length > 0) {
-                    // Dynamically generate UACS data from JEV array
-                    const uacsDataFromJev = jev.map(item => ({
-                        code: item.uacsCode,
-                        name: item.uacsName,
-                        budget: item.budget,
-                        expenses: [0, 0, 0, 0, 0] // Initialize expenses
-                    }));
-
-                    // Add the "Total" entry manually
-                    const totalEntry = {
-                        code: '19901020000',
-                        name: 'Total',
-                        budget: currentDocument.budget,
-                        expenses: [0, 0, 0, 0, 0] // Initialize expenses for "Total"
-                    };
-
+                if (lr && lr.length > 0) {
                     // Calculate weekly expenses from the LR data
                     const weeklyExpenses = calculateWeeklyExpenses(lr);
 
                     // Update uacsData with the calculated weekly expenses
-                    const updatedUacsData = [...uacsDataFromJev, totalEntry].map(uacs => {
+                    const updatedUacsData = sampleUacsData.map(uacs => {
                         if (weeklyExpenses[uacs.code]) {
                             return {
                                 ...uacs,
@@ -356,12 +459,9 @@ function DashboardPage(props) {
                             };
                         }
                         return uacs;
-
                     });
 
                     setUacsData(updatedUacsData);
-                } else {
-                    setUacsData(defaultUacsData)
                 }
             } catch (error) {
                 console.error('Error processing data:', error);
@@ -369,11 +469,12 @@ function DashboardPage(props) {
         };
 
         fetchData();
-    }, [lr, jev, currentDocument.budget]);
+    }, [lr, jev]);
 
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
         setCurrentSchool(currentUser.schools.find(s => s.id === schoolId));
+        console.log('Selected school:', schoolId);
     };
 
     const updateDocumentById = async (docId, value) => {
@@ -382,7 +483,7 @@ function DashboardPage(props) {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                     Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 body: JSON.stringify({ budgetLimit: value })
             });
@@ -392,13 +493,15 @@ function DashboardPage(props) {
             if (response.ok) {
                 console.log('Budget limit updated successfully:', data);
                 return true;
+            } else {
+                console.error('Failed to update budget limit:', data);
+                return false;
             }
         } catch (error) {
             console.error('Error updating budget limit:', error);
             return false;
         }
     };
-
 
     const handleOpen = (text) => {
         setOpen(true);
@@ -430,14 +533,24 @@ function DashboardPage(props) {
         event.preventDefault();
         const updatedAmount = editableAmounts[clickedButton];
 
+        // Get the monthly budget from the current document
+        const monthlyBudget = currentDocument?.budget ? parseFloat(currentDocument.budget) : 0;
+
+        // Validate if the input amount exceeds the monthly budget
+        let finalBudgetLimit = parseFloat(updatedAmount.amount);
+        if (finalBudgetLimit > monthlyBudget) {
+            finalBudgetLimit = monthlyBudget;
+            setError(`The budget limit has been adjusted to match the monthly budget: Php ${monthlyBudget.toFixed(2)}`);
+        }
+
         try {
-            const isUpdated = await updateDocumentById(currentDocument.id, updatedAmount.amount);
+            const isUpdated = await updateDocumentById(currentDocument.id, finalBudgetLimit);
 
             if (isUpdated) {
                 console.log('Budget limit saved successfully');
                 setCurrentDocument({
                     ...currentDocument,
-                    budgetLimit: parseFloat(updatedAmount.amount)
+                    budgetLimit: finalBudgetLimit // Save the adjusted value
                 });
                 setEditableAmounts({
                     ...editableAmounts,
@@ -446,9 +559,11 @@ function DashboardPage(props) {
                 setError('');
                 setOpen(false);
             } else {
+                console.error('Failed to save budget limit');
                 setError('Failed to save budget limit. Please try again later.');
             }
         } catch (error) {
+            console.error('Error saving budget limit:', error);
             setError('Failed to save budget limit. Please try again later.');
         }
     };
@@ -456,13 +571,15 @@ function DashboardPage(props) {
     const renderEditableCard = (title) => {
         const amountData = editableAmounts[title] || { currency: '', amount: '' };
         let displayTitle = title;
-        if (title === 'monthlyExpense') displayTitle = 'Monthly Expense';
+        if (title === 'totalExpenses') displayTitle = 'Total Expenses';
         else if (title === 'budgetLimit') displayTitle = 'Budget Limit';
         else if (title === 'totalBalance') displayTitle = 'Total Balance';
 
         if (!currentDocument) {
             return null;
         }
+        const totalBalance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
+        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
 
         return (
             <Paper
@@ -473,11 +590,11 @@ function DashboardPage(props) {
                     flexDirection: 'column',
                     height: 160,
                     textAlign: 'left',
-                    paddingLeft: (displayTitle === 'Monthly Expense' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
+                    paddingLeft: (displayTitle === 'Total Expenses' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
                 }}
             >
                 {displayTitle}
-                {displayTitle === 'Monthly Expense' && (
+                {displayTitle === 'Total Expenses' && (
                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
 
                 )}
@@ -485,23 +602,14 @@ function DashboardPage(props) {
                     <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
                 )}
                 {displayTitle === 'Budget Limit' && (
-                    <Button
-                        onClick={() => handleOpen(title)}
-                        className={clickedButton === title ? 'clicked' : ''}
-                        style={{
-                            display: currentUser.position !== "Principal" && "none",
-                            position: 'absolute',
-                            top: '10px', right: '10px',
-                            background: 'none',
-                            border: 'none',
-                            padding: 0
-                        }}
-                    >
-                        <EditIcon sx={{ display: false, width: '30px', height: '30px' }} />
+                    <Button onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
+                        <EditIcon sx={{ width: '30px', height: '30px' }} />
                     </Button>
                 )}
                 {displayTitle === 'Total Balance' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {((currentDocument.cashAdvance || 0) - (currentDocument.budget || 0)).toFixed(2)}</p>
+                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold', color: totalBalanceColor }}> { }
+                        Php {totalBalance.toFixed(2)}
+                    </p>
                 )}
 
                 <Modal
@@ -542,7 +650,8 @@ function DashboardPage(props) {
     };
 
     const renderSummaryCard = () => {
-
+        const totalBalance = (currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0);
+        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
 
         return (
             <Paper
@@ -550,18 +659,22 @@ function DashboardPage(props) {
                     p: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    height: 380,
+                    height: "100%",
                     textAlign: 'left',
+                    marginBottom: '15px',
                 }}
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
                 <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{`${month} ${year}`}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Expense : Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget: Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
                 <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Budget Limit: Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Balance: Php {((currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0)).toFixed(2)}</p>
+                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0', color: totalBalanceColor }}>
+                    Total Balance: Php {totalBalance.toFixed(2)}
+                </p>
             </Paper>
         );
     };
+
 
     if (!currentUser) {
         return null;
@@ -602,7 +715,6 @@ function DashboardPage(props) {
                             <FilterDate />
                             <Box style={{ paddingRight: '10px' }}>
                                 <Select
-                                    name="dashboard-school-select"
                                     value={selectedSchool}
                                     onChange={(event) => handleSchoolSelect(event.target.value)}
                                     displayEmpty
@@ -654,7 +766,7 @@ function DashboardPage(props) {
                         }}>
                         <Grid container >
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                {renderEditableCard('monthlyExpense')}
+                                {renderEditableCard('totalExpenses')}
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                                 {renderEditableCard('budgetLimit')}
@@ -671,8 +783,7 @@ function DashboardPage(props) {
                                     sx={{
                                         p: 2,
                                         display: 'flex',
-                                        flexDirection: 'column',
-                                        height: 380,
+                                        flexDirection: 'column'
                                     }}
 
                                 >
@@ -682,6 +793,12 @@ function DashboardPage(props) {
                             </Grid>
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                                 {renderSummaryCard()}
+                            </Grid>
+                            <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
+                                <ApexAnnualReport type="Stacked Bar" currentSchool={currentSchool} year={year} />
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                <ApexAnnualReport type="Pie Chart" currentSchool={currentSchool} year={year} />
                             </Grid>
                         </Grid>
                     </Grid>
