@@ -11,15 +11,14 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Select,
-    FormControl,
-    MenuItem,
 } from '@mui/material';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 
 import { useSchoolContext } from '../../Context/SchoolProvider';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
 
-import ConfirmModal from './ConfirmModal';
+import BudgetConfirmModal from './BudgetConfirmModal';
 
 const columns = [
     {
@@ -58,38 +57,12 @@ const emptyDocument = {
     headAccounting: ""
 }
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        },
-    },
-};
-
-const getStyles = (name, personName) => ({
-    fontWeight: "650",
-    color: personName === name ? "#176AF6" : null
-});
-
-export default function AnnualTab() {
-    const { month, months, year, currentSchool, jev, getDocumentBySchoolIdYear, isEditingRef } = useSchoolContext();
+export default function BudgetAllocationContent() {
+    const { month, months, year, currentSchool, jev, getDocumentBySchoolIdYear } = useSchoolContext();
     const [documentsByYear, setDocumentsByYear] = React.useState([]);
-    const [tabMonth, setTabMonth] = React.useState(month); // Initally get current month value
-    const [selectedDocument, setSelectedDocument] = React.useState(null); // Initially get current Document value
     const [input, setInput] = React.useState(0);
     const [confirmOpen, setConfirmOpen] = React.useState(false);
-
-    const handleConfirmClose = () => {
-        setConfirmOpen(false);
-        isEditingRef.current = false;
-    }
-
-    const handleConfirmOpen = () => {
-        setConfirmOpen(true);
-        isEditingRef.current = true;
-    }
+    const [isClicked, setIsClicked] = React.useState(false);
 
     const getDocumentsByYear = React.useCallback(async () => {
         try {
@@ -107,126 +80,125 @@ export default function AnnualTab() {
         }
     }, [currentSchool, year, getDocumentBySchoolIdYear]);
 
+    const handleConfirmClose = () => {
+        setConfirmOpen(false);
+    }
+
+    const handleConfirmOpen = () => {
+        setConfirmOpen(true);
+    }
+
+    const handleInputChange = (event) => {
+        let modifiedValue = event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+        setInput(modifiedValue);
+    }
+
+    const handleInputClick = () => { setIsClicked(true) }
+
+    const handleInputBlur = () => { setIsClicked(false) }
+
+    const formatNumberDisplay = (number) => {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(number);
+    }
+
+    const formatAnnualNumberDisplay = (number) => {
+        if (isClicked) { return number > 0 ? number : ""; }
+        return formatNumberDisplay(number);
+    }
+
     React.useEffect(() => {
         getDocumentsByYear();
     }, [year, jev, getDocumentsByYear, month]);
 
     React.useEffect(() => {
         if (documentsByYear) {
-            const value = documentsByYear.find(doc => doc.month === tabMonth) || emptyDocument;
-            setInput(value?.cashAdvance || 0);
-            setSelectedDocument(value);
+            const value = documentsByYear.find(doc => doc.month === month) || emptyDocument;
+            setInput(value?.annualBudget || 0);
         }
-    }, [documentsByYear, tabMonth]);
-    console.log(selectedDocument)
+    }, [documentsByYear, month]);
 
-    const handleChangeMonth = (event) => {
-        setTabMonth(event.target.value);
-        if (documentsByYear) {
-            const value = documentsByYear.find(doc => doc.month === tabMonth);
-            setSelectedDocument(value ? value : emptyDocument);
-        }
-    }
-
-    const handleInputChange = (event) => {
-        let modifiedValue = event.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-        setInput(modifiedValue);
-        isEditingRef.current = true;
-    }
-
-    const formatNumberDisplay = (number) => {
-        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
-        return number > 0 ? number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
-    }
+    const ChipInfo = () => {
+        const budgetSet = documentsByYear.some(doc => doc.month === month && doc.annualBudget > 0);
+        return (
+            <Chip
+                label={budgetSet ? "The annual budget has been set." : "The annual budget has not been set."}
+                size="small"
+                color={budgetSet ? "success" : "warning"}
+                variant="outlined"
+            />
+        );
+    };
 
     return (
         <React.Fragment>
             <Typography id="modal-modal-description" sx={{ mt: 1, mb: .5 }}>
-                Set the required or delegated cash advance for each month of the fiscal year
-                <span style={{ fontWeight: 'bold' }}> {year}</span> at
-                <span style={{ fontWeight: 'bold' }}> {currentSchool?.name}</span>.
+                Establish the required or delegated budget for
+                <span style={{ fontWeight: 'bold' }}> {currentSchool?.name} </span>
+                for the entirety of fiscal year
+                <span style={{ fontWeight: 'bold' }}> {year}</span>.
             </Typography>
             <Box sx={
                 {
                     display: "flex",
-                    flexDirection: "row",
+                    flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
-                    height: 80,
+                    height: "100%",
                     width: "100%",
                     borderRadius: 5,
                     border: "1px solid #c7c7c7",
                     mt: 1.5,
-                    mb: 1.5,
-                    p: 1
+                    p: 3,
+                    pb: 2
                 }
             }>
-                <FormControl variant="standard" sx={{ m: 2, minWidth: 90 }}>
-                    <Select
-                        name={"document-month-select"}
-                        sx={{ fontSize: 13, fontWeight: "bold" }}
-                        labelId="demo-simple-select-standard-label"
-                        id="demo-simple-select-standard"
-                        value={tabMonth}
-                        onChange={handleChangeMonth}
-                        label="Age"
-                        inputProps={{ 'aria-label': 'Without label' }}
-                        MenuProps={MenuProps}
-                    >
-                        {months.map((item) => (
-                            <MenuItem
-                                key={item}
-                                value={item}
-                                style={getStyles(item, tabMonth)}
-                            >{item}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                <TextField
-                    // disabled={documentsByYear.some(doc => doc.month === tabMonth)}
-                    disabled={documentsByYear.some(doc => doc.month === tabMonth && doc.cashAdvance > 0)}
-                    variant="standard"
-                    value={input}
-                    inputProps={{
-                        inputMode: 'numeric', // For mobile devices to show numeric keyboard
-                        pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
-                    }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                ₱{/* Replace this with your desired currency symbol */}
-                            </InputAdornment>
-                        ),
-                        style: {
-                            display: 'flex',
-                            alignItems: 'center',
-                            flexDirection: 'row',
-                            justifyContent: "flex-start",
-                            fontWeight: "bold",
-                            borderRadius: 10,
-                            fontSize: 13,
-                            height: 30
-                        }
-                    }}
-                    // onClick={(event) => handleCellClick(column.id, row.id, event)}
-                    onChange={(e) => handleInputChange(e)}
-                // onKeyDown={(e) => {
-                //     if (e.key === 'Enter') {
-                //         e.preventDefault();
-                //         e.target.blur(); // Invoke handleLogin on Enter key press
-                //     }
-                // }} 
-                />
-                <Button
-                    disabled={documentsByYear.some(doc => doc.month === tabMonth && doc.cashAdvance > 0)}
-                    // disabled={!selectedDocument?.id === 0}
-                    sx={[styles.button, { fontSize: 13, m: 2, maxHeight: 35 }]}
-                    onClick={handleConfirmOpen}
-                    variant="contained"
-                >
-                    Save
-                </Button>
+                <Stack spacing={1} sx={{ alignItems: 'center' }}>
+                    <Stack direction="row" spacing={1}>
+                        <TextField
+                            disabled={documentsByYear.some(doc => doc.month === month && doc.annualBudget > 0)}
+                            variant="standard"
+                            value={formatAnnualNumberDisplay(input)}
+                            inputProps={{
+                                inputMode: 'numeric', // For mobile devices to show numeric keyboard
+                                pattern: '[0-9]*',    // HTML5 pattern to restrict input to numeric values
+                            }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        ₱{/* Replace this with your desired currency symbol */}
+                                    </InputAdornment>
+                                ),
+                                style: {
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    flexDirection: 'row',
+                                    justifyContent: "flex-start",
+                                    fontWeight: "bold",
+                                    borderRadius: 10,
+                                    fontSize: 13,
+                                    height: 30
+                                }
+                            }}
+                            onClick={handleInputClick}
+                            onBlur={handleInputBlur}
+                            onChange={(e) => handleInputChange(e)}
+                        />
+                        <Button
+                            disabled={documentsByYear.some(doc => doc.month === month && doc.annualBudget > 0) || !input || input < 1}
+                            sx={[styles.button, { fontSize: 13, ml: 2, mb: 2, maxHeight: 35 }]}
+                            onClick={handleConfirmOpen}
+                            variant="contained"
+                        >
+                            Save
+                        </Button>
+                    </Stack>
+                    <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
+                        <ChipInfo />
+                    </Stack>
+                </Stack>
             </Box>
             <TableContainer sx={{ mt: 2, maxHeight: 250 }}>
                 <Table stickyHeader aria-label="sticky table">
@@ -239,7 +211,6 @@ export default function AnnualTab() {
                                     style={{
                                         minWidth: column.minWidth,
                                         maxWidth: column.maxWidth,
-                                        // backgroundColor: "green",
                                         zIndex: 3,
                                         lineHeight: 1.2,
                                         paddingTop: "7px",
@@ -314,10 +285,8 @@ export default function AnnualTab() {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <ConfirmModal
+            <BudgetConfirmModal
                 open={confirmOpen}
-                month={tabMonth}
-                currentDocument={selectedDocument}
                 handleClose={handleConfirmClose}
                 value={input || 0} />
         </React.Fragment >

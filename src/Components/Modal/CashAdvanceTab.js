@@ -5,13 +5,19 @@ import { useSchoolContext } from '../../Context/SchoolProvider';
 import ConfirmModal from './ConfirmModal';
 
 export default function CashAdvanceTab({ handleClose }) {
-    const { month, currentSchool, currentDocument, jev } = useSchoolContext();
+    const { month, currentSchool, currentDocument, jev, isEditingRef } = useSchoolContext();
     const [amount, setAmount] = React.useState(0)
     const [confirmOpen, setConfirmOpen] = React.useState(false);
 
-    const handleConfirmClose = () => setConfirmOpen(false)
+    const handleConfirmClose = () => {
+        setConfirmOpen(false);
+        isEditingRef.current = false;
+    }
 
-    const handleConfirmOpen = () => setConfirmOpen(true)
+    const handleConfirmOpen = () => {
+        setConfirmOpen(true);
+        isEditingRef.current = true;
+    }
 
     React.useEffect(() => {
         if (currentDocument) {
@@ -23,9 +29,15 @@ export default function CashAdvanceTab({ handleClose }) {
         const value = event.target.value;
         const regex = /^[0-9]*$/;
 
+        isEditingRef.current = true;
+
         if (regex.test(value)) {
             setAmount(value);
         }
+    }
+
+    const blurChange = () => {
+        isEditingRef.current = false;
     }
 
     return (
@@ -41,6 +53,7 @@ export default function CashAdvanceTab({ handleClose }) {
                 value={amount || 0}
                 disabled={!!currentDocument?.cashAdvance} // Convert to boolean; Disabled if cash advance already set
                 onChange={(event) => handleChange(event)}
+                onBlur={() => blurChange()}
                 label="Input Amount"
             />
             <Button

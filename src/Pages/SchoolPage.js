@@ -1,5 +1,5 @@
-import '../App.css';
 import React from 'react';
+import '../App.css';
 import PropTypes from 'prop-types';
 import {
     Paper,
@@ -8,24 +8,28 @@ import {
     Container,
     Grid,
     Box,
-    Button
+    Button,
+    Typography
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import Badge from "@mui/material/Badge";
+import IconButton from "@mui/material/IconButton";
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
-import {
-    FilterDate,
-    SchoolFieldsFilter,
-    SchoolSearchFilter
-} from '../Components/Filters/FilterDate';
+import FilterDate from '../Components/Filters/FilterDate';
+import SchoolSearchFilter from '../Components/Filters/SchoolSearchFilter';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 
 import { useSchoolContext } from '../Context/SchoolProvider';
-// import { useNavigationContext } from '../Context/NavigationProvider';
 
 import DocumentTable from '../Components/Table/LRTable';
 import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
-import BudgetModal from '../Components/Modal/BudgetModal';
+import { useNavigationContext } from '../Context/NavigationProvider';
+import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
+import ApprovalModal from '../Components/Modal/ApprovalModal';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -62,33 +66,75 @@ export function a11yProps(index) {
     };
 }
 
+const StyledBadge = styled(Badge)(({ theme }) => ({
+    '& .MuiBadge-badge': {
+        right: -3,
+        top: 13,
+        border: `2px solid ${theme.palette.background.paper}`,
+        padding: '0 4px',
+    },
+}));
+
 function SchoolPage(props) {
-    const { year, month, setIsAdding, currentDocument, currentSchool, updateLr, updateJev, value, setValue, isLoading } = useSchoolContext();
+    const { currentUser } = useNavigationContext();
+    const {
+        year,
+        month,
+        setIsAdding,
+        isEditingRef,
+        currentDocument,
+        currentSchool,
+        lrNotApproved,
+        updateLr,
+        updateJev,
+        value,
+        setValue
+    } = useSchoolContext();
+
     const [open, setOpen] = React.useState(false);
+    const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
 
-    const handleOpen = () => setOpen(true);
+    const handleOpen = () => {
+        setOpen(true);
+        isEditingRef.current = true;
+    }
 
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false);
+        isEditingRef.current = false;
+    }
+
+    const handleOpenApproval = () => {
+        setOpenApproval(true);
+    }
+
+    const handleCloseApproval = () => {
+        setOpenApproval(false);
+    }
 
     const exportDocument = async () => {
         setExportIsLoading(true);  // Start loading
         try {
-            if (currentSchool && currentDocument) {
+            if (currentSchool && currentDocument && currentUser) {
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_DOWNLOAD}`, {
+                    userId: currentUser.id,
                     documentId: currentDocument.id,
                     schoolId: currentSchool.id,
                     year,
                     month
                 }, {
-                    responseType: 'blob' // Set the response type to 'blob' to handle binary data
+                    responseType: 'blob',  // Set the response type to 'blob' to handle binary data
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
                 });
 
                 // Extract blob data from the response
                 const blobData = new Blob([response.data], { type: 'application/octet-stream' });
 
                 // Use FileSaver.js to trigger file download
-                saveAs(blobData, 'LR-2024.xlsx');
+                saveAs(blobData, `Documents-${month}-${year}.zip`);
 
                 if (blobData) {
                     console.log("Successfully exported document")
@@ -107,13 +153,13 @@ function SchoolPage(props) {
 
     // Ensures to update lr and jev only if its not loading and there's a current document
     React.useEffect(() => {
-        if (!isLoading && currentDocument) {
-            console.log("Schools useEffect: Document fetched, updating lr and jev");
-            updateLr();
-            updateJev();
-        }
+        console.log("Schools useEffect: Document fetched, updating lr and jev");
+        // update lr and jev has currentDocument as a dependency
+        // fetch lr and jev per document change
+        updateLr();
+        updateJev();
         setIsAdding(false); //reset state to allow addFields again
-    }, [year, month, updateLr, updateJev, setIsAdding, currentDocument, isLoading]);
+    }, [currentDocument, updateLr, updateJev, setIsAdding, value]); // Listen to "value" when changing tabs; reset isAdding
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -128,15 +174,26 @@ function SchoolPage(props) {
                             styles.header, {
                                 p: 2,
                                 display: 'flex',
-                                flexDirection: 'row'
+                                flexDirection: 'row',
+                                justifyContent: 'space-between'
                             }
                         ]}
                         elevation={0}
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
                             <FilterDate />
-                            <SchoolFieldsFilter />
                             <SchoolSearchFilter />
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: "center" }}>
+                            <Typography
+                                sx={{ color: "#252733", fontWeight: "bold", fontSize: "1.2rem" }}
+                                component="h1"
+                                color="inherit"
+                                noWrap
+                            >
+                                {`${month} ${year}`}
+                            </Typography>
+                            <CalendarMonthIcon sx={{ ml: 1, color: "#f44133" }} />
                         </Box>
                     </Paper>
                 </Grid>
@@ -158,7 +215,7 @@ function SchoolPage(props) {
                                         height: "100%",
                                     }}
                                     >
-                                        <DocumentSummary />
+                                        <DocumentSummary setOpen={() => handleOpen()} />
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} sm={4} md={4} lg={6}>
@@ -172,7 +229,7 @@ function SchoolPage(props) {
                                         }}
                                     >
                                         <Button
-                                            disabled={exportIsLoading}
+                                            disabled={exportIsLoading || currentDocument.id === 0 || !currentDocument}
                                             variant="contained"
                                             sx={{ backgroundColor: '#4A99D3' }}
                                             onClick={() => exportDocumentOnClick()}
@@ -188,6 +245,7 @@ function SchoolPage(props) {
                             <Grid item xs={12} md={12} lg={12}>
                                 <Box sx={{
                                     display: 'flex',
+                                    flexDirection: 'row',
                                     overflow: 'auto', //if overflow, hide it
                                     overflowWrap: "break-word",
                                 }}>
@@ -197,18 +255,26 @@ function SchoolPage(props) {
                                         aria-label="basic tabs example">
                                         <Tab sx={styles.tab} label="LR & RCD" {...a11yProps(0)} />
                                         <Tab sx={styles.tab} label="JEV" {...a11yProps(1)} />
-
                                     </Tabs>
                                     <Button
                                         sx={[{ minWidth: "90px" }, open && { fontWeight: 'bold' }]}
                                         onClick={handleOpen}
                                     >
-                                        Budget
+                                        Budget Allocation
                                     </Button>
-                                    <BudgetModal
-                                        open={open}
-                                        handleClose={handleClose}
-                                    />
+                                    <IconButton
+                                        aria-label="open-approval"
+                                        onClick={handleOpenApproval}
+                                        sx={{
+                                            color: "#C5C7CD",
+                                            marginLeft: "auto",
+                                            pr: 3
+                                        }}
+                                    >
+                                        <StyledBadge badgeContent={lrNotApproved.length} color="secondary">
+                                            <FactCheckIcon />
+                                        </StyledBadge>
+                                    </IconButton>
                                 </Box>
                             </Grid>
                             {/*Document Tables*/}
@@ -224,6 +290,14 @@ function SchoolPage(props) {
                     </Paper>
                 </Grid>
             </Grid>
+            <ApprovalModal
+                open={openApproval}
+                handleClose={handleCloseApproval}
+            />
+            <BudgetAllocationModal
+                open={open}
+                handleClose={handleClose}
+            />
         </Container >
     );
 }
@@ -235,7 +309,6 @@ const styles = {
         fontFamily: 'Mulish-Regular',
         buttons: {
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
             width: '650px', //adjust the container
         }

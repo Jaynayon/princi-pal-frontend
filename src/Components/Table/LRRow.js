@@ -6,52 +6,74 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import MenuItem from '@mui/material/MenuItem';
-import { Menu, TextField } from '@mui/material';
+import { Menu } from '@mui/material';
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import UacsFilter from '../Filters/UacsFilter';
+import UacsSelect from '../Select/UacsSelect';
+import HistoryModal from '../Modal/HistoryModal';
+import LRDate from '../Picker/LRDate';
+import "react-datepicker/dist/react-datepicker.css";
+import NatureOfPaymentSelect from '../Select/NatureOfPaymentSelect';
+import LRTextField from '../Input/LRTextField';
+import ExceedWarningModal from '../Modal/ExceedWarningModal';
 
 function LRRow(props) {
     const { page, rowsPerPage } = props;
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
-    const [inputValue, setInputValue] = useState('Initial Value');
-    const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
-    const [dateError, setDateError] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [warningOpen, setWarningOpen] = useState(false);
+    const [error, setError] = useState(true);
+
+    const handleWarningOpen = () => setWarningOpen(true);
+
+    const handleWarningClose = () => setWarningOpen(false);
+
+    const handleOpen = () => setOpen(true);
+
+    const handleClose = () => setOpen(false);
 
     const {
         addFields,
+        formatDate,
         isAdding,
+        isEditingRef,
+        isEditable,
         currentDocument,
         lr,
-        updateLr,
-        updateLrById,
         deleteLrByid,
         setLr,
         fetchDocumentData,
         createLrByDocId,
-        value,
-        createNewDocument,
-        month,
-        jev
+        value
     } = useSchoolContext();
 
-    useEffect(() => {
-        console.log("RecordsRow useEffect")
-        if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
-            addFields(isAdding);
+    const createLrByDocumentId = async (doc_id, obj) => {
+        try {
+            const response = await createLrByDocId(doc_id, obj);
+            if (response) {
+                console.log(`LR is created`);
+            } else {
+                console.log("LR not created");
+            }
+            await fetchDocumentData();
+        } catch (error) {
+            console.error('Error fetching document:', error);
         }
-    }, [isAdding, addFields, value]);
+    }
 
     const handleCellClick = (colId, rowId, event) => {
+        isEditingRef.current = true; // user clicked a cell
         setEditingCell({ colId, rowId });
-        setInitialValue(event.target.value); // Save the initial value of the clicked cell
-        setInputValue(event.target.value); // Set input value to the current value
         console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
+
+    const handleBlurCell = () => {
+        isEditingRef.current = false;
+    }
 
     const handleDeleteOpen = (event, index) => {
         setDeleteAnchorEl(event.currentTarget);
@@ -64,72 +86,38 @@ function LRRow(props) {
     };
 
     const handleDelete = async (rowId) => {
-        // Implement delete functionality here
-        console.log("Delete button clicked for row at index:", selectedIndex);
-        console.log("Delete lr id: " + rowId)
-        deleteLrByid(rowId);
+        await deleteLrByid(rowId);
         handleMenuClose();
     };
 
-    const createLrByDocumentId = async (doc_id, obj) => {
-        try {
-            const response = await createLrByDocId(doc_id, obj);
-            if (response) {
-                console.log(`LR is created`);
-            } else {
-                console.log("LR not created");
-            }
-            fetchDocumentData();
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    }
-
-    //If lr length is greater than one; reload to fetch documents and lr createLrByDocId
-    //else, set lr to empty
+    // Fetch document data to get Document and LR; reload
     const handleNewRecordCancel = async () => {
-        console.log("cancel");
         await fetchDocumentData();
-        if (lr.length > 1) {
-            await fetchDocumentData();
-        } else {
-            // setReload(!reload); //just to reload school.js to fetch lr data
-            updateLr(); //just to reload school.js to fetch lr data
-        }
-        setDateError(false); //reset date error state
     }
 
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
-        console.log("accept");
-        const rowIndex = lr.findIndex(row => row.id === rowId);
-        if (!dateError) {
-            if (lr[rowIndex]["date"] === "") {
-                setDateError(true)
-            } else {
-                const rowIndex = lr.findIndex(row => row.id === rowId);
-                // jev length upon initialization will always be > 2 or not null/undefined
-                if (!currentDocument?.id || !jev || (Array.isArray(jev) && jev.length === 0)) { //if there's no current document or it's not yet existing
-                    await createNewDocument(lr[rowIndex], month);
-                } else {
-                    try {
-                        await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
-                    } catch (error) {
-                        console.error('Error creating LR: ', error);
-                    }
-                }
-            }
+        if (!error) {
+            const rowIndex = lr.findIndex(row => row.id === rowId);
+            await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
         }
     }
 
-    const handleInputChange = (colId, rowId, event) => {
-        let modifiedValue = event.target.value
+    const handleInputChange = async (colId, rowId, event) => {
+        let modifiedValue = colId === "date" ? formatDate(event) : event.target.value
+
         // Find the index of the object with matching id
         const rowIndex = lr.findIndex(row => row.id === rowId);
 
         if (colId === "amount") {
             // Replace any characters that are not digits or periods
             modifiedValue = modifiedValue.replace(/[^0-9.]/g, '');
+            console.log(modifiedValue)
+            if (modifiedValue === 0 || modifiedValue === "" || !modifiedValue) {
+                setError(true);
+            } else {
+                setError(false);
+            }
         }
 
         if (rowIndex !== -1) {
@@ -141,62 +129,18 @@ function LRRow(props) {
 
             // Update the state with the modified rows
             setLr(updatedRows);
-            setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
         } else {
             console.error(`Row with id ${rowId} not found`);
         }
     };
 
-    const handleInputBlur = async (colId, rowId) => {
-        setEditingCell(null);
-        // Perform any action when input is blurred (e.g., save the value)
-        // Only applies if it's not the new row
-        if (rowId !== 3) {
-            if (inputValue !== initialValue) {
-                console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-                await updateLrById(colId, rowId, inputValue);
-            }
-            console.log('Value saved:', inputValue);
+    useEffect(() => {
+        console.log("RecordsRow useEffect")
+        if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
+            setError(true); // set error to true by default per LR adding
+            addFields(isAdding);
         }
-        // Perform validation for new row/addFields/ add row feature
-        else {
-            if (colId === "date") { setDateError(!isValidDateFormat(inputValue)); }
-        }
-    };
-
-    // Function to format a number with commas and two decimal places
-    const formatNumber = (number, colId, rowId) => {
-        //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
-        if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
-            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
-        }
-        return "₱" + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    };
-
-    const displayError = (colId, rowId) => {
-        const rowIndex = lr.findIndex(row => row.id === rowId);
-        if (colId === "date" && rowId === 3 && dateError) {
-            if (lr[rowIndex]["date"] === "") {
-                return "Empty field"
-            }
-            return "Invalid format";
-        }
-    }
-
-    const isError = (colId, rowId) => {
-        if (colId === "date" && rowId === 3 && dateError) {
-            return true;
-        }
-        return false;
-    }
-
-    function isValidDateFormat(dateString) {
-        // Define the regex pattern for m/d/yyyy or mm/dd/yyyy
-        const regexPattern = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{4}$/;
-
-        // Check if the date string matches the regex pattern
-        return regexPattern.test(dateString);
-    }
+    }, [isAdding, addFields, value]);
 
     return (
         <React.Fragment>
@@ -208,6 +152,7 @@ function LRRow(props) {
                         <TableRow key={uniqueKey} hover role="checkbox" tabIndex={-1}>
                             {props.columns.map((column) => {
                                 const value = row[column.id];
+                                const selectedDate = value ? new Date(value) : new Date();
 
                                 return (
                                     <TableCell
@@ -218,67 +163,68 @@ function LRRow(props) {
                                             {
                                                 minWidth: column.minWidth,
                                                 maxWidth: column.maxWidth,
+                                                pointerEvents: !isEditable && 'none' // disallow editing
                                             }
                                         ]}
                                         onClick={(event) => handleCellClick(column.id, row.id, event)}
+                                        onBlur={() => handleBlurCell()}
                                     >
-                                        {/*UACS field*/}
-                                        {column.id === "objectCode" ?
-                                            <Box sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}>
-                                                <UacsFilter
-                                                    value={value} // objectCode value
-                                                    rowId={row.id} // lr id
-                                                    handleInputChange={handleInputChange} //handle input change on current row
-                                                />
-                                            </Box>
-                                            :
-                                            <Box
-                                                style={
-                                                    editingCell &&
-                                                        editingCell.colId === column.id &&
-                                                        editingCell.rowId === row.id &&
-                                                        row.id !== 3
-                                                        ? styles.divInput
-                                                        : null
-                                                }
-                                            >
-                                                <TextField
-                                                    //variant='standard'
-                                                    id={lr?.id}
-                                                    value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
-                                                    error={isError(column.id, row.id)}
-                                                    helperText={displayError(column.id, row.id)}
-                                                    sx={{
-                                                        "& fieldset": { border: row.id !== 3 && 'none' }
-                                                    }}
-                                                    FormHelperTextProps={{ style: { position: "absolute", bottom: "-20px" } }}
-                                                    InputProps={{
-                                                        //disableUnderline: true,
-                                                        style: {
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            flexDirection: 'row',
-                                                            justifyContent: "flex-start",
-                                                            fontSize: 14,
-                                                            height: 40
-                                                        }
-                                                    }}
-                                                    onChange={(event) =>
-                                                        handleInputChange(column.id, row.id, event)
-                                                    }
-                                                    onBlur={() => handleInputBlur(column.id, row.id)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            e.preventDefault();
-                                                            e.target.blur(); // Invoke handleLogin on Enter key press
-                                                        }
-                                                    }}
-                                                />
-                                            </Box>
-                                        }
+                                        {(() => {
+                                            const isNatureOfPayment = column.id === "natureOfPayment";
+                                            const isObjectCodeColumn = column.id === "objectCode";
+                                            const isDateColumn = column.id === "date";
+                                            const isEditing = editingCell?.colId === column.id && editingCell?.rowId === row.id && row.id !== 3;
+
+                                            if (isDateColumn) {
+                                                return (
+                                                    <LRDate
+                                                        selected={selectedDate}
+                                                        colId={column.id}
+                                                        rowId={row.id}
+                                                        onChange={handleInputChange}
+                                                    />
+                                                );
+                                            }
+
+                                            if (isObjectCodeColumn) {
+                                                return (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <UacsSelect
+                                                            name={`lr-uacs-select-${lr?.id}`}
+                                                            value={value} // objectCode value
+                                                            rowId={row.id} // lr id
+                                                            handleInputChange={handleInputChange} //handle input change on current row
+                                                        />
+                                                    </Box>
+                                                );
+                                            }
+
+                                            if (isNatureOfPayment) {
+                                                return (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <NatureOfPaymentSelect
+                                                            name={`lr-nature-payment-select-${lr?.id}`}
+                                                            value={value} // natureOfPayment value
+                                                            rowId={row.id} // lr id
+                                                            handleInputChange={handleInputChange} //handle input change on current row
+                                                        />
+                                                    </Box>
+                                                );
+                                            }
+
+                                            return (
+                                                <Box style={isEditing ? styles.divInput : null}>
+                                                    <LRTextField
+                                                        row={row}
+                                                        column={column}
+                                                        editingCell={editingCell}
+                                                        setEditingCell={setEditingCell}
+                                                        value={value}
+                                                        setError={setError}
+                                                    />
+                                                </Box>
+                                            );
+                                        })()}
                                     </TableCell>
                                 );
                             })}
@@ -324,7 +270,14 @@ function LRRow(props) {
                                             open={Boolean(deleteAnchorEl && selectedIndex === index)}
                                             onClose={handleMenuClose}
                                         >
-                                            <MenuItem onClick={() => handleDelete(row.id)}>Delete</MenuItem>
+                                            <MenuItem onClick={() => handleOpen()}>History</MenuItem>
+                                            <MenuItem
+                                                disabled={!isEditable}
+                                                sx={{ color: "red" }}
+                                                onClick={() => handleDelete(row.id)}
+                                            >
+                                                Delete
+                                            </MenuItem>
                                         </Menu>
                                     </Box>
                                 )}
@@ -332,7 +285,8 @@ function LRRow(props) {
                         </TableRow>
                     );
                 })}
-
+            <ExceedWarningModal open={warningOpen} onClose={handleWarningClose} />
+            <HistoryModal open={open} handleClose={handleClose} handleCloseParent={handleMenuClose} index={selectedIndex} />
         </React.Fragment>
     );
 }
@@ -352,7 +306,7 @@ const styles = {
     },
     divInput: {
         borderRadius: "8px",
-        border: "1px solid #ccc",
+        boxShadow: "0 0 0 2px #1976d2",
         background: "transparent",
         outline: "none",
     }

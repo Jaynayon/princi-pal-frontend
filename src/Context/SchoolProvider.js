@@ -6,15 +6,6 @@ export const SchoolContext = createContext();
 
 export const useSchoolContext = () => useContext(SchoolContext);
 
-const emptyDocument = {
-    id: 0,
-    budget: 0,
-    cashAdvance: 0,
-    claimant: "",
-    sds: "",
-    headAccounting: ""
-}
-
 // Initialize current date to get current month and year
 const currentDate = new Date();
 const currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Get full month name
@@ -29,9 +20,20 @@ const months = [
 const startYear = 2021;
 const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (startYear + i).toString());
 
+const emptyDocument = {
+    id: 0,
+    year: currentYear,
+    month: currentMonth,
+    budget: 0,
+    cashAdvance: 0,
+    claimant: "",
+    sds: "",
+    headAccounting: ""
+}
+
 export const SchoolProvider = ({ children }) => {
     // Set initial state for month and year using current date
-    const { currentSchool, navigationLoading } = useNavigationContext();
+    const { currentSchool, setCurrentSchool, currentUser, selected } = useNavigationContext();
 
     // Document Tabs: LR & RCD, JEV
     const [value, setValue] = React.useState(0);
@@ -47,39 +49,69 @@ export const SchoolProvider = ({ children }) => {
     const prevMonthRef = useRef(monthIndex === 0 ? 11 : monthIndex);
     const prevYearRef = useRef(monthIndex === 0 ? (yearIndex === 0 ? years.length - 1 : yearIndex - 1) : yearIndex);
 
-    // States needed for adding LR
+    // States needed for adding, searching, or editing entities
     const [isAdding, setIsAdding] = useState(false);
+    const isEditingRef = useRef(false);
+    const isSearchingRef = useRef(false);
     const [addOneRow, setAddOneRow] = useState(false);
+    const [objectCodes, setObjectCodes] = useState([]);
+    const [isEditable, setIsEditable] = useState(false);
 
     // Document, LR, and JEV entities
     const [currentDocument, setCurrentDocument] = useState(emptyDocument);
     const [lr, setLr] = useState([]);
+    const [lrNotApproved, setLrNotApproved] = useState([]);
     const [jev, setJev] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(false);
-
     const fetchDocumentData = useCallback(async () => {
-        setIsLoading(true);  // Start loading
         try {
-            if (!navigationLoading && currentSchool) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`)
-
-                console.log(response.data)
-                setCurrentDocument(response.data);
+            if (currentSchool) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${currentSchool.id}/${year}/${month}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                setCurrentDocument(response.data || emptyDocument);
             }
         } catch (error) {
             setCurrentDocument(emptyDocument)
             console.error('Error fetching document:', error);
-        } finally {
-            setIsLoading(false);  // End loading
         }
-    }, [currentSchool, setCurrentDocument, year, month, navigationLoading]);
+    }, [currentSchool, setCurrentDocument, year, month]);
+
+    const fetchDocumentBySchoolId = useCallback(async (schoolId) => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${schoolId}/${year}/${month}`, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
+            setCurrentDocument(response.data);
+        } catch (error) {
+            setCurrentDocument(emptyDocument)
+            console.error('Error fetching document:', error);
+        }
+    }, [setCurrentDocument, year, month]);
+
+    const fetchUacs = useCallback(async () => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_UACS}/all`, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
+            setObjectCodes(response.data || []);
+        } catch (error) {
+            console.error('Error validating token:', error);
+        }
+    }, [setObjectCodes]);
 
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
-            if (currentDocument) {
+            if (currentDocument && currentUser) {
                 const response = await axios.post(`${process.env.REACT_APP_API_URL_LR}/create`, {
                     documentsId,
+                    userId: currentUser.id,
                     date: obj.date,
                     orsBursNo: obj.orsBursNo,
                     particulars: obj.particulars,
@@ -89,7 +121,8 @@ export const SchoolProvider = ({ children }) => {
                     natureOfPayment: obj.natureOfPayment
                 }, {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
 
@@ -99,7 +132,7 @@ export const SchoolProvider = ({ children }) => {
             console.error('Error fetching document:', error);
             return null;
         }
-    }, [currentDocument]);
+    }, [currentDocument, currentUser]);
 
     const updateDocumentById = useCallback(async (docId, description, value) => {
         // Construct the payload object based on the provided colId
@@ -114,7 +147,8 @@ export const SchoolProvider = ({ children }) => {
         try {
             const response = await axios.patch(`${process.env.REACT_APP_API_URL_DOC}/${docId}`, payload, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             })
 
@@ -125,6 +159,29 @@ export const SchoolProvider = ({ children }) => {
             return null;
         }
     }, []);
+
+    const initializeDocuments = useCallback(async (annualBudget) => {
+        try {
+            if (currentSchool) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_DOC}/initialize`, {
+                    schoolId: currentSchool.id,
+                    month,
+                    year,
+                    annualBudget
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+
+                return response.status === 201;
+            }
+        } catch (error) {
+            console.error('Error fetching document:', error);
+            return null;
+        }
+    }, [currentSchool, month, year]);
 
     const createNewDocument = useCallback(async (obj, month, cashAdvanceValue) => {
         try {
@@ -142,7 +199,8 @@ export const SchoolProvider = ({ children }) => {
                     year: yearValue
                 }, {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
 
@@ -174,30 +232,46 @@ export const SchoolProvider = ({ children }) => {
 
                     // return response.data; // Return the created document data
                     setCurrentDocument(response.data || emptyDocument);
-                    // fetchDocumentData();
+                    fetchDocumentData();
                 }
             }
         } catch (error) {
             console.error('Error fetching document:', error);
             return null;
         }
-    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById]);
+    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById, fetchDocumentData]);
+
+    const getDocumentBySchoolIdYear = async (school_id, year) => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}`, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
+            return response.data
+        } catch (error) {
+            console.log(error.response.data)
+            return null;
+        }
+    };
 
     const updateJev = useCallback(async () => {
         try {
-            if (!isLoading && currentDocument.id !== 0) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_JEV}/documents/${currentDocument.id}`);
-                setJev(response.data || [])
-                // Handle response as needed
-                console.log(response.data);
-
+            if (currentDocument.id !== 0) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/jev/documents/${currentDocument.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                setJev(response.data || []);
             } else {
                 setJev([]); //meaning it's empty 
             }
         } catch (error) {
+            setJev([]);
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setJev, isLoading]);
+    }, [currentDocument, setJev]);
 
     const updateJevById = async (colId, rowId, value) => {
         let obj = {}
@@ -210,59 +284,83 @@ export const SchoolProvider = ({ children }) => {
         try {
             const response = await axios.patch(`${process.env.REACT_APP_API_URL_JEV}/${rowId}`, obj, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             })
-            if (response) {
-                console.log(response.data);
-            }
             return response.status === 200;
         } catch (error) {
             console.error('Error fetching lrs by document id:', error);
-            //throw new Error("Get lr failed. Please try again later.");
             return null;
         }
     };
 
     const updateLr = useCallback(async () => {
         try {
-            if (!isLoading && currentDocument.id !== 0) {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}`);
-                setLr(response.data || [])
-                // Handle response as needed
-                console.log(response.data);
+            if (currentDocument.id !== 0) {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/approved`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                const notApproved = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/unapproved`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                setLr(response.data || []);
+                setLrNotApproved(notApproved.data || []);
+                console.log(notApproved.data)
             } else {
                 setLr([]); //meaning it's empty 
+                setLrNotApproved([]);
             }
         } catch (error) {
+            setLr([]);
+            setLrNotApproved([]);
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setLr, isLoading]);
+    }, [currentDocument, setLr]);
 
     const updateLrById = async (colId, rowId, value) => {
-        let obj = {}
+        let obj = { userId: currentUser.id }
 
         // Construct the payload object based on the provided colId
-        if (colId === "amount") {
-            obj = { amount: value };
-        } else if (colId === "particulars") {
-            obj = { particulars: value };
-        } else if (colId === "orsBursNo") {
-            obj = { orsBursNo: value };
-        } else if (colId === "date") {
-            obj = { date: value };
-        } else if (colId === "objectCode") {
-            obj = { objectCode: value };
-        } else if (colId === "payee") {
-            obj = { payee: value };
-        } else if (colId === "natureOfPayment") {
-            obj = { natureOfPayment: value };
+        switch (colId) {
+            case "amount":
+                obj.amount = value;
+                break;
+            case "particulars":
+                obj.particulars = value;
+                break;
+            case "orsBursNo":
+                obj.orsBursNo = value;
+                break;
+            case "date":
+                obj.date = value;
+                break;
+            case "objectCode":
+                obj.objectCode = value;
+                break;
+            case "payee":
+                obj.payee = value;
+                break;
+            case "natureOfPayment":
+                obj.natureOfPayment = value;
+                break;
+            case "approved":
+                obj.approved = value;
+                break;
+            default:
+                console.warn("Invalid colId:", colId); // Handle unexpected colId
+                break;
         }
 
         try {
             const response = await axios.patch(`${process.env.REACT_APP_API_URL_LR}/${rowId}`, obj, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             })
 
@@ -276,19 +374,25 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    }
+    };
 
     const deleteLrByid = async (rowId) => {
         try {
-            const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}`)
-            if (response) {
-                console.log(response.data)
-            }
+            if (currentUser) {
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}/user/${currentUser.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                if (response) {
+                    console.log(response.data)
+                }
 
-            if (response.status === 200) {
-                console.log(`LR with id: ${rowId} is deleted`);
-            } else {
-                console.log("LR not deleted");
+                if (response.status === 200) {
+                    console.log(`LR with id: ${rowId} is deleted`);
+                } else {
+                    console.log("LR not deleted");
+                }
             }
             fetchDocumentData();
         } catch (error) {
@@ -296,34 +400,103 @@ export const SchoolProvider = ({ children }) => {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // Convert to Date object
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based, so +1
+        const day = date.getDate().toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${month}/${day}/${year}`; // Return formatted date as MM/DD/YYYY
+    };
+
     const addFields = useCallback((isAdding) => {
         let newLr = {
             id: 3,
-            date: '',
+            date: formatDate(new Date()), //default date: today
             orsBursNo: '',
             particulars: '',
             amount: 0,
-            objectCode: '5020502001', //predefined option
+            objectCode: objectCodes[0].code, //predefined option '5020502001'
             payee: '',
             natureOfPayment: 'Cash'
         }
 
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
-    }, [])
+    }, [objectCodes]);
+
+    // Function to check if the document is editable
+    const isDocumentEditable = (docYear, docMonth) => {
+        const monthOrder = months.findIndex(month => month === docMonth);
+        const currentMonthOrder = months.findIndex(month => month === currentMonth);
+        const documentDate = new Date(docYear, monthOrder);
+        const twoMonthsAgo = new Date(currentYear, currentMonthOrder - 2, 1); // Date two months behind the current month
+
+        return documentDate >= twoMonthsAgo;
+    };
 
     useEffect(() => {
-        console.log("SchoolProvider useEffect: update document");
-        fetchDocumentData();
-    }, [fetchDocumentData]); // Run effect only on mount and unmount
+        // Assuming document.year and document.month are provided in numeric format
+        const editable = isDocumentEditable(currentDocument.year, currentDocument.month);
+        setIsEditable(editable);
+    }, [currentDocument]);
+
+    useEffect(() => {
+        if (objectCodes.length === 0) {
+            fetchUacs();
+        }
+    }, [fetchUacs, objectCodes]); // Run effect only on mount and unmount
+
+    useEffect(() => {
+        let timeoutId;
+
+        const updateDocumentData = () => {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
+                fetchDocumentData().finally(() => {
+                    // Set the next timeout after the fetch is complete
+                    timeoutId = setTimeout(updateDocumentData, 10000); // 10 seconds
+                });
+            } else {
+                timeoutId = setTimeout(updateDocumentData, 10000); // 10 seconds
+            }
+        };
+
+        // Check if user is in school tab or dashboard
+        if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
+            updateDocumentData();
+        }
+
+        // Cleanup function to clear the timeout
+        return () => clearTimeout(timeoutId);
+
+    }, [fetchDocumentData, isAdding, currentUser.schools, selected]);
 
     return (
         <SchoolContext.Provider value={{
-            prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years,
-            lr, setLr, setCurrentDocument, currentDocument,
-            addFields, isAdding, setIsAdding, addOneRow, setAddOneRow, updateLr, fetchDocumentData,
-            currentSchool, value, setValue, updateJev, updateJevById, jev, setJev, createNewDocument,
-            isLoading, setIsLoading, createLrByDocId, updateDocumentById, deleteLrByid,
-            updateLrById
+            prevMonthRef, prevYearRef,
+            value, setValue,
+            month, setMonth,
+            year, setYear,
+            months, years,
+            lr, setLr, updateLr,
+            lrNotApproved,
+            jev, setJev, updateJev,
+            currentDocument, setCurrentDocument,
+            emptyDocument,
+            addFields, formatDate,
+            isAdding, setIsAdding,
+            isEditingRef,
+            isSearchingRef,
+            isEditable,
+            addOneRow, setAddOneRow,
+            currentSchool, setCurrentSchool,
+            fetchDocumentData,
+            fetchDocumentBySchoolId,
+            createNewDocument, updateDocumentById, getDocumentBySchoolIdYear,
+            initializeDocuments,
+            createLrByDocId, deleteLrByid, updateLrById,
+            updateJevById,
+            objectCodes
         }}>
             {children}
         </SchoolContext.Provider>

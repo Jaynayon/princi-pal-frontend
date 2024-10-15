@@ -1,16 +1,17 @@
 import { useState } from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { TextField, InputAdornment, IconButton, Button, Typography, Container, Grid } from "@mui/material";
-import RestService from "../Services/RestService";
 import { Link } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Box from '@mui/material/Box';
+import { useAppContext } from "../Context/AppProvider";
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
+    const { authenticateUser } = useAppContext();
 
     const handleShowPasswordClick = () => {
         setShowPassword(prevShowPassword => !prevShowPassword);
@@ -19,8 +20,8 @@ const LoginPage = () => {
     const handleBtnRegister = () => {
         // Logic for handling register button click
         // Redirect to the registration page
-        window.location.href = "http://localhost:3000/register";
-    }
+        window.location.href = `${process.env.REACT_APP_FRONTEND_URL}/register`;
+    };
 
     const handleLogin = async () => {
         try {
@@ -39,12 +40,9 @@ const LoginPage = () => {
             }
 
             // Make a POST request to the backend to validate the credentials
-            const response = await RestService.authenticateUser(emailValue, passwordValue);
+            const response = await authenticateUser(emailValue, passwordValue);
 
-            if (response) {
-                // Credentials are valid, set isLoggedIn to true
-                window.location.href = "http://localhost:3000/dashboard";
-            } else {
+            if (!response) {
                 // Invalid credentials, display error message
                 setLoginError('Incorrect email or password.');
             }

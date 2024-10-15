@@ -1,8 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React from 'react'
 import Button from '@mui/material/Button';
 import SortIcon from '@mui/icons-material/Sort';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import SearchIcon from '@mui/icons-material/Search';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -16,23 +14,7 @@ import IconButton from '@mui/material/IconButton';
 import Popover from '@mui/material/Popover';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 
-export function SchoolFieldsFilter() {
-    return (
-        <React.Fragment>
-            <Button variant="text" >
-                <FilterAltIcon sx={styles.icon} />
-                <Typography
-                    noWrap
-                    style={styles.description}
-                >
-                    Filter
-                </Typography>
-            </Button>
-        </React.Fragment>
-    )
-}
-
-export function FilterDate() {
+export default function FilterDate() {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const { prevMonthRef, prevYearRef, month, setMonth, year, setYear, months, years } = useSchoolContext();
@@ -227,41 +209,6 @@ export function FilterDate() {
     );
 }
 
-export function SchoolSearchFilter() {
-    const [input, setInput] = useState('');
-
-    const handleInputChange = (event) => {
-        setInput(event.target.value)
-    }
-
-    const handleInputBlur = () => {
-        //Something after searching
-    }
-
-    useEffect(() => {
-        console.log(input)
-    }, [input])
-
-    return (
-        <React.Fragment>
-            <Box
-                sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                }}
-            >
-                <SearchIcon sx={styles.icon} />
-                <input
-                    style={styles.input}
-                    placeholder='Search'
-                    onChange={(event) => handleInputChange(event)}
-                    onBlur={handleInputBlur()}
-                />
-            </Box>
-        </React.Fragment>
-    );
-}
-
 const styles = {
     description: {
         marginLeft: '5px',
@@ -273,16 +220,5 @@ const styles = {
     icon: {
         color: "#C5C7CD",
         backgroundColor: 'white'
-    },
-    input: {
-        fontFamily: 'Mulish-SemiBold',
-        fontSize: '13px',
-        color: "#4B506D",
-        marginLeft: '5px',
-        textTransform: 'none',
-        background: "transparent",
-        outline: "none",
-        border: 'none',
-        width: '400px'
     }
 }

@@ -1,6 +1,5 @@
 // React imports
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Material-UI imports
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
@@ -12,19 +11,11 @@ import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import Badge from "@mui/material/Badge";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
-import Divider from '@mui/material/Divider';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import Avatar from '@mui/material/Avatar';
+
 
 // Custom imports
 import { styling } from "./styling";
@@ -32,13 +23,8 @@ import { DisplayItems, ProfileTab } from "./DisplayItems";
 import { useNavigationContext } from "../../Context/NavigationProvider";
 import CustomizedSwitches from "./CustomizedSwitches";
 import NavigationSearchBar from "./NavigationSearchBar";
-import { useSchoolContext } from '../../Context/SchoolProvider';
+import NotificationTab from './NotificationTab';
 
-// Static object testing
-const User = {
-  name: "Jay Nayon",
-  email: "jay.nayonjr@cit.edu",
-};
 
 const drawerWidth = 220;
 
@@ -137,58 +123,8 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
-  const { currentDocument } = useSchoolContext(); // Get current document state
+  const { open, toggleDrawer, selected, navStyle, mobileMode} = useNavigationContext();
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [options, setOptions] = useState([]);
-  const [previousBalance, setPreviousBalance] = useState(null);
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleClearOptions = () => {
-    setOptions([]); // Clear options by setting it to an empty array
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await fetch('/api/notifications/all');
-      const data = await response.json();
-      setOptions(data);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    }
-  };
-  
-  const createNotification = (userId, balance) => {
-    const message = `Alert: Your balance is negative.`;
-    setOptions(prevOptions => [...prevOptions, message]);
-  };
-  
-  useEffect(() => {
-    if (currentDocument) {
-      const balance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0); 
-
-      if (balance < 0 && previousBalance !== null && previousBalance >= 0) {
-        createNotification(balance);
-      }
-
-      // Update previous balance state
-      setPreviousBalance(balance);
-    }
-  }, [currentDocument]);
-  
-  useEffect(() => {
-    fetchNotifications(); // Fetch notifications when the component mounts
-  }, []);
-  
-  const ITEM_HEIGHT = 48;
 
   const defaultTheme = createTheme({
     typography: {
@@ -196,7 +132,6 @@ export default function Navigation({ children }) {
     },
     navStyle: styling[navStyle],
   });
-
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -248,7 +183,7 @@ export default function Navigation({ children }) {
                 ...(!open && { display: "none" }),
               }}
             >
-              <ProfileTab user={User} />
+              <ProfileTab />
               <IconButton
                 onClick={toggleDrawer}
                 sx={{
@@ -340,56 +275,8 @@ export default function Navigation({ children }) {
 
                   {/* Search Bar */}
                   <NavigationSearchBar />
-                  <Box>
-                    <IconButton color="inherit" onClick={handleMenuOpen}>
-                      <Badge badgeContent={options.length} color="secondary">
-                        <NotificationsIcon />
-                      </Badge>
-                    </IconButton>
-                    <Menu
-                      id="long-menu"
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl)}
-                      onClose={handleMenuClose}
-                      PaperProps={{
-                        style: {
-                          maxHeight: ITEM_HEIGHT * 13,
-                          width: '42ch',
-                          position: 'fixed',
-                        },
-                      }}
-                    >
-                      <Typography variant="subtitle1" sx={{ paddingLeft: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        Notifications
-                        <DeleteOutlineIcon sx={{ ml: 25 }} onClick={handleClearOptions} />
-                      </Typography>
-
-                      <Tabs
-                        value={0}
-                        variant="fullWidth"
-                        textColor="primary"
-                        indicatorColor="primary"
-                      >
-                        <Tab label="All" />
-                      </Tabs>
-                      {options.flatMap((option, index) => (
-                        index !== options.length - 1
-                          ? [
-                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
-                              <Avatar sx={{ marginRight: '8px' }} />
-                              {option}
-                            </MenuItem>,
-                            <Divider key={`divider-${index}`} />
-                          ]
-                          : [
-                            <MenuItem key={option} onClick={handleMenuClose} sx={{ whiteSpace: 'normal' }}>
-                              <Avatar sx={{ marginRight: '8px' }} />
-                              {option}
-                            </MenuItem>
-                          ]
-                      ))}
-                    </Menu>
-                  </Box>
+                  <NotificationTab />
+                  
                 </Toolbar>
               </AppBar>
               {children}

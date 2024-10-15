@@ -27,9 +27,10 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import { Typography } from '@mui/material';
+import { useAppContext } from '../../Context/AppProvider';
+import LogoutDialog from '../Modal/LogoutDialog';
 
 export function DisplayItems() {
     const theme = useTheme();
@@ -37,10 +38,6 @@ export function DisplayItems() {
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // State to manage logout dialog
 
     console.log("display items rendered");
-
-    // useEffect(() => {
-    //     console.log(selected);
-    // }, [selected]);
 
     const styles = {
         icon: {
@@ -79,25 +76,6 @@ export function DisplayItems() {
             );
         }
         return null;
-    };
-
-    function logoutUser(cookieName) {
-        // Check if the cookie exists
-        if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(`${cookieName}=`))) {
-            // Overwrite the cookie with an empty value and a path that matches the original cookie's path
-            document.cookie = `${cookieName}=; path=/;`;
-            console.log(`${cookieName} cookie removed.`);
-            window.location.href = "http://localhost:3000/";
-        } else {
-            console.log(`${cookieName} cookie not found.`);
-        }
-    }
-
-    const handleLogout = (e) => {
-        // Remove local storage to reset initial selected state
-        window.localStorage.removeItem("LOCAL_STORAGE_SELECTED");
-        e.preventDefault();
-        logoutUser('jwt');
     };
 
     return (
@@ -140,41 +118,19 @@ export function DisplayItems() {
                 </React.Fragment>
             ))}
             {/* Logout confirmation dialog */}
-            <Dialog
+            <LogoutDialog
                 open={logoutDialogOpen}
                 onClose={() => setLogoutDialogOpen(false)}
-                aria-labelledby="logout-dialog-title"
-                maxWidth="xs"
-                fullWidth
-            >
-                <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
-                <DialogContent sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: " flex-end",
-                    p: 0
-                }}>
-                    <DialogActions>
-                        <Box>
-                            <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
-                                Cancel
-                            </Button>
-                            <Button onClick={handleLogout} color="primary">
-                                Logout
-                            </Button>
-                        </Box>
-                    </DialogActions>
-                </DialogContent>
-            </Dialog>
+            />
         </>
     );
 }
 
-export const ProfileTab = ({ user }) => {
+export const ProfileTab = () => {
     const theme = useTheme();
     const [selected, setSelected] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
-    const { currentUser } = useNavigationContext();
+    const { currentUser } = useAppContext();
 
     if (!currentUser) {
         return null
@@ -262,39 +218,73 @@ export const ProfileTab = ({ user }) => {
                     <Stack spacing={2} margin={2} direction="row" alignItems="center">
                         <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
                         <Stack spacing={2}>
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Username" defaultValue={currentUser.username} margin="normal"
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="username-field"
+                                label="Username"
+                                defaultValue={currentUser.username}
+                                margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
                                             <PersonIcon />
                                         </InputAdornment>
                                     ),
-                                }} />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="First Name" defaultValue={currentUser.fname + " "} margin="normal"
+                                }}
+                            />
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="first-name-field"
+                                label="First Name"
+                                defaultValue={currentUser.fname + " "}
+                                margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
                                             <PersonIcon />
                                         </InputAdornment>
                                     ),
-                                }} />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Middle Name" defaultValue={currentUser.mname + " "} margin="normal"
+                                }}
+                            />
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="middle-name-field"
+                                label="Middle Name"
+                                defaultValue={currentUser.mname + " "}
+                                margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
                                             <PersonIcon />
                                         </InputAdornment>
                                     ),
-                                }} />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Last Name" defaultValue={currentUser.lname} margin="normal"
+                                }}
+                            />
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="last-name-field"
+                                label="Last Name"
+                                defaultValue={currentUser.lname}
+                                margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
                                             <PersonIcon />
                                         </InputAdornment>
                                     ),
-                                }} />
-                            <TextField sx={{ width: '100%' }} disabled id="outlined-disabled" label="Email" defaultValue={currentUser.email} margin="normal"
+                                }}
+                            />
+                            <TextField
+                                sx={{ width: '100%' }}
+                                disabled
+                                id="email-field"
+                                label="Email"
+                                defaultValue={currentUser.email}
+                                margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -303,7 +293,12 @@ export const ProfileTab = ({ user }) => {
                                     ),
                                 }}
                             />
-                            <TextField disabled id="outlined-disabled" label="Role" defaultValue={currentUser.position} margin="normal"
+                            <TextField
+                                disabled
+                                id="role-field"
+                                label="Role"
+                                defaultValue={currentUser.position}
+                                margin="normal"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">

@@ -19,16 +19,15 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemAvatar, ListItemText } from '@mui/material';
+import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import SchoolIcon from '@mui/icons-material/School'; // If SchoolIcon is a MUI icon
 import axios from 'axios'; // Import Axios for making HTTP requests
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 
 function PeoplePage(props) {
-    const [member, setMember] = useState('');
+    const [member, setMember] = useState('Member');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -42,27 +41,40 @@ function PeoplePage(props) {
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
 
-    const { currentUser } = useNavigationContext();
+    const { currentUser} = useNavigationContext();
     const [currentAssocation, setCurrentAssociation] = useState('');
+
+    const [currentSchool, setCurrentSchool] = useState({ id: null });
+    const [applications, setApplications] = useState([]);
+    const [invitationMessage, setInvitationMessage] = useState('');
 
     const fetchAssociation = useCallback(async () => {
         try {
-            const response = await axios.post('http://localhost:4000/associations/user', {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
                 userId: currentUser.id,
                 schoolId: selectedValue
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
             });
             setCurrentAssociation(response.data); // Update the state with the fetched data
         } catch (error) {
             console.error('Error fetching association:', error);
         }
     }, [currentUser, selectedValue]);
-
+    
     //currentUser association, which will change per school
     //to fetch the user from the school she belong
     // Function to fetch users by school ID
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.post('http://localhost:4000/schools/users', { schoolId: selectedValue });
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`,
+                { schoolId: selectedValue }, {
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
             setRows(response.data); // Update the state with the fetched data
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -94,25 +106,83 @@ function PeoplePage(props) {
         setSelectedValue(event.target.value); // Update selected school
         //fetchUsers(); // Fetch users belonging to the selected school
     };
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    
+    //
+    useEffect(() => {
+        // Assuming the current school is set based on some logic or user interaction
+        if (selectedValue) {
+            setCurrentSchool({ id: selectedValue });
+        }
+    }, [selectedValue]);    
 
     const handleClose = (value) => {
         setOpen(false);
         //setSelectedValue(value);
     };
 
-    const schoolAvatar = (
+    /*const schoolAvatar = (
         <Avatar>
             <SchoolIcon />
         </Avatar>
-    );
+    );*/
 
-    const handleAccept = () => {
-        handleClose('accepted');
-    };
+        const handleClickOpen = async () => {
+            console.log("Current School State:", currentSchool); // Debugging line
+            if (currentSchool && currentSchool.id) {
+                console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
+                setOpen(true);
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                        }
+                    });
+                    console.log("Applications fetched:", response.data); // Debugging line
+                    setApplications(response.data);
+                } catch (e) {
+                    console.error(e);
+                }
+            } else {
+                console.error("Cannot fetch applications: School ID is missing.");
+            }
+        };
+
+        const handleAccept = async (associationRequest) => {
+            try {
+                // Sending request to approve the association
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+                    }
+                });
+                
+                console.log('Success:', response.data);
+        
+            } catch (error) {
+                console.error("Error approving user:", error.response ? error.response.data : error.message);
+            }
+        };
+        
+        
+        const handleReject = async (application) => {
+            try {
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/reject`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    },
+                    data: application // Pass the application object as data in the DELETE request
+                });
+        
+                console.log('User rejected successfully:', response.data);
+        
+                // Update the UI by removing the rejected application from the list
+                setApplications(applications.filter(app => app.id !== application.userId));
+            } catch (error) {
+                console.error('Error rejecting user:', error.response ? error.response.data : error.message);
+            }
+        };    
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);
@@ -125,6 +195,7 @@ function PeoplePage(props) {
         // Also set the deleteAnchorEl and selectedIndex
         setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
+        console.log(rows[index]);
     };
 
     const handleMenuClose = () => {
@@ -144,12 +215,16 @@ function PeoplePage(props) {
 
     const confirmDelete = async () => {
         try {
-            if (selectedIndex !== null && rows[selectedIndex]) {
-                const userId = rows[selectedIndex].userId; // Get userId of the selected user
+            if (selectedIndex && rows[selectedIndex]) {
+                const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
                 // Make an API call to delete the user association
-                await axios.delete(`http://localhost:4000/associations/${userId}/${schoolId}`);
-                console.log("User deleted successfully.");
+                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                console.log("User deleted successfully. " + response.data);
                 // Remove the deleted row from the state
                 setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
             }
@@ -182,16 +257,20 @@ function PeoplePage(props) {
             let newRole = '';
             if ((selectedRole === "Member" && rows[selectedIndex].admin) || (selectedRole === "Admin" && !rows[selectedIndex].admin)) {
                 if (selectedRole === "Member" && rows[selectedIndex].admin) {
-                    endpoint = 'http://localhost:4000/associations/demote';
+                    endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/demote`;
                     newRole = false;
                 } else if (selectedRole === "Admin" && !rows[selectedIndex].admin) {
-                    endpoint = 'http://localhost:4000/associations/promote';
+                    endpoint = `${process.env.REACT_APP_API_URL_ASSOC}/promote`;
                     newRole = true;
                 }
 
                 const response = await axios.patch(endpoint, {
                     userId: rows[selectedIndex].id,
-                    schoolId: selectedValue
+                    schoolId: rows[selectedIndex].schoolId // changed to rows[selectedIndex].schoolId from selectedIndex
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
                 });
 
                 console.log(response)
@@ -218,13 +297,63 @@ function PeoplePage(props) {
         setDropdownAnchorEl(null);
     };
 
-    const handleInvite = () => {
-        // Implement invite functionality here
+    /*const handleInvite = () => {
+        if (inviteEmail.trim() === '') {
+            setInvitationMessage('Please enter a valid email.');
+            return;
+        }
+    
         console.log("Inviting email:", inviteEmail);
-        // You can send an invitation using the inviteEmail value
-        // Reset inviteEmail state after sending invitation if needed
+    
+        const invitePayload = {
+            email: inviteEmail, // or another identifier
+            schoolId: currentSchool.id // Ensure you have the correct schoolId
+        };
+    
+        axios.post('http://localhost:4000/associations/invite', invitePayload)
+            .then(response => {
+                console.log("Invitation sent successfully:", response.data);
+                setInvitationMessage('Invitation sent successfully!');
+            })
+            .catch(error => {
+                console.error("Error inviting member:", error.response ? error.response.data : error.message);
+                setInvitationMessage('Failed to send invitation. Please try again.');
+            });
+    
+        setInviteEmail('');
+    };*/
+
+    const handleInvite = () => {
+        if (inviteEmail.trim() === '') {
+            setInvitationMessage('Please enter a valid email.');
+            return;
+        }
+    
+        console.log("Inviting email:", inviteEmail);
+    
+        const invitePayload = {
+            email: inviteEmail,
+            schoolId: currentSchool.id,
+            admin: member === 'Admin'
+        };
+    
+        axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/invite`, invitePayload, {
+            headers: {
+                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+            }
+        })
+            .then(response => {
+                console.log("Invitation sent successfully:", response.data);
+                setInvitationMessage('Invitation sent successfully!');
+            })
+            .catch(error => {
+                console.error("Error inviting member:", error.response ? error.response.data : error.message);
+                setInvitationMessage('Failed to send invitation. Please try again.');
+            });
+    
         setInviteEmail('');
     };
+    
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
@@ -262,20 +391,18 @@ function PeoplePage(props) {
                                 onChange={(e) => setInviteEmail(e.target.value)}
                             />
                             <FormControl sx={{ minWidth: 120 }} size="53px">
-                                <InputLabel sx={{}} id="demo-select-small-label">Member</InputLabel>
-                                <Select
-                                    sx={{}}
-                                    labelId="demo-select-small-label"
-                                    id="demo-select-small"
-                                    value={member}
-                                    label="Member"
-                                    onChange={(event) => setMember(event.target.value)}
-                                >
-                                    <MenuItem>Member</MenuItem>
-                                    <MenuItem>Guess</MenuItem>
-                                    <MenuItem>Admin</MenuItem>
-                                </Select>
-                            </FormControl>
+                            <InputLabel id="demo-select-small-label">Role</InputLabel>
+                            <Select
+                                labelId="demo-select-small-label"
+                                id="demo-select-small"
+                                value={member}
+                                label="Role"
+                                onChange={(event) => setMember(event.target.value)}
+                            >
+                                <MenuItem value="Member">Member</MenuItem>
+                                <MenuItem value="Admin">Admin</MenuItem>
+                            </Select>
+                        </FormControl>
                             <Button
                                 sx={{ width: "20%", height: "55px" }}
                                 variant="contained"
@@ -297,7 +424,7 @@ function PeoplePage(props) {
                                 >
                                     {schools?.map((school) => (
                                         <MenuItem key={school.id} value={school.id}>
-                                            {school.name}
+                                            {transformSchoolText(school.name)}
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -309,17 +436,45 @@ function PeoplePage(props) {
                                 <Button variant="outlined" onClick={handleClickOpen}>
                                     Open Application Dialog
                                 </Button>
-                                <Dialog onClose={handleClose} open={open} sx={{ '& .MuiDialog-paper': { minWidth: 400 } }}>
+                                <Dialog onClose={handleClose} open={open} sx={{ margin: 2, '& .MuiDialog-paper': { minWidth: 400 }, margin: 2 }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
-                                    <List>
-                                        <ListItem disableGutters sx={{ paddingRight: '20px' }}>
-                                            <ListItemAvatar sx={{ paddingLeft: '10px' }}>{schoolAvatar}</ListItemAvatar>
-                                            <ListItemText primary="Kiki Kiki" />
-                                            <Button onClick={handleAccept} variant="contained" color="primary">
-                                                Accept
-                                            </Button>
-                                        </ListItem>
+                                    <List sx={{ p: 3 }}>
+                                        {applications.length === 0 ? (
+                                            <ListItem>
+                                                <ListItemText primary="No applications found." />
+                                            </ListItem>
+                                        ) : (
+                                            applications?.map(application => (
+                                                <ListItem key={application.id} disableGutters>
+                                                    <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
+                                                    <Box display="flex" justifyContent="space-between" gap={1}>
+                                                        <Button
+                                                            onClick={() => {
+                                                                handleAccept({ userId: application.id, schoolId: application.schoolId });
+                                                                handleClose();  // Close the dialog after accepting
+                                                            }}
+                                                            variant="contained"
+                                                            color="primary"
+                                                        >
+                                                            Accept
+                                                        </Button>
+
+                                                        <Button
+                                                            onClick={() => {
+                                                                handleReject({ userId: application.id, schoolId: application.schoolId });
+                                                                handleClose();  // Close the dialog after rejecting
+                                                            }}
+                                                            variant="contained"
+                                                            color="secondary"
+                                                        >
+                                                            Reject
+                                                        </Button>
+                                                    </Box>
+                                                </ListItem>
+                                            ))
+                                        )}
                                     </List>
+
                                 </Dialog>
                             </FormControl>
                         </Grid>
@@ -471,6 +626,5 @@ function PeoplePage(props) {
 }
 
 export default PeoplePage;
-
 
 
