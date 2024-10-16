@@ -16,10 +16,16 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import { useAppContext } from '../../Context/AppProvider';
 import axios from 'axios';
+import ExceedConfirmModal from './ExceedConfirmModal';
 
 export default function ApprovalModal({ open, handleClose }) {
     const { currentUser } = useAppContext();
     const { lrNotApproved, deleteLrByid, updateLrById } = useSchoolContext();
+    const [openConfirm, setOpenConfirm] = React.useState(false);
+
+    const handleCloseConfirm = () => setOpenConfirm(false);
+
+    const handleOpenConfirm = () => setOpenConfirm(true);
 
     const handleReject = async (id) => {
         try {
@@ -37,8 +43,9 @@ export default function ApprovalModal({ open, handleClose }) {
     };
 
     const handleAccept = async (id) => {
-        await updateLrById("approved", id, true);
-        handleClose();
+        // await updateLrById("approved", id, true);
+        // handleClose();
+        handleOpenConfirm();
     };
 
     const getLastLrHistory = async (id) => {
@@ -139,6 +146,13 @@ export default function ApprovalModal({ open, handleClose }) {
                                                 )}
 
                                             </AccordionActions>
+                                            <ExceedConfirmModal
+                                                open={openConfirm}
+                                                onClose={handleCloseConfirm}
+                                                onCloseParent={handleClose}
+                                                amount={item.amount}
+                                                id={item.id}
+                                            />
                                         </Accordion>
                                     );
                                 })
