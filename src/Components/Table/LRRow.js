@@ -158,7 +158,7 @@ function LRRow(props) {
 
     return (
         <React.Fragment>
-            {lr
+            {currentDocument.id !== 0 && lr // ensure that current document is not empty
                 .slice(page * rowsPerPage, page * props.rowsPerPage + props.rowsPerPage)
                 .map((row, index) => {
                     const uniqueKey = `row_${row.id}_${index}`;
