@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import CustomizedTooltips from '../Tooltip/CustomizedTooltips';
 
 function DocumentSummary({ setOpen }) {
     const { currentDocument, setIsAdding, value, isEditable, isAdding } = useSchoolContext();
@@ -26,21 +27,44 @@ function DocumentSummary({ setOpen }) {
         return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
+    const tooltipContent = () => {
+        return (
+            <React.Fragment>
+                <span>Adding <i>disabled</i> due to insufficient balance.</span>
+            </React.Fragment>
+        );
+    }
+
     return (
         <React.Fragment>
-            <IconButton
-                disabled={!isEditable || !(currentDocument.cashAdvance > currentDocument.budget)}
-                sx={{ alignSelf: "center" }}
-                onClick={handleAddButtonClick}
-            >
-                <AddBoxIcon
-                    sx={{
-                        fontSize: 25,
-                        color: !isEditable || !(currentDocument.cashAdvance > currentDocument.budget)
-                            ? '#e0e0e0'
-                            : '#00ee60'
-                    }} />
-            </IconButton>
+            {!isEditable || !(currentDocument.cashAdvance > currentDocument.budget) ? (
+                <CustomizedTooltips content={tooltipContent()}>
+                    <span>
+                        <IconButton
+                            disabled
+                            sx={{ alignSelf: "center" }}
+                            onClick={handleAddButtonClick}
+                        >
+                            <AddBoxIcon
+                                sx={{
+                                    fontSize: 25,
+                                    color: '#e0e0e0'
+                                }} />
+                        </IconButton>
+                    </span>
+                </CustomizedTooltips>
+            ) : (
+                <IconButton
+                    sx={{ alignSelf: "center" }}
+                    onClick={handleAddButtonClick}
+                >
+                    <AddBoxIcon
+                        sx={{
+                            fontSize: 25,
+                            color: '#00ee60'
+                        }} />
+                </IconButton>
+            )}
             <Grid container pb={1} >
                 <Grid item xs={12} md={4} lg={4}>
                     <BudgetSummary
