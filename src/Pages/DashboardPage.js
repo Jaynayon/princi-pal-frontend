@@ -360,7 +360,10 @@ function DashboardPage(props) {
 
     const [uacsData, setUacsData] = useState([]);
 
-    // This function only runs when dependencies: currentSchool & currentUser are changed
+    const formatAmount = (value) => new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -653,6 +656,20 @@ function DashboardPage(props) {
         const totalBalance = (currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0);
         const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
 
+        const SummaryDetails = ({ description, amount, type }) => {
+            return (
+                <p style={{
+                    paddingLeft: '20px',
+                    borderBottom: '1px solid #ccc',
+                    paddingBottom: '5px',
+                    marginTop: '0',
+                    color: type === 'balance' && totalBalanceColor
+                }}>
+                    {description}: <strong>Php {formatAmount(amount)}</strong>
+                </p>
+            );
+        }
+
         return (
             <Paper
                 sx={{
@@ -666,11 +683,19 @@ function DashboardPage(props) {
             >
                 <p style={{ paddingLeft: '20px', fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
                 <p style={{ paddingLeft: '20px', paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{`${month} ${year}`}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Monthly Budget: Php {currentDocument?.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0' }}>Total Budget Limit: Php {currentDocument?.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
-                <p style={{ paddingLeft: '20px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginTop: '0', color: totalBalanceColor }}>
-                    Total Balance: Php {totalBalance.toFixed(2)}
-                </p>
+                <SummaryDetails
+                    description="Total Monthly Budget"
+                    amount={currentDocument?.budget ? currentDocument.budget : '0.00'}
+                />
+                <SummaryDetails
+                    description="Total Budget Limit"
+                    amount={currentDocument?.budgetLimit ? currentDocument.budgetLimit : '0.00'}
+                />
+                <SummaryDetails
+                    type="balance"
+                    description="Total Balance"
+                    amount={totalBalance.toFixed(2)}
+                />
             </Paper>
         );
     };
