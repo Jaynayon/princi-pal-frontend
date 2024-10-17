@@ -578,11 +578,20 @@ function DashboardPage(props) {
         else if (title === 'budgetLimit') displayTitle = 'Budget Limit';
         else if (title === 'totalBalance') displayTitle = 'Total Balance';
 
+        const totalBalance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
+        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
+
+        const DisplayAnalytics = ({ amount, type }) => {
+            return (
+                <p style={{ fontSize: '2.0rem', fontWeight: 'bold', color: type === "balance" && totalBalanceColor }}>
+                    Php {formatAmount(amount)}
+                </p>
+            );
+        }
+
         if (!currentDocument) {
             return null;
         }
-        const totalBalance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
-        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
 
         return (
             <Paper
@@ -596,23 +605,32 @@ function DashboardPage(props) {
                     paddingLeft: (displayTitle === 'Total Expenses' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
                 }}
             >
-                {displayTitle}
+                <span style={{ fontSize: 17 }}>{displayTitle}</span>
                 {displayTitle === 'Total Expenses' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budget ? parseFloat(currentDocument.budget).toFixed(2) : '0.00'}</p>
-
+                    <DisplayAnalytics amount={currentDocument.budget ? currentDocument.budget : '0.00'} />
                 )}
                 {displayTitle === 'Budget Limit' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold' }}>Php {currentDocument.budgetLimit ? parseFloat(currentDocument.budgetLimit).toFixed(2) : '0.00'}</p>
-                )}
-                {displayTitle === 'Budget Limit' && (
-                    <Button sx={{ display: currentUser.position !== "Principal" && "none" }} onClick={() => handleOpen(title)} className={clickedButton === title ? 'clicked' : ''} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', padding: 0 }}>
-                        <EditIcon sx={{ width: '30px', height: '30px' }} />
-                    </Button>
+                    <React.Fragment>
+                        <DisplayAnalytics amount={currentDocument.budgetLimit ? currentDocument.budgetLimit : '0.00'} />
+                        <Button
+                            sx={{ display: currentUser.position !== "Principal" && "none" }}
+                            onClick={() => handleOpen(title)}
+                            className={clickedButton === title ? 'clicked' : ''}
+                            style={{
+                                position: 'absolute',
+                                top: '10px',
+                                right: '10px',
+                                background: 'none',
+                                border: 'none',
+                                padding: 0
+                            }}
+                        >
+                            <EditIcon sx={{ width: '30px', height: '30px' }} />
+                        </Button>
+                    </React.Fragment>
                 )}
                 {displayTitle === 'Total Balance' && (
-                    <p style={{ fontSize: '2.0rem', fontWeight: 'bold', color: totalBalanceColor }}> { }
-                        Php {totalBalance.toFixed(2)}
-                    </p>
+                    <DisplayAnalytics amount={totalBalance.toFixed(2)} type="balance" />
                 )}
 
                 <Modal
