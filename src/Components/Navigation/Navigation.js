@@ -115,16 +115,17 @@ const displayTitle = (selected) => {
   }
 
   return (
-    <>
-      <span>School </span>
-      <span style={{ color: "grey" }}>({transformSchoolText(selected || "None")})</span>
-    </>
+    <span>
+      School {""}
+      <span style={{ color: "#20A0F0" }}>
+        ({transformSchoolText(selected || "None")})
+      </span>
+    </span>
   );
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode} = useNavigationContext();
-
+  const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
 
   const defaultTheme = createTheme({
     typography: {
@@ -276,7 +277,7 @@ export default function Navigation({ children }) {
                   {/* Search Bar */}
                   <NavigationSearchBar />
                   <NotificationTab />
-                  
+
                 </Toolbar>
               </AppBar>
               {children}
