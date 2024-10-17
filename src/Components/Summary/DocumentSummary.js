@@ -30,7 +30,10 @@ function DocumentSummary({ setOpen }) {
     const tooltipContent = () => {
         return (
             <React.Fragment>
-                <span>Adding <i>disabled</i> due to insufficient balance.</span>
+                <span>Adding <i>disabled</i> possibly due to:</span>
+                <li>Insufficient balance</li>
+                <li>Lack of privileges</li>
+                <li>Outdated document <i>(over 3 months from the current month)</i></li>
             </React.Fragment>
         );
     }
