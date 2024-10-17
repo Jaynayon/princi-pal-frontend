@@ -249,7 +249,7 @@ const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
             plotOptions: {
                 bar: {
                     horizontal: false,
-                    columnWidth: '60%',
+                    columnWidth: '50%'
                 }
             },
             dataLabels: {
@@ -273,7 +273,7 @@ const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
                     style: {
                         fontSize: '12px'
                     }
-                }
+                },
             },
             yaxis: {
                 title: {
