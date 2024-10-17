@@ -93,18 +93,7 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [setCurrentDocument, year, month]);
 
-    const fetchUacs = useCallback(async () => {
-        try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL_UACS}/all`, {
-                headers: {
-                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                }
-            });
-            setObjectCodes(response.data || []);
-        } catch (error) {
-            console.error('Error validating token:', error);
-        }
-    }, [setObjectCodes]);
+
 
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
@@ -424,27 +413,44 @@ export const SchoolProvider = ({ children }) => {
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
     }, [objectCodes]);
 
-    // Function to check if the document is editable
-    const isDocumentEditable = (docYear, docMonth) => {
-        const monthOrder = months.findIndex(month => month === docMonth);
-        const currentMonthOrder = months.findIndex(month => month === currentMonth);
-        const documentDate = new Date(docYear, monthOrder);
-        const twoMonthsAgo = new Date(currentYear, currentMonthOrder - 2, 1); // Date two months behind the current month
+    useEffect(() => {
+        // Function to check if the document is editable
+        const isDocumentEditable = (docYear, docMonth) => {
+            const monthOrder = months.findIndex(month => month === docMonth);
+            const currentMonthOrder = months.findIndex(month => month === currentMonth);
+            const documentDate = new Date(docYear, monthOrder);
+            const twoMonthsAgo = new Date(currentYear, currentMonthOrder - 2, 1); // Date two months behind the current month
 
-        return documentDate >= twoMonthsAgo;
-    };
+            return documentDate >= twoMonthsAgo;
+        };
+
+        if (currentUser?.position === "Principal") {
+            setIsEditable(false); // Automatically not editable for "Principal"
+        } else {
+            // Assuming document.year and document.month are provided in numeric format
+            const editable = isDocumentEditable(currentDocument.year, currentDocument.month);
+            setIsEditable(editable);
+        }
+    }, [currentUser, currentDocument]);
 
     useEffect(() => {
-        // Assuming document.year and document.month are provided in numeric format
-        const editable = isDocumentEditable(currentDocument.year, currentDocument.month);
-        setIsEditable(editable);
-    }, [currentDocument]);
+        const fetchUacs = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_UACS}/all`, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                setObjectCodes(response.data || []);
+            } catch (error) {
+                console.error('Error validating token:', error);
+            }
+        }
 
-    useEffect(() => {
         if (objectCodes.length === 0) {
             fetchUacs();
         }
-    }, [fetchUacs, objectCodes]); // Run effect only on mount and unmount
+    }, [objectCodes]); // Run effect only on mount and unmount
 
     useEffect(() => {
         let timeoutId;
