@@ -187,19 +187,29 @@ export default function NotificationTab() {
                 onClose={handleMenuClose}
                 PaperProps={{
                     style: {
-                        maxHeight: ITEM_HEIGHT * 13,
+                        // maxHeight: ITEM_HEIGHT * 13,
+                        maxHeight: '70vh', // Sets the max-height to 70% of the viewport height
                         width: '42ch',
                         position: 'fixed',
                     },
                 }}
             >
-                <Typography variant="subtitle1" sx={{ paddingLeft: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                        paddingLeft: '20px',
+                        paddingRight: '10px',
+                        fontSize: '1.2rem',
+                        fontWeight: 'bold',
+                        justifyContent: 'space-between',
+                        display: 'flex',
+                    }}
+                >
                     Notifications
-                    <IconButton sx={{ marginLeft: '210px' }} onClick={handleClearNotifications}>
+                    <IconButton onClick={handleClearNotifications}>
                         <DeleteOutlineIcon />
                     </IconButton>
                 </Typography>
-
                 <Tabs
                     value={0}
                     variant="fullWidth"
