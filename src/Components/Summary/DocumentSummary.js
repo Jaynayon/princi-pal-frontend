@@ -29,11 +29,17 @@ function DocumentSummary({ setOpen }) {
     return (
         <React.Fragment>
             <IconButton
-                disabled={!isEditable}
+                disabled={!isEditable || !(currentDocument.cashAdvance > currentDocument.budget)}
                 sx={{ alignSelf: "center" }}
                 onClick={handleAddButtonClick}
             >
-                <AddBoxIcon sx={{ fontSize: 25, color: !isEditable ? '#e0e0e0' : '#00ee60' }} />
+                <AddBoxIcon
+                    sx={{
+                        fontSize: 25,
+                        color: !isEditable || !(currentDocument.cashAdvance > currentDocument.budget)
+                            ? '#e0e0e0'
+                            : '#00ee60'
+                    }} />
             </IconButton>
             <Grid container pb={1} >
                 <Grid item xs={12} md={4} lg={4}>

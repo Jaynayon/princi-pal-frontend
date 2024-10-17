@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAppContext } from './AppProvider';
@@ -20,7 +20,7 @@ export const NavigationProvider = ({ children }) => {
     const prevOpenRef = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
-    
+
 
     const toggleDrawer = () => {
         setOpen(prevOpen => {
