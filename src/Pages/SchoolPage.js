@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import '../App.css';
 import PropTypes from 'prop-types';
 import {
@@ -88,7 +88,9 @@ function SchoolPage(props) {
         updateLr,
         updateJev,
         value,
-        setValue
+        setValue,
+        deleteLrByid,
+        updateLrById
     } = useSchoolContext();
 
     const [open, setOpen] = React.useState(false);
@@ -109,9 +111,9 @@ function SchoolPage(props) {
         setOpenApproval(true);
     }
 
-    const handleCloseApproval = () => {
+    const handleCloseApproval = useCallback(() => {
         setOpenApproval(false);
-    }
+    }, []); // empty dependency to avoid re-constructing
 
     const exportDocument = async () => {
         setExportIsLoading(true);  // Start loading
@@ -293,6 +295,9 @@ function SchoolPage(props) {
             <ApprovalModal
                 open={openApproval}
                 handleClose={handleCloseApproval}
+                lrNotApproved={lrNotApproved}
+                deleteLrByid={deleteLrByid}
+                updateLrById={updateLrById}
             />
             <BudgetAllocationModal
                 open={open}
