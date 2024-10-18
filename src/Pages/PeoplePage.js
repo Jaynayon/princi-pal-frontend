@@ -19,7 +19,7 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText } from '@mui/material';
+import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText, Skeleton } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import axios from 'axios'; // Import Axios for making HTTP requests
@@ -41,12 +41,14 @@ function PeoplePage(props) {
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
 
-    const { currentUser} = useNavigationContext();
+    const { currentUser } = useNavigationContext();
     const [currentAssocation, setCurrentAssociation] = useState('');
 
     const [currentSchool, setCurrentSchool] = useState({ id: null });
     const [applications, setApplications] = useState([]);
     const [invitationMessage, setInvitationMessage] = useState('');
+
+    const [isLoading, setIsLoading] = useState(false);
 
     const fetchAssociation = useCallback(async () => {
         try {
@@ -63,11 +65,12 @@ function PeoplePage(props) {
             console.error('Error fetching association:', error);
         }
     }, [currentUser, selectedValue]);
-    
+
     //currentUser association, which will change per school
     //to fetch the user from the school she belong
     // Function to fetch users by school ID
     const fetchUsers = useCallback(async () => {
+        setIsLoading(true);
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`,
                 { schoolId: selectedValue }, {
@@ -78,6 +81,8 @@ function PeoplePage(props) {
             setRows(response.data); // Update the state with the fetched data
         } catch (error) {
             console.error('Error fetching users:', error);
+        } finally {
+            setIsLoading(false);
         }
     }, [selectedValue]);
 
@@ -106,14 +111,14 @@ function PeoplePage(props) {
         setSelectedValue(event.target.value); // Update selected school
         //fetchUsers(); // Fetch users belonging to the selected school
     };
-    
+
     //
     useEffect(() => {
         // Assuming the current school is set based on some logic or user interaction
         if (selectedValue) {
             setCurrentSchool({ id: selectedValue });
         }
-    }, [selectedValue]);    
+    }, [selectedValue]);
 
     const handleClose = (value) => {
         setOpen(false);
@@ -126,63 +131,63 @@ function PeoplePage(props) {
         </Avatar>
     );*/
 
-        const handleClickOpen = async () => {
-            console.log("Current School State:", currentSchool); // Debugging line
-            if (currentSchool && currentSchool.id) {
-                console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
-                setOpen(true);
-                try {
-                    const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
-                        headers: {
-                            'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                        }
-                    });
-                    console.log("Applications fetched:", response.data); // Debugging line
-                    setApplications(response.data);
-                } catch (e) {
-                    console.error(e);
-                }
-            } else {
-                console.error("Cannot fetch applications: School ID is missing.");
-            }
-        };
-
-        const handleAccept = async (associationRequest) => {
+    const handleClickOpen = async () => {
+        console.log("Current School State:", currentSchool); // Debugging line
+        if (currentSchool && currentSchool.id) {
+            console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
+            setOpen(true);
             try {
-                // Sending request to approve the association
-                const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                
-                console.log('Success:', response.data);
-        
-            } catch (error) {
-                console.error("Error approving user:", error.response ? error.response.data : error.message);
+                console.log("Applications fetched:", response.data); // Debugging line
+                setApplications(response.data);
+            } catch (e) {
+                console.error(e);
             }
-        };
-        
-        
-        const handleReject = async (application) => {
-            try {
-                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/reject`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                    },
-                    data: application // Pass the application object as data in the DELETE request
-                });
-        
-                console.log('User rejected successfully:', response.data);
-        
-                // Update the UI by removing the rejected application from the list
-                setApplications(applications.filter(app => app.id !== application.userId));
-            } catch (error) {
-                console.error('Error rejecting user:', error.response ? error.response.data : error.message);
-            }
-        };    
+        } else {
+            console.error("Cannot fetch applications: School ID is missing.");
+        }
+    };
+
+    const handleAccept = async (associationRequest) => {
+        try {
+            // Sending request to approve the association
+            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+                }
+            });
+
+            console.log('Success:', response.data);
+
+        } catch (error) {
+            console.error("Error approving user:", error.response ? error.response.data : error.message);
+        }
+    };
+
+
+    const handleReject = async (application) => {
+        try {
+            const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/reject`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                },
+                data: application // Pass the application object as data in the DELETE request
+            });
+
+            console.log('User rejected successfully:', response.data);
+
+            // Update the UI by removing the rejected application from the list
+            setApplications(applications.filter(app => app.id !== application.userId));
+        } catch (error) {
+            console.error('Error rejecting user:', error.response ? error.response.data : error.message);
+        }
+    };
 
     const handleDropdownOpen = (event, index) => {
         setDropdownAnchorEl(event.currentTarget);
@@ -328,15 +333,15 @@ function PeoplePage(props) {
             setInvitationMessage('Please enter a valid email.');
             return;
         }
-    
+
         console.log("Inviting email:", inviteEmail);
-    
+
         const invitePayload = {
             email: inviteEmail,
             schoolId: currentSchool.id,
             admin: member === 'Admin'
         };
-    
+
         axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/invite`, invitePayload, {
             headers: {
                 'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
@@ -350,16 +355,105 @@ function PeoplePage(props) {
                 console.error("Error inviting member:", error.response ? error.response.data : error.message);
                 setInvitationMessage('Failed to send invitation. Please try again.');
             });
-    
+
         setInviteEmail('');
     };
-    
+
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
         (row && row.name && row.name.toLowerCase().includes(searchValue.toLowerCase())) ||
         (row && row.email && row.email.toLowerCase().includes(searchValue.toLowerCase()))
     );
+
+    const RenderPeopleRows = () => {
+        if (isLoading) {
+            return (
+                <>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                        <TableRow key={index}>
+                            <TableCell colSpan={4} align="center">
+                                <Skeleton animation="wave" />
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </>
+            );
+        }
+
+        return (
+            filteredRows.map((row, index) => (
+                <TableRow key={index}>
+                    <TableCell>
+                        <Grid container alignItems="center" spacing={1}>
+                            <Grid item>
+                                {row.name && (
+                                    <Avatar sx={{ bgcolor: blue[900] }}>
+                                        {row.name.charAt(0)}
+                                    </Avatar>
+                                )}
+                            </Grid>
+                            <Grid item>{`${row.fname} ${row.mname.charAt(0) + "."} ${row.lname}`}</Grid>
+                        </Grid>
+                    </TableCell>
+                    <TableCell>{row.email}</TableCell>
+                    <TableCell>
+                        {/* Role with dropdown arrow */}
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            {row.admin === true ?
+                                row.position === "Principal" ?
+                                    <span>Principal</span>
+                                    :
+                                    <span>Admin</span>
+                                :
+                                <span>Member</span>
+                            }
+                            {row.position !== "Principal" &&
+                                currentAssocation.admin === true &&
+                                currentAssocation.position === "Principal" &&
+                                <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
+                        </div>
+                        {/* Dropdown menu for role options */}
+                        {row.position !== "Principal" &&
+                            currentAssocation.admin === true &&
+                            currentAssocation.position === "Principal" &&
+                            <Menu
+                                id={`menu-dropdown-${index}`}
+                                anchorEl={dropdownAnchorEl}
+                                open={Boolean(dropdownAnchorEl && selectedIndex === index)}
+                                onClose={handleMenuClose}
+                            >
+                                {/* Role options */}
+                                <MenuItem onClick={() => handleRoleChange("Admin")}>Admin</MenuItem>
+                                <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
+                            </Menu>
+                        }
+                    </TableCell>
+                    {currentAssocation.admin === true && row.position !== "Principal" &&
+                        <TableCell>
+                            {/* Delete button */}
+                            <Button
+                                aria-controls={`menu-delete-${index}`}
+                                aria-haspopup="true"
+                                onClick={(event) => handleDeleteOpen(event, index)}
+                            >
+                                <MoreHorizIcon />
+                            </Button>
+                            {/* Delete menu */}
+                            <Menu
+                                id={`menu-delete-${index}`}
+                                anchorEl={deleteAnchorEl}
+                                open={Boolean(deleteAnchorEl && selectedIndex === index)}
+                                onClose={handleMenuClose}
+                            >
+                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                            </Menu>
+                        </TableCell>
+                    }
+                </TableRow>
+            ))
+        );
+    }
 
     return (
         <Container className="test" maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
@@ -391,18 +485,18 @@ function PeoplePage(props) {
                                 onChange={(e) => setInviteEmail(e.target.value)}
                             />
                             <FormControl sx={{ minWidth: 120 }} size="53px">
-                            <InputLabel id="demo-select-small-label">Role</InputLabel>
-                            <Select
-                                labelId="demo-select-small-label"
-                                id="demo-select-small"
-                                value={member}
-                                label="Role"
-                                onChange={(event) => setMember(event.target.value)}
-                            >
-                                <MenuItem value="Member">Member</MenuItem>
-                                <MenuItem value="Admin">Admin</MenuItem>
-                            </Select>
-                        </FormControl>
+                                <InputLabel id="demo-select-small-label">Role</InputLabel>
+                                <Select
+                                    labelId="demo-select-small-label"
+                                    id="demo-select-small"
+                                    value={member}
+                                    label="Role"
+                                    onChange={(event) => setMember(event.target.value)}
+                                >
+                                    <MenuItem value="Member">Member</MenuItem>
+                                    <MenuItem value="Admin">Admin</MenuItem>
+                                </Select>
+                            </FormControl>
                             <Button
                                 sx={{ width: "20%", height: "55px" }}
                                 variant="contained"
@@ -436,7 +530,7 @@ function PeoplePage(props) {
                                 <Button variant="outlined" onClick={handleClickOpen}>
                                     Open Application Dialog
                                 </Button>
-                                <Dialog onClose={handleClose} open={open} sx={{ margin: 2, '& .MuiDialog-paper': { minWidth: 400 }, margin: 2 }}>
+                                <Dialog onClose={handleClose} open={open} sx={{ margin: 2, '& .MuiDialog-paper': { minWidth: 400 } }}>
                                     <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
                                     <List sx={{ p: 3 }}>
                                         {applications.length === 0 ? (
@@ -524,76 +618,7 @@ function PeoplePage(props) {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {filteredRows.map((row, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>
-                                            <Grid container alignItems="center" spacing={1}>
-                                                <Grid item>
-                                                    {row.name && (
-                                                        <Avatar sx={{ bgcolor: blue[900] }}>
-                                                            {row.name.charAt(0)}
-                                                        </Avatar>
-                                                    )}
-                                                </Grid>
-                                                <Grid item>{`${row.fname} ${row.mname.charAt(0) + "."} ${row.lname}`}</Grid>
-                                            </Grid>
-                                        </TableCell>
-                                        <TableCell>{row.email}</TableCell>
-                                        <TableCell>
-                                            {/* Role with dropdown arrow */}
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                {row.admin === true ?
-                                                    row.position === "Principal" ?
-                                                        <span>Principal</span>
-                                                        :
-                                                        <span>Admin</span>
-                                                    :
-                                                    <span>Member</span>
-                                                }
-                                                {row.position !== "Principal" &&
-                                                    currentAssocation.admin === true &&
-                                                    currentAssocation.position === "Principal" &&
-                                                    <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
-                                            </div>
-                                            {/* Dropdown menu for role options */}
-                                            {row.position !== "Principal" &&
-                                                currentAssocation.admin === true &&
-                                                currentAssocation.position === "Principal" &&
-                                                <Menu
-                                                    id={`menu-dropdown-${index}`}
-                                                    anchorEl={dropdownAnchorEl}
-                                                    open={Boolean(dropdownAnchorEl && selectedIndex === index)}
-                                                    onClose={handleMenuClose}
-                                                >
-                                                    {/* Role options */}
-                                                    <MenuItem onClick={() => handleRoleChange("Admin")}>Admin</MenuItem>
-                                                    <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
-                                                </Menu>
-                                            }
-                                        </TableCell>
-                                        {currentAssocation.admin === true && row.position !== "Principal" &&
-                                            <TableCell>
-                                                {/* Delete button */}
-                                                <Button
-                                                    aria-controls={`menu-delete-${index}`}
-                                                    aria-haspopup="true"
-                                                    onClick={(event) => handleDeleteOpen(event, index)}
-                                                >
-                                                    <MoreHorizIcon />
-                                                </Button>
-                                                {/* Delete menu */}
-                                                <Menu
-                                                    id={`menu-delete-${index}`}
-                                                    anchorEl={deleteAnchorEl}
-                                                    open={Boolean(deleteAnchorEl && selectedIndex === index)}
-                                                    onClose={handleMenuClose}
-                                                >
-                                                    <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                                                </Menu>
-                                            </TableCell>
-                                        }
-                                    </TableRow>
-                                ))}
+                                <RenderPeopleRows type={"loading"} />
                             </TableBody>
                         </Table>
                     </TableContainer>
