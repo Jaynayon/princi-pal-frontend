@@ -539,7 +539,7 @@ function DashboardPage(props) {
         const updatedAmount = editableAmounts[clickedButton];
 
         // Get the monthly budget from the current document
-        const monthlyBudget = currentDocument?.budget ? parseFloat(currentDocument.budget) : 0;
+        const monthlyBudget = currentDocument?.cashAdvance ? parseFloat(currentDocument.cashAdvance) : 0;
 
         // Validate if the input amount exceeds the monthly budget
         let finalBudgetLimit = parseFloat(updatedAmount.amount);
@@ -549,23 +549,27 @@ function DashboardPage(props) {
         }
 
         try {
-            const isUpdated = await updateDocumentById(currentDocument.id, finalBudgetLimit);
+            if (finalBudgetLimit !== currentDocument?.budgetLimit) {
+                const isUpdated = await updateDocumentById(currentDocument.id, finalBudgetLimit);
 
-            if (isUpdated) {
-                console.log('Budget limit saved successfully');
-                setCurrentDocument({
-                    ...currentDocument,
-                    budgetLimit: finalBudgetLimit // Save the adjusted value
-                });
-                setEditableAmounts({
-                    ...editableAmounts,
-                    [clickedButton]: { ...editableAmounts[clickedButton], amount: '' }
-                });
-                setError('');
-                setOpen(false);
+                if (isUpdated) {
+                    console.log('Budget limit saved successfully');
+                    setCurrentDocument({
+                        ...currentDocument,
+                        budgetLimit: finalBudgetLimit // Save the adjusted value
+                    });
+                    setEditableAmounts({
+                        ...editableAmounts,
+                        [clickedButton]: { ...editableAmounts[clickedButton], amount: '' }
+                    });
+                    setError('');
+                    setOpen(false);
+                } else {
+                    console.error('Failed to save budget limit');
+                    setError('Failed to save budget limit. Please try again later.');
+                }
             } else {
-                console.error('Failed to save budget limit');
-                setError('Failed to save budget limit. Please try again later.');
+                setOpen(false); // Close the modal if the value is the same
             }
         } catch (error) {
             console.error('Error saving budget limit:', error);
