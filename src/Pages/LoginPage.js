@@ -11,6 +11,7 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const { authenticateUser } = useAppContext();
 
     const handleShowPasswordClick = () => {
@@ -24,6 +25,7 @@ const LoginPage = () => {
     };
 
     const handleLogin = async () => {
+        setIsLoading(true);
         try {
             const emailValue = getEmailorUsername(); // Get email or username
             const passwordValue = getPassword(); // Get password
@@ -53,6 +55,8 @@ const LoginPage = () => {
             } else {
                 setLoginError('Incorrect email or password.');
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -142,7 +146,7 @@ const LoginPage = () => {
                         }}
                     />
                     {loginError && <Typography color="error" sx={{ fontSize: "14px", mt: 2 }}>{loginError}</Typography>}
-                    <Button onClick={loginButtonActionListener} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
+                    <Button disabled={isLoading} onClick={loginButtonActionListener} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
                     <Typography variant="body1" sx={{ mt: 2, marginLeft: '25%' }}>
                         Not registered yet? <span style={{ color: '#6C6FD5' }}>Create an account </span>
                         <Link style={{ color: '#6EADDC', textDecoration: 'none', fontWeight: 'bold', borderBottom: '1px solid' }}
