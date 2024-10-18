@@ -120,34 +120,34 @@ const ExceedOffsetModal = memo(({ open, onClose, amountExceeded }) => {
                     <DialogContentText sx={{ color: 'black', mb: 1 }}>
                         {data?.amount > amountExceeded.exceeded ? (
                             <>
-                                <Typography variant="body2">
+                                <Typography component="span" variant="body2" sx={{ display: 'block' }}>
                                     Date: <StyledSpan>{data?.date}</StyledSpan>
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography component="span" variant="body2" sx={{ display: 'block' }}>
                                     ORS/BURS No.: <StyledSpan>{data?.orsBursNo}</StyledSpan>
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography component="span" variant="body2" sx={{ display: 'block' }}>
                                     Payee: <StyledSpan>{data?.payee}</StyledSpan>
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography component="span" variant="body2" sx={{ display: 'block' }}>
                                     Particulars: <StyledSpan>{data?.particulars}</StyledSpan>
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography component="span" variant="body2" sx={{ display: 'block' }}>
                                     Object Code: <StyledSpan>{data?.objectCode}</StyledSpan>
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography component="span" variant="body2" sx={{ display: 'block' }}>
                                     Nature of Payment: <StyledSpan>{data?.natureOfPayment}</StyledSpan>
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography component="span" variant="body2" sx={{ display: 'block' }}>
                                     Payee: <StyledSpan>{data?.payee}</StyledSpan>
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography component="span" variant="body2" sx={{ display: 'block' }}>
                                     New Amount:
                                     <StyledSpan>₱{formatAmount(data?.amount)}</StyledSpan>
                                     {" "}-{" "}
                                     <span style={{
                                         fontWeight: 'bold',
-                                        backgroundColor: '#f44133',  // Dark green text for contrast
+                                        backgroundColor: '#f44133',
                                         color: '#fff',
                                         padding: '1px 6px',
                                         borderRadius: '5px',
@@ -158,7 +158,7 @@ const ExceedOffsetModal = memo(({ open, onClose, amountExceeded }) => {
                                     {" "}={" "}
                                     <span style={{
                                         fontWeight: 'bold',
-                                        backgroundColor: '#32b14a',  // Dark green text for contrast
+                                        backgroundColor: '#32b14a',
                                         color: '#fff',
                                         padding: '1px 6px',
                                         borderRadius: '5px',
