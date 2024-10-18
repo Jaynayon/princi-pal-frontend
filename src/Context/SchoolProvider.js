@@ -16,9 +16,9 @@ const months = [
     'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-// Dynamic year starting from year 2021
-const startYear = 2021;
-const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => (startYear + i).toString());
+// Dynamic year starting from year 2024
+const startYear = 2024;
+const years = Array.from({ length: (currentYear + 1) - startYear + 1 }, (_, i) => (startYear + i).toString());
 
 const emptyDocument = {
     id: 0,
