@@ -143,7 +143,7 @@ const ApexAnnualReport = memo(({ currentSchool, year, type }) => {
         colors: ['#FF4560', '#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF6F61', '#F1A7A1', '#F5E1D6']
     };
 
-    if (type === "Stacked Bar") {
+    if (type === "Stacked Bar" && data.length > 0) {
         return (
             <React.Fragment>
                 {/* Stacked bar chart Paper */}
@@ -161,7 +161,7 @@ const ApexAnnualReport = memo(({ currentSchool, year, type }) => {
         );
     }
 
-    if (type === "Pie Chart") {
+    if (type === "Pie Chart" && data.length > 0) {
         return (
             <React.Fragment>
                 {/* Pie chart Paper, wider */}
@@ -406,37 +406,37 @@ function DashboardPage(props) {
             {
                 code: '5020502001',
                 name: 'Communication Expenses',
-                budget: jev[0]?.budget,
+                budget: jev[0]?.budget || 0,
                 expenses: [0, 0, 0, 0, 0]
             },
             {
                 code: '5020402000',
                 name: 'Electricity Expenses',
-                budget: jev[1]?.budget,
+                budget: jev[1]?.budget || 0,
                 expenses: [0, 0, 0, 0, 0]
             },
             {
                 code: '5020503000',
                 name: 'Internet Subscription Expenses',
-                budget: jev[2]?.budget,
+                budget: jev[2]?.budget || 0,
                 expenses: [0, 0, 0, 0, 0]
             },
             {
                 code: '5029904000',
                 name: 'Transpo/Delivery Expenses',
-                budget: jev[3]?.budget,
+                budget: jev[3]?.budget || 0,
                 expenses: [0, 0, 0, 0, 0]
             },
             {
                 code: '5020201000',
                 name: 'Training Expenses',
-                budget: jev[4]?.budget,
+                budget: jev[4]?.budget || 0,
                 expenses: [0, 0, 0, 0, 0]
             },
             {
                 code: '5020399000',
                 name: 'Other Supplies & Materials Expenses',
-                budget: jev[5]?.budget,
+                budget: jev[5]?.budget || 0,
                 expenses: [0, 0, 0, 0, 0]
             },
             {
@@ -465,6 +465,8 @@ function DashboardPage(props) {
                     });
 
                     setUacsData(updatedUacsData);
+                } else {
+                    setUacsData(sampleUacsData);
                 }
             } catch (error) {
                 console.error('Error processing data:', error);
