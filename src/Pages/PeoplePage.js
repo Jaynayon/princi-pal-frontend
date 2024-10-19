@@ -618,7 +618,88 @@ function PeoplePage(props) {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <RenderPeopleRows type={"loading"} />
+                                {isLoading ? (
+                                    <>
+                                        {Array.from({ length: 3 }).map((_, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell colSpan={4} align="center">
+                                                    <Skeleton animation="wave" />
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </>
+                                ) : (
+                                    filteredRows.map((row, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>
+                                                <Grid container alignItems="center" spacing={1}>
+                                                    <Grid item>
+                                                        {row.name && (
+                                                            <Avatar sx={{ bgcolor: blue[900] }}>
+                                                                {row.name.charAt(0)}
+                                                            </Avatar>
+                                                        )}
+                                                    </Grid>
+                                                    <Grid item>{`${row.fname} ${row.mname.charAt(0) + "."} ${row.lname}`}</Grid>
+                                                </Grid>
+                                            </TableCell>
+                                            <TableCell>{row.email}</TableCell>
+                                            <TableCell>
+                                                {/* Role with dropdown arrow */}
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    {row.admin === true ?
+                                                        row.position === "Principal" ?
+                                                            <span>Principal</span>
+                                                            :
+                                                            <span>Admin</span>
+                                                        :
+                                                        <span>Member</span>
+                                                    }
+                                                    {row.position !== "Principal" &&
+                                                        currentAssocation.admin === true &&
+                                                        currentAssocation.position === "Principal" &&
+                                                        <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
+                                                </div>
+                                                {/* Dropdown menu for role options */}
+                                                {row.position !== "Principal" &&
+                                                    currentAssocation.admin === true &&
+                                                    currentAssocation.position === "Principal" &&
+                                                    <Menu
+                                                        id={`menu-dropdown-${index}`}
+                                                        anchorEl={dropdownAnchorEl}
+                                                        open={Boolean(dropdownAnchorEl && selectedIndex === index)}
+                                                        onClose={handleMenuClose}
+                                                    >
+                                                        {/* Role options */}
+                                                        <MenuItem onClick={() => handleRoleChange("Admin")}>Admin</MenuItem>
+                                                        <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
+                                                    </Menu>
+                                                }
+                                            </TableCell>
+                                            {currentAssocation.admin === true && row.position !== "Principal" &&
+                                                <TableCell>
+                                                    {/* Delete button */}
+                                                    <Button
+                                                        aria-controls={`menu-delete-${index}`}
+                                                        aria-haspopup="true"
+                                                        onClick={(event) => handleDeleteOpen(event, index)}
+                                                    >
+                                                        <MoreHorizIcon />
+                                                    </Button>
+                                                    {/* Delete menu */}
+                                                    <Menu
+                                                        id={`menu-delete-${index}`}
+                                                        anchorEl={deleteAnchorEl}
+                                                        open={Boolean(deleteAnchorEl && selectedIndex === index)}
+                                                        onClose={handleMenuClose}
+                                                    >
+                                                        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                                                    </Menu>
+                                                </TableCell>
+                                            }
+                                        </TableRow>
+                                    ))
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>
