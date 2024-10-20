@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import '../App.css';
 import PropTypes from 'prop-types';
 import {
@@ -11,10 +11,7 @@ import {
     Button,
     Typography
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
-import FactCheckIcon from '@mui/icons-material/FactCheck';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 import FilterDate from '../Components/Filters/FilterDate';
@@ -29,7 +26,6 @@ import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
-import ApprovalModal from '../Components/Modal/ApprovalModal';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -66,28 +62,21 @@ export function a11yProps(index) {
     };
 }
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
-    '& .MuiBadge-badge': {
-        right: -3,
-        top: 13,
-        border: `2px solid ${theme.palette.background.paper}`,
-        padding: '0 4px',
-    },
-}));
-
 function SchoolPage(props) {
-    const { currentUser } = useNavigationContext();
+    const { currentUser, selected } = useNavigationContext();
     const {
         year,
         month,
         setIsAdding,
+        isAdding,
+        isSearchingRef,
         isEditingRef,
         currentDocument,
         currentSchool,
         updateLr,
         updateJev,
         value,
-        setValue
+        setValue, lr
     } = useSchoolContext();
 
     const [open, setOpen] = React.useState(false);
@@ -141,19 +130,74 @@ function SchoolPage(props) {
 
     console.log("Schools renders")
 
-    // Ensures to update lr and jev only if its not loading and there's a current document
     React.useEffect(() => {
-        console.log("Schools useEffect: Document fetched, updating lr and jev");
-        // update lr and jev has currentDocument as a dependency
-        // fetch lr and jev per document change
-        updateLr();
-        updateJev();
-        setIsAdding(false); //reset state to allow addFields again
-    }, [currentDocument, updateLr, updateJev, setIsAdding, value]); // Listen to "value" when changing tabs; reset isAdding
+        console.log("listen to lr")
+    }, [lr]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    // Remove add field when going to another tab
+    React.useEffect(() => {
+        setIsAdding(false); //reset state to allow addFields again
+    }, [value, setIsAdding]); // Listen to "value" when changing tabs; reset isAdding
+
+    // Time out interval for fetching LR data
+    React.useEffect(() => {
+        let timeoutIdLr;
+
+        const updateLRData = () => {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
+                updateLr().finally(() => {
+                    // Set the next timeout after the fetch is complete
+                    timeoutIdLr = setTimeout(updateLRData, 10000); // 10 seconds
+                });
+            } else {
+                timeoutIdLr = setTimeout(updateLRData, 10000); // 10 seconds
+            }
+        };
+
+        // Check if user is in the school tab or dashboard
+        if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
+            updateLRData();
+        }
+
+        // Cleanup function to clear timeout
+        return () => {
+            clearTimeout(timeoutIdLr);
+        };
+
+    }, [updateLr, isAdding, isEditingRef, isSearchingRef, currentUser.schools, selected]);
+
+    // Time out interval for fetching JEV data
+    React.useEffect(() => {
+        let timeoutIdJev;
+
+        const updateJEVData = () => {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
+                updateJev().finally(() => {
+                    // Set the next timeout after the fetch is complete
+                    timeoutIdJev = setTimeout(updateJEVData, 10000); // 10 seconds
+                });
+            } else {
+                timeoutIdJev = setTimeout(updateJEVData, 10000); // 10 seconds
+            }
+        };
+
+        // Check if user is in the school tab or dashboard
+        if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
+            updateJEVData();
+        }
+
+        // Cleanup function to clear timeout
+        return () => {
+            clearTimeout(timeoutIdJev);
+        };
+
+    }, [updateJev, isAdding, isEditingRef, isSearchingRef, currentUser.schools, selected]);
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
