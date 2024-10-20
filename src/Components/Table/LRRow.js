@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
-import { useSchoolContext } from '../../Context/SchoolProvider';
 import Box from '@mui/material/Box';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
 import Button from '@mui/material/Button';
@@ -18,8 +17,28 @@ import NatureOfPaymentSelect from '../Select/NatureOfPaymentSelect';
 import LRTextField from '../Input/LRTextField';
 import ExceedWarningModal from '../Modal/ExceedWarningModal';
 
-function LRRow(props) {
-    const { page, rowsPerPage } = props;
+const LRRow = memo((props) => {
+    const {
+        page,
+        rowsPerPage,
+        columns,
+        addFields,
+        formatDate,
+        isAdding,
+        setIsAdding,
+        isEditingRef,
+        isEditable,
+        lr,
+        deleteLrByid,
+        setLr,
+        updateLr,
+        createLrByDocId,
+        currentDocument,
+        fetchDocumentData,
+        value
+    } = props;
+
+    console.log("RecordsRow.js")
 
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [amountExceeded, setAmountExceeded] = useState({ docId: null, colId: null, rowId: null, exceeded: null, newValue: null });
@@ -37,21 +56,6 @@ function LRRow(props) {
     const handleOpen = () => setOpen(true);
 
     const handleClose = () => setOpen(false);
-
-    const {
-        addFields,
-        formatDate,
-        isAdding,
-        isEditingRef,
-        isEditable,
-        currentDocument,
-        lr,
-        deleteLrByid,
-        setLr,
-        fetchDocumentData,
-        createLrByDocId,
-        value
-    } = useSchoolContext();
 
     const createLrByDocumentId = async (doc_id, obj) => {
         try {
@@ -89,11 +93,14 @@ function LRRow(props) {
 
     const handleDelete = async (rowId) => {
         await deleteLrByid(rowId);
+        await updateLr();
         handleMenuClose();
     };
 
     // Fetch document data to get Document and LR; reload
     const handleNewRecordCancel = async () => {
+        setIsAdding(false); //reset state to allow addFields again
+        await updateLr();
         await fetchDocumentData();
     }
 
@@ -150,7 +157,7 @@ function LRRow(props) {
 
     useEffect(() => {
         console.log("RecordsRow useEffect")
-        if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
+        if (isAdding && value === 0) { // applies only to LR & RCD tab: value = 0
             setError(true); // set error to true by default per LR adding
             addFields(isAdding);
         }
@@ -159,12 +166,12 @@ function LRRow(props) {
     return (
         <React.Fragment>
             {currentDocument.id !== 0 && lr // ensure that current document is not empty
-                .slice(page * rowsPerPage, page * props.rowsPerPage + props.rowsPerPage)
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                     const uniqueKey = `row_${row.id}_${index}`;
                     return (
                         <TableRow key={uniqueKey} hover role="checkbox" tabIndex={-1}>
-                            {props.columns.map((column) => {
+                            {columns.map((column) => {
                                 const value = row[column.id];
                                 const selectedDate = value ? new Date(value) : new Date();
 
@@ -314,7 +321,7 @@ function LRRow(props) {
             />
         </React.Fragment>
     );
-}
+});
 
 const styles = {
     cell: {
