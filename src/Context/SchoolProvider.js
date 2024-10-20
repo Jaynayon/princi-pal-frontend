@@ -60,7 +60,6 @@ export const SchoolProvider = ({ children }) => {
     // Document, LR, and JEV entities
     const [currentDocument, setCurrentDocument] = useState(emptyDocument);
     const [lr, setLr] = useState([]);
-    const [lrNotApproved, setLrNotApproved] = useState([]);
     const [jev, setJev] = useState([]);
 
     const fetchDocumentData = useCallback(async () => {
@@ -77,23 +76,7 @@ export const SchoolProvider = ({ children }) => {
             setCurrentDocument(emptyDocument)
             console.error('Error fetching document:', error);
         }
-    }, [currentSchool, setCurrentDocument, year, month]);
-
-    const fetchDocumentBySchoolId = useCallback(async (schoolId) => {
-        try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${schoolId}/${year}/${month}`, {
-                headers: {
-                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                }
-            });
-            setCurrentDocument(response.data);
-        } catch (error) {
-            setCurrentDocument(emptyDocument)
-            console.error('Error fetching document:', error);
-        }
-    }, [setCurrentDocument, year, month]);
-
-
+    }, [currentSchool, year, month]);
 
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
@@ -228,7 +211,7 @@ export const SchoolProvider = ({ children }) => {
             console.error('Error fetching document:', error);
             return null;
         }
-    }, [currentSchool, setCurrentDocument, year, createLrByDocId, updateDocumentById, fetchDocumentData]);
+    }, [currentSchool, year, createLrByDocId, updateDocumentById, fetchDocumentData]);
 
     const getDocumentBySchoolIdYear = async (school_id, year) => {
         try {
@@ -260,7 +243,7 @@ export const SchoolProvider = ({ children }) => {
             setJev([]);
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setJev]);
+    }, [currentDocument]);
 
     const updateJevById = async (colId, rowId, value) => {
         let obj = {}
@@ -292,29 +275,24 @@ export const SchoolProvider = ({ children }) => {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                const notApproved = await axios.get(`${process.env.REACT_APP_API_URL_LR}/documents/${currentDocument.id}/unapproved`, {
-                    headers: {
-                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                    }
-                });
-                setLr(response.data || []);
 
-                if (JSON.stringify(notApproved.data) !== JSON.stringify(lrNotApproved)) {
-                    setLrNotApproved(notApproved.data);
+                if (JSON.stringify(response.data) === JSON.stringify(lr)) {
+                    return; // Exit the function
+                } else {
+                    setLr(response.data || []);
                 }
-                console.log(notApproved.data)
+
+                console.log(response.data)
             } else {
                 setLr([]); //meaning it's empty 
-                setLrNotApproved([]);
             }
         } catch (error) {
-            setLr([]);
-            if (JSON.stringify(lrNotApproved) !== JSON.stringify([])) {
-                setLrNotApproved([]);
+            if (JSON.stringify(lr) !== JSON.stringify([])) {
+                setLr([]);
             }
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument, setLr]);
+    }, [currentDocument]);
 
     const updateLrById = useCallback(async (colId, rowId, value) => {
         let obj = { userId: currentUser.id }
@@ -490,7 +468,6 @@ export const SchoolProvider = ({ children }) => {
             year, setYear,
             months, years,
             lr, setLr, updateLr,
-            lrNotApproved,
             jev, setJev, updateJev,
             currentDocument, setCurrentDocument,
             emptyDocument,
@@ -502,7 +479,6 @@ export const SchoolProvider = ({ children }) => {
             addOneRow, setAddOneRow,
             currentSchool, setCurrentSchool,
             fetchDocumentData,
-            fetchDocumentBySchoolId,
             createNewDocument, updateDocumentById, getDocumentBySchoolIdYear,
             initializeDocuments,
             createLrByDocId, deleteLrByid, updateLrById,

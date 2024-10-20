@@ -84,17 +84,13 @@ function SchoolPage(props) {
         isEditingRef,
         currentDocument,
         currentSchool,
-        lrNotApproved,
         updateLr,
         updateJev,
         value,
-        setValue,
-        deleteLrByid,
-        updateLrById
+        setValue
     } = useSchoolContext();
 
     const [open, setOpen] = React.useState(false);
-    const [openApproval, setOpenApproval] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
 
     const handleOpen = () => {
@@ -106,14 +102,6 @@ function SchoolPage(props) {
         setOpen(false);
         isEditingRef.current = false;
     }
-
-    const handleOpenApproval = () => {
-        setOpenApproval(true);
-    }
-
-    const handleCloseApproval = useCallback(() => {
-        setOpenApproval(false);
-    }, []); // empty dependency to avoid re-constructing
 
     const exportDocument = async () => {
         setExportIsLoading(true);  // Start loading
@@ -266,16 +254,16 @@ function SchoolPage(props) {
                                     </Button>
                                     <IconButton
                                         aria-label="open-approval"
-                                        onClick={handleOpenApproval}
+                                        // onClick={handleOpenApproval}
                                         sx={{
                                             color: "#C5C7CD",
                                             marginLeft: "auto",
                                             pr: 3
                                         }}
                                     >
-                                        <StyledBadge badgeContent={lrNotApproved.length} color="secondary">
+                                        {/* <StyledBadge badgeContent={lrNotApproved.length} color="secondary">
                                             <FactCheckIcon />
-                                        </StyledBadge>
+                                        </StyledBadge> */}
                                     </IconButton>
                                 </Box>
                             </Grid>
@@ -292,13 +280,6 @@ function SchoolPage(props) {
                     </Paper>
                 </Grid>
             </Grid>
-            <ApprovalModal
-                open={openApproval}
-                handleClose={handleCloseApproval}
-                lrNotApproved={lrNotApproved}
-                deleteLrByid={deleteLrByid}
-                updateLrById={updateLrById}
-            />
             <BudgetAllocationModal
                 open={open}
                 handleClose={handleClose}
