@@ -70,13 +70,20 @@ export const SchoolProvider = ({ children }) => {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                setCurrentDocument(response.data || emptyDocument);
+
+                const fetchedDocument = response.data || emptyDocument;
+
+                // Compare the currentDocument and fetchedDocument
+                if (JSON.stringify(fetchedDocument) !== JSON.stringify(currentDocument)) {
+                    setCurrentDocument(fetchedDocument);
+                }
+
             }
         } catch (error) {
             setCurrentDocument(emptyDocument)
             console.error('Error fetching document:', error);
         }
-    }, [currentSchool, year, month]);
+    }, [currentDocument, currentSchool, year, month]);
 
     const createLrByDocId = useCallback(async (documentsId, obj) => {
         try {
@@ -235,15 +242,23 @@ export const SchoolProvider = ({ children }) => {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                setJev(response.data || []);
+
+                if (JSON.stringify(response.data) !== JSON.stringify(jev)) {
+                    setJev(response.data || []);
+                }
+
             } else {
-                setJev([]); //meaning it's empty 
+                if (JSON.stringify(jev) !== JSON.stringify([])) {
+                    setJev([]); //meaning it's empty 
+                }
             }
         } catch (error) {
-            setJev([]);
+            if (JSON.stringify(jev) !== JSON.stringify([])) {
+                setJev([]);
+            }
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument]);
+    }, [currentDocument, jev]);
 
     const updateJevById = async (colId, rowId, value) => {
         let obj = {}
@@ -276,15 +291,14 @@ export const SchoolProvider = ({ children }) => {
                     }
                 });
 
-                if (JSON.stringify(response.data) === JSON.stringify(lr)) {
-                    return; // Exit the function
-                } else {
+                if (JSON.stringify(response.data) !== JSON.stringify(lr)) {
                     setLr(response.data || []);
                 }
 
-                console.log(response.data)
             } else {
-                setLr([]); //meaning it's empty 
+                if (JSON.stringify(lr) !== JSON.stringify([])) {
+                    setLr([]); //meaning it's empty 
+                }
             }
         } catch (error) {
             if (JSON.stringify(lr) !== JSON.stringify([])) {
@@ -292,7 +306,7 @@ export const SchoolProvider = ({ children }) => {
             }
             console.error('Error fetching lr:', error);
         }
-    }, [currentDocument]);
+    }, [currentDocument, lr]);
 
     const updateLrById = useCallback(async (colId, rowId, value) => {
         let obj = { userId: currentUser.id }
@@ -346,7 +360,7 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    }, [currentUser]); // Exclude fetchDocumentData from dependencies
+    }, [currentUser, fetchDocumentData]); // Exclude fetchDocumentData from dependencies
 
     const deleteLrByid = useCallback(async (rowId) => {
         try {
@@ -370,16 +384,16 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    }, [currentUser]); // Exclude fetchDocumentData from dependencies
+    }, [currentUser, fetchDocumentData]); // Exclude fetchDocumentData from dependencies
 
-    const formatDate = (dateString) => {
+    const formatDate = useCallback((dateString) => {
         const date = new Date(dateString); // Convert to Date object
         const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based, so +1
         const day = date.getDate().toString().padStart(2, '0');
         const year = date.getFullYear();
 
         return `${month}/${day}/${year}`; // Return formatted date as MM/DD/YYYY
-    };
+    }, []);
 
     const addFields = useCallback((isAdding) => {
         let newLr = {
@@ -394,7 +408,7 @@ export const SchoolProvider = ({ children }) => {
         }
 
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
-    }, [objectCodes]);
+    }, [objectCodes, formatDate]);
 
     useEffect(() => {
         // Function to check if the document is editable
