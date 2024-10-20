@@ -35,7 +35,7 @@ const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
 
 export default function LRDate({ rowId, colId, selected, onChange }) {
     const [startDate, setStartDate] = useState(new Date(selected) || new Date());
-    const { formatDate, updateLrById, years, months } = useSchoolContext();
+    const { formatDate, updateLrById, updateLr, years, months } = useSchoolContext();
 
     const dateOnChange = async (date) => {
         try {
@@ -43,6 +43,7 @@ export default function LRDate({ rowId, colId, selected, onChange }) {
             // Update cells to any date fields that already have data/LR
             if (rowId !== 3) {
                 await updateLrById(colId, rowId, formattedDate);
+                await updateLr(); // Update lr to get new order
             } else {
                 // Call the on change function that updates the LR state rowId === 3
                 onChange(colId, rowId, formattedDate)
