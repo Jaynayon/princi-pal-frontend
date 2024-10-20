@@ -73,7 +73,23 @@ const columns = [
 ];
 
 export default function LRTable() {
-    const { currentDocument, emptyDocument, lr } = useSchoolContext();
+    const {
+        currentDocument,
+        emptyDocument,
+        lr,
+        addFields,
+        formatDate,
+        isAdding,
+        setIsAdding,
+        isEditingRef,
+        isEditable,
+        deleteLrByid,
+        setLr,
+        updateLr,
+        fetchDocumentData,
+        createLrByDocId,
+        value
+    } = useSchoolContext();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
 
@@ -120,6 +136,20 @@ export default function LRTable() {
                             page={page}
                             rowsPerPage={rowsPerPage}
                             columns={columns}
+                            addFields={addFields}
+                            formatDate={formatDate}
+                            isAdding={isAdding}
+                            setIsAdding={setIsAdding}
+                            isEditingRef={isEditingRef}
+                            isEditable={isEditable}
+                            deleteLrByid={deleteLrByid}
+                            lr={lr}
+                            updateLr={updateLr}
+                            setLr={setLr}
+                            currentDocument={currentDocument}
+                            createLrByDocId={createLrByDocId}
+                            fetchDocumentData={fetchDocumentData}
+                            value={value}
                         />
                     </TableBody>
                 </Table>
