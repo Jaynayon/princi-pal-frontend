@@ -298,7 +298,10 @@ export const SchoolProvider = ({ children }) => {
                     }
                 });
                 setLr(response.data || []);
-                setLrNotApproved(notApproved.data || []);
+
+                if (JSON.stringify(notApproved.data) !== JSON.stringify(lrNotApproved)) {
+                    setLrNotApproved(notApproved.data);
+                }
                 console.log(notApproved.data)
             } else {
                 setLr([]); //meaning it's empty 
@@ -306,12 +309,14 @@ export const SchoolProvider = ({ children }) => {
             }
         } catch (error) {
             setLr([]);
-            setLrNotApproved([]);
+            if (JSON.stringify(lrNotApproved) !== JSON.stringify([])) {
+                setLrNotApproved([]);
+            }
             console.error('Error fetching lr:', error);
         }
     }, [currentDocument, setLr]);
 
-    const updateLrById = async (colId, rowId, value) => {
+    const updateLrById = useCallback(async (colId, rowId, value) => {
         let obj = { userId: currentUser.id }
 
         // Construct the payload object based on the provided colId
@@ -363,9 +368,9 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    };
+    }, [currentUser]); // Exclude fetchDocumentData from dependencies
 
-    const deleteLrByid = async (rowId) => {
+    const deleteLrByid = useCallback(async (rowId) => {
         try {
             if (currentUser) {
                 const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}/user/${currentUser.id}`, {
@@ -387,7 +392,7 @@ export const SchoolProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching document:', error);
         }
-    };
+    }, [currentUser]); // Exclude fetchDocumentData from dependencies
 
     const formatDate = (dateString) => {
         const date = new Date(dateString); // Convert to Date object
