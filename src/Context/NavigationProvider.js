@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useRef, useContext } from 'r
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAppContext } from './AppProvider';
+import { useMemo } from 'react';
 
 const NavigationContext = createContext();
 
@@ -10,7 +11,7 @@ export const useNavigationContext = () => useContext(NavigationContext);
 export const NavigationProvider = ({ children }) => {
     const { currentUser } = useAppContext();
 
-    const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
+    const list = useMemo(() => ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'], []);
     const [selected, setSelected] = useState('Dashboard');
     const [open, setOpen] = useState(true);
     const [openSub, setOpenSub] = useState(false);
@@ -142,7 +143,7 @@ export const NavigationProvider = ({ children }) => {
         // Extract the root route if it's the /schools route
         const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
 
-        // if current user is not null or undefined, or not in /schools, set default school
+        // if current user is not null or undefined, & not in /schools, set default school
         if (currentUser && !currentSchool && (extractRoute !== "/schools")) {
             setCurrentSchool(currentUser.schools[0]);
         }
@@ -186,7 +187,7 @@ export const NavigationProvider = ({ children }) => {
             if (localStorageValue !== null || localStorageValue !== undefined) {
                 setSelected(localStorageValue)
             } else {
-                window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify("Dashboard"));
+                // window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify("Dashboard"));
                 setSelected("Dashboard")
             }
         }
@@ -207,10 +208,10 @@ export const NavigationProvider = ({ children }) => {
         };
     }, [currentUser, currentSchool, location, navigate]);
 
-    useEffect(() => {
-        window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
-    }, [selected]);
-
+    // useEffect(() => {
+    //     console.log("test navigation context")
+    //     window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
+    // }, [selected]);
 
     return (
         <NavigationContext.Provider value={{
