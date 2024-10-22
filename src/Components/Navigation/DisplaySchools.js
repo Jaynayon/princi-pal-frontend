@@ -50,7 +50,7 @@ export default function DisplaySchools() {
             setSelected(currentUser.schools[index].name);
             setCurrentSchool(currentUser.schools[index]);
         } else {
-            setSelected(currentUser.schools[0].name)
+            setSelected(currentUser.schools[0].name);
             setCurrentSchool(currentUser.schools[0]);
         }
         setIsAdding(false); // Close the add field/form when a school is selected

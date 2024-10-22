@@ -80,7 +80,7 @@ const DisplayItems = memo(({ list, selected, setSelected }) => {
                             value={item}
                             onClick={() => {
                                 if (index < 4) {
-                                    setSelected(selected !== item && item); // Only update if it's not the same value
+                                    setSelected(item); // Only update if it's not the same value
                                 } else {
                                     setLogoutDialogOpen(true); // Open logout dialog on logout button click
                                 }

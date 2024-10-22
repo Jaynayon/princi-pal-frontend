@@ -8,6 +8,14 @@ const NavigationContext = createContext();
 
 export const useNavigationContext = () => useContext(NavigationContext);
 
+// Define a mapping between paths and the desired local storage values
+const pathToLocalStorageValue = {
+    "/": "Dashboard",
+    '/dashboard': 'Dashboard',
+    '/people': 'People',
+    '/settings': 'Settings',
+};
+
 export const NavigationProvider = ({ children }) => {
     const { currentUser } = useAppContext();
 
@@ -148,14 +156,6 @@ export const NavigationProvider = ({ children }) => {
             setCurrentSchool(currentUser.schools[0]);
         }
 
-        // Define a mapping between paths and the desired local storage values
-        const pathToLocalStorageValue = {
-            "/": "Dashboard",
-            '/dashboard': 'Dashboard',
-            '/people': 'People',
-            '/settings': 'Settings',
-        };
-
         if (currentUser && currentUser.position !== "Super administrator") {
             // Get the local storage value based on the current path
             let localStorageValue = pathToLocalStorageValue[location.pathname];
@@ -183,13 +183,6 @@ export const NavigationProvider = ({ children }) => {
                     navigate('/');
                 }
             }
-            // Set the state with the current local storage value
-            if (localStorageValue !== null || localStorageValue !== undefined) {
-                setSelected(localStorageValue)
-            } else {
-                // window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify("Dashboard"));
-                setSelected("Dashboard")
-            }
         }
         // Call the function to set initial mobileMode state
         updateMobileMode();
@@ -207,6 +200,18 @@ export const NavigationProvider = ({ children }) => {
             window.removeEventListener('resize', handleResize);
         };
     }, [currentUser, currentSchool, location, navigate]);
+
+    useEffect(() => {
+        if (currentUser?.position !== "Super administrator") {
+            // Get the local storage value based on the current path and check if it's truthy
+            const localStorageValue = pathToLocalStorageValue[location.pathname];
+
+            if (localStorageValue && localStorageValue !== selected) { // Ensure setter not called !necessarily
+                setSelected(localStorageValue);
+            }
+        }
+    }, [currentUser, location.pathname, selected]);
+
 
     // useEffect(() => {
     //     console.log("test navigation context")
