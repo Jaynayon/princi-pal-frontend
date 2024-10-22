@@ -178,6 +178,8 @@ export const NavigationProvider = ({ children }) => {
 
                     // Fetch selected school data by setting the current school state
                     if (matchedSchool) { setCurrentSchool(matchedSchool); }
+
+                    setSelected(localStorageValue); // Set the selected state for school
                 } else {
                     // If user is logged in, redirect to inner modules
                     navigate('/');
