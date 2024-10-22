@@ -117,34 +117,33 @@ export default function LRTable() {
     const stableSchools = useMemo(() => currentUser.schools, [currentUser.schools]);
     const stableSelected = useMemo(() => selected, [selected]);
 
-    // Time out interval for fetching LR data
     useEffect(() => {
-        let timeoutIdLr;
+        let intervalIdLr = null;
 
         const updateLRData = () => {
             // Fetch data if user is not adding, editing, or searching
             if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
-                updateLr().finally(() => {
-                    // Set the next timeout after the fetch is complete
-                    timeoutIdLr = setTimeout(updateLRData, 10000); // 10 seconds
-                });
-            } else {
-                timeoutIdLr = setTimeout(updateLRData, 10000); // 10 seconds
+                updateLr().catch(error => console.error('Error fetching LR data:', error));
             }
         };
 
         // Check if user is in the school tab or dashboard
         if (stableSchools.find(school => school.name === stableSelected) || stableSelected === "Dashboard") {
-            updateLRData();
+            updateLRData();  // Initial fetch immediately
+            intervalIdLr = setInterval(updateLRData, 10000);  // Set interval for every 10 seconds
         }
 
-        // Cleanup function to clear timeout
+        // Cleanup function to clear interval
         return () => {
-            clearTimeout(timeoutIdLr);
-            timeoutIdLr = null;  // Ensure timeoutId is reset to null
+            if (intervalIdLr) {
+                clearInterval(intervalIdLr);
+                intervalIdLr = null;  // Reset intervalId to null after clearing
+            }
         };
 
     }, [updateLr, isAdding, isEditingRef, isSearchingRef, stableSchools, stableSelected]);
+
+
 
     return (
         <React.Fragment>

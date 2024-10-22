@@ -80,34 +80,32 @@ export default function JEVTable() {
     const stableSchools = useMemo(() => currentUser.schools, [currentUser.schools]);
     const stableSelected = useMemo(() => selected, [selected]);
 
-    // Time out interval for fetching JEV data
     useEffect(() => {
-        let timeoutIdJev;
+        let intervalIdJev = null;
 
         const updateJEVData = () => {
             // Fetch data if user is not adding, editing, or searching
             if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
-                updateJev().finally(() => {
-                    // Set the next timeout after the fetch is complete
-                    timeoutIdJev = setTimeout(updateJEVData, 10000); // 10 seconds
-                });
-            } else {
-                timeoutIdJev = setTimeout(updateJEVData, 10000); // 10 seconds
+                updateJev().catch(error => console.error('Error fetching JEV data:', error));
             }
         };
 
         // Check if user is in the school tab or dashboard
         if (stableSchools.find(school => school.name === stableSelected) || stableSelected === "Dashboard") {
-            updateJEVData();
+            updateJEVData();  // Initial fetch
+            intervalIdJev = setInterval(updateJEVData, 10000);  // Set interval for every 10 seconds
         }
 
-        // Cleanup function to clear timeout
+        // Cleanup function to clear interval
         return () => {
-            clearTimeout(timeoutIdJev);
-            timeoutIdJev = null;  // Ensure timeoutId is reset to null
+            if (intervalIdJev) {
+                clearInterval(intervalIdJev);
+                intervalIdJev = null;  // Ensure intervalId is reset to null
+            }
         };
 
     }, [updateJev, isAdding, isEditingRef, isSearchingRef, stableSchools, stableSelected]);
+
 
     return (
         <React.Fragment>
