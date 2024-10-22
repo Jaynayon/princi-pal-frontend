@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
 import Box from '@mui/material/Box';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
@@ -51,7 +51,7 @@ const LRRow = memo((props) => {
 
     const handleWarningOpen = () => setWarningOpen(true);
 
-    const handleWarningClose = () => setWarningOpen(false);
+    const handleWarningClose = useCallback(() => setWarningOpen(false), []);
 
     const handleOpen = () => setOpen(true);
 
@@ -120,6 +120,7 @@ const LRRow = memo((props) => {
                 handleWarningOpen();
             } else {
                 await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                await updateLr(); // Fetch LR
             }
         }
     }
