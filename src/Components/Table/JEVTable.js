@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -6,8 +6,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { SchoolContext } from '../../Context/SchoolProvider';
+import { useSchoolContext } from '../../Context/SchoolProvider';
 import JEVRow from './JEVRow';
+import { useAppContext } from '../../Context/AppProvider';
+import { useNavigationContext } from '../../Context/NavigationProvider';
 
 const columns = [
     {
@@ -45,7 +47,17 @@ const columns = [
 ];
 
 export default function JEVTable() {
-    const { currentDocument, emptyDocument, jev } = useContext(SchoolContext);
+    const { currentUser } = useAppContext();
+    const { selected } = useNavigationContext();
+    const {
+        currentDocument,
+        emptyDocument,
+        jev,
+        updateJev,
+        isAdding,
+        isEditingRef,
+        isSearchingRef
+    } = useSchoolContext();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
 
@@ -63,6 +75,39 @@ export default function JEVTable() {
             setPage(0);
         }
     }, [currentDocument, emptyDocument]);
+
+    // Memoize dependencies to prevent unnecessary re-renders
+    const stableSchools = useMemo(() => currentUser.schools, [currentUser.schools]);
+    const stableSelected = useMemo(() => selected, [selected]);
+
+    // Time out interval for fetching JEV data
+    useEffect(() => {
+        let timeoutIdJev;
+
+        const updateJEVData = () => {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
+                updateJev().finally(() => {
+                    // Set the next timeout after the fetch is complete
+                    timeoutIdJev = setTimeout(updateJEVData, 10000); // 10 seconds
+                });
+            } else {
+                timeoutIdJev = setTimeout(updateJEVData, 10000); // 10 seconds
+            }
+        };
+
+        // Check if user is in the school tab or dashboard
+        if (stableSchools.find(school => school.name === stableSelected) || stableSelected === "Dashboard") {
+            updateJEVData();
+        }
+
+        // Cleanup function to clear timeout
+        return () => {
+            clearTimeout(timeoutIdJev);
+            timeoutIdJev = null;  // Ensure timeoutId is reset to null
+        };
+
+    }, [updateJev, isAdding, isEditingRef, isSearchingRef, stableSchools, stableSelected]);
 
     return (
         <React.Fragment>

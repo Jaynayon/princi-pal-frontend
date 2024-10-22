@@ -256,7 +256,7 @@ export const SchoolProvider = ({ children }) => {
             if (JSON.stringify(jev) !== JSON.stringify([])) {
                 setJev([]);
             }
-            console.error('Error fetching lr:', error);
+            console.error('Error fetching jev:', error);
         }
     }, [currentDocument, jev]);
 

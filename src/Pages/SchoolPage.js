@@ -21,11 +21,11 @@ import { saveAs } from 'file-saver';
 
 import { useSchoolContext } from '../Context/SchoolProvider';
 
-import DocumentTable from '../Components/Table/LRTable';
+import LRTable from '../Components/Table/LRTable';
 import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
-import { useNavigationContext } from '../Context/NavigationProvider';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
+import { useAppContext } from '../Context/AppProvider';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -63,20 +63,16 @@ export function a11yProps(index) {
 }
 
 function SchoolPage(props) {
-    const { currentUser, selected } = useNavigationContext();
+    const { currentUser } = useAppContext();
     const {
         year,
         month,
         setIsAdding,
-        isAdding,
-        isSearchingRef,
         isEditingRef,
         currentDocument,
         currentSchool,
-        updateLr,
-        updateJev,
         value,
-        setValue, lr
+        setValue
     } = useSchoolContext();
 
     const [open, setOpen] = React.useState(false);
@@ -91,6 +87,10 @@ function SchoolPage(props) {
         setOpen(false);
         isEditingRef.current = false;
     }
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
 
     const exportDocument = async () => {
         setExportIsLoading(true);  // Start loading
@@ -126,78 +126,16 @@ function SchoolPage(props) {
         }
     };
 
-    const exportDocumentOnClick = async () => { await exportDocument(); }
+    const exportDocumentOnClick = async () => {
+        await exportDocument();
+    }
 
     console.log("Schools renders")
-
-    React.useEffect(() => {
-        console.log("listen to lr")
-    }, [lr]);
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
 
     // Remove add field when going to another tab
     React.useEffect(() => {
         setIsAdding(false); //reset state to allow addFields again
     }, [value, setIsAdding]); // Listen to "value" when changing tabs; reset isAdding
-
-    // Time out interval for fetching LR data
-    React.useEffect(() => {
-        let timeoutIdLr;
-
-        const updateLRData = () => {
-            // Fetch data if user is not adding, editing, or searching
-            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
-                updateLr().finally(() => {
-                    // Set the next timeout after the fetch is complete
-                    timeoutIdLr = setTimeout(updateLRData, 10000); // 10 seconds
-                });
-            } else {
-                timeoutIdLr = setTimeout(updateLRData, 10000); // 10 seconds
-            }
-        };
-
-        // Check if user is in the school tab or dashboard
-        if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
-            updateLRData();
-        }
-
-        // Cleanup function to clear timeout
-        return () => {
-            clearTimeout(timeoutIdLr);
-        };
-
-    }, [updateLr, isAdding, isEditingRef, isSearchingRef, currentUser.schools, selected]);
-
-    // Time out interval for fetching JEV data
-    React.useEffect(() => {
-        let timeoutIdJev;
-
-        const updateJEVData = () => {
-            // Fetch data if user is not adding, editing, or searching
-            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
-                updateJev().finally(() => {
-                    // Set the next timeout after the fetch is complete
-                    timeoutIdJev = setTimeout(updateJEVData, 10000); // 10 seconds
-                });
-            } else {
-                timeoutIdJev = setTimeout(updateJEVData, 10000); // 10 seconds
-            }
-        };
-
-        // Check if user is in the school tab or dashboard
-        if (currentUser.schools.find(school => school.name === selected) || selected === "Dashboard") {
-            updateJEVData();
-        }
-
-        // Cleanup function to clear timeout
-        return () => {
-            clearTimeout(timeoutIdJev);
-        };
-
-    }, [updateJev, isAdding, isEditingRef, isSearchingRef, currentUser.schools, selected]);
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -314,7 +252,7 @@ function SchoolPage(props) {
                             {/*Document Tables*/}
                             <Grid item xs={12} md={12} lg={12}>
                                 <CustomTabPanel value={value} index={0}>
-                                    <DocumentTable />
+                                    <LRTable />
                                 </CustomTabPanel>
                                 <CustomTabPanel value={value} index={1}>
                                     <JEVTable />

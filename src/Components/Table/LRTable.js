@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Table from '@mui/material/Table';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -12,6 +12,8 @@ import TableRow from '@mui/material/TableRow';
 import LRRow from './LRRow';
 import Typography from '@mui/material/Typography';
 import { useSchoolContext } from '../../Context/SchoolProvider';
+import { useAppContext } from '../../Context/AppProvider';
+import { useNavigationContext } from '../../Context/NavigationProvider';
 
 const columns = [
     {
@@ -73,6 +75,8 @@ const columns = [
 ];
 
 export default function LRTable() {
+    const { currentUser } = useAppContext();
+    const { selected } = useNavigationContext();
     const {
         currentDocument,
         emptyDocument,
@@ -88,7 +92,8 @@ export default function LRTable() {
         updateLr,
         fetchDocumentData,
         createLrByDocId,
-        value
+        value,
+        isSearchingRef
     } = useSchoolContext();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
@@ -107,6 +112,39 @@ export default function LRTable() {
             setPage(0);
         }
     }, [currentDocument, emptyDocument]);
+
+    // Memoize dependencies to prevent unnecessary re-renders
+    const stableSchools = useMemo(() => currentUser.schools, [currentUser.schools]);
+    const stableSelected = useMemo(() => selected, [selected]);
+
+    // Time out interval for fetching LR data
+    useEffect(() => {
+        let timeoutIdLr;
+
+        const updateLRData = () => {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
+                updateLr().finally(() => {
+                    // Set the next timeout after the fetch is complete
+                    timeoutIdLr = setTimeout(updateLRData, 10000); // 10 seconds
+                });
+            } else {
+                timeoutIdLr = setTimeout(updateLRData, 10000); // 10 seconds
+            }
+        };
+
+        // Check if user is in the school tab or dashboard
+        if (stableSchools.find(school => school.name === stableSelected) || stableSelected === "Dashboard") {
+            updateLRData();
+        }
+
+        // Cleanup function to clear timeout
+        return () => {
+            clearTimeout(timeoutIdLr);
+            timeoutIdLr = null;  // Ensure timeoutId is reset to null
+        };
+
+    }, [updateLr, isAdding, isEditingRef, isSearchingRef, stableSchools, stableSelected]);
 
     return (
         <React.Fragment>
