@@ -18,10 +18,22 @@ import { transformSchoolText } from './Navigation';
 // Custom imports
 import { VerticalLine } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import { useSchoolContext } from '../../Context/SchoolProvider';
 
 export default function DisplaySchools() {
     const theme = useTheme();
-    const { open, toggleDrawer, prevOpen, selected, setSelected, setCurrentSchool, currentUser, openSub, setOpenSub } = useNavigationContext();
+    const {
+        open,
+        toggleDrawer,
+        prevOpen,
+        selected,
+        setSelected,
+        setCurrentSchool,
+        currentUser,
+        openSub,
+        setOpenSub
+    } = useNavigationContext();
+    const { setIsAdding } = useSchoolContext();
 
     useEffect(() => {
         if (!open) {
@@ -41,6 +53,7 @@ export default function DisplaySchools() {
             setSelected(currentUser.schools[0].name)
             setCurrentSchool(currentUser.schools[0]);
         }
+        setIsAdding(false); // Close the add field/form when a school is selected
     }
 
     const handleClick = () => {
