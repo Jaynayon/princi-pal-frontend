@@ -18,15 +18,19 @@ const LoginPage = () => {
     };
 
     const handleBtnRegister = () => {
-        // Logic for handling register button click
         // Redirect to the registration page
         window.location.href = `${process.env.REACT_APP_FRONTEND_URL}/register`;
     };
 
+    const handleForgotPassword = () => {
+        // Redirect to the forgot password page
+        window.location.href = `${process.env.REACT_APP_FRONTEND_URL}/forgot-password`;
+    };
+
     const handleLogin = async () => {
         try {
-            const emailValue = getEmailorUsername(); // Get email or username
-            const passwordValue = getPassword(); // Get password
+            const emailValue = getEmailorUsername();
+            const passwordValue = getPassword();
 
             if (!emailValue.trim() || !passwordValue.trim()) {
                 if (!emailValue.trim() && !passwordValue.trim()) {
@@ -43,7 +47,6 @@ const LoginPage = () => {
             const response = await authenticateUser(emailValue, passwordValue);
 
             if (!response) {
-                // Invalid credentials, display error message
                 setLoginError('Incorrect email or password.');
             }
         } catch (error) {
@@ -56,16 +59,9 @@ const LoginPage = () => {
         }
     };
 
+    const getEmailorUsername = () => email;
 
-    const getEmailorUsername = () => {
-        // Logic to get email or username from the input field
-        return email;
-    };
-
-    const getPassword = () => {
-        // Logic to get password from the input field
-        return password;
-    };
+    const getPassword = () => password;
 
     const loginButtonActionListener = () => {
         handleLogin();
@@ -83,14 +79,13 @@ const LoginPage = () => {
         }}>
             <Grid container spacing={4}>
                 {/* Left side: Login fields */}
-                <Grid item xs={12} md={5} sx={{ alignItems: 'flex-start', marginTop: '5%', textAlign: 'left', marginLeft: '5%' }}> {/* Updated marginLeft */}
+                <Grid item xs={12} md={5} sx={{ alignItems: 'flex-start', marginTop: '5%', textAlign: 'left', marginLeft: '5%' }}>
                     <Box sx={{
                         display: 'flex',
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'flex-start'
-                    }}
-                    >
+                    }}>
                         <IconButton
                             onClick={() => console.log('test')}
                             href="/"
@@ -98,9 +93,9 @@ const LoginPage = () => {
                             <ChevronLeftIcon color='inherit' sx={{ fontSize: '50px' }} />
                         </IconButton>
                     </Box>
-                    <Typography variant="h4" sx={{ fontSize: "48px", fontWeight: "bold", mt: 2 }}>Login to your account</Typography> {/* Updated marginTop */}
-                    <Typography variant="body1" sx={{ fontSize: "20px", mt: 6 }}>Hi, Welcome back 👋 </Typography> {/* Updated spacing */}
-                    <Typography variant="subtitle1" sx={{ marginTop: '3%', fontSize: "18px", fontWeight: "600", mt: 15 }}>Email</Typography> {/* Updated marginTop */}
+                    <Typography variant="h4" sx={{ fontSize: "48px", fontWeight: "bold", mt: 2 }}>Login to your account</Typography>
+                    <Typography variant="body1" sx={{ fontSize: "20px", mt: 6 }}>Hi, Welcome back 👋 </Typography>
+                    <Typography variant="subtitle1" sx={{ marginTop: '3%', fontSize: "18px", fontWeight: "600", mt: 15 }}>Email</Typography>
                     <TextField
                         color="primary"
                         label="Enter your email id"
@@ -108,14 +103,14 @@ const LoginPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         fullWidth
-                        sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
+                        sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                                handleLogin(); // Invoke handleLogin on Enter key press
+                                handleLogin();
                             }
                         }}
                     />
-                    <Typography variant="subtitle1" sx={{ fontSize: "18px", fontWeight: "600", mt: 4 }}>Password</Typography> {/* Updated spacing */}
+                    <Typography variant="subtitle1" sx={{ fontSize: "18px", fontWeight: "600", mt: 4 }}>Password</Typography>
                     <TextField
                         color="primary"
                         label="Enter your password"
@@ -129,20 +124,26 @@ const LoginPage = () => {
                                     </IconButton>
                                 </InputAdornment>
                             ),
-                            sx: { borderColor: "#DBF0FD" } // Removed padding
+                            sx: { borderColor: "#DBF0FD" }
                         }}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         fullWidth
-                        sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }} // Adjusted borderRadius
+                        sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                                handleLogin(); // Invoke handleLogin on Enter key press
+                                handleLogin();
                             }
                         }}
                     />
                     {loginError && <Typography color="error" sx={{ fontSize: "14px", mt: 2 }}>{loginError}</Typography>}
                     <Button onClick={loginButtonActionListener} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
+
+                    {/* Forgot Password Link - Aligned to the right */}
+                    <Typography variant="body2" sx={{ mt: 2, textAlign: 'left', textDecoration: 'underline' }}>
+                        <Link onClick={handleForgotPassword} style={{ color: '#6EADDC', textDecoration: 'underline', fontWeight: 'normal' }}>Forgot Password?</Link>
+                    </Typography>
+
                     <Typography variant="body1" sx={{ mt: 2, marginLeft: '25%' }}>
                         Not registered yet? <span style={{ color: '#6C6FD5' }}>Create an account </span>
                         <Link style={{ color: '#6EADDC', textDecoration: 'none', fontWeight: 'bold', borderBottom: '1px solid' }}
@@ -151,9 +152,9 @@ const LoginPage = () => {
                 </Grid>
 
                 {/* Right side: Sign-up button and image */}
-                <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', mt: 8, marginTop: '10%' }}> {/* Updated marginTop */}
-                    <Button variant="contained" href="/register" sx={{ marginLeft: 'auto', width: "167px", height: "43px", borderRadius: "5px", backgroundColor: "#4a99d3" }}>Sign Up</Button> {/* Updated marginLeft */}
-                    <img style={{ mt: 8, marginTop: '20%', marginLeft: 'auto', marginRight: 'auto', width: "100%", maxWidth: "450px", objectFit: "cover" }} alt="" src="/reshotillustrationwebsitedesignu3pzxdsevy-1@2x.png" /> {/* Updated marginLeft */}
+                <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', mt: 8, marginTop: '10%' }}>
+                    <Button variant="contained" href="/register" sx={{ marginLeft: 'auto', width: "167px", height: "43px", borderRadius: "5px", backgroundColor: "#4a99d3" }}>Sign Up</Button>
+                    <img style={{ mt: 8, marginTop: '20%', marginLeft: 'auto', marginRight: 'auto', width: "100%", maxWidth: "450px", objectFit: "cover" }} alt="" src="/reshotillustrationwebsitedesignu3pzxdsevy-1@2x.png" />
                 </Grid>
             </Grid>
         </Container>

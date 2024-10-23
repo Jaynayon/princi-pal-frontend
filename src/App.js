@@ -14,6 +14,8 @@ import { SchoolProvider } from './Context/SchoolProvider.js';
 import WelcomePage from './Pages/WelcomePage.js';
 import RegistrationPage from './Pages/RegistrationPage.js';
 import { useAppContext } from './Context/AppProvider.js';
+import ForgotPasswordPage from './Pages/ForgotPasswordPage.js';
+import ResetPasswordPage from './Pages/ResetPasswordPage.js';
 
 function App() {
   const { isLoggedIn, isSuperAdmin } = useAppContext();
@@ -66,6 +68,16 @@ function App() {
         <Route
           path="*"
           element={<NoMatchPage />}
+        />
+        {/* Bypass login check for ForgotPasswordPage */}
+        <Route
+          path="/forgot-password"
+          element={<ForgotPasswordPage />} 
+        />
+        <Route
+          path="/reset-password/"
+          element={
+            <ResetPasswordPage/>}
         />
       </Route>
     )
