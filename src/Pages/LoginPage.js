@@ -1,9 +1,8 @@
 import { useState } from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { TextField, InputAdornment, IconButton, Button, Typography, Container, Grid } from "@mui/material";
+import { TextField, InputAdornment, IconButton, Button, Typography, Container, Grid, Box } from "@mui/material";
 import { Link } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import Box from '@mui/material/Box';
 import { useAppContext } from "../Context/AppProvider";
 
 const LoginPage = () => {
@@ -110,7 +109,13 @@ const LoginPage = () => {
                             }
                         }}
                     />
-                    <Typography variant="subtitle1" sx={{ fontSize: "18px", fontWeight: "600", mt: 4 }}>Password</Typography>
+                    {/* Container for Forgot Password Link */}
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                        <Link onClick={handleForgotPassword} style={{ color: '#6EADDC', textDecoration: 'underline', fontWeight: 'normal', alignSelf: 'center' }}>
+                            Forgot Password?
+                        </Link>
+                    </Box>
+                    <Typography variant="subtitle1" sx={{ fontSize: "18px", fontWeight: "600", mt: 1 }}>Password</Typography>
                     <TextField
                         color="primary"
                         label="Enter your password"
@@ -129,7 +134,7 @@ const LoginPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         fullWidth
-                        sx={{ mt: 2, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }}
+                        sx={{ mt: 0.5, backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' }, borderRadius: '8px' }}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 handleLogin();
@@ -138,11 +143,6 @@ const LoginPage = () => {
                     />
                     {loginError && <Typography color="error" sx={{ fontSize: "14px", mt: 2 }}>{loginError}</Typography>}
                     <Button onClick={loginButtonActionListener} variant="contained" sx={{ mt: 7, width: "100%", height: "44px", borderRadius: "5px", }}>Log in</Button>
-
-                    {/* Forgot Password Link - Aligned to the right */}
-                    <Typography variant="body2" sx={{ mt: 2, textAlign: 'left', textDecoration: 'underline' }}>
-                        <Link onClick={handleForgotPassword} style={{ color: '#6EADDC', textDecoration: 'underline', fontWeight: 'normal' }}>Forgot Password?</Link>
-                    </Typography>
 
                     <Typography variant="body1" sx={{ mt: 2, marginLeft: '25%' }}>
                         Not registered yet? <span style={{ color: '#6C6FD5' }}>Create an account </span>

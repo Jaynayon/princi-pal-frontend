@@ -16,6 +16,7 @@ import RegistrationPage from './Pages/RegistrationPage.js';
 import { useAppContext } from './Context/AppProvider.js';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage.js';
 import ResetPasswordPage from './Pages/ResetPasswordPage.js';
+import TokenExpiredPage from './Pages/TokenExpiredPage.js';
 
 function App() {
   const { isLoggedIn, isSuperAdmin } = useAppContext();
@@ -78,6 +79,10 @@ function App() {
           path="/reset-password/"
           element={
             <ResetPasswordPage/>}
+        />
+        <Route
+          path="/token-expired"
+          element={<TokenExpiredPage />} 
         />
       </Route>
     )

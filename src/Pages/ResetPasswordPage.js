@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { TextField, Button, Typography, Container, Box, Snackbar, IconButton, InputAdornment } from "@mui/material";
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import React from 'react';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
@@ -13,8 +12,8 @@ const ResetPasswordPage = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
-    const [showPassword, setShowPassword] = useState(false); // Toggle for new password visibility
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle for confirm password visibility
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -24,47 +23,47 @@ const ResetPasswordPage = () => {
         return regex.test(input);
     };
 
-     // UseEffect to validate token
-     useEffect(() => {
+    // UseEffect to validate token
+    useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
-        const token = queryParams.get('token'); // Get token from query params
- 
+        const token = queryParams.get('token');
+
         if (!token) {
             setError("Invalid or expired token.");
-            return; // Exit if token is not present
+            return;
         }
- 
-        // Validate token with the backend
+
         const validateToken = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_BASE}/validate-token`, {
                     params: { token }
                 });
- 
-                if (response.status === 200) {
-                    console.log('Token validation successful', response.data);
-                } else {
-                    setError("Token expired or invalid.");
+
+                if (response.status !== 200) {
+                    navigate('/token-expired');
                 }
             } catch (error) {
-                if (error.response) {
-                    // Server responded with a status code out of 2xx range
-                    console.error("Response error:", error.response.data);
-                    setError(`Server error: ${error.response.data}`);
-                } else if (error.request) {
-                    // No response received
-                    console.error("No response received:", error.request);
-                    setError("No response received from the server.");
-                } else {
-                    // Other errors
-                    console.error("Error setting up request:", error.message);
-                    setError("Error validating token.");
-                }
+                setError("Error validating token.");
+                navigate('/token-expired');
             }
         };
- 
-        validateToken(); // Call the validation function
-    }, [location.search]);
+
+        validateToken();
+    }, [location.search, navigate]);
+
+    // Validate password on change
+    const handleNewPasswordChange = (e) => {
+        const value = e.target.value;
+        setNewPassword(value);
+
+        if (!validatePassword(value)) {
+            setPasswordError(true);
+            setError("Password must contain at least 8 characters, including one special character, one letter, and one number.");
+        } else {
+            setPasswordError(false);
+            setError('');
+        }
+    };
 
     const handleChangePassword = async () => {
         if (!newPassword || !confirmPassword) {
@@ -77,28 +76,12 @@ const ResetPasswordPage = () => {
             return;
         }
 
-        if (!validatePassword(newPassword)) {
-            setPasswordError(true);
-            setError("Password must contain at least 8 characters, including one special character, one letter, and one number.");
-            return;
-        } else {
-            setPasswordError(false);
-        }
-
         const queryParams = new URLSearchParams(location.search);
         const token = queryParams.get('token');
 
-        if (!token) {
-            setError("Token is missing.");
-            return;
-        }
-
         try {
             const response = await axios.put(`${process.env.REACT_APP_API_URL_BASE}/reset-password`, null, {
-                params: {
-                    token: token,
-                    password: newPassword,
-                },
+                params: { token, password: newPassword },
             });
 
             if (response.status === 200) {
@@ -109,7 +92,7 @@ const ResetPasswordPage = () => {
             } else {
                 setError("Failed to change password.");
             }
-        } catch (error) {
+        } catch {
             setError("An error occurred. Please try again.");
         }
     };
@@ -117,15 +100,6 @@ const ResetPasswordPage = () => {
     const handleSnackbarClose = () => {
         setOpenSnackbar(false);
         navigate('/login');
-    };
-
-    // Toggle password visibility for both fields
-    const handleShowPasswordClick = () => {
-        setShowPassword(!showPassword);
-    };
-
-    const handleShowConfirmPasswordClick = () => {
-        setShowConfirmPassword(!showConfirmPassword);
     };
 
     return (
@@ -154,25 +128,24 @@ const ResetPasswordPage = () => {
             >
                 <Typography variant="h4" sx={{ fontWeight: "bold", mb: 4 }}>Reset Password</Typography>
 
-                {/* General Error Message */}
-                {error && (
-                    <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>
-                )}
-
-                {/* New Password Field with visibility toggle */}
+                {/* New Password Field */}
                 <TextField
                     fullWidth
                     label="New Password"
                     variant="outlined"
                     type={showPassword ? "text" : "password"}
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    onChange={handleNewPasswordChange}
                     error={passwordError}
-                    sx={{ mb: 2 }}
+                    helperText={passwordError ? error : ''}
+                    sx={{ mb: 1 }}
                     InputProps={{
                         endAdornment: (
                             <InputAdornment position="end">
-                                <IconButton onClick={handleShowPasswordClick} aria-label="toggle password visibility">
+                                <IconButton onClick={() => {
+                                    setShowPassword(!showPassword);
+                                    setShowConfirmPassword(!showPassword); // Toggle confirm password visibility
+                                }} aria-label="toggle password visibility">
                                     {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                                 </IconButton>
                             </InputAdornment>
@@ -180,7 +153,7 @@ const ResetPasswordPage = () => {
                     }}
                 />
 
-                {/* Confirm Password Field with visibility toggle */}
+                {/* Confirm Password Field */}
                 <TextField
                     fullWidth
                     label="Confirm Password"
@@ -188,11 +161,13 @@ const ResetPasswordPage = () => {
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    error={newPassword && confirmPassword && newPassword !== confirmPassword} // Set error only if both fields are filled and don't match
+                    helperText={newPassword && confirmPassword && newPassword !== confirmPassword ? "Passwords do not match." : ''} // Show error message only if both fields are filled and don't match
                     sx={{ mb: 2 }}
                     InputProps={{
                         endAdornment: (
                             <InputAdornment position="end">
-                                <IconButton onClick={handleShowConfirmPasswordClick} aria-label="toggle password visibility">
+                                <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label="toggle password visibility">
                                     {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                                 </IconButton>
                             </InputAdornment>
@@ -206,6 +181,7 @@ const ResetPasswordPage = () => {
                     fullWidth
                     onClick={handleChangePassword}
                     sx={{ backgroundColor: '#4a99d3' }}
+                    disabled={!newPassword || !confirmPassword || !!error || passwordError || (newPassword !== confirmPassword)} // Disable button if either field is empty or passwords don't match
                 >
                     Change Password
                 </Button>
@@ -217,6 +193,7 @@ const ResetPasswordPage = () => {
                 autoHideDuration={6000}
                 onClose={handleSnackbarClose}
                 message={successMessage}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }} // Centered at the top
             />
         </Container>
     );

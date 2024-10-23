@@ -1,120 +1,206 @@
 import { useState } from "react";
-import { TextField, Button, Typography, Container, Box, Snackbar } from "@mui/material";
+import { Box, Button, Divider, List, ListItem, ListItemText, TextField, Typography, Snackbar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios'; // Ensure axios is imported for making HTTP requests
-import React from 'react';
- 
+import axios from 'axios';
+
 const ForgotPasswordPage = () => {
     const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
+    const [error, setError] = useState(''); // For non-email-related errors
+    const [emailError, setEmailError] = useState(''); // For email validation errors
     const [successMessage, setSuccessMessage] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
- 
-    // Function to handle the forgot password API call
+
+    // Email validation function
+    const validateEmail = (email) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    const handleInputChange = (e) => {
+        const inputEmail = e.target.value;
+        setEmail(inputEmail);
+
+        // Reset errors if the input is empty
+        if (inputEmail === '') {
+            setEmailError('');
+            setError('');
+        } else {
+            // Validate email and set appropriate error message
+            if (!validateEmail(inputEmail)) {
+                setEmailError("Please enter a valid email address.");
+            } else {
+                setEmailError(''); // Clear email error if valid
+            }
+        }
+    };
+
     const forgotPassword = async (email) => {
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_URL_BASE}/forgot-password`, null, {
-                params: { email: email }
+                params: { email }
             });
-            console.log('Response:', response);
-            return response; // Return entire response to check status code and data
+            return response;
         } catch (error) {
-            console.error('Error sending forgot password request:', error);
             throw error;
         }
     };
-    
+
     const handleForgotPassword = async () => {
+        console.log("Submitting forgot password request...");
+
         if (!email) {
             setError("Email is required.");
+            console.log("Error: Email is required.");
             return;
         }
-    
-        setError('');
+
+        if (emailError) {
+            return; // Exit if email is invalid
+        }
+
         setLoading(true);
-    
+        console.log("Email submitted:", email);
+
         try {
             const response = await forgotPassword(email);
-    
-            // Check if the response is 200 and the message is "Email sent"
+            console.log("Response from forgotPassword:", response);
+
             if (response.status === 200 && response.data === "Email sent") {
                 setSuccessMessage("Password reset link sent to your email!");
+                console.log("Success: Password reset link sent.");
                 setOpenSnackbar(true);
-                setEmail(''); // Clear the email field after success
+                setEmail(''); // Clear email input after success
             } else {
                 setError("Failed to send password reset link. Please try again.");
+                console.log("Error: Failed to send password reset link.");
             }
         } catch (error) {
-            setError("An error occurred: " + (error.response?.data || error.message));
+            console.log("Error caught:", error);
+            if (error.response) {
+                if (error.response.status === 404) {
+                    setError("Email is not registered.");
+                    console.log("Error: Email is not registered.");
+                } else {
+                    setError("An error occurred: " + (error.response.data || error.message));
+                    console.log("Error: An error occurred:", error.response.data || error.message);
+                }
+            } else {
+                setError("An error occurred: " + error.message);
+                console.log("Error: An error occurred:", error.message);
+            }
         } finally {
             setLoading(false);
         }
     };
-    
-    
- 
+
     const handleSnackbarClose = () => {
         setOpenSnackbar(false);
-        navigate('/login'); // Navigate to login page after showing the success message
+        navigate('/login');
     };
- 
+
+    const style = {
+        width: '100%',
+        maxWidth: 500,
+        borderRadius: 2,
+        border: '1px solid',
+        borderColor: 'divider',
+        backgroundColor: 'background.paper',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    };
+
     return (
-        <Container
-            maxWidth={false}
-            style={{
-                width: "100vw",
-                height: "100vh",
-                position: "relative",
-                overflow: "auto",
-                backgroundImage: `url(/bg.png)`,
+        <Box 
+            sx={{ 
+                width: "100vw", 
+                height: "100vh", 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                backgroundImage: `url(/bg.png)`, 
                 backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                backgroundPosition: 'center'
             }}
         >
-            <Box
-                maxWidth="sm"
-                style={{
-                    padding: "20px",
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
-                }}
-            >
-                <Typography variant="h4" sx={{ fontWeight: "bold", mb: 4 }}>Forgot Password</Typography>
-                {error && (
-                    <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>
-                )}
-                <TextField
-                    fullWidth
-                    label="Email"
-                    variant="outlined"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    sx={{ mb: 2 }}
-                />
-                <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={handleForgotPassword}
-                    sx={{ backgroundColor: '#4a99d3' }}
-                    disabled={loading} // Disable button while loading
-                >
-                    {loading ? 'Sending...' : 'Send Reset Link'}
-                </Button>
-            </Box>
+            <List sx={style}>
+                <ListItem>
+                    <ListItemText 
+                        primary="Forgot Password" 
+                        primaryTypographyProps={{ variant: 'h5', fontWeight: 'bold' }}
+                    />
+                </ListItem>
+                <Divider component="li" />
+                <ListItem>
+                    <Box sx={{ width: '100%' }}>
+                        <Typography variant="body2">
+                            Please enter your email address to receive a password reset link.
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            label="Email"
+                            variant="outlined"
+                            type="email"
+                            value={email}
+                            onChange={handleInputChange}
+                            error={!!emailError} // Show error if emailError is not empty
+                            helperText={emailError} // Display the email validation error
+                            sx={{ mb: 2, mt: 2 }}
+                        />
+                        {/* Display general error messages here */}
+                        {error && (
+                            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                                {error}
+                            </Typography>
+                        )}
+                    </Box>
+                </ListItem>
+                <Divider component="li" />
+                <ListItem sx={{ justifyContent: 'flex-end' }}>
+                    <Button 
+                        variant="contained"
+                        onClick={() => navigate('/login')} 
+                        sx={{ 
+                            mr: 1, 
+                            backgroundColor: '#B7B7B7',
+                            color: '#3C3D37',
+                            fontWeight: 'bold', 
+                            '&:hover': { 
+                                backgroundColor: 'darkgray' 
+                            }
+                        }} 
+                        size="small"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleForgotPassword}
+                        sx={{ 
+                            backgroundColor: '#4a99d3', 
+                            color: 'white', 
+                            fontWeight: 'bold', 
+                            '&:hover': { 
+                                backgroundColor: '#3380a0' 
+                            }
+                        }}
+                        disabled={loading || !!emailError || !email} // Disable button if loading, emailError, or empty email
+                        size="small"
+                    >
+                        {loading ? 'Sending...' : 'Send'}
+                    </Button>
+                </ListItem>
+            </List>
+    
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}
                 onClose={handleSnackbarClose}
                 message={successMessage}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }} // Position Snackbar above center
             />
-        </Container>
+        </Box>
     );
 };
- 
+
 export default ForgotPasswordPage;
