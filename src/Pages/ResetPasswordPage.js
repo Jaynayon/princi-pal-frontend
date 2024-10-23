@@ -24,33 +24,46 @@ const ResetPasswordPage = () => {
         return regex.test(input);
     };
 
-    // UseEffect to validate token
-    useEffect(() => {
+     // UseEffect to validate token
+     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
-        const token = queryParams.get('token');
-
+        const token = queryParams.get('token'); // Get token from query params
+ 
         if (!token) {
             setError("Invalid or expired token.");
-            return;
+            return; // Exit if token is not present
         }
-
+ 
+        // Validate token with the backend
         const validateToken = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_BASE}/validate-token`, {
                     params: { token }
                 });
-
+ 
                 if (response.status === 200) {
                     console.log('Token validation successful', response.data);
                 } else {
                     setError("Token expired or invalid.");
                 }
             } catch (error) {
-                setError("Error validating token.");
+                if (error.response) {
+                    // Server responded with a status code out of 2xx range
+                    console.error("Response error:", error.response.data);
+                    setError(`Server error: ${error.response.data}`);
+                } else if (error.request) {
+                    // No response received
+                    console.error("No response received:", error.request);
+                    setError("No response received from the server.");
+                } else {
+                    // Other errors
+                    console.error("Error setting up request:", error.message);
+                    setError("Error validating token.");
+                }
             }
         };
-
-        validateToken();
+ 
+        validateToken(); // Call the validation function
     }, [location.search]);
 
     const handleChangePassword = async () => {
