@@ -27,19 +27,19 @@ const ResetPasswordPage = () => {
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const token = queryParams.get('token'); // Get token from query params
- 
+
         if (!token) {
             setError("Invalid or expired token.");
             return; // Exit if token is not present
         }
- 
+
         // Validate token with the backend
         const validateToken = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_BASE}/validate-token`, {
                     params: { token }
                 });
- 
+
                 if (response.status === 200) {
                     console.log('Token validation successful', response.data);
                 } else {
@@ -61,7 +61,7 @@ const ResetPasswordPage = () => {
                 }
             }
         };
- 
+
         validateToken(); // Call the validation function
     }, [location.search]);
 
@@ -70,11 +70,30 @@ const ResetPasswordPage = () => {
         const value = e.target.value;
         setNewPassword(value);
 
-        if (!validatePassword(value)) {
+        if (!value) {
+            // If the newPassword field is empty, reset errors
+            setPasswordError(false);
+            setError('');
+        } else if (!validatePassword(value)) {
             setPasswordError(true);
             setError("Password must contain at least 8 characters, including one special character, one letter, and one number.");
         } else {
             setPasswordError(false);
+            setError('');
+        }
+    };
+
+    // Validate confirm password on change
+    const handleConfirmPasswordChange = (e) => {
+        const value = e.target.value;
+        setConfirmPassword(value);
+
+        if (!value) {
+            // If confirmPassword is empty, reset the error
+            setError('');
+        } else if (newPassword && value !== newPassword) {
+            setError("Passwords do not match.");
+        } else {
             setError('');
         }
     };
@@ -174,7 +193,7 @@ const ResetPasswordPage = () => {
                     variant="outlined"
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={handleConfirmPasswordChange}
                     error={newPassword && confirmPassword && newPassword !== confirmPassword} // boolean condition here
                     helperText={newPassword && confirmPassword && newPassword !== confirmPassword ? "Passwords do not match." : ''} // Helper text for error message
                     sx={{ mb: 2 }}
