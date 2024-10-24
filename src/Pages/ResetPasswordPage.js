@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { TextField, Button, Typography, Container, Box, Snackbar, IconButton, InputAdornment } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { TextField, Button, Typography, Container, Box, Snackbar, IconButton, InputAdornment, Grid2 } from "@mui/material";
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import LinkOffIcon from '@mui/icons-material/LinkOff';
 
 const ResetPasswordPage = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -14,6 +15,7 @@ const ResetPasswordPage = () => {
     const [passwordError, setPasswordError] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [page, setPage] = useState('reset');
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -43,9 +45,11 @@ const ResetPasswordPage = () => {
                 if (response.status === 200) {
                     console.log('Token validation successful', response.data);
                 } else {
+                    setPage('invalid');
                     setError("Token expired or invalid.");
                 }
             } catch (error) {
+                setPage('invalid');
                 if (error.response) {
                     // Server responded with a status code out of 2xx range
                     console.error("Response error:", error.response.data);
@@ -159,67 +163,99 @@ const ResetPasswordPage = () => {
                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
                 }}
             >
-                <Typography variant="h4" sx={{ fontWeight: "bold", mb: 4 }}>Reset Password</Typography>
+                {page === "reset" ? (
+                    <React.Fragment>
+                        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 4 }}>Reset Password</Typography>
 
-                {/* New Password Field */}
-                <TextField
-                    fullWidth
-                    label="New Password"
-                    variant="outlined"
-                    type={showPassword ? "text" : "password"}
-                    value={newPassword}
-                    onChange={handleNewPasswordChange}
-                    error={passwordError} // Use boolean here
-                    helperText={passwordError ? error : ''} // Helper text can display the error string
-                    sx={{ mb: 1 }}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton onClick={() => {
-                                    setShowPassword(!showPassword);
-                                    setShowConfirmPassword(!showPassword); // Toggle confirm password visibility
-                                }} aria-label="toggle password visibility">
-                                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
-                />
+                        {/* New Password Field */}
+                        <TextField
+                            fullWidth
+                            label="New Password"
+                            variant="outlined"
+                            type={showPassword ? "text" : "password"}
+                            value={newPassword}
+                            onChange={handleNewPasswordChange}
+                            error={passwordError} // Use boolean here
+                            helperText={passwordError ? error : ''} // Helper text can display the error string
+                            sx={{ mb: 1 }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => {
+                                            setShowPassword(!showPassword);
+                                            setShowConfirmPassword(!showPassword); // Toggle confirm password visibility
+                                        }} aria-label="toggle password visibility">
+                                            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
 
-                {/* Confirm Password Field */}
-                <TextField
-                    fullWidth
-                    label="Confirm Password"
-                    variant="outlined"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={handleConfirmPasswordChange}
-                    error={newPassword && confirmPassword && newPassword !== confirmPassword} // boolean condition here
-                    helperText={newPassword && confirmPassword && newPassword !== confirmPassword ? "Passwords do not match." : ''} // Helper text for error message
-                    sx={{ mb: 2 }}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label="toggle password visibility">
-                                    {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
-                />
+                        {/* Confirm Password Field */}
+                        <TextField
+                            fullWidth
+                            label="Confirm Password"
+                            variant="outlined"
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={confirmPassword}
+                            onChange={handleConfirmPasswordChange}
+                            error={newPassword !== "" && confirmPassword !== "" && newPassword !== confirmPassword} // boolean condition here
+                            helperText={newPassword && confirmPassword && newPassword !== confirmPassword ? "Passwords do not match." : ''} // Helper text for error message
+                            sx={{ mb: 2 }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label="toggle password visibility">
+                                            {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
 
-                {/* Submit Button */}
-                <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={handleChangePassword}
-                    sx={{ backgroundColor: '#4a99d3' }}
-                    disabled={!newPassword || !confirmPassword || passwordError || (newPassword !== confirmPassword)} // Disable button if there's any issue
-                >
-                    Change Password
-                </Button>
+                        {/* Submit Button */}
+                        <Button
+                            variant="contained"
+                            fullWidth
+                            onClick={handleChangePassword}
+                            sx={{ backgroundColor: '#4a99d3' }}
+                            disabled={!newPassword || !confirmPassword || passwordError || (newPassword !== confirmPassword)} // Disable button if there's any issue
+                        >
+                            Change Password
+                        </Button>
+                    </React.Fragment>
+                ) : (
+                    <Grid2
+                        container
+                        sx={{ display: "flex", p: 1, pt: 2, pb: 2 }}
+                    >
+                        <Grid2
+                            size={{ xs: 12, md: 6, lg: 6 }}
+                            sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                        >
+                            <LinkOffIcon sx={{ fontSize: 140 }} />
+                        </Grid2>
+                        <Grid2
+                            size={{ xs: 12, md: 6, lg: 6 }}
+                            sx={{ display: "flex", flexDirection: 'column' }}
+                        >
+                            <Typography color="error" variant="h2" align="left">404 OOPS!</Typography>
+                            <Typography variant="body2" align="left">
+                                It looks like the link you’ve used is either broken, expired, or invalid.
+                                If you’re trying to reset your password or access a secure area,
+                                please request a new link or contact support for further assistance.
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                onClick={() => navigate('/login')}
+                                sx={{ alignSelf: "flex-start", mt: 2 }}
+                            > Go Back</Button>
+                        </Grid2>
+                    </Grid2>
+                )
+                }
             </Box>
-
             {/* Snackbar for Success Message */}
             <Snackbar
                 open={openSnackbar}
