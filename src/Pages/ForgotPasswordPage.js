@@ -106,7 +106,7 @@ const ForgotPasswordPage = () => {
         borderRadius: 2,
         border: '1px solid',
         borderColor: 'divider',
-        backgroundColor: 'background.paper',
+        backgroundColor: '#F5F5F5', // Set background color to #E4E0E1
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
     };
 
@@ -127,7 +127,7 @@ const ForgotPasswordPage = () => {
                 <ListItem>
                     <ListItemText 
                         primary="Forgot Password" 
-                        primaryTypographyProps={{ variant: 'h5', fontWeight: 'bold' }}
+                        primaryTypographyProps={{ variant: 'h5', fontWeight: 'bold', sx: { color: '#003366' } }}
                     />
                 </ListItem>
                 <Divider component="li" />
@@ -162,7 +162,7 @@ const ForgotPasswordPage = () => {
                         onClick={() => navigate('/login')} 
                         sx={{ 
                             mr: 1, 
-                            backgroundColor: '#B7B7B7',
+                            backgroundColor: '#E4E0E1',
                             color: '#3C3D37',
                             fontWeight: 'bold', 
                             '&:hover': { 

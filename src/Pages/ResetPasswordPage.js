@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { TextField, Button, Typography, Container, Box, Snackbar, IconButton, InputAdornment, Grid2 } from "@mui/material";
+import { TextField, Button, Typography, Container, Box, Snackbar, IconButton, InputAdornment, Alert } from "@mui/material";
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
+
 
 const ResetPasswordPage = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -19,23 +20,20 @@ const ResetPasswordPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Password complexity validation function
     const validatePassword = (input) => {
         const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         return regex.test(input);
     };
 
-    // UseEffect to validate token
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
-        const token = queryParams.get('token'); // Get token from query params
+        const token = queryParams.get('token');
 
         if (!token) {
             setError("Invalid or expired token.");
-            return; // Exit if token is not present
+            return;
         }
 
-        // Validate token with the backend
         const validateToken = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_BASE}/validate-token`, {
@@ -51,31 +49,26 @@ const ResetPasswordPage = () => {
             } catch (error) {
                 setPage('invalid');
                 if (error.response) {
-                    // Server responded with a status code out of 2xx range
                     console.error("Response error:", error.response.data);
                     setError(`Server error: ${error.response.data}`);
                 } else if (error.request) {
-                    // No response received
                     console.error("No response received:", error.request);
                     setError("No response received from the server.");
                 } else {
-                    // Other errors
                     console.error("Error setting up request:", error.message);
                     setError("Error validating token.");
                 }
             }
         };
 
-        validateToken(); // Call the validation function
+        validateToken();
     }, [location.search]);
 
-    // Validate password on change
     const handleNewPasswordChange = (e) => {
         const value = e.target.value;
         setNewPassword(value);
 
         if (!value) {
-            // If the newPassword field is empty, reset errors
             setPasswordError(false);
             setError('');
         } else if (!validatePassword(value)) {
@@ -87,13 +80,11 @@ const ResetPasswordPage = () => {
         }
     };
 
-    // Validate confirm password on change
     const handleConfirmPasswordChange = (e) => {
         const value = e.target.value;
         setConfirmPassword(value);
 
         if (!value) {
-            // If confirmPassword is empty, reset the error
             setError('');
         } else if (newPassword && value !== newPassword) {
             setError("Passwords do not match.");
@@ -152,22 +143,24 @@ const ResetPasswordPage = () => {
                 backgroundPosition: 'center',
                 display: 'flex',
                 justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
             }}
         >
             <Box
                 maxWidth="sm"
-                style={{
+                sx={{
                     padding: "20px",
                     borderRadius: '8px',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                    backgroundColor: 'white',
+                    textAlign: 'center',
+                    backgroundImage: page === 'reset' ? `url(/bg.png)` : 'none',
                 }}
             >
                 {page === "reset" ? (
                     <React.Fragment>
                         <Typography variant="h4" sx={{ fontWeight: "bold", mb: 4 }}>Reset Password</Typography>
 
-                        {/* New Password Field */}
                         <TextField
                             fullWidth
                             label="New Password"
@@ -175,16 +168,18 @@ const ResetPasswordPage = () => {
                             type={showPassword ? "text" : "password"}
                             value={newPassword}
                             onChange={handleNewPasswordChange}
-                            error={passwordError} // Use boolean here
-                            helperText={passwordError ? error : ''} // Helper text can display the error string
-                            sx={{ mb: 1 }}
+                            error={passwordError}
+                            helperText={passwordError ? error : ''}
+                            sx={{
+                                mb: 1,
+                                backgroundColor: "#DBF0FD",
+                                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' },
+                                borderRadius: '8px'
+                            }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        <IconButton onClick={() => {
-                                            setShowPassword(!showPassword);
-                                            setShowConfirmPassword(!showPassword); // Toggle confirm password visibility
-                                        }} aria-label="toggle password visibility">
+                                        <IconButton onClick={() => setShowPassword(!showPassword)}>
                                             {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                                         </IconButton>
                                     </InputAdornment>
@@ -192,7 +187,6 @@ const ResetPasswordPage = () => {
                             }}
                         />
 
-                        {/* Confirm Password Field */}
                         <TextField
                             fullWidth
                             label="Confirm Password"
@@ -200,13 +194,18 @@ const ResetPasswordPage = () => {
                             type={showConfirmPassword ? "text" : "password"}
                             value={confirmPassword}
                             onChange={handleConfirmPasswordChange}
-                            error={newPassword !== "" && confirmPassword !== "" && newPassword !== confirmPassword} // boolean condition here
-                            helperText={newPassword && confirmPassword && newPassword !== confirmPassword ? "Passwords do not match." : ''} // Helper text for error message
-                            sx={{ mb: 2 }}
+                            error={newPassword !== "" && confirmPassword !== "" && newPassword !== confirmPassword}
+                            helperText={newPassword && confirmPassword && newPassword !== confirmPassword ? "Passwords do not match." : ''}
+                            sx={{
+                                mb: 2,
+                                backgroundColor: "#DBF0FD",
+                                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DBF0FD' },
+                                borderRadius: '8px'
+                            }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label="toggle password visibility">
+                                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                                             {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                                         </IconButton>
                                     </InputAdornment>
@@ -214,49 +213,35 @@ const ResetPasswordPage = () => {
                             }}
                         />
 
-                        {/* Submit Button */}
                         <Button
                             variant="contained"
                             fullWidth
                             onClick={handleChangePassword}
                             sx={{ backgroundColor: '#4a99d3' }}
-                            disabled={!newPassword || !confirmPassword || passwordError || (newPassword !== confirmPassword)} // Disable button if there's any issue
+                            disabled={!newPassword || !confirmPassword || passwordError || (newPassword !== confirmPassword)}
                         >
                             Change Password
                         </Button>
                     </React.Fragment>
                 ) : (
-                    <Grid2
-                        container
-                        sx={{ display: "flex", p: 1, pt: 2, pb: 2 }}
-                    >
-                        <Grid2
-                            size={{ xs: 12, md: 6, lg: 6 }}
-                            sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                    <Box>
+                        <Typography variant="h4" sx={{ color: 'red', fontWeight: "bold", mb: 4 }}>404 OOPS!</Typography>
+                        <Alert severity="error" icon={<LinkOffIcon />} sx={{ mb: 2 }}>
+                            It looks like the link you’ve used is either broken, expired, or invalid.
+                            If you’re trying to reset your password or access a secure area,
+                            please request a new link or contact support for further assistance.
+                        </Alert>
+                        <Button
+                            variant="contained"
+                            onClick={() => navigate('/login')}
+                            sx={{ backgroundColor: '#4a99d3' }}
                         >
-                            <LinkOffIcon sx={{ fontSize: 140 }} />
-                        </Grid2>
-                        <Grid2
-                            size={{ xs: 12, md: 6, lg: 6 }}
-                            sx={{ display: "flex", flexDirection: 'column' }}
-                        >
-                            <Typography color="error" variant="h2" align="left">404 OOPS!</Typography>
-                            <Typography variant="body2" align="left">
-                                It looks like the link you’ve used is either broken, expired, or invalid.
-                                If you’re trying to reset your password or access a secure area,
-                                please request a new link or contact support for further assistance.
-                            </Typography>
-                            <Button
-                                variant="contained"
-                                onClick={() => navigate('/login')}
-                                sx={{ alignSelf: "flex-start", mt: 2 }}
-                            > Go Back</Button>
-                        </Grid2>
-                    </Grid2>
-                )
-                }
+                            Go Back
+                        </Button>
+                    </Box>
+                )}
             </Box>
-            {/* Snackbar for Success Message */}
+
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}
