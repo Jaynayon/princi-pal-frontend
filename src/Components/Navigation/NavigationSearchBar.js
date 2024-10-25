@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import Box from "@mui/material/Box";
@@ -22,29 +22,65 @@ const NavigationSearchBar = () => {
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
   const [appliedSchools, setAppliedSchools] = useState([]); // Store full school objects along with assocId
   const [schools, setSchools] = useState([]);
+  const [associatedSchoolIds, setAssociatedSchoolIds] = useState([]);
+
+  const searchBoxRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(event.target)) {
+        setQuery(""); // Close the search box when clicked outside
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Fetch all available schools on component mount
   useEffect(() => {
     let isMounted = true;
-    axios
-      .get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
-        headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-        },
-      })
-      .then((response) => {
+    const fetchSchools = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
+          headers: {
+            Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+          },
+        });
         if (isMounted) {
           setSchools(response.data);
         }
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the school data!", error);
-      });
+      } catch (error) {
+        console.error("Error fetching the school data:", error);
+      }
+    };
+
+    const fetchUserAssociations = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL_ASSOC}/user/${currentUser.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+            },
+          }
+        );
+        const associatedIds = response.data.map((assoc) => assoc.schoolId);
+        setAssociatedSchoolIds(associatedIds);
+      } catch (error) {
+        console.error("Error fetching user associations:", error);
+      }
+    };
+
+    fetchSchools();
+    fetchUserAssociations();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [currentUser.id]);
 
   // Fetch applied schools when the Application Inbox is opened
   const handleClickOpenApplicationInbox = async () => {
@@ -154,9 +190,13 @@ const NavigationSearchBar = () => {
     setQuery(event.target.value);
   };
 
-  const filteredSchools = schools.filter(
-    (school) => school.fullName?.toLowerCase().includes(query.toLowerCase())
-  );
+  const isUserAssociatedWithSelectedSchool = selectedSchool
+    ? associatedSchoolIds.includes(selectedSchool.id)
+    : false;
+
+    const filteredSchools = schools.filter(
+      (school) => school.fullName?.toLowerCase().startsWith(query.toLowerCase())
+    );    
 
   if (currentUser.position === 'Principal') {
     return (
@@ -166,8 +206,9 @@ const NavigationSearchBar = () => {
     );
   }
 
+
   return (
-    <Box style={{ width: "400px", position: "relative" }}>
+    <Box style={{ width: "400px", position: "relative" }} ref={searchBoxRef}>
       <Box
         component="form"
         sx={{
@@ -312,8 +353,12 @@ const NavigationSearchBar = () => {
             Provide information to request access to this organization.
           </DialogContentText>
           <DialogActions>
-            <Button onClick={handleApplySchool} autoFocus>
-              Apply
+            <Button
+              onClick={handleApplySchool}
+              autoFocus
+              disabled={isUserAssociatedWithSelectedSchool}
+            >
+              {isUserAssociatedWithSelectedSchool ? "Already Associated" : "Join"}
             </Button>
           </DialogActions>
         </DialogContent>
