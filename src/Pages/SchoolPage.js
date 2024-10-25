@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import '../App.css';
 import PropTypes from 'prop-types';
 import {
@@ -11,6 +11,7 @@ import {
     Button,
     Typography
 } from '@mui/material';
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import IconButton from "@mui/material/IconButton";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
@@ -26,6 +27,7 @@ import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
 import { useAppContext } from '../Context/AppProvider';
+import SummaryModal from '../Components/Modal/SummaryModal';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -72,10 +74,15 @@ function SchoolPage(props) {
         currentDocument,
         currentSchool,
         value,
-        setValue
+        setValue,
+        lr,
+        updateLr,
+        jev,
+        updateJev
     } = useSchoolContext();
 
     const [open, setOpen] = React.useState(false);
+    const [openSummary, setOpenSummary] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
 
     const handleOpen = () => {
@@ -91,6 +98,14 @@ function SchoolPage(props) {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    const handleOpenSummary = () => {
+        setOpenSummary(true);
+    }
+
+    const handleCloseSummary = useCallback(() => {
+        setOpenSummary(false);
+    }, []);
 
     const exportDocument = async () => {
         setExportIsLoading(true);  // Start loading
@@ -125,6 +140,8 @@ function SchoolPage(props) {
             setExportIsLoading(false);  // End loading
         }
     };
+
+    console.log(currentDocument)
 
     const exportDocumentOnClick = async () => {
         await exportDocument();
@@ -236,16 +253,15 @@ function SchoolPage(props) {
                                     </Button>
                                     <IconButton
                                         aria-label="open-approval"
-                                        // onClick={handleOpenApproval}
+                                        onClick={handleOpenSummary}
+                                        disabled={currentDocument.id === 0 || !currentDocument}
                                         sx={{
                                             color: "#C5C7CD",
                                             marginLeft: "auto",
-                                            pr: 3
+                                            mr: 2
                                         }}
                                     >
-                                        {/* <StyledBadge badgeContent={lrNotApproved.length} color="secondary">
-                                            <FactCheckIcon />
-                                        </StyledBadge> */}
+                                        <SummarizeIcon />
                                     </IconButton>
                                 </Box>
                             </Grid>
@@ -262,6 +278,14 @@ function SchoolPage(props) {
                     </Paper>
                 </Grid>
             </Grid>
+            <SummaryModal
+                open={openSummary}
+                handleClose={handleCloseSummary}
+                lr={lr}
+                updateLr={updateLr}
+                jev={jev}
+                updateJev={updateJev}
+            />
             <BudgetAllocationModal
                 open={open}
                 handleClose={handleClose}
