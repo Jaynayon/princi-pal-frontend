@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback } from 'react';
 import '../App.css';
 import PropTypes from 'prop-types';
 import {
@@ -9,33 +9,25 @@ import {
     Grid,
     Box,
     Button,
-    Typography,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
+    Typography
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import Badge from "@mui/material/Badge";
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import IconButton from "@mui/material/IconButton";
-import FactCheckIcon from '@mui/icons-material/FactCheck';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
-import {
-    FilterDate,
-    SchoolSearchFilter
-} from '../Components/Filters/FilterDate';
+import FilterDate from '../Components/Filters/FilterDate';
+import SchoolSearchFilter from '../Components/Filters/SchoolSearchFilter';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 
 import { useSchoolContext } from '../Context/SchoolProvider';
+import { useAppContext } from '../Context/AppProvider';
 
-import DocumentTable from '../Components/Table/LRTable';
+import LRTable from '../Components/Table/LRTable';
 import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
-import { useNavigationContext } from '../Context/NavigationProvider';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
-import ApprovalModal from '../Components/Modal/ApprovalModal';
-import WarningIcon from '@mui/icons-material/Warning';
+import SummaryModal from '../Components/Modal/SummaryModal';
 
 export function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -72,22 +64,23 @@ export function a11yProps(index) {
     };
 }
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
-    '& .MuiBadge-badge': {
-        right: -3,
-        top: 13,
-        border: `2px solid ${theme.palette.background.paper}`,
-        padding: '0 4px',
-    },
-}));
-
 function SchoolPage(props) {
-    const { currentUser} = useNavigationContext();
-    const { year, month, setIsAdding, isEditingRef, currentDocument, currentSchool, lrNotApproved, updateLr, updateJev, value, setValue } = useSchoolContext();
+    const { currentUser } = useAppContext();
+    const {
+        year,
+        month,
+        setIsAdding,
+        isEditingRef,
+        currentDocument,
+        currentSchool,
+        value,
+        setValue,
+        createLrByDocId
+    } = useSchoolContext();
+
     const [open, setOpen] = React.useState(false);
-    const [openApproval, setOpenApproval] = React.useState(false);
+    const [openSummary, setOpenSummary] = React.useState(false);
     const [exportIsLoading, setExportIsLoading] = React.useState(false);
-    // const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleOpen = () => {
         setOpen(true);
@@ -99,13 +92,17 @@ function SchoolPage(props) {
         isEditingRef.current = false;
     }
 
-    const handleOpenApproval = () => {
-        setOpenApproval(true);
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
+
+    const handleOpenSummary = () => {
+        setOpenSummary(true);
     }
 
-    const handleCloseApproval = () => {
-        setOpenApproval(false);
-    }
+    const handleCloseSummary = useCallback(() => {
+        setOpenSummary(false);
+    }, []);
 
     const exportDocument = async () => {
         setExportIsLoading(true);  // Start loading
@@ -141,23 +138,20 @@ function SchoolPage(props) {
         }
     };
 
-    const exportDocumentOnClick = async () => { await exportDocument(); }
+    const exportDocumentOnClick = async () => {
+        await exportDocument();
+    }
 
     console.log("Schools renders")
 
-    // Ensures to update lr and jev only if its not loading and there's a current document
+    // Remove add field when going to another tab
     React.useEffect(() => {
-        console.log("Schools useEffect: Document fetched, updating lr and jev");
-        // update lr and jev has currentDocument as a dependency
-        // fetch lr and jev per document change
-        updateLr();
-        updateJev();
         setIsAdding(false); //reset state to allow addFields again
-    }, [currentDocument, updateLr, updateJev, setIsAdding, value]); // Listen to "value" when changing tabs; reset isAdding
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
+    }, [
+        value, // Listen to "value" when changing tabs; reset isAdding
+        setIsAdding,
+        createLrByDocId // Reset isAding when an LR is added
+    ]);
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
@@ -180,13 +174,14 @@ function SchoolPage(props) {
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: "center" }}>
                             <Typography
-                                sx={{ color: "#252733" }}
+                                sx={{ color: "#252733", fontWeight: "bold", fontSize: "1.2rem" }}
                                 component="h1"
                                 color="inherit"
                                 noWrap
                             >
                                 {`${month} ${year}`}
                             </Typography>
+                            <CalendarMonthIcon sx={{ ml: 1, color: "#f44133" }} />
                         </Box>
                     </Paper>
                 </Grid>
@@ -257,23 +252,22 @@ function SchoolPage(props) {
                                     </Button>
                                     <IconButton
                                         aria-label="open-approval"
-                                        onClick={handleOpenApproval}
+                                        onClick={handleOpenSummary}
+                                        disabled={currentDocument.id === 0 || !currentDocument}
                                         sx={{
                                             color: "#C5C7CD",
                                             marginLeft: "auto",
-                                            pr: 3
+                                            mr: 2
                                         }}
                                     >
-                                        <StyledBadge badgeContent={lrNotApproved.length} color="secondary">
-                                            <FactCheckIcon />
-                                        </StyledBadge>
+                                        <SummarizeIcon />
                                     </IconButton>
                                 </Box>
                             </Grid>
                             {/*Document Tables*/}
                             <Grid item xs={12} md={12} lg={12}>
                                 <CustomTabPanel value={value} index={0}>
-                                    <DocumentTable />
+                                    <LRTable />
                                 </CustomTabPanel>
                                 <CustomTabPanel value={value} index={1}>
                                     <JEVTable />
@@ -283,9 +277,13 @@ function SchoolPage(props) {
                     </Paper>
                 </Grid>
             </Grid>
-            <ApprovalModal
-                open={openApproval}
-                handleClose={handleCloseApproval}
+            <SummaryModal
+                open={openSummary}
+                handleClose={handleCloseSummary}
+                currentDocument={currentDocument}
+                currentSchool={currentSchool}
+                year={year}
+                month={month}
             />
             <BudgetAllocationModal
                 open={open}

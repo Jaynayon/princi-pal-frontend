@@ -1,0 +1,82 @@
+import * as React from 'react';
+import { styled } from '@mui/material/styles';
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+
+const LightTooltip = styled(({ className, ...props }) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+        backgroundColor: theme.palette.common.white,
+        color: 'rgba(0, 0, 0, 0.87)',
+        boxShadow: theme.shadows[1],
+        fontSize: 11,
+    },
+}));
+
+const BootstrapTooltip = styled(({ className, ...props }) => (
+    <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+    [`& .${tooltipClasses.arrow}`]: {
+        color: theme.palette.common.black,
+    },
+    [`& .${tooltipClasses.tooltip}`]: {
+        backgroundColor: theme.palette.common.black,
+    },
+}));
+
+const HtmlTooltip = styled(({ className, ...props }) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+        backgroundColor: '#f5f5f9',
+        color: 'rgba(0, 0, 0, 0.87)',
+        maxWidth: 220,
+        fontSize: theme.typography.pxToRem(12),
+        border: '1px solid #dadde9',
+    },
+}));
+
+export default function CustomizedTooltips({ type, content = "", children }) {
+    if (type === "bootstrap") {
+        return (
+            <div>
+                <BootstrapTooltip
+                    sx={{ maxWidth: 150 }}
+                    title={content}
+                >
+                    {children}
+                </BootstrapTooltip>
+            </div>
+        );
+    }
+
+    if (type === "html") {
+        return (
+            <div>
+                <HtmlTooltip
+                    title={
+                        <React.Fragment>
+                            <Typography color="inherit">Tooltip with HTML</Typography>
+                            <em>{"And here's"}</em> <b>{'some'}</b> <u>{'amazing content'}</u>.{' '}
+                            {"It's very engaging. Right?"}
+                        </React.Fragment>
+                    }
+                >
+                    {children}
+                </HtmlTooltip>
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            <LightTooltip
+                sx={{ maxWidth: 150 }}
+                title={content}
+            >
+                {children}
+            </LightTooltip>
+        </div>
+    );
+}

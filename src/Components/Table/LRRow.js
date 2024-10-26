@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { TableCell, TableRow } from "@mui/material";
-import { useSchoolContext } from '../../Context/SchoolProvider';
 import Box from '@mui/material/Box';
 // import { useNavigationContext } from '../../Context/NavigationProvider';
 import Button from '@mui/material/Button';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import MenuItem from '@mui/material/MenuItem';
-import { Menu, TextField } from '@mui/material';
+import { Menu } from '@mui/material';
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -15,36 +14,48 @@ import HistoryModal from '../Modal/HistoryModal';
 import LRDate from '../Picker/LRDate';
 import "react-datepicker/dist/react-datepicker.css";
 import NatureOfPaymentSelect from '../Select/NatureOfPaymentSelect';
+import LRTextField from '../Input/LRTextField';
+import ExceedWarningModal from '../Modal/ExceedWarningModal';
 
-function LRRow(props) {
-    const { page, rowsPerPage } = props;
+const LRRow = memo((props) => {
+    const {
+        page,
+        rowsPerPage,
+        columns,
+        addFields,
+        formatDate,
+        isAdding,
+        setIsAdding,
+        isEditingRef,
+        isEditable,
+        lr,
+        deleteLrByid,
+        setLr,
+        updateLr,
+        createLrByDocId,
+        currentDocument,
+        fetchDocumentData,
+        value
+    } = props;
+
+    console.log("RecordsRow.js")
+
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
-    const [inputValue, setInputValue] = useState('Initial Value');
-    const [initialValue, setInitialValue] = useState(''); //only request update if there is changes in initial value
+    const [amountExceeded, setAmountExceeded] = useState({ docId: null, colId: null, rowId: null, exceeded: null, newValue: null });
+
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [open, setOpen] = useState(false);
+    const [warningOpen, setWarningOpen] = useState(false);
     const [error, setError] = useState(true);
+
+    const handleWarningOpen = () => setWarningOpen(true);
+
+    const handleWarningClose = useCallback(() => setWarningOpen(false), []);
 
     const handleOpen = () => setOpen(true);
 
     const handleClose = () => setOpen(false);
-
-    const {
-        addFields,
-        formatDate,
-        isAdding,
-        isEditingRef,
-        isEditable,
-        currentDocument,
-        lr,
-        updateLrById,
-        deleteLrByid,
-        setLr,
-        fetchDocumentData,
-        createLrByDocId,
-        value
-    } = useSchoolContext();
 
     const createLrByDocumentId = async (doc_id, obj) => {
         try {
@@ -60,12 +71,9 @@ function LRRow(props) {
         }
     }
 
-    const handleCellClick = (colId, rowId, event) => {
+    const handleCellClick = (colId, rowId) => {
         isEditingRef.current = true; // user clicked a cell
         setEditingCell({ colId, rowId });
-        setInitialValue(event.target.value); // Save the initial value of the clicked cell
-        setInputValue(colId === "date" ? event : event.target.value); // Set input value to the current value
-        console.log(editingCell)
         console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
 
@@ -85,19 +93,34 @@ function LRRow(props) {
 
     const handleDelete = async (rowId) => {
         await deleteLrByid(rowId);
+        await updateLr();
         handleMenuClose();
     };
 
     // Fetch document data to get Document and LR; reload
     const handleNewRecordCancel = async () => {
+        setIsAdding(false); //reset state to allow addFields again
+        await updateLr();
         await fetchDocumentData();
     }
 
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
+        const rowIndex = lr.findIndex(row => row.id === rowId);
+        const newTotalExpenses = Number(lr[rowIndex].amount) + Number(currentDocument.budget);
         if (!error) {
-            const rowIndex = lr.findIndex(row => row.id === rowId);
-            await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+            if (newTotalExpenses > currentDocument.cashAdvance) {
+                setAmountExceeded({
+                    rowId: 3, // Adding row
+                    docId: currentDocument.id,
+                    exceeded: newTotalExpenses - currentDocument.cashAdvance,
+                    newValue: lr[rowIndex]
+                });
+                handleWarningOpen();
+            } else {
+                await createLrByDocumentId(currentDocument.id, lr[rowIndex]);
+                await updateLr(); // Fetch LR
+            }
         }
     }
 
@@ -127,49 +150,14 @@ function LRRow(props) {
 
             // Update the state with the modified rows
             setLr(updatedRows);
-            setInputValue(updatedRows[rowIndex][colId]); // Update inputValue if needed
         } else {
             console.error(`Row with id ${rowId} not found`);
         }
     };
 
-    const handleInputBlur = async (colId, rowId) => {
-        setEditingCell(null);
-        // Perform any action when input is blurred (e.g., save the value)
-        // Only applies if it's not the new row
-        if (rowId !== 3) {
-            if (inputValue !== initialValue) {
-                console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
-                await updateLrById(colId, rowId, inputValue);
-            }
-            console.log('Value saved:', inputValue);
-        }
-    };
-
-    // Function to format a number with commas and two decimal places
-    const formatNumber = (number, colId, rowId) => {
-        const formattedNumber = new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(number);
-        if (editingCell?.colId === colId && editingCell?.rowId === rowId) {
-            return number > 0 ? number : ""; // Return the number if it's greater than 0, otherwise return an empty string
-        }
-        return (`₱${formattedNumber}`);
-    };
-
-    const isError = (colId, rowId, value) => {
-        if (colId === "amount" && rowId === 3) {
-            if (value === "" || value === 0 || !value) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     useEffect(() => {
         console.log("RecordsRow useEffect")
-        if (isAdding === true && value === 0) { // applies only to LR & RCD tab: value = 0
+        if (isAdding && value === 0) { // applies only to LR & RCD tab: value = 0
             setError(true); // set error to true by default per LR adding
             addFields(isAdding);
         }
@@ -177,13 +165,13 @@ function LRRow(props) {
 
     return (
         <React.Fragment>
-            {lr
-                .slice(page * rowsPerPage, page * props.rowsPerPage + props.rowsPerPage)
+            {currentDocument.id !== 0 && lr // ensure that current document is not empty
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                     const uniqueKey = `row_${row.id}_${index}`;
                     return (
                         <TableRow key={uniqueKey} hover role="checkbox" tabIndex={-1}>
-                            {props.columns.map((column) => {
+                            {columns.map((column) => {
                                 const value = row[column.id];
                                 const selectedDate = value ? new Date(value) : new Date();
 
@@ -199,7 +187,7 @@ function LRRow(props) {
                                                 pointerEvents: !isEditable && 'none' // disallow editing
                                             }
                                         ]}
-                                        onClick={(event) => handleCellClick(column.id, row.id, event)}
+                                        onClick={() => handleCellClick(column.id, row.id)}
                                         onBlur={() => handleBlurCell()}
                                     >
                                         {(() => {
@@ -247,35 +235,15 @@ function LRRow(props) {
 
                                             return (
                                                 <Box style={isEditing ? styles.divInput : null}>
-                                                    <TextField
-                                                        id={lr?.id}
-                                                        value={column.id === "amount" ? formatNumber(value, column.id, row.id) : value}
-                                                        error={isError(column.id, row.id, value)}
-                                                        helperText={isError(column.id, row.id, value) && "Empty field"}
-                                                        sx={{ "& fieldset": { border: row.id !== 3 && 'none' } }}
-                                                        FormHelperTextProps={{
-                                                            style: { position: "absolute", bottom: "-20px" },
-                                                        }}
-                                                        InputProps={{
-                                                            style: {
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                flexDirection: 'row',
-                                                                justifyContent: "flex-start",
-                                                                fontSize: 14,
-                                                                height: 40,
-                                                            },
-                                                        }}
-                                                        onChange={(event) =>
-                                                            handleInputChange(column.id, row.id, event)
-                                                        }
-                                                        onBlur={() => handleInputBlur(column.id, row.id)}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter') {
-                                                                e.preventDefault();
-                                                                e.target.blur(); // Blur input on Enter key press
-                                                            }
-                                                        }}
+                                                    <LRTextField
+                                                        row={row}
+                                                        column={column}
+                                                        editingCell={editingCell}
+                                                        setEditingCell={setEditingCell}
+                                                        handleWarningOpen={handleWarningOpen}
+                                                        value={value}
+                                                        setError={setError}
+                                                        setAmountExceeded={setAmountExceeded}
                                                     />
                                                 </Box>
                                             );
@@ -340,10 +308,20 @@ function LRRow(props) {
                         </TableRow>
                     );
                 })}
-            <HistoryModal open={open} handleClose={handleClose} handleCloseParent={handleMenuClose} index={selectedIndex} />
+            <ExceedWarningModal
+                open={warningOpen}
+                onClose={handleWarningClose}
+                amountExceeded={amountExceeded}
+            />
+            <HistoryModal
+                open={open}
+                index={selectedIndex}
+                handleClose={handleClose}
+                handleCloseParent={handleMenuClose}
+            />
         </React.Fragment>
     );
-}
+});
 
 const styles = {
     cell: {
