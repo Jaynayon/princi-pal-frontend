@@ -25,6 +25,8 @@ export default function LRTextField(props) {
 
     const handleInputChange = async (event) => {
         let modifiedValue = event.target.value
+            .replace(/^\s+/, '')      // Remove leading spaces
+            .replace(/\s{2,}/g, ' '); // Replace consecutive spaces with a single space
 
         // Find the index of the object with matching id
         const rowIndex = lr.findIndex(r => r.id === row.id);
@@ -54,7 +56,7 @@ export default function LRTextField(props) {
         if (rowIndex !== -1) {
             // .trim removes spaces from both start and the end of the string.
             const modifiedInput = colId === "amount" ? Number(input) : input.trim()
-            const modifiedValue = colId === "amount" ? Number(value) : value
+            const modifiedValue = colId === "amount" ? Number(value) : value.trim()
 
             const totalExpenses = Number(currentDocument?.budget);
             const monthlyBudget = Number(currentDocument?.cashAdvance);
@@ -86,7 +88,7 @@ export default function LRTextField(props) {
                     }
                 } else {
                     console.log('Value saved:', value);
-                    setInput(value);
+                    setInput(modifiedValue);
                 }
             } catch (e) {
                 console.error(e);

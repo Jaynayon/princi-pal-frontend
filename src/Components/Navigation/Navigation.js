@@ -19,7 +19,8 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 
 // Custom imports
 import { styling } from "./styling";
-import { DisplayItems, ProfileTab } from "./DisplayItems";
+import DisplayItems from './DisplayItems'; // Correct import for the default export
+import ProfileTab from "../Modal/ProfileTab";
 import { useNavigationContext } from "../../Context/NavigationProvider";
 import CustomizedSwitches from "./CustomizedSwitches";
 import NavigationSearchBar from "./NavigationSearchBar";
@@ -125,7 +126,7 @@ const displayTitle = (selected) => {
 };
 
 export default function Navigation({ children }) {
-  const { open, toggleDrawer, selected, navStyle, mobileMode } = useNavigationContext();
+  const { list, setSelected, selected, open, toggleDrawer, navStyle, mobileMode } = useNavigationContext();
 
   const defaultTheme = createTheme({
     typography: {
@@ -204,7 +205,11 @@ export default function Navigation({ children }) {
               marginTop: "5px",
             }}
           >
-            <DisplayItems />
+            <DisplayItems
+              list={list}
+              selected={selected}
+              setSelected={setSelected}
+            />
           </List>
           <Box
             sx={{
