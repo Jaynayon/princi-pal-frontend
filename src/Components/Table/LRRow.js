@@ -108,7 +108,6 @@ const LRRow = memo((props) => {
     const handleNewRecordAccept = async (rowId) => {
         const rowIndex = lr.findIndex(row => row.id === rowId);
         const newTotalExpenses = Number(lr[rowIndex].amount) + Number(currentDocument.budget);
-        console.log(newTotalExpenses)
         if (!error) {
             if (newTotalExpenses > currentDocument.cashAdvance) {
                 setAmountExceeded({

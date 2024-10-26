@@ -74,7 +74,8 @@ function SchoolPage(props) {
         currentDocument,
         currentSchool,
         value,
-        setValue
+        setValue,
+        createLrByDocId
     } = useSchoolContext();
 
     const [open, setOpen] = React.useState(false);
@@ -146,7 +147,11 @@ function SchoolPage(props) {
     // Remove add field when going to another tab
     React.useEffect(() => {
         setIsAdding(false); //reset state to allow addFields again
-    }, [value, setIsAdding]); // Listen to "value" when changing tabs; reset isAdding
+    }, [
+        value, // Listen to "value" when changing tabs; reset isAdding
+        setIsAdding,
+        createLrByDocId // Reset isAding when an LR is added
+    ]);
 
     return (
         <Container className="test" maxWidth="lg" sx={{ /*mt: 4,*/ mb: 4 }}>
