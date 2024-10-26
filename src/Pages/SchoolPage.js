@@ -21,12 +21,12 @@ import axios from 'axios';
 import { saveAs } from 'file-saver';
 
 import { useSchoolContext } from '../Context/SchoolProvider';
+import { useAppContext } from '../Context/AppProvider';
 
 import LRTable from '../Components/Table/LRTable';
 import JEVTable from '../Components/Table/JEVTable';
 import DocumentSummary from '../Components/Summary/DocumentSummary';
 import BudgetAllocationModal from '../Components/Modal/BudgetAllocationModal';
-import { useAppContext } from '../Context/AppProvider';
 import SummaryModal from '../Components/Modal/SummaryModal';
 
 export function CustomTabPanel(props) {
@@ -74,11 +74,7 @@ function SchoolPage(props) {
         currentDocument,
         currentSchool,
         value,
-        setValue,
-        lr,
-        updateLr,
-        jev,
-        updateJev
+        setValue
     } = useSchoolContext();
 
     const [open, setOpen] = React.useState(false);
@@ -140,8 +136,6 @@ function SchoolPage(props) {
             setExportIsLoading(false);  // End loading
         }
     };
-
-    console.log(currentDocument)
 
     const exportDocumentOnClick = async () => {
         await exportDocument();
@@ -281,10 +275,10 @@ function SchoolPage(props) {
             <SummaryModal
                 open={openSummary}
                 handleClose={handleCloseSummary}
-                lr={lr}
-                updateLr={updateLr}
-                jev={jev}
-                updateJev={updateJev}
+                currentDocument={currentDocument}
+                currentSchool={currentSchool}
+                year={year}
+                month={month}
             />
             <BudgetAllocationModal
                 open={open}

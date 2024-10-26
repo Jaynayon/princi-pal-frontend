@@ -220,7 +220,7 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentSchool, year, createLrByDocId, updateDocumentById, fetchDocumentData]);
 
-    const getDocumentBySchoolIdYear = async (school_id, year) => {
+    const getDocumentBySchoolIdYear = useCallback(async (school_id, year) => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL_DOC}/school/${school_id}/${year}`, {
                 headers: {
@@ -232,7 +232,7 @@ export const SchoolProvider = ({ children }) => {
             console.log(error.response.data)
             return null;
         }
-    };
+    }, []);
 
     const updateJev = useCallback(async () => {
         try {
@@ -260,7 +260,7 @@ export const SchoolProvider = ({ children }) => {
         }
     }, [currentDocument, jev]);
 
-    const updateJevById = async (colId, rowId, value) => {
+    const updateJevById = useCallback(async (colId, rowId, value) => {
         let obj = {}
 
         // Construct the payload object based on the provided colId
@@ -280,7 +280,7 @@ export const SchoolProvider = ({ children }) => {
             console.error('Error fetching lrs by document id:', error);
             return null;
         }
-    };
+    }, []);
 
     const updateLr = useCallback(async () => {
         try {
