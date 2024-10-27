@@ -18,18 +18,25 @@ const NavigationSearchBar = () => {
   const { currentUser } = useNavigationContext();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [isInputVisible, setIsInputVisible] = useState(false); // New state for input visibility
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [openApplicationInbox, setOpenApplicationInbox] = useState(false);
-  const [appliedSchools, setAppliedSchools] = useState([]); // Store full school objects along with assocId
+  const [appliedSchools, setAppliedSchools] = useState([]);
   const [schools, setSchools] = useState([]);
   const [associatedSchoolIds, setAssociatedSchoolIds] = useState([]);
 
-  const searchBoxRef = useRef(null);
+  const searchBoxRef = useRef(null); // Ref for the search box
+  const isDialogOpen = open || openApplicationInbox;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchBoxRef.current && !searchBoxRef.current.contains(event.target)) {
-        setQuery(""); // Close the search box when clicked outside
+      if (
+        searchBoxRef.current && 
+        !searchBoxRef.current.contains(event.target) && 
+        !isDialogOpen
+      ) {
+        setQuery(""); // Close the search results box
+        setIsInputVisible(false); // Hide the input field
       }
     };
 
@@ -37,52 +44,45 @@ const NavigationSearchBar = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [isDialogOpen]);
 
-  // Fetch all available schools on component mount
-  useEffect(() => {
-    let isMounted = true;
-    const fetchSchools = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
-          headers: {
-            Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-          },
-        });
-        if (isMounted) {
-          setSchools(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching the school data:", error);
-      }
-    };
+  const handleSearchIconClick = async () => {
+    setIsInputVisible(!isInputVisible);
 
-    const fetchUserAssociations = async () => {
+    if (!isInputVisible) {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL_ASSOC}/user/${currentUser.id}`,
-          {
+        // Fetch all available schools
+        const fetchSchools = async () => {
+          const response = await axios.get(`${process.env.REACT_APP_API_URL_SCHOOL}/all`, {
             headers: {
               Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
             },
-          }
-        );
-        const associatedIds = response.data.map((assoc) => assoc.schoolId);
-        setAssociatedSchoolIds(associatedIds);
+          });
+          setSchools(response.data);
+        };
+
+        // Fetch user associations
+        const fetchUserAssociations = async () => {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL_ASSOC}/user/${currentUser.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+              },
+            }
+          );
+          const associatedIds = response.data.map((assoc) => assoc.schoolId);
+          setAssociatedSchoolIds(associatedIds);
+        };
+
+        // Run both fetch functions
+        await Promise.all([fetchSchools(), fetchUserAssociations()]);
       } catch (error) {
-        console.error("Error fetching user associations:", error);
+        console.error("Error fetching data:", error);
       }
-    };
+    }
+  };
 
-    fetchSchools();
-    fetchUserAssociations();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentUser.id]);
-
-  // Fetch applied schools when the Application Inbox is opened
   const handleClickOpenApplicationInbox = async () => {
     try {
       const response = await axios.get(
@@ -90,12 +90,11 @@ const NavigationSearchBar = () => {
         {
           headers: {
             Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-          }
+          },
         }
       );
-      console.log("Applied schools response:", response.data); // Check if fullName and assocId are included
-      setAppliedSchools(response.data); // Set applied schools
-      setOpenApplicationInbox(true); // Open the Application Inbox dialog
+      setAppliedSchools(response.data);
+      setOpenApplicationInbox(true);
     } catch (error) {
       console.error("Error fetching applied schools:", error);
     }
@@ -105,48 +104,37 @@ const NavigationSearchBar = () => {
     setOpenApplicationInbox(false);
   };
 
-  // Apply to a school and get assocId and fullName from the response
   const handleApplySchool = async () => {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL_ASSOC}/apply`,
         {
           userId: currentUser.id,
-          schoolId: selectedSchool.id
+          schoolId: selectedSchool.id,
         },
         {
           headers: {
             Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-          }
+          },
         }
       );
-  
-      // Log the full response data to inspect its structure
-      console.log("Full response data:", response.data);
-  
-      // Safely check the structure of response.data and assign values
+
       const assocId = response.data?.id;
       const school = response.data?.school || selectedSchool;
       const isApproved = response.data?.isApproved;
-  
-      console.log("Application submitted successfully:", { assocId, school, isApproved });
-  
+
       if (isApproved) {
-        // If the association is approved, remove the school from the appliedSchools list
         setAppliedSchools((prevAppliedSchools) =>
           prevAppliedSchools.filter((appliedSchool) => appliedSchool.id !== school.id)
         );
-        console.log("School removed from applied schools because it is approved.");
       } else {
-        // If the association is not yet approved, add the school to the appliedSchools list
         setAppliedSchools((prevAppliedSchools) => [
           ...prevAppliedSchools,
-          { ...school, assocId } // Add school and assocId to the appliedSchools array
+          { ...school, assocId },
         ]);
-        console.log("School added to applied schools list.");
       }
-  
-      handleClose(); // Close the selected school dialog
+
+      handleClose();
     } catch (error) {
       console.error("Error applying to school:", error);
     }
@@ -157,7 +145,6 @@ const NavigationSearchBar = () => {
     setOpen(true);
   };
 
-  // Remove school and delete association when the user clicks cancel
   const handleRemoveSchool = async (schoolToRemove) => {
     try {
       const assocId = schoolToRemove.assocId;
@@ -166,14 +153,12 @@ const NavigationSearchBar = () => {
         return;
       }
 
-      // Delete the association using the assocId
       await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${assocId}`, {
         headers: {
           Authorization: `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
-        }
+        },
       });
 
-      // Remove the school from the appliedSchools state
       setAppliedSchools((prevAppliedSchools) =>
         prevAppliedSchools.filter((school) => school.id !== schoolToRemove.id)
       );
@@ -194,42 +179,55 @@ const NavigationSearchBar = () => {
     ? associatedSchoolIds.includes(selectedSchool.id)
     : false;
 
-    const filteredSchools = schools.filter(
-      (school) => school.fullName?.toLowerCase().startsWith(query.toLowerCase())
-    );    
+  const filteredSchools = schools.filter((school) =>
+    school.fullName?.toLowerCase().startsWith(query.toLowerCase())
+  );
 
-  if (currentUser.position === 'Principal') {
+  if (currentUser.position === "Principal") {
     return (
-      <Box style={{ width: "400px", position: "relative", textAlign: "center", padding: "20px" }}>
-        
-      </Box>
+      <Box style={{ width: "400px", position: "relative", textAlign: "center", padding: "20px" }} />
     );
   }
 
-
   return (
     <Box style={{ width: "400px", position: "relative" }} ref={searchBoxRef}>
-      <Box
-        component="form"
-        sx={{
-          p: "2px 4px",
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-        }}
-      >
-        <InputBase
-          sx={{ ml: 1, flex: 1, textAlign: "right" }}
-          placeholder=""
-          value={query}
-          onChange={handleInputChange}
-          inputProps={{ style: { textAlign: "right" } }}
-        />
-        <IconButton color="inherit" type="button" sx={{ p: "10px" }}>
-          <SearchIcon />
-        </IconButton>
-      </Box>
-      {query && (
+<Box
+  component="form"
+  sx={{
+    display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        gap: 2,
+        p: 1,
+  }}
+>
+  {/* Search input, conditionally rendered */}
+  {isInputVisible && (
+    <InputBase
+      sx={{
+        ml: 1, // Consistent margin for spacing
+        flex: 1,
+        textAlign: "right",
+      }}
+      placeholder="Search..."
+      value={query}
+      onChange={handleInputChange}
+      inputProps={{ style: { textAlign: "right" } }}
+    />
+  )}
+
+  {/* Search icon, always in the same position */}
+  <IconButton
+    color="inherit"
+    type="button"
+    sx={{ p: "10px" }}
+    onClick={handleSearchIconClick} // Toggle input field visibility
+  >
+    <SearchIcon />
+  </IconButton>
+</Box>
+
+      {isInputVisible && query && (
         <ul
           style={{
             listStyleType: "none",
@@ -291,9 +289,9 @@ const NavigationSearchBar = () => {
                   }}
                   key={index}
                 >
-                  <Avatar>{school.fullName?.charAt(0).toUpperCase()}</Avatar> {/* Display first letter */}
+                  <Avatar>{school.fullName?.charAt(0).toUpperCase()}</Avatar>
                   <DialogContentText id="alert-dialog-description">
-                    <span style={{ fontWeight: "bold" }}>{school.fullname}</span> {/* Full name */}
+                    <span style={{ fontWeight: "bold" }}>{school.fullname}</span>
                     <br />
                     Your application is currently under review.
                   </DialogContentText>
