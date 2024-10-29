@@ -25,6 +25,7 @@ import ListItem from '@mui/material/ListItem';
 import axios from 'axios'; // Import Axios for making HTTP requests
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
+import { Typography } from '@mui/material';
 
 function PeoplePage(props) {
     const [member, setMember] = useState('Member');
@@ -47,6 +48,8 @@ function PeoplePage(props) {
     const [currentSchool, setCurrentSchool] = useState({ id: null });
     const [applications, setApplications] = useState([]);
     const [invitationMessage, setInvitationMessage] = useState('');
+    const [isInvitationSuccessful, setIsInvitationSuccessful] = useState(false);
+
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -302,33 +305,8 @@ function PeoplePage(props) {
         setDropdownAnchorEl(null);
     };
 
-    /*const handleInvite = () => {
-        if (inviteEmail.trim() === '') {
-            setInvitationMessage('Please enter a valid email.');
-            return;
-        }
-    
-        console.log("Inviting email:", inviteEmail);
-    
-        const invitePayload = {
-            email: inviteEmail, // or another identifier
-            schoolId: currentSchool.id // Ensure you have the correct schoolId
-        };
-    
-        axios.post('http://localhost:4000/associations/invite', invitePayload)
-            .then(response => {
-                console.log("Invitation sent successfully:", response.data);
-                setInvitationMessage('Invitation sent successfully!');
-            })
-            .catch(error => {
-                console.error("Error inviting member:", error.response ? error.response.data : error.message);
-                setInvitationMessage('Failed to send invitation. Please try again.');
-            });
-    
-        setInviteEmail('');
-    };*/
 
-    const handleInvite = () => {
+    /*const handleInvite = () => {
         if (inviteEmail.trim() === '') {
             setInvitationMessage('Please enter a valid email.');
             return;
@@ -357,8 +335,50 @@ function PeoplePage(props) {
             });
 
         setInviteEmail('');
-    };
+    };*/
 
+    const handleInvite = () => {
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (inviteEmail.trim() === '' || !emailRegex.test(inviteEmail)) {
+            setInvitationMessage('Please enter a valid email.');
+            setIsInvitationSuccessful(false);
+            return;
+        }
+
+        console.log("Inviting email:", inviteEmail);
+
+        const invitePayload = {
+            email: inviteEmail,
+            schoolId: currentSchool.id,
+            admin: member === 'Admin'
+        };
+
+        axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/invite`, invitePayload, {
+            headers: {
+                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+            }
+        })
+        .then(response => {
+            console.log("Invitation sent successfully:", response.data);
+            setInvitationMessage('Invitation sent successfully!');
+            setIsInvitationSuccessful(true); // Set success state
+        })
+        .catch(error => {
+            console.error("Error inviting member:", error.response ? error.response.data : error.message);
+
+            // Set a more descriptive error message for the user
+            if (error.response && error.response.data && error.response.data.message) {
+                setInvitationMessage(error.response.data.message);
+            } else {
+                setInvitationMessage('Failed to send invitation. Please try again.');
+            }
+            setIsInvitationSuccessful(false); // Set failure state
+        });
+
+        // Clear the input after attempt
+        setInviteEmail('');
+    };
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
@@ -478,11 +498,18 @@ function PeoplePage(props) {
                             <TextField
                                 sx={{ width: '50%' }}
                                 id="invite"
-                                label="Invite by email"
+                                label="Enter email"
                                 variant="outlined"
                                 className="inviteTextField"
                                 value={inviteEmail}
                                 onChange={(e) => setInviteEmail(e.target.value)}
+                                fullWidth
+                                error={!!invitationMessage && !isInvitationSuccessful} // Error if there's a message and not successful
+                                InputProps={{
+                                    style: {
+                                        borderColor: isInvitationSuccessful ? 'green' : undefined, // Green border if successful
+                                    },
+                                }}
                             />
                             <FormControl sx={{ minWidth: 120 }} size="53px">
                                 <InputLabel id="demo-select-small-label">Role</InputLabel>
@@ -505,6 +532,15 @@ function PeoplePage(props) {
                             >
                                 Invite
                             </Button>
+                            {invitationMessage && (
+                            <Typography
+                                variant="body2"
+                                color={isInvitationSuccessful ? "green" : "error"} // Change color based on success
+                                sx={{ mt: 1, fontWeight: 'bold', marginRight: 41.5 }} // Add top margin and bold text
+                            >
+                                {invitationMessage}
+                            </Typography>
+                        )}
                         </Grid>
                         <Grid item xs={6} md={6} lg={12} sx={{ display: 'flex', alignSelf: "center" }}>
                             <FormControl sx={{ minWidth: 150 }} >
