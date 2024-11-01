@@ -47,28 +47,11 @@ function AdminPage() {
     return (
         <Container
             maxWidth={false}
-            style={styles.outer_container}
+            style={styles.container}
         >
-            <Paper style={styles.paper} >
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        pl: 2,
-                        pb: 1,
-                        pr: 4
-                    }}
-                >
-                    <Box
-                        style={{
-                            display: 'flex',
-                            justifyContent: "center",
-                            alignItems: "center",
-                            marginTop: "0.5rem",
-                            marginBottom: "0.60rem"
-                        }}
-                    >
+            <Paper sx={styles.paper} >
+                <Box sx={styles.header_container}>
+                    <Box sx={styles.header_title}>
                         <img
                             src="/logoremovebgpreview-1@2x-black.png"
                             alt="logo"
@@ -81,29 +64,15 @@ function AdminPage() {
                     <Button
                         variant="outlined"
                         sx={{
-                            textTransform: 'none', // Remove uppercase transformation
-                            borderRadius: '4px', // Slightly rounded corners
-                            padding: '4px 12px', // Adjust padding to match the look
-                            borderColor: '#ddd', // Light gray border color
-                            color: 'red', // Dark text color
-                            '&:hover': {
-                                borderColor: '#bbb', // Slightly darker border on hover
-                            },
+                            ...styles.button,
+                            fontWeight: logoutDialogOpen && "bold"
                         }}
                         onClick={() => setLogoutDialogOpen(true)}
                     >
                         Logout
                     </Button>
                 </Box>
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "flex-start",
-                        pl: 2,
-                        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" // Bottom shadow
-                    }}
-                >
+                <Box sx={styles.tab_container}>
                     <Tabs value={tabValue} onChange={handleTabChange} centered >
                         <Tab label="Principals" sx={styles.tab} />
                         <Tab label="Schools" sx={[styles.tab]} />
@@ -137,13 +106,28 @@ function AdminPage() {
 }
 
 const styles = {
-    outer_container: {
+    container: {
         width: "100vw",
         height: "100vh",
         overflow: "auto",
         backgroundImage: `url(/bg.png)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center'
+    },
+    header_container: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        pl: 2,
+        pb: 1,
+        pr: 4
+    },
+    header_title: {
+        display: 'flex',
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: "0.5rem",
+        marginBottom: "0.60rem"
     },
     title: {
         fontFamily: "Mulish",
@@ -169,12 +153,30 @@ const styles = {
         maxWidth: "700px", // Adjust if needed
         margin: "0 auto", // Center align horizontally
     },
+    tab_container: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        pl: 2,
+        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" // Bottom shadow
+    },
     tab: {
         textTransform: 'none',
         '&.Mui-selected': {
             color: 'black', // Color of selected tab
             fontWeight: 'bold', // Font weight of selected tab
         }
+    },
+    button: {
+        textTransform: 'none', // Remove uppercase transformation
+        borderRadius: '4px', // Slightly rounded corners
+        padding: '4px 12px', // Adjust padding to match the look
+        borderColor: '#ddd', // Light gray border color
+        color: 'red', // Dark text color
+        px: 3,
+        '&:hover': {
+            borderColor: '#bbb', // Slightly darker border on hover
+        },
     }
 }
 

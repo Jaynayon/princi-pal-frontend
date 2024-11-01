@@ -31,24 +31,55 @@ export default function LogoutDialog({ open, onClose }) {
             maxWidth="xs"
             fullWidth
         >
-            <DialogTitle id="logout-dialog-title">Are you sure you want to Logout?</DialogTitle>
-            <DialogContent sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: " flex-end",
-                p: 0
-            }}>
-                <DialogActions>
-                    <Box>
-                        <Button onClick={onClose} color="primary">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleLogout} color="primary">
-                            Logout
-                        </Button>
-                    </Box>
-                </DialogActions>
-            </DialogContent>
+            <Box sx={{ p: 3, pb: 2.5 }}>
+                <DialogTitle
+                    id="logout-dialog-title"
+                    sx={styles.title}
+                >
+                    Are you sure you want to log out?
+                </DialogTitle>
+                <DialogContent sx={styles.content}>
+                    <DialogActions sx={{ p: 0 }}>
+                        <Box>
+                            <Button
+                                sx={[styles.button, { backgroundColor: "#f2f2f2", color: "black", mr: 1 }]}
+                                onClick={onClose}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                sx={[styles.button, { backgroundColor: "#1565c0", color: "white" }]}
+                                onClick={handleLogout}
+                            >
+                                Logout
+                            </Button>
+                        </Box>
+                    </DialogActions>
+                </DialogContent>
+            </Box>
+
         </Dialog>
     );
+}
+
+const styles = {
+    title: {
+        fontFamily: "Mulish",
+        fontWeight: "bold",
+        fontSize: 15,
+        p: 0,
+        pb: 3
+    },
+    content: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: " flex-end",
+        p: 0
+    },
+    button: {
+        textTransform: 'none',
+        fontFamily: "Mulish",
+        fontSize: 15,
+        px: 3
+    }
 }
