@@ -49,42 +49,83 @@ function AdminPage() {
             maxWidth={false}
             style={styles.outer_container}
         >
-            <Container
-                maxWidth="md"
-                style={styles.inner_container}
-            >
-                <Typography
-                    variant="h4"
-                    style={styles.title}
+            <Paper style={styles.paper} >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        pl: 2,
+                        pb: 1,
+                        pr: 4
+                    }}
                 >
-                    Admin Page
-                </Typography>
-                <Paper style={styles.paper} >
-                    <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                        <Tabs value={tabValue} onChange={handleTabChange} centered>
-                            <Tab label="Principals" />
-                            <Tab label="Schools" />
-                            <Tab label="Integration" />
-                            <Tab label="UACS" />
-                            <Tab label="Positions" />
-                        </Tabs>
-                        <Button onClick={() => setLogoutDialogOpen(true)}>Logout</Button>
+                    <Box
+                        style={{
+                            display: 'flex',
+                            justifyContent: "center",
+                            alignItems: "center",
+                            marginTop: "0.5rem",
+                            marginBottom: "0.60rem"
+                        }}
+                    >
+                        <img
+                            src="/logoremovebgpreview-1@2x-black.png"
+                            alt="logo"
+                            style={{ width: "70px", height: "auto" }}
+                        />
+                        <Typography variant="h5" style={styles.title}>
+                            Admin Panel
+                        </Typography>
                     </Box>
+                    <Button
+                        variant="outlined"
+                        sx={{
+                            textTransform: 'none', // Remove uppercase transformation
+                            borderRadius: '4px', // Slightly rounded corners
+                            padding: '4px 12px', // Adjust padding to match the look
+                            borderColor: '#ddd', // Light gray border color
+                            color: 'red', // Dark text color
+                            '&:hover': {
+                                borderColor: '#bbb', // Slightly darker border on hover
+                            },
+                        }}
+                        onClick={() => setLogoutDialogOpen(true)}
+                    >
+                        Logout
+                    </Button>
+                </Box>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                        pl: 2,
+                        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" // Bottom shadow
+                    }}
+                >
+                    <Tabs value={tabValue} onChange={handleTabChange} centered >
+                        <Tab label="Principals" sx={styles.tab} />
+                        <Tab label="Schools" sx={[styles.tab]} />
+                        <Tab label="Integration" sx={styles.tab} />
+                        <Tab label="UACS" sx={styles.tab} />
+                        <Tab label="Positions" sx={styles.tab} />
+                    </Tabs>
+                </Box>
 
-                    {/* Tab Content */}
-                    <Box sx={styles.content}>
-                        {tabValue === 0 && (<CreatePrincipalTab />)}
+                {/* Tab Content */}
+                <Box sx={styles.content}>
+                    {tabValue === 0 && (<CreatePrincipalTab />)}
 
-                        {tabValue === 1 && (<CreateSchoolTab />)}
+                    {tabValue === 1 && (<CreateSchoolTab />)}
 
-                        {tabValue === 2 && (<CreateIntegrateTab />)}
+                    {tabValue === 2 && (<CreateIntegrateTab />)}
 
-                        {tabValue === 3 && (<CreateUacsTab />)}
+                    {tabValue === 3 && (<CreateUacsTab />)}
 
-                        {tabValue === 4 && (<CreatePositionTab />)}
-                    </Box>
-                </Paper>
-            </Container>
+                    {tabValue === 4 && (<CreatePositionTab />)}
+                </Box>
+            </Paper>
 
             {/* Logout confirmation dialog */}
             <LogoutDialog
@@ -99,40 +140,23 @@ const styles = {
     outer_container: {
         width: "100vw",
         height: "100vh",
-        position: "relative",
         overflow: "auto",
         backgroundImage: `url(/bg.png)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center'
     },
-    inner_container: {
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        position: "relative",
-        zIndex: 1,
-        paddingTop: "64px",
-        padding: "0 1rem",
-    },
     title: {
-        marginBottom: "2rem",
-        marginTop: "2rem",
         fontFamily: "Mulish",
-        color: "#000",
         textAlign: "center"
     },
     paper: {
-        width: '100%',
-        padding: '2rem',
+        // minWidth: '100%',
+        maxWidth: "1440px",
+        paddingTop: '15px',
         borderRadius: '10px',
         margin: 'auto',
-        position: 'relative',
-        bottom: '20px',
-        left: '0',
-        right: '0',
-        zIndex: 1,
+        marginBottom: '20px',
+        marginTop: '20px',
     },
     content: {
         minHeight: "60vh",
@@ -144,6 +168,13 @@ const styles = {
         width: "100%",
         maxWidth: "700px", // Adjust if needed
         margin: "0 auto", // Center align horizontally
+    },
+    tab: {
+        textTransform: 'none',
+        '&.Mui-selected': {
+            color: 'black', // Color of selected tab
+            fontWeight: 'bold', // Font weight of selected tab
+        }
     }
 }
 
