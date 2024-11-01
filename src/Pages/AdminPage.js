@@ -62,11 +62,11 @@ function AdminPage() {
                 <Paper style={styles.paper} >
                     <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                         <Tabs value={tabValue} onChange={handleTabChange} centered>
-                            <Tab label="Create Principal" />
-                            <Tab label="Create School" />
-                            <Tab label="Integrate Principal" />
-                            <Tab label="Create UACS" />
-                            <Tab label="Create Position" />
+                            <Tab label="Principals" />
+                            <Tab label="Schools" />
+                            <Tab label="Integration" />
+                            <Tab label="UACS" />
+                            <Tab label="Positions" />
                         </Tabs>
                         <Button onClick={() => setLogoutDialogOpen(true)}>Logout</Button>
                     </Box>
