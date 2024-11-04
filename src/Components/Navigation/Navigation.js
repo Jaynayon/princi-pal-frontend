@@ -1,9 +1,4 @@
-// React imports
-import React from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-
-
-// Material-UI imports
+import React, { useState, useEffect } from "react";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import MuiDrawer from "@mui/material/Drawer";
@@ -17,10 +12,16 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import axios from "axios"; 
+import Dialog from "@mui/material/Dialog"; 
+import DialogTitle from "@mui/material/DialogTitle"; 
+import DialogContent from "@mui/material/DialogContent"; 
+import DialogActions from "@mui/material/DialogActions"; 
+import Button from "@mui/material/Button"; 
 
 // Custom imports
 import { styling } from "./styling";
-import DisplayItems from './DisplayItems'; // Correct import for the default export
+import DisplayItems from './DisplayItems'; 
 import ProfileTab from "../Modal/ProfileTab";
 import { useNavigationContext } from "../../Context/NavigationProvider";
 import CustomizedSwitches from "./CustomizedSwitches";
@@ -29,6 +30,7 @@ import NotificationTab from './NotificationTab';
 
 const drawerWidth = 220;
 
+// Styled components for AppBar and Drawer
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
@@ -92,9 +94,23 @@ const displayTitle = (selected) => {
   );
 };
 
+// Function to send verification email
+const sendVerificationEmail = async (email) => {
+  try {
+    const response = await axios.post(`${process.env.REACT_APP_API_URL_BASE}/send-verification`, null, {
+      params: { email }
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default function Navigation({ children }) {
-  const navigate = useNavigate(); // Use the useNavigate hook
-  const { list, setSelected, selected, open, toggleDrawer, navStyle, mobileMode, isEmailVerified } = useNavigationContext();
+  const { list, setSelected, selected, open, toggleDrawer, navStyle, mobileMode, currentUser } = useNavigationContext();
+  const [loading, setLoading] = useState(false); 
+  const [openModal, setOpenModal] = useState(false); 
+  const [, setIsVerified] = useState(false); 
 
   const defaultTheme = createTheme({
     typography: {
@@ -103,9 +119,28 @@ export default function Navigation({ children }) {
     navStyle: styling[navStyle],
   });
 
-  const handleVerifyClick = () => {
-    console.log("Verify button clicked!"); // Debugging log
-    navigate("/verify-email"); // Ensure navigate is called correctly
+  // Check if currentUser is verified
+  useEffect(() => {
+    if (currentUser) {
+      setIsVerified(currentUser.verified);
+    }
+  }, [currentUser]);
+
+  const handleVerifyClick = async () => {
+    setLoading(true); 
+    try {
+      await sendVerificationEmail(currentUser.email); 
+      setOpenModal(true); 
+    } catch (error) {
+      console.error("Failed to send verification email:", error);
+      alert("Failed to send verification email. Please try again."); 
+    } finally {
+      setLoading(false); 
+    }
+  };  
+
+  const handleCloseModal = () => {
+    setOpenModal(false); 
   };
 
   return (
@@ -184,17 +219,16 @@ export default function Navigation({ children }) {
                   >
                     {displayTitle(selected)}
                   </Typography>
-                  {/* Search Bar */}
                   <NavigationSearchBar />
                   <NotificationTab />
                 </Toolbar>
               </AppBar>
-
+              
               {/* Email Verification Indicator */}
-              {!isEmailVerified && (
+              {currentUser && !currentUser.verified && (
                 <Box
                   sx={{
-                    backgroundColor: "#f44336", // Red background
+                    backgroundColor: "#f44336", 
                     padding: "10px",
                     borderRadius: "4px",
                     mb: "20px",
@@ -204,35 +238,50 @@ export default function Navigation({ children }) {
                     alignItems: "center",
                     pl: "15px",
                     pr: "15px",
-                    width: "100%", // Full width
+                    width: "100%", 
                   }}
                 >
                   <Typography variant="body1" color="white" sx={{ flexGrow: 1 }}>
-                    Verify your email
+                    Please check your email to verify your account and keep your current username.
                   </Typography>
-                  <button
-                    style={{
-                      backgroundColor: "white", // Button background color
-                      color: "#f44336", // Text color for the button
-                      border: "none",
-                      borderRadius: "4px",
-                      padding: "8px 16px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      fontSize: "14px",
+                  <Button
+                    onClick={handleVerifyClick}
+                    variant="outlined" // Change to outlined variant
+                    sx={{
+                      borderColor: "white", // Set the border color to white
+                      color: "white", // Set the text color to white
+                      "&:hover": {
+                        borderColor: "white", // Ensure the border stays white on hover
+                        backgroundColor: "rgba(255, 255, 255, 0.1)", // Optional: Add a light background on hover
+                      },
                     }}
-                    onClick={handleVerifyClick} // Call the handler
+                    disabled={loading}
                   >
-                    Verify
-                  </button>
+                    {loading ? "Sending..." : "Resend Email"}
+                  </Button>
+
                 </Box>
               )}
-
               {children}
             </Grid>
           </Container>
         </Box>
       </Box>
+
+      {/* Modal for verification email status */}
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Email Verification Status</DialogTitle>
+        <DialogContent>
+          <Typography>
+            A verification email has been sent to {currentUser.email}. Please check your inbox.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }
