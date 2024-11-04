@@ -12,16 +12,16 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import axios from "axios"; 
-import Dialog from "@mui/material/Dialog"; 
-import DialogTitle from "@mui/material/DialogTitle"; 
-import DialogContent from "@mui/material/DialogContent"; 
-import DialogActions from "@mui/material/DialogActions"; 
-import Button from "@mui/material/Button"; 
+import axios from "axios";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
 
 // Custom imports
 import { styling } from "./styling";
-import DisplayItems from './DisplayItems'; 
+import DisplayItems from './DisplayItems';
 import ProfileTab from "../Modal/ProfileTab";
 import { useNavigationContext } from "../../Context/NavigationProvider";
 import CustomizedSwitches from "./CustomizedSwitches";
@@ -62,13 +62,13 @@ const Drawer = styled(MuiDrawer, {
     ...(open
       ? {}
       : {
-          overflowX: "hidden",
-          transition: theme.transitions.create("width", {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-          width: theme.spacing(7.7),
+        overflowX: "hidden",
+        transition: theme.transitions.create("width", {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
         }),
+        width: theme.spacing(7.7),
+      }),
   },
 }));
 
@@ -108,9 +108,9 @@ const sendVerificationEmail = async (email) => {
 
 export default function Navigation({ children }) {
   const { list, setSelected, selected, open, toggleDrawer, navStyle, mobileMode, currentUser } = useNavigationContext();
-  const [loading, setLoading] = useState(false); 
-  const [openModal, setOpenModal] = useState(false); 
-  const [, setIsVerified] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [, setIsVerified] = useState(false);
 
   const defaultTheme = createTheme({
     typography: {
@@ -127,20 +127,20 @@ export default function Navigation({ children }) {
   }, [currentUser]);
 
   const handleVerifyClick = async () => {
-    setLoading(true); 
+    setLoading(true);
     try {
-      await sendVerificationEmail(currentUser.email); 
-      setOpenModal(true); 
+      await sendVerificationEmail(currentUser.email);
+      setOpenModal(true);
     } catch (error) {
       console.error("Failed to send verification email:", error);
-      alert("Failed to send verification email. Please try again."); 
+      alert("Failed to send verification email. Please try again.");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
-  };  
+  };
 
   const handleCloseModal = () => {
-    setOpenModal(false); 
+    setOpenModal(false);
   };
 
   return (
@@ -223,33 +223,35 @@ export default function Navigation({ children }) {
                   <NotificationTab />
                 </Toolbar>
               </AppBar>
-              
+
               {/* Email Verification Indicator */}
               {currentUser && !currentUser.verified && (
                 <Box
                   sx={{
-                    backgroundColor: "#f44336", 
+                    backgroundColor: "#f44336",
                     padding: "10px",
                     borderRadius: "4px",
-                    mb: "20px",
                     textAlign: "center",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    pl: "15px",
-                    pr: "15px",
-                    width: "100%", 
+                    mx: "25px",
+                    mb: "20px",
+                    width: "100%",
                   }}
                 >
-                  <Typography variant="body1" color="white" sx={{ flexGrow: 1 }}>
+                  <Typography variant="body2" color="white" sx={{ flexGrow: 1 }}>
                     Please check your email to verify your account and keep your current username.
                   </Typography>
                   <Button
                     onClick={handleVerifyClick}
                     variant="outlined" // Change to outlined variant
                     sx={{
+                      height: "30px",
+                      textTransform: "none", // Remove uppercase transformation
                       borderColor: "white", // Set the border color to white
                       color: "white", // Set the text color to white
+                      fontSize: "0.75rem", // Set the font size to 0.75rem
                       "&:hover": {
                         borderColor: "white", // Ensure the border stays white on hover
                         backgroundColor: "rgba(255, 255, 255, 0.1)", // Optional: Add a light background on hover
@@ -257,7 +259,9 @@ export default function Navigation({ children }) {
                     }}
                     disabled={loading}
                   >
-                    {loading ? "Sending..." : "Resend Email"}
+                    <Typography variant="body2" color="white">
+                      {loading ? "Sending..." : "Resend Email"}
+                    </Typography>
                   </Button>
 
                 </Box>
