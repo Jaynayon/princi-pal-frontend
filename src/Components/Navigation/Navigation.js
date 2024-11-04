@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import MuiDrawer from "@mui/material/Drawer";
@@ -13,10 +13,6 @@ import Grid from "@mui/material/Grid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import axios from "axios";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 
 // Custom imports
@@ -27,6 +23,7 @@ import { useNavigationContext } from "../../Context/NavigationProvider";
 import CustomizedSwitches from "./CustomizedSwitches";
 import NavigationSearchBar from "./NavigationSearchBar";
 import NotificationTab from './NotificationTab';
+import EmailVerificationModal from "../Modal/EmailVerificationModal";
 
 const drawerWidth = 220;
 
@@ -139,9 +136,9 @@ export default function Navigation({ children }) {
     }
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setOpenModal(false);
-  };
+  }, []);
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -273,19 +270,11 @@ export default function Navigation({ children }) {
       </Box>
 
       {/* Modal for verification email status */}
-      <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Email Verification Status</DialogTitle>
-        <DialogContent>
-          <Typography>
-            A verification email has been sent to {currentUser.email}. Please check your inbox.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <EmailVerificationModal
+        openModal={openModal}
+        handleCloseModal={handleCloseModal}
+        currentUser={currentUser}
+      />
     </ThemeProvider>
   );
 }
