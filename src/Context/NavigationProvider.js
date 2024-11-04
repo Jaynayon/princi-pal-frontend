@@ -180,7 +180,10 @@ export const NavigationProvider = ({ children }) => {
                     if (matchedSchool) { setCurrentSchool(matchedSchool); }
 
                     setSelected(localStorageValue); // Set the selected state for school
-                } else {
+                } else if (extractRoute === "/reset-password" || extractRoute === "/verify-email") {
+                    return; // Do nothing; load the page
+                }
+                else {
                     // If user is logged in, redirect to inner modules
                     navigate('/');
                 }
