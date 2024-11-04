@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Snackbar, Alert } from '@mui/material';
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -39,6 +40,9 @@ const RegistrationPage = () => {
   });
   const [formValid, setFormValid] = useState(true); // Track form validity
   const { createUser, validateUsernameEmail } = useNavigationContext();
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
@@ -137,46 +141,56 @@ const RegistrationPage = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    const { email, password, username, firstName, middleName, lastName, position } = formData;
+ // Add this close handler function
+const handleSnackbarClose = (event, reason) => {
+  if (reason === 'clickaway') {
+    return;
+  }
+  setSnackbarOpen(false);
+};
 
-    if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
-      console.log("All fields are required");
-      setFormValid(false); // Set form validity to false immediately
-      return; // Exit the function
-    }
+// Update handleSubmit function with Snackbar logic
+const handleSubmit = async () => {
+  const { email, password, username, firstName, middleName, lastName, position } = formData;
 
-    // Further validation logic for email, password, and confirmPassword
-    if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
-      try {
-        const response = await createUser(firstName, middleName, lastName, username, email, password, position);
-        if (response) {
-          console.log("Registration successful");
-          setRegistrationError('');
-          // Clear form fields after successful registration
-          setFormData({
-            email: '',
-            password: '',
-            username: '',
-            firstName: '',
-            middleName: '',
-            lastName: '',
-            confirmPassword: '',
-            position: ''
-          });
-          // Redirect to login page or display a success message
-          window.location.href = "/login"; // Change this to the correct URL if needed
-        } else {
-          setRegistrationError("Registration failed");
-        }
-      } catch (error) {
-        console.error("Error:", error);
+  if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
+    console.log("All fields are required");
+    setFormValid(false);
+    return;
+  }
+
+  if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
+    try {
+      const response = await createUser(firstName, middleName, lastName, username, email, password, position);
+      if (response) {
+        console.log("Registration successful");
+        setRegistrationError('');
+        // Open Snackbar with success message
+        setSnackbarMessage('Successful Registration ✓ Email verification is sent to your email');
+        setSnackbarOpen(true); // Open the Snackbar here
+        // Clear form fields after successful registration
+        setFormData({
+          email: '',
+          password: '',
+          username: '',
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          confirmPassword: '',
+          position: ''
+        });
+        window.location.href = "/login"; 
+      } else {
         setRegistrationError("Registration failed");
       }
-    } else {
-      console.log("Form contains errors");
+    } catch (error) {
+      console.error("Error:", error);
+      setRegistrationError("Registration failed");
     }
-  };
+  } else {
+    console.log("Form contains errors");
+  }
+};
 
   function getErrorCondition(item) {
     const { key } = item;
@@ -323,6 +337,11 @@ const RegistrationPage = () => {
           <b>Sign in</b>
         </Link>
       </Container>
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+      <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+        {snackbarMessage}
+      </Alert>
+    </Snackbar>
     </Container>
   );
 };
