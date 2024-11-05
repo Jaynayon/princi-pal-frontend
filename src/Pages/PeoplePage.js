@@ -166,7 +166,7 @@ function PeoplePage(props) {
             });
 
             console.log('Success:', response.data);
-
+            fetchUsers(); // Fetch new users after accepting
         } catch (error) {
             console.error("Error approving user:", error.response ? error.response.data : error.message);
         }
