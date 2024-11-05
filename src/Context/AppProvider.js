@@ -46,7 +46,7 @@ export const AppProvider = ({ children }) => {
             window.localStorage.setItem("LOCAL_STORAGE_TOKEN", JSON.stringify(response.data.token));
 
             if (response.data.isMatch) {
-                fetchData();
+                fetchCurrentUser();
             }
 
             return response.data;
@@ -73,7 +73,7 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    const fetchData = useCallback(async () => {
+    const fetchCurrentUser = useCallback(async () => {
         try {
             const jwtToken = JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"));
 
@@ -105,10 +105,10 @@ export const AppProvider = ({ children }) => {
 
     useEffect(() => {
         if (!isLoggedIn) {
-            fetchData();
+            fetchCurrentUser();
         }
 
-    }, [isLoggedIn, fetchData]);
+    }, [isLoggedIn, fetchCurrentUser]);
 
     return (
         <AppContext.Provider value={{
@@ -117,7 +117,8 @@ export const AppProvider = ({ children }) => {
             currentUser, setCurrentUser,
             validateToken,
             getUserById,
-            authenticateUser
+            authenticateUser,
+            fetchCurrentUser
         }}>
             {children}
         </AppContext.Provider>

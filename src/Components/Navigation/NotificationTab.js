@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import { useAppContext } from '../../Context/AppProvider';
 
 // Material-UI imports
 import { Box, IconButton, Badge, Menu, Typography, MenuItem, Button, Divider } from '@mui/material';
@@ -14,6 +15,7 @@ import Tab from '@mui/material/Tab';
 const ITEM_HEIGHT = 48;
 
 export default function NotificationTab() {
+    const { fetchCurrentUser } = useAppContext();
     const { currentUser } = useNavigationContext();
     const [notifications, setNotifications] = useState([]);
     const [error, setError] = useState(null);
@@ -112,6 +114,8 @@ export default function NotificationTab() {
             } else {
                 console.error('Error:', error.message);
             }
+        } finally {
+            fetchCurrentUser(); // Reload user to render new school/s
         }
     };
 
