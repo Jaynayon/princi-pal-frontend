@@ -8,7 +8,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import axios from 'axios';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 
-export default function CreatePrincipalTab() {
+export default function CreatePrincipalTab({ fetchPrincipals }) {
     const { currentUser, validateUsernameEmail } = useNavigationContext();
     const [showPassword, setShowPassword] = useState(false);
     const [usernameError, setUsernameError] = useState(false);
@@ -181,6 +181,8 @@ export default function CreatePrincipalTab() {
             } catch (error) {
                 console.error("Error:", error);
                 setRegistrationError("Registration failed");
+            } finally {
+                fetchPrincipals(); // Fetch updated list of principals
             }
         } else {
             console.log("Form contains errors");
@@ -222,7 +224,7 @@ export default function CreatePrincipalTab() {
     }
 
     return (
-        <Box>
+        <Box sx={{ pt: 2 }}>
             {[
                 { label: "Email", icon: <EmailIcon />, key: 'email' },
                 { label: "Username", icon: <PersonIcon />, key: 'username', maxLength: 20 },
@@ -256,8 +258,17 @@ export default function CreatePrincipalTab() {
                                 </IconButton>
                             </InputAdornment>
                         ),
+                        style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            flexDirection: 'row',
+                            justifyContent: "flex-start",
+                            fontSize: 14,
+                            height: 45,
+                        },
                     }}
                     inputProps={{ maxLength: item.maxLength }}
+                    InputLabelProps={{ sx: { fontSize: 14 } }}
                     sx={{ backgroundColor: "#DBF0FD", '& .MuiOutlinedInput-notchedOutline': { borderColor: "#DBF0FD" }, borderRadius: '8px' }}
                 />
             ))}
@@ -273,13 +284,14 @@ export default function CreatePrincipalTab() {
                     textTransform: "none",
                     width: "100%",
                     maxWidth: '400px',
+                    height: "40px",
                     marginBottom: "1rem",
                     padding: "15px",
                     borderRadius: "1.5px",
                     cursor: "pointer",
                     transition: "background-color 0.3s",
                     "&:hover": { backgroundColor: "#474bca" },
-                    display: 'block',
+                    display: 'flex',
                     marginLeft: 'auto',
                     marginRight: 'auto',
                 }}
