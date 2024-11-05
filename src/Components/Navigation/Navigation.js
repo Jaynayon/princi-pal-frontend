@@ -244,7 +244,8 @@ export default function Navigation({ children }) {
                     onClick={handleVerifyClick}
                     variant="outlined" // Change to outlined variant
                     sx={{
-                      height: "30px",
+                      minWidth: "80px",
+                      minHeight: "30px",
                       textTransform: "none", // Remove uppercase transformation
                       borderColor: "white", // Set the border color to white
                       color: "white", // Set the text color to white
