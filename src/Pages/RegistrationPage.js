@@ -40,9 +40,10 @@ const RegistrationPage = () => {
   });
   const [formValid, setFormValid] = useState(true); // Track form validity
   const { createUser, validateUsernameEmail } = useNavigationContext();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
@@ -141,56 +142,59 @@ const [snackbarMessage, setSnackbarMessage] = useState('');
     }
   };
 
- // Add this close handler function
-const handleSnackbarClose = (event, reason) => {
-  if (reason === 'clickaway') {
-    return;
-  }
-  setSnackbarOpen(false);
-};
-
-// Update handleSubmit function with Snackbar logic
-const handleSubmit = async () => {
-  const { email, password, username, firstName, middleName, lastName, position } = formData;
-
-  if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
-    console.log("All fields are required");
-    setFormValid(false);
-    return;
-  }
-
-  if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
-    try {
-      const response = await createUser(firstName, middleName, lastName, username, email, password, position);
-      if (response) {
-        console.log("Registration successful");
-        setRegistrationError('');
-        // Open Snackbar with success message
-        setSnackbarMessage('Successful Registration ✓ Email verification is sent to your email');
-        setSnackbarOpen(true); // Open the Snackbar here
-        // Clear form fields after successful registration
-        setFormData({
-          email: '',
-          password: '',
-          username: '',
-          firstName: '',
-          middleName: '',
-          lastName: '',
-          confirmPassword: '',
-          position: ''
-        });
-        window.location.href = "/login"; 
-      } else {
-        setRegistrationError("Registration failed");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setRegistrationError("Registration failed");
+  // Add this close handler function
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
     }
-  } else {
-    console.log("Form contains errors");
-  }
-};
+    setSnackbarOpen(false);
+  };
+
+  // Update handleSubmit function with Snackbar logic
+  const handleSubmit = async () => {
+    const { email, password, username, firstName, middleName, lastName, position } = formData;
+
+    if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
+      console.log("All fields are required");
+      setFormValid(false);
+      return;
+    }
+
+    if (!emailError && !emailExistsError && !passwordError && !confirmPasswordError) {
+      setIsLoading(true);
+      try {
+        const response = await createUser(firstName, middleName, lastName, username, email, password, position);
+        if (response) {
+          console.log("Registration successful");
+          setRegistrationError('');
+          // Open Snackbar with success message
+          setSnackbarMessage('Successful Registration ✓ Email verification is sent to your email');
+          setSnackbarOpen(true); // Open the Snackbar here
+          // Clear form fields after successful registration
+          setFormData({
+            email: '',
+            password: '',
+            username: '',
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            confirmPassword: '',
+            position: ''
+          });
+          window.location.href = "/login";
+        } else {
+          setRegistrationError("Registration failed");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        setRegistrationError("Registration failed");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      console.log("Form contains errors");
+    }
+  };
 
   function getErrorCondition(item) {
     const { key } = item;
@@ -322,14 +326,14 @@ const handleSubmit = async () => {
             backgroundColor: "#4a99d3", color: "#fff", textTransform: "none", width: "100%", marginBottom: "1rem", padding: "15px", borderRadius: "1.5px", cursor: "pointer", transition: "background-color 0.3s", "&:hover": { backgroundColor: "#474bca", },
           }}
           disabled={
-            (usernameError || emailError || emailExistsError || passwordError || confirmPasswordError) ||
+            (usernameError || emailError || emailExistsError || passwordError || confirmPasswordError || isLoading) ||
             (formData.email === '' || formData.username === '' || formData.password === '' || formData.confirmPassword === '')
           }
           disableElevation
           variant="contained"
           onClick={handleSubmit}
         >
-          Create Account
+          {isLoading ? "Creating Account..." : "Create Account"}
         </Button>
         <Link className="signInLink" style={{ textDecoration: "none", color: "#3048c1" }}
           onClick={() => handleBtnLogin()}>
@@ -338,10 +342,10 @@ const handleSubmit = async () => {
         </Link>
       </Container>
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-      <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
-        {snackbarMessage}
-      </Alert>
-    </Snackbar>
+        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
