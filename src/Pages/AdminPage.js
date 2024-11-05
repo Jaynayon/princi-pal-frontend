@@ -7,10 +7,10 @@ import { Container, Button, Tabs, Tab } from '@mui/material';
 import PropTypes from 'prop-types';
 import CreatePositionTab from '../Components/Tabs/CreatePositionTab';
 import CreateUacsTab from '../Components/Tabs/CreateUacsTab';
-import CreatePrincipalTab from '../Components/Tabs/CreatePrincipalTab';
 import CreateSchoolTab from '../Components/Tabs/CreateSchoolTab';
 import CreateIntegrateTab from '../Components/Tabs/CreateIntegrateTab';
 import LogoutDialog from '../Components/Modal/LogoutDialog';
+import PrincipalsTable from '../Components/Table/PrincipalsTable';
 
 // TabPanel component for displaying content based on the active tab
 const TabPanel = ({ children, value, index }) => {
@@ -84,7 +84,7 @@ function AdminPage() {
 
                 {/* Tab Content */}
                 <Box sx={styles.content}>
-                    {tabValue === 0 && (<CreatePrincipalTab />)}
+                    {tabValue === 0 && (<PrincipalsTable />)}
 
                     {tabValue === 1 && (<CreateSchoolTab />)}
 
@@ -136,6 +136,7 @@ const styles = {
     paper: {
         // minWidth: '100%',
         maxWidth: "1440px",
+        maxHeight: "900px",
         paddingTop: '15px',
         borderRadius: '10px',
         margin: 'auto',
@@ -143,15 +144,14 @@ const styles = {
         marginTop: '20px',
     },
     content: {
-        minHeight: "60vh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: "3rem",
-        width: "100%",
-        maxWidth: "700px", // Adjust if needed
+        maxHeight: "900px",
         margin: "0 auto", // Center align horizontally
+        p: 5,
+        overflow: "auto"
     },
     tab_container: {
         display: "flex",
