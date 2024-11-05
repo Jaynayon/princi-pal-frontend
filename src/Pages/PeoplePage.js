@@ -359,22 +359,22 @@ function PeoplePage(props) {
                 'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
             }
         })
-        .then(response => {
-            console.log("Invitation sent successfully:", response.data);
-            setInvitationMessage('Invitation sent successfully!');
-            setIsInvitationSuccessful(true); // Set success state
-        })
-        .catch(error => {
-            console.error("Error inviting member:", error.response ? error.response.data : error.message);
+            .then(response => {
+                console.log("Invitation sent successfully:", response.data);
+                setInvitationMessage('Invitation sent successfully!');
+                setIsInvitationSuccessful(true); // Set success state
+            })
+            .catch(error => {
+                console.error("Error inviting member:", error.response ? error.response.data : error.message);
 
-            // Set a more descriptive error message for the user
-            if (error.response && error.response.data && error.response.data.message) {
-                setInvitationMessage(error.response.data.message);
-            } else {
-                setInvitationMessage('Failed to send invitation. Please try again.');
-            }
-            setIsInvitationSuccessful(false); // Set failure state
-        });
+                // Set a more descriptive error message for the user
+                if (error.response && error.response.data && error.response.data.message) {
+                    setInvitationMessage(error.response.data.message);
+                } else {
+                    setInvitationMessage('Failed to send invitation. Please try again.');
+                }
+                setIsInvitationSuccessful(false); // Set failure state
+            });
 
         // Clear the input after attempt
         setInviteEmail('');
@@ -386,97 +386,8 @@ function PeoplePage(props) {
         (row && row.email && row.email.toLowerCase().includes(searchValue.toLowerCase()))
     );
 
-    const RenderPeopleRows = () => {
-        if (isLoading) {
-            return (
-                <>
-                    {Array.from({ length: 3 }).map((_, index) => (
-                        <TableRow key={index}>
-                            <TableCell colSpan={4} align="center">
-                                <Skeleton animation="wave" />
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </>
-            );
-        }
-
-        return (
-            filteredRows.map((row, index) => (
-                <TableRow key={index}>
-                    <TableCell>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                {row.name && (
-                                    <Avatar sx={{ bgcolor: blue[900] }}>
-                                        {row.name.charAt(0)}
-                                    </Avatar>
-                                )}
-                            </Grid>
-                            <Grid item>{`${row.fname} ${row.mname.charAt(0) + "."} ${row.lname}`}</Grid>
-                        </Grid>
-                    </TableCell>
-                    <TableCell>{row.email}</TableCell>
-                    <TableCell>
-                        {/* Role with dropdown arrow */}
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {row.admin === true ?
-                                row.position === "Principal" ?
-                                    <span>Principal</span>
-                                    :
-                                    <span>Admin</span>
-                                :
-                                <span>Member</span>
-                            }
-                            {row.position !== "Principal" &&
-                                currentAssocation.admin === true &&
-                                currentAssocation.position === "Principal" &&
-                                <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
-                        </div>
-                        {/* Dropdown menu for role options */}
-                        {row.position !== "Principal" &&
-                            currentAssocation.admin === true &&
-                            currentAssocation.position === "Principal" &&
-                            <Menu
-                                id={`menu-dropdown-${index}`}
-                                anchorEl={dropdownAnchorEl}
-                                open={Boolean(dropdownAnchorEl && selectedIndex === index)}
-                                onClose={handleMenuClose}
-                            >
-                                {/* Role options */}
-                                <MenuItem onClick={() => handleRoleChange("Admin")}>Admin</MenuItem>
-                                <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
-                            </Menu>
-                        }
-                    </TableCell>
-                    {currentAssocation.admin === true && row.position !== "Principal" &&
-                        <TableCell>
-                            {/* Delete button */}
-                            <Button
-                                aria-controls={`menu-delete-${index}`}
-                                aria-haspopup="true"
-                                onClick={(event) => handleDeleteOpen(event, index)}
-                            >
-                                <MoreHorizIcon />
-                            </Button>
-                            {/* Delete menu */}
-                            <Menu
-                                id={`menu-delete-${index}`}
-                                anchorEl={deleteAnchorEl}
-                                open={Boolean(deleteAnchorEl && selectedIndex === index)}
-                                onClose={handleMenuClose}
-                            >
-                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                            </Menu>
-                        </TableCell>
-                    }
-                </TableRow>
-            ))
-        );
-    }
-
     return (
-        <Container className="test" maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
+        <Container className="test" maxWidth="lg" sx={{ mb: 2 }}>
             <Grid container spacing={2}>
 
                 {currentAssocation.admin === true ?
@@ -494,23 +405,34 @@ function PeoplePage(props) {
                                 />
                             </Box>
                         </Grid>
-                        <Grid item xs={12} md={6} lg={6}>
-                            <TextField
-                                sx={{ width: '50%' }}
-                                id="invite"
-                                label="Enter email"
-                                variant="outlined"
-                                className="inviteTextField"
-                                value={inviteEmail}
-                                onChange={(e) => setInviteEmail(e.target.value)}
-                                fullWidth
-                                error={!!invitationMessage && !isInvitationSuccessful} // Error if there's a message and not successful
-                                InputProps={{
-                                    style: {
-                                        borderColor: isInvitationSuccessful ? 'green' : undefined, // Green border if successful
-                                    },
-                                }}
-                            />
+                        <Grid item xs={12} md={6} lg={6} sx={{ display: "flex", flexDirection: "row" }}>
+                            <Box sx={{ width: '50%' }}>
+                                <TextField
+                                    id="invite"
+                                    label="Enter email"
+                                    variant="outlined"
+                                    className="inviteTextField"
+                                    value={inviteEmail}
+                                    onChange={(e) => setInviteEmail(e.target.value)}
+                                    fullWidth
+                                    error={!!invitationMessage && !isInvitationSuccessful} // Error if there's a message and not successful
+                                    InputProps={{
+                                        style: {
+                                            borderColor: isInvitationSuccessful ? 'green' : undefined, // Green border if successful
+                                        },
+                                    }}
+                                />
+                                {invitationMessage && (
+                                    <Typography
+                                        variant="body2"
+                                        color={isInvitationSuccessful ? "green" : "error"} // Change color based on success
+                                        sx={{ mt: 1, fontWeight: 'bold', marginRight: 41.5, width: "100%" }} // Add top margin and bold text
+                                    >
+                                        {invitationMessage}
+                                    </Typography>
+                                )}
+                            </Box>
+
                             <FormControl sx={{ minWidth: 120 }} size="53px">
                                 <InputLabel id="demo-select-small-label">Role</InputLabel>
                                 <Select
@@ -532,15 +454,7 @@ function PeoplePage(props) {
                             >
                                 Invite
                             </Button>
-                            {invitationMessage && (
-                            <Typography
-                                variant="body2"
-                                color={isInvitationSuccessful ? "green" : "error"} // Change color based on success
-                                sx={{ mt: 1, fontWeight: 'bold', marginRight: 41.5 }} // Add top margin and bold text
-                            >
-                                {invitationMessage}
-                            </Typography>
-                        )}
+
                         </Grid>
                         <Grid item xs={6} md={6} lg={12} sx={{ display: 'flex', alignSelf: "center" }}>
                             <FormControl sx={{ minWidth: 150 }} >
