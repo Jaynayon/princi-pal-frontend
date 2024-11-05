@@ -26,6 +26,7 @@ import axios from 'axios'; // Import Axios for making HTTP requests
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 import { Typography } from '@mui/material';
+import { useAppContext } from '../Context/AppProvider';
 
 function PeoplePage(props) {
     const [member, setMember] = useState('Member');
@@ -42,6 +43,7 @@ function PeoplePage(props) {
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
 
+    const { fetchCurrentUser } = useAppContext();
     const { currentUser } = useNavigationContext();
     const [currentAssocation, setCurrentAssociation] = useState('');
 
@@ -55,15 +57,19 @@ function PeoplePage(props) {
 
     const fetchAssociation = useCallback(async () => {
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
-                userId: currentUser.id,
-                schoolId: selectedValue
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                }
-            });
-            setCurrentAssociation(response.data); // Update the state with the fetched data
+            if (selectedValue && currentUser) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
+                    userId: currentUser.id,
+                    schoolId: selectedValue
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                setCurrentAssociation(response.data); // Update the state with the fetched data
+            } else {
+                setCurrentAssociation("");
+            }
         } catch (error) {
             console.error('Error fetching association:', error);
         }
@@ -75,14 +81,19 @@ function PeoplePage(props) {
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`,
-                { schoolId: selectedValue }, {
-                headers: {
-                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                }
-            });
-            setRows(response.data); // Update the state with the fetched data
+            if (selectedValue) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`,
+                    { schoolId: selectedValue }, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                setRows(response.data); // Update the state with the fetched data
+            } else {
+                setRows([]);
+            }
         } catch (error) {
+            setRows([]);
             console.error('Error fetching users:', error);
         } finally {
             setIsLoading(false);
@@ -96,7 +107,7 @@ function PeoplePage(props) {
             fetchUsers();
             fetchAssociation();
         }
-    }, [selectedValue, fetchUsers, currentUser, fetchAssociation]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
+    }, [selectedValue, fetchUsers, fetchAssociation]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
 
     // Fetch schools when component mounts
     useEffect(() => {
@@ -105,6 +116,8 @@ function PeoplePage(props) {
             //fetchAssociation();
             if (currentUser.schools.length > 0) {
                 setSelectedValue(currentUser.schools[0].id);
+            } else {
+                setSelectedValue('')
             }
         }
     }, [currentUser]); // Empty dependency array ensures the effect runs only once
@@ -223,7 +236,7 @@ function PeoplePage(props) {
 
     const confirmDelete = async () => {
         try {
-            if (selectedIndex && rows[selectedIndex]) {
+            if (selectedIndex >= 0 && rows[selectedIndex]) {
                 const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
                 // Make an API call to delete the user association
@@ -244,6 +257,10 @@ function PeoplePage(props) {
         } finally {
             // Close the delete menu and reset selectedIndex
             handleMenuClose();
+
+            if (rows[selectedIndex].id === currentUser.id) {
+                fetchCurrentUser();
+            }
         }
     };
 
