@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { Container, Button, Tabs, Tab } from '@mui/material';
+import { Container, Button, Tabs, Tab, ThemeProvider, createTheme } from '@mui/material';
 
 import PropTypes from 'prop-types';
 import CreatePositionTab from '../Components/Tabs/CreatePositionTab';
 import CreateUacsTab from '../Components/Tabs/CreateUacsTab';
-import CreateSchoolTab from '../Components/Tabs/CreateSchoolTab';
 import CreateIntegrateTab from '../Components/Tabs/CreateIntegrateTab';
 import LogoutDialog from '../Components/Modal/LogoutDialog';
 import PrincipalsTable from '../Components/Table/PrincipalsTable';
+import SchoolTable from '../Components/Table/SchoolTable';
 
 // TabPanel component for displaying content based on the active tab
 const TabPanel = ({ children, value, index }) => {
@@ -44,64 +44,72 @@ function AdminPage() {
         setTabValue(newValue);
     };
 
+    const defaultTheme = createTheme({
+        typography: {
+            fontFamily: "Mulish",
+        },
+    });
+
     return (
-        <Container
-            maxWidth={false}
-            style={styles.container}
-        >
-            <Paper sx={styles.paper} >
-                <Box sx={styles.header_container}>
-                    <Box sx={styles.header_title}>
-                        <img
-                            src="/logoremovebgpreview-1@2x-black.png"
-                            alt="logo"
-                            style={{ width: "70px", height: "auto" }}
-                        />
-                        <Typography variant="h5" style={styles.title}>
-                            Admin Panel
-                        </Typography>
+        <ThemeProvider theme={defaultTheme}>
+            <Container
+                maxWidth={false}
+                style={styles.container}
+            >
+                <Paper sx={styles.paper} >
+                    <Box sx={styles.header_container}>
+                        <Box sx={styles.header_title}>
+                            <img
+                                src="/logoremovebgpreview-1@2x-black.png"
+                                alt="logo"
+                                style={{ width: "70px", height: "auto" }}
+                            />
+                            <Typography variant="h5" style={styles.title}>
+                                Admin Panel
+                            </Typography>
+                        </Box>
+                        <Button
+                            variant="outlined"
+                            sx={{
+                                ...styles.button,
+                                fontWeight: logoutDialogOpen && "bold"
+                            }}
+                            onClick={() => setLogoutDialogOpen(true)}
+                        >
+                            Logout
+                        </Button>
                     </Box>
-                    <Button
-                        variant="outlined"
-                        sx={{
-                            ...styles.button,
-                            fontWeight: logoutDialogOpen && "bold"
-                        }}
-                        onClick={() => setLogoutDialogOpen(true)}
-                    >
-                        Logout
-                    </Button>
-                </Box>
-                <Box sx={styles.tab_container}>
-                    <Tabs value={tabValue} onChange={handleTabChange} centered >
-                        <Tab label="Principals" sx={styles.tab} />
-                        <Tab label="Schools" sx={[styles.tab]} />
-                        <Tab label="Integration" sx={styles.tab} />
-                        <Tab label="UACS" sx={styles.tab} />
-                        <Tab label="Positions" sx={styles.tab} />
-                    </Tabs>
-                </Box>
+                    <Box sx={styles.tab_container}>
+                        <Tabs value={tabValue} onChange={handleTabChange} centered >
+                            <Tab label="Principals" sx={styles.tab} />
+                            <Tab label="Schools" sx={[styles.tab]} />
+                            <Tab label="Integration" sx={styles.tab} />
+                            <Tab label="UACS" sx={styles.tab} />
+                            <Tab label="Positions" sx={styles.tab} />
+                        </Tabs>
+                    </Box>
 
-                {/* Tab Content */}
-                <Box sx={styles.content}>
-                    {tabValue === 0 && (<PrincipalsTable />)}
+                    {/* Tab Content */}
+                    <Box sx={styles.content}>
+                        {tabValue === 0 && (<PrincipalsTable />)}
 
-                    {tabValue === 1 && (<CreateSchoolTab />)}
+                        {tabValue === 1 && (<SchoolTable />)}
 
-                    {tabValue === 2 && (<CreateIntegrateTab />)}
+                        {tabValue === 2 && (<CreateIntegrateTab />)}
 
-                    {tabValue === 3 && (<CreateUacsTab />)}
+                        {tabValue === 3 && (<CreateUacsTab />)}
 
-                    {tabValue === 4 && (<CreatePositionTab />)}
-                </Box>
-            </Paper>
+                        {tabValue === 4 && (<CreatePositionTab />)}
+                    </Box>
+                </Paper>
 
-            {/* Logout confirmation dialog */}
-            <LogoutDialog
-                open={logoutDialogOpen}
-                onClose={() => setLogoutDialogOpen(false)}
-            />
-        </Container>
+                {/* Logout confirmation dialog */}
+                <LogoutDialog
+                    open={logoutDialogOpen}
+                    onClose={() => setLogoutDialogOpen(false)}
+                />
+            </Container>
+        </ThemeProvider>
     );
 }
 
