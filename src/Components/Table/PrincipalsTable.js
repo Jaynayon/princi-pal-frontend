@@ -63,8 +63,6 @@ export default function PrincipalsTable(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
     const [principals, setPrincipals] = useState([]);
-    // const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
-    // const [selectedIndex, setSelectedIndex] = useState(null);
     const [input, setInput] = useState('');
 
     const handleModalOpen = () => {
@@ -75,15 +73,6 @@ export default function PrincipalsTable(props) {
         setOpen(false);
     }, []);
 
-    // const handleDeleteOpen = (event, index) => {
-    //     setDeleteAnchorEl(event.currentTarget);
-    //     setSelectedIndex(index);
-    // };
-
-    // const handleMenuClose = () => {
-    //     setDeleteAnchorEl(null);
-    //     setSelectedIndex(null);
-    // };
 
     const handleInputChange = (event) => {
         setInput(event.target.value);
@@ -223,37 +212,6 @@ export default function PrincipalsTable(props) {
                                                     </TableCell>
                                                 );
                                             })}
-                                            {/* <TableCell>
-                                                <Box sx={{
-                                                    display: "flex",
-                                                    flexDirection: "row",
-                                                    justifyContent: "center",
-                                                    width: 40
-                                                }}>
-                                                    <Button
-                                                        aria-controls={`principal-button-delete-${rowIndex}`}
-                                                        aria-haspopup="true"
-                                                        onClick={(event) => handleDeleteOpen(event, rowIndex)}
-                                                    >
-                                                        <MoreHorizIcon />
-                                                    </Button>
-                                                    <Menu
-                                                        id={`principal-menu-delete-${rowIndex}`}
-                                                        anchorEl={deleteAnchorEl}
-                                                        open={Boolean(deleteAnchorEl && selectedIndex === rowIndex)}
-                                                        onClose={handleMenuClose}
-                                                    >
-                                                        <MenuItem onClick={() => console.log("test")}>History</MenuItem>
-                                                        <MenuItem
-                                                            // disabled={!isEditable}
-                                                            sx={{ color: "red" }}
-                                                        // onClick={() => handleDelete(row.id)}
-                                                        >
-                                                            Delete
-                                                        </MenuItem>
-                                                    </Menu>
-                                                </Box>
-                                            </TableCell> */}
                                         </TableRow>
                                     );
                                 })}
