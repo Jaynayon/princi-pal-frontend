@@ -102,7 +102,6 @@ function PeoplePage(props) {
 
     useEffect(() => {
         // Fetch users when the component mounts or when the selected school changes
-        console.log(selectedValue)
         if (selectedValue) {
             fetchUsers();
             fetchAssociation();
@@ -148,9 +147,7 @@ function PeoplePage(props) {
     );*/
 
     const handleClickOpen = async () => {
-        console.log("Current School State:", currentSchool); // Debugging line
         if (currentSchool && currentSchool.id) {
-            console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
             setOpen(true);
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
@@ -158,7 +155,6 @@ function PeoplePage(props) {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                console.log("Applications fetched:", response.data); // Debugging line
                 setApplications(response.data);
             } catch (e) {
                 console.error(e);
@@ -171,14 +167,12 @@ function PeoplePage(props) {
     const handleAccept = async (associationRequest) => {
         try {
             // Sending request to approve the association
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
+            await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
                 }
             });
-
-            console.log('Success:', response.data);
             fetchUsers(); // Fetch new users after accepting
         } catch (error) {
             console.error("Error approving user:", error.response ? error.response.data : error.message);
@@ -188,15 +182,13 @@ function PeoplePage(props) {
 
     const handleReject = async (application) => {
         try {
-            const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/reject`, {
+            await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/reject`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 data: application // Pass the application object as data in the DELETE request
             });
-
-            console.log('User rejected successfully:', response.data);
 
             // Update the UI by removing the rejected application from the list
             setApplications(applications.filter(app => app.id !== application.userId));
@@ -216,7 +208,6 @@ function PeoplePage(props) {
         // Also set the deleteAnchorEl and selectedIndex
         setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
-        console.log(rows[index]);
     };
 
     const handleMenuClose = () => {
@@ -240,12 +231,11 @@ function PeoplePage(props) {
                 const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
                 // Make an API call to delete the user association
-                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`, {
+                await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`, {
                     headers: {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                console.log("User deleted successfully. " + response.data);
                 // Remove the deleted row from the state
                 setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
             }
@@ -289,7 +279,7 @@ function PeoplePage(props) {
                     newRole = true;
                 }
 
-                const response = await axios.patch(endpoint, {
+                await axios.patch(endpoint, {
                     userId: rows[selectedIndex].id,
                     schoolId: rows[selectedIndex].schoolId // changed to rows[selectedIndex].schoolId from selectedIndex
                 }, {
@@ -297,8 +287,6 @@ function PeoplePage(props) {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-
-                console.log(response)
 
                 // Update role in frontend state if successful
                 const updatedRows = [...rows];
@@ -329,8 +317,6 @@ function PeoplePage(props) {
             return;
         }
 
-        console.log("Inviting email:", inviteEmail);
-
         const invitePayload = {
             email: inviteEmail,
             schoolId: currentSchool.id,
@@ -343,7 +329,6 @@ function PeoplePage(props) {
             }
         })
             .then(response => {
-                console.log("Invitation sent successfully:", response.data);
                 setInvitationMessage('Invitation sent successfully!');
             })
             .catch(error => {
@@ -363,8 +348,6 @@ function PeoplePage(props) {
             return;
         }
 
-        console.log("Inviting email:", inviteEmail);
-
         const invitePayload = {
             email: inviteEmail,
             schoolId: currentSchool.id,
@@ -377,7 +360,6 @@ function PeoplePage(props) {
             }
         })
             .then(response => {
-                console.log("Invitation sent successfully:", response.data);
                 setInvitationMessage('Invitation sent successfully!');
                 setIsInvitationSuccessful(true); // Set success state
             })

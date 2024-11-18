@@ -35,12 +35,7 @@ export default function NatureOfPaymentSelect(props) {
 
     const updateLrByIdNature = async (value) => {
         try {
-            const response = await updateLrById("natureOfPayment", rowId, value);
-            if (response) {
-                console.log(`LR with id: ${rowId} is updated`);
-            } else {
-                console.log("LR not updated");
-            }
+            await updateLrById("natureOfPayment", rowId, value);
             fetchDocumentData();
         } catch (error) {
             console.error('Error fetching document:', error);

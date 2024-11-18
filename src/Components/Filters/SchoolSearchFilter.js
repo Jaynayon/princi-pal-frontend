@@ -68,7 +68,6 @@ export default function SchoolSearchFilter() {
                     value.toString().toLowerCase().includes(keyword.toLowerCase())
                 );
             });
-            console.log(obj);
             // Check if the filtered result is empty
             if (obj.length === 0) {
                 // Return the original array if the keyword didn't match anything

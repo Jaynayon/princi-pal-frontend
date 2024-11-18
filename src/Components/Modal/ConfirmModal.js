@@ -18,12 +18,7 @@ export default function ConfirmModal({ currentDocument, month, open, handleClose
 
     const updateDocumentCashAdvById = async (newValue) => {
         try {
-            const response = await updateDocumentById(currentDocument?.id, "Cash Advance", newValue);
-            if (response) {
-                console.log(`Document with id: ${currentDocument?.id} is updated`);
-            } else {
-                console.log("Document not updated");
-            }
+            await updateDocumentById(currentDocument?.id, "Cash Advance", newValue);
         } catch (error) {
             console.error('Error fetching document:', error);
         }
@@ -32,7 +27,6 @@ export default function ConfirmModal({ currentDocument, month, open, handleClose
     const handleOnClick = async () => {
         let obj = {}
         obj = { cashAdvance: value }
-        console.log(jev)
         // jev length upon initialization will always be > 2
         try {
             if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) {

@@ -135,13 +135,12 @@ export default function NotificationTab() {
             const rejectInvitationUrl = `${process.env.REACT_APP_API_URL_NOTIF}/reject/${notificationId}`;
 
             // Send a PUT request with the Authorization header
-            const response = await axios.put(rejectInvitationUrl, null, {
+            await axios.put(rejectInvitationUrl, null, {
                 headers: {
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             });
             fetchNotifications();
-            console.log('Invitation rejected and associated data updated successfully:', response.data);
         } catch (error) {
             if (error.response) {
                 console.error('Server Error:', error.response.data);
@@ -165,7 +164,6 @@ export default function NotificationTab() {
             // Clear notifications in the state after successful deletion
             setNotifications([]);
             localStorage.removeItem("NOTIFICATIONS");
-            console.log('All notifications cleared successfully.');
         } catch (error) {
             if (error.response) {
                 console.error('Server Error:', error.response.data);

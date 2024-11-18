@@ -27,7 +27,7 @@ export default function BudgetResetConfirmModal({ open, handleClose, handleClose
             // await initializeDocuments(value);
             // fetch updated document data
             // await fetchDocumentData();
-            const response = await axios.patch(`${process.env.REACT_APP_API_URL_DOC}/resetBudget`, {
+            await axios.patch(`${process.env.REACT_APP_API_URL_DOC}/resetBudget`, {
                 schoolId: currentSchool.id,
                 year,
                 annualBudget: value
@@ -37,8 +37,6 @@ export default function BudgetResetConfirmModal({ open, handleClose, handleClose
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             });
-
-            console.log(response.data);
         } catch (error) {
             console.error('Error in handleOnClick:', error);
         } finally {
@@ -48,8 +46,6 @@ export default function BudgetResetConfirmModal({ open, handleClose, handleClose
             }
         }
     }
-
-    console.log(currentSchool);
 
     return (
         <Modal

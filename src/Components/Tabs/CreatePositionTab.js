@@ -54,13 +54,11 @@ export default function CreatePositionTab() {
 
     const handlePositionBlur = async (value) => {
         const pos = await getPositionByName(value);
-        console.log(pos)
         if (pos) {
             setPositionError(true);
         } else {
             setPositionError(false);
         }
-        console.log(positionError);
         setIsTyping(false);
     }
     return (

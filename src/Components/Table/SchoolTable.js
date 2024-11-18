@@ -99,7 +99,6 @@ export default function SchoolTable(props) {
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             });
-            console.log(response.data);
             setSchools(response.data);
         } catch (e) {
             console.error(e);

@@ -38,8 +38,6 @@ const LRRow = memo((props) => {
         value
     } = props;
 
-    console.log("RecordsRow.js")
-
     const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const [amountExceeded, setAmountExceeded] = useState({ docId: null, colId: null, rowId: null, exceeded: null, newValue: null });
 
@@ -59,12 +57,7 @@ const LRRow = memo((props) => {
 
     const createLrByDocumentId = async (doc_id, obj) => {
         try {
-            const response = await createLrByDocId(doc_id, obj);
-            if (response) {
-                console.log(`LR is created`);
-            } else {
-                console.log("LR not created");
-            }
+            await createLrByDocId(doc_id, obj);
             await fetchDocumentData();
         } catch (error) {
             console.error('Error fetching document:', error);
@@ -74,7 +67,6 @@ const LRRow = memo((props) => {
     const handleCellClick = (colId, rowId) => {
         isEditingRef.current = true; // user clicked a cell
         setEditingCell({ colId, rowId });
-        console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
 
     const handleBlurCell = () => {
@@ -133,7 +125,6 @@ const LRRow = memo((props) => {
         if (colId === "amount") {
             // Replace any characters that are not digits or periods
             modifiedValue = modifiedValue.replace(/[^0-9.]/g, '');
-            console.log(modifiedValue)
             if (modifiedValue === 0 || modifiedValue === "" || !modifiedValue) {
                 setError(true);
             } else {
@@ -156,7 +147,6 @@ const LRRow = memo((props) => {
     };
 
     useEffect(() => {
-        console.log("RecordsRow useEffect")
         if (isAdding && value === 0) { // applies only to LR & RCD tab: value = 0
             setError(true); // set error to true by default per LR adding
             addFields(isAdding);

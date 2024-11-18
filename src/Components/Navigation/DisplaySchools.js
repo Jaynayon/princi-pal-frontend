@@ -85,8 +85,6 @@ export default function DisplaySchools() {
         },
     }), [theme.navStyle.color, theme.navStyle.bold]);
 
-    console.log(currentUser);
-
     return (
         currentUser && currentUser.schools.length > 0 ? //Check if user has schools assigned
             (currentUser.schools.length > 1 ? //Check if user has multiple schools

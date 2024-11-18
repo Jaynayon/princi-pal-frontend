@@ -77,11 +77,8 @@ const EmailVerificationPage = () => {
     };
 
     const handleSendVerificationEmail = async () => {
-        console.log("Submitting email verification request...");
-
         if (!email) {
             setError("Email is required.");
-            console.log("Error: Email is required.");
             return;
         }
 
@@ -90,34 +87,26 @@ const EmailVerificationPage = () => {
         }
 
         setLoading(true);
-        console.log("Email submitted:", email);
 
         try {
             const response = await sendVerificationEmail(email);
-            console.log("Response from sendVerificationEmail:", response);
 
             if (response.status === 200 && response.data === "Verification email sent.") {
                 setSuccessMessage("Verification link sent to your email! Please check your inbox.");
-                console.log("Success: Verification link sent.");
                 setOpenSnackbar(true);
                 setEmail(''); // Clear email input after success
             } else {
                 setError("Failed to send verification link. Please try again.");
-                console.log("Error: Failed to send verification link.");
             }
         } catch (error) {
-            console.log("Error caught:", error);
             if (error.response) {
                 if (error.response.status === 404) {
                     setError("Email is not registered.");
-                    console.log("Error: Email is not registered.");
                 } else {
                     setError("An error occurred: " + (error.response.data || error.message));
-                    console.log("Error: An error occurred:", error.response.data || error.message);
                 }
             } else {
                 setError("An error occurred: " + error.message);
-                console.log("Error: An error occurred:", error.message);
             }
         } finally {
             setLoading(false);
@@ -234,46 +223,46 @@ const EmailVerificationPage = () => {
                     </>
                 ) : verificationStatus ? ( // Show success message
                     <Box
-                    sx={{
-                        textAlign: 'center',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 4,
-                    }}
-                >
-                    <MarkEmailReadIcon
-                        sx={{ fontSize: 100, color: '#4CAF50', mb: 2 }} // Big green icon for success
-                    />
-                    <Typography
-                        variant="h4"
-                        sx={{ color: '#4CAF50', fontWeight: 'bold', mb: 1 }}
-                    >
-                        Email Verified!
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        sx={{ color: '#666', mb: 4 }}
-                    >
-                        Your email has been successfully verified.
-                    </Typography>
-                    <Button
-                        variant="contained"
-                        onClick={() => navigate('/login')}
                         sx={{
-                            backgroundColor: '#4a99d3',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            '&:hover': {
-                                backgroundColor: '#3380a0',
-                            },
-                            px: 4, // Padding for the button to make it wider
+                            textAlign: 'center',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            p: 4,
                         }}
                     >
-                        Continue to Login
-                    </Button>
-                </Box>
+                        <MarkEmailReadIcon
+                            sx={{ fontSize: 100, color: '#4CAF50', mb: 2 }} // Big green icon for success
+                        />
+                        <Typography
+                            variant="h4"
+                            sx={{ color: '#4CAF50', fontWeight: 'bold', mb: 1 }}
+                        >
+                            Email Verified!
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            sx={{ color: '#666', mb: 4 }}
+                        >
+                            Your email has been successfully verified.
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            onClick={() => navigate('/login')}
+                            sx={{
+                                backgroundColor: '#4a99d3',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                '&:hover': {
+                                    backgroundColor: '#3380a0',
+                                },
+                                px: 4, // Padding for the button to make it wider
+                            }}
+                        >
+                            Continue to Login
+                        </Button>
+                    </Box>
                 ) : ( // Show error message
                     <Box>
                         <Typography variant="h4" sx={{ color: 'red', fontWeight: "bold", mb: 4 }}>404 OOPS!</Typography>

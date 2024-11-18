@@ -58,7 +58,6 @@ const ExceedOffsetModal = memo(({ open, onClose, amountExceeded }) => {
                             'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                         }
                     });
-                    console.log(response.data);
                     setData(response.data || null);
                 }
             } catch (error) {

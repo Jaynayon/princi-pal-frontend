@@ -33,12 +33,7 @@ export default function UacsSelect(props) {
 
     const updateLrByIdUacs = async (value) => {
         try {
-            const response = await updateLrById("objectCode", rowId, value);
-            if (response) {
-                console.log(`LR with id: ${rowId} is updated`);
-            } else {
-                console.log("LR not updated");
-            }
+            await updateLrById("objectCode", rowId, value);
             fetchDocumentData();
         } catch (error) {
             console.error('Error fetching document:', error);

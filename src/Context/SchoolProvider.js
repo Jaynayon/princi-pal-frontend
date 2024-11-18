@@ -190,22 +190,10 @@ export const SchoolProvider = ({ children }) => {
                     // If a payload (obj) is passed, create document and lr, else only document.
                     if (obj) {
                         if (obj.cashAdvance) {
-                            const setDocumentBudget = await updateDocumentById(newDocumentId, "Cash Advance", obj.cashAdvance);
-
-                            if (setDocumentBudget) {
-                                console.log("Budget set successfully");
-                            } else {
-                                console.error('Failed to set budget')
-                            }
+                            await updateDocumentById(newDocumentId, "Cash Advance", obj.cashAdvance);
                         } else {
                             // Insert new LR using the newly created document's ID
-                            const lrCreationResponse = await createLrByDocId(newDocumentId, obj);
-
-                            if (lrCreationResponse) {
-                                console.log('LR created successfully');
-                            } else {
-                                console.error('Failed to create LR');
-                            }
+                            await createLrByDocId(newDocumentId, obj);
                         }
                     }
 
@@ -229,7 +217,7 @@ export const SchoolProvider = ({ children }) => {
             });
             return response.data
         } catch (error) {
-            console.log(error.response.data)
+            console.error(error);
             return null;
         }
     }, []);
@@ -343,46 +331,30 @@ export const SchoolProvider = ({ children }) => {
         }
 
         try {
-            const response = await axios.patch(`${process.env.REACT_APP_API_URL_LR}/${rowId}`, obj, {
+            await axios.patch(`${process.env.REACT_APP_API_URL_LR}/${rowId}`, obj, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
-            })
-
-            if (response.status === 200) {
-                console.log(response.data);
-                console.log(`LR with id: ${rowId} is updated`);
-            } else {
-                console.log("LR not updated");
-            }
+            });
             fetchDocumentData();
         } catch (error) {
-            console.error('Error fetching document:', error);
+            console.error('Error updating document:', error);
         }
     }, [currentUser, fetchDocumentData]); // Exclude fetchDocumentData from dependencies
 
     const deleteLrByid = useCallback(async (rowId) => {
         try {
             if (currentUser) {
-                const response = await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}/user/${currentUser.id}`, {
+                await axios.delete(`${process.env.REACT_APP_API_URL_LR}/${rowId}/user/${currentUser.id}`, {
                     headers: {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                if (response) {
-                    console.log(response.data)
-                }
-
-                if (response.status === 200) {
-                    console.log(`LR with id: ${rowId} is deleted`);
-                } else {
-                    console.log("LR not deleted");
-                }
             }
             fetchDocumentData();
         } catch (error) {
-            console.error('Error fetching document:', error);
+            console.error('Error deleting document:', error);
         }
     }, [currentUser, fetchDocumentData]); // Exclude fetchDocumentData from dependencies
 

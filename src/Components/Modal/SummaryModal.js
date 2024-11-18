@@ -103,7 +103,7 @@ const SummaryModal = React.memo(({ open, handleClose, currentDocument, currentSc
                 }
             } catch (error) {
                 setSummary([]);
-                console.log(error);
+                console.error(error);
             } finally {
                 setLoading(false);
             }
@@ -111,8 +111,6 @@ const SummaryModal = React.memo(({ open, handleClose, currentDocument, currentSc
 
         fetchData();
     }, [open, currentDocument]);
-
-    console.log(summary);
 
     const renderSummary = useCallback(() => {
         // Helper function to render LR items related to the specific JEV's uacsCode

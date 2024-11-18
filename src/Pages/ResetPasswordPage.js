@@ -40,9 +40,7 @@ const ResetPasswordPage = () => {
                     params: { token }
                 });
 
-                if (response.status === 200) {
-                    console.log('Token validation successful', response.data);
-                } else {
+                if (response.status !== 200) {
                     setPage('invalid');
                     setError("Token expired or invalid.");
                 }

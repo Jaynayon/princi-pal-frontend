@@ -81,7 +81,6 @@ export default function CreateUacsTab() {
                 [key]: false
             });
         }
-        console.log(uacsError);
         setIsTyping(false);
     }
 

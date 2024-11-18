@@ -98,7 +98,6 @@ export default function PrincipalsTable(props) {
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             });
-            console.log(response.data);
             setPrincipals(response.data);
         } catch (e) {
             console.error(e);

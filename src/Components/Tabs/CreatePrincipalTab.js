@@ -47,10 +47,6 @@ export default function CreatePrincipalTab({ fetchPrincipals }) {
                 }
             })
 
-            if (response) {
-                console.log(response.data)
-            }
-
             return response.status === 201;
         } catch (error) {
             console.error('Error creating user:', error);
@@ -150,7 +146,6 @@ export default function CreatePrincipalTab({ fetchPrincipals }) {
         const { email, password, username, firstName, middleName, lastName } = formData;
 
         if (!email || !password || !username || !firstName || !middleName || !lastName) {
-            console.log("All fields are required");
             setFormValid(false); // Set form validity to false immediately
             return; // Exit the function
         }
@@ -160,8 +155,6 @@ export default function CreatePrincipalTab({ fetchPrincipals }) {
             try {
                 const response = await createUserPrincipal(currentUser.id, firstName, middleName, lastName, username, email, password);
                 if (response) {
-                    console.log("Registration successful");
-
                     // Clear form fields after successful registration
                     setFormData({
                         email: '',
@@ -184,8 +177,6 @@ export default function CreatePrincipalTab({ fetchPrincipals }) {
             } finally {
                 fetchPrincipals(); // Fetch updated list of principals
             }
-        } else {
-            console.log("Form contains errors");
         }
     };
 

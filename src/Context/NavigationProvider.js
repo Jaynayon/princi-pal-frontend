@@ -64,10 +64,6 @@ export const NavigationProvider = ({ children }) => {
                 }
             });
 
-            if (response) {
-                console.log(response.data)
-            }
-
             return response.status === 201;
         } catch (error) {
             console.error('Error creating user:', error);
@@ -87,11 +83,7 @@ export const NavigationProvider = ({ children }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            })
-
-            if (response) {
-                console.log(response.data);
-            }
+            });
 
             return response.data
         } catch (error) {
@@ -219,7 +211,6 @@ export const NavigationProvider = ({ children }) => {
 
 
     // useEffect(() => {
-    //     console.log("test navigation context")
     //     window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
     // }, [selected]);
 

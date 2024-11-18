@@ -28,7 +28,6 @@ const ApprovalModal = React.memo(({ open, handleClose, lrNotApproved, deleteLrBy
     const handleReject = async (id) => {
         try {
             const lastHistory = await getLastLrHistory(id);
-            console.log(lastHistory)
             if (lastHistory.lrCopy) {
                 await deleteLrByid(id);
             } else {

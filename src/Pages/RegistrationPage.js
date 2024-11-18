@@ -155,7 +155,6 @@ const RegistrationPage = () => {
     const { email, password, username, firstName, middleName, lastName, position } = formData;
 
     if (!email || !password || !username || !firstName || !middleName || !lastName || !position) {
-      console.log("All fields are required");
       setFormValid(false);
       return;
     }
@@ -165,7 +164,6 @@ const RegistrationPage = () => {
       try {
         const response = await createUser(firstName, middleName, lastName, username, email, password, position);
         if (response) {
-          console.log("Registration successful");
           setRegistrationError('');
           // Open Snackbar with success message
           setSnackbarMessage('Successful Registration ✓ Email verification is sent to your email');
@@ -191,8 +189,6 @@ const RegistrationPage = () => {
       } finally {
         setIsLoading(false);
       }
-    } else {
-      console.log("Form contains errors");
     }
   };
 

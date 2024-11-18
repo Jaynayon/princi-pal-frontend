@@ -96,10 +96,7 @@ export default function AnnualTab() {
             if (currentSchool) {
                 const response = await getDocumentBySchoolIdYear(currentSchool.id, year);
                 if (response) {
-                    console.log(response); //test
                     setDocumentsByYear(response);
-                } else {
-                    console.log("Documents not fetched");
                 }
             }
         } catch (error) {
@@ -118,7 +115,6 @@ export default function AnnualTab() {
             setSelectedDocument(value);
         }
     }, [documentsByYear, tabMonth]);
-    console.log(selectedDocument)
 
     const handleChangeMonth = (event) => {
         setTabMonth(event.target.value);
