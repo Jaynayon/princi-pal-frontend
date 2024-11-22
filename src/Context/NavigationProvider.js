@@ -13,7 +13,7 @@ const pathToLocalStorageValue = {
     "/": "Dashboard",
     '/dashboard': 'Dashboard',
     '/people': 'People',
-    '/settings': 'Settings',
+    '/settings': 'Settings'
 };
 
 export const NavigationProvider = ({ children }) => {
@@ -172,7 +172,7 @@ export const NavigationProvider = ({ children }) => {
                     if (matchedSchool) { setCurrentSchool(matchedSchool); }
 
                     setSelected(localStorageValue); // Set the selected state for school
-                } else if (extractRoute === "/reset-password" || extractRoute === "/verify-email") {
+                } else if (extractRoute === "/reset-password" || extractRoute === "/verify-email" || extractRoute === "/referral") {
                     return; // Do nothing; load the page
                 }
                 else {
