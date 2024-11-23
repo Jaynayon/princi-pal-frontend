@@ -9,16 +9,13 @@ import { useAppContext } from "../Context/AppProvider";
 
 const ReferralPage = () => {
     const { currentUser } = useAppContext();
-    const [successMessage, setSuccessMessage] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [school, setSchool] = useState(null);
     const [page, setPage] = useState('invalid');
-    const location = useLocation();
     const navigate = useNavigate();
+    const location = useLocation();
     const code = location.pathname.split('/')[2];
-
-    console.log(currentUser)
 
     useEffect(() => {
         // Get if code exists; check user association
@@ -81,7 +78,6 @@ const ReferralPage = () => {
             });
 
             if (response.status === 201) {
-                setSuccessMessage('You have successfully accepted the invitation. Redirecting to the dashboard...');
                 setOpenSnackbar(true);
             }
         } catch (e) {
@@ -138,6 +134,7 @@ const ReferralPage = () => {
                         <Typography variant="body1" gutterBottom>
                             There's no need to take any further action.
                             You are now a member and have access to all available resources and tools within the platform.
+                            If not, please check your notifications and accept the invitation.
                         </Typography>
                         <Typography
                             color="textSecondary"
@@ -251,7 +248,7 @@ const ReferralPage = () => {
                 onClose={handleSnackbarClose}
             >
                 <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
-                    {successMessage}
+                    You have successfully accepted the invitation. Redirecting to the dashboard...
                 </Alert>
             </Snackbar>
         </Container >
