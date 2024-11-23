@@ -133,8 +133,9 @@ const ReferralPage = () => {
                         </Typography>
                         <Typography variant="body1" gutterBottom>
                             There's no need to take any further action.
-                            You are now a member and have access to all available resources and tools within the platform.
-                            If not, please check your notifications and accept the invitation.
+                            You are now affiliated with <strong>{transformSchoolText(school?.name || "")}</strong>.
+                            If not, please check your notifications and accept the invitation,
+                            or wait for the admin to approve your request.
                         </Typography>
                         <Typography
                             color="textSecondary"
