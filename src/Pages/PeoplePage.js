@@ -19,7 +19,7 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText, Skeleton, Typography } from '@mui/material';
+import { Menu, Dialog, DialogTitle, ListItemText, Skeleton, Typography } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import axios from 'axios'; // Import Axios for making HTTP requests
@@ -27,6 +27,8 @@ import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
 import { useAppContext } from '../Context/AppProvider';
 import InviteMembersModal from '../Components/Modal/InviteMembersModal';
+import PeopleConfirmationDialog from '../Components/Modal/PeopleConfirmationDialog';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 function PeoplePage(props) {
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
@@ -229,7 +231,7 @@ function PeoplePage(props) {
         // setSelectedIndex(index);
     };
 
-    const confirmDelete = async () => {
+    const confirmDelete = useCallback(async () => {
         try {
             if (selectedIndex >= 0 && rows[selectedIndex]) {
                 const userId = rows[selectedIndex].id; // Get userId of the selected user
@@ -256,21 +258,21 @@ function PeoplePage(props) {
                 fetchCurrentUser();
             }
         }
-    };
+    }, [currentUser.id, fetchCurrentUser, rows, selectedIndex]);
 
-    const cancelDelete = () => {
+    const cancelDelete = useCallback(() => {
         // Close delete confirmation dialog without deleting
         setDeleteConfirmationDialogOpen(false);
         setDropdownAnchorEl(null);
         setDeleteAnchorEl(null);
-    };
+    }, []);
 
     const handleRoleChange = (newRole) => {
         setSelectedRole(newRole);
         setConfirmationDialogOpen(true); // Open confirmation dialog
     };
 
-    const confirmRoleChange = async () => {
+    const confirmRoleChange = useCallback(async () => {
         try {
             let endpoint = '';
             let newRole = '';
@@ -306,13 +308,13 @@ function PeoplePage(props) {
             // Close delete menu and reset selectedIndex
             handleMenuClose();
         }
-    };
+    }, [rows, selectedIndex, selectedRole]);
 
-    const cancelRoleChange = () => {
+    const cancelRoleChange = useCallback(() => {
         // Close confirmation dialog without changing role
         setConfirmationDialogOpen(false);
         setDropdownAnchorEl(null);
-    };
+    }, []);
 
 
     /*const handleInvite = () => {
@@ -416,9 +418,14 @@ function PeoplePage(props) {
                                 Invite Members
                             </Typography>
                         </Button>
-                        <Dialog onClose={handleClose} open={open} sx={{ margin: 2, '& .MuiDialog-paper': { minWidth: 400 } }}>
-                            <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
-                            <List sx={{ p: 3 }}>
+                        <Dialog
+                            open={open}
+                            onClose={handleClose}
+                            aria-labelledby="application-dialog-title"
+                            maxWidth="xs"
+                            fullWidth>
+                            <DialogTitle id="application-dialog-title" sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
+                            <List sx={{ p: 3, pt: 1 }}>
                                 {applications.length === 0 ? (
                                     <ListItem>
                                         <ListItemText primary="No applications found." />
@@ -426,6 +433,13 @@ function PeoplePage(props) {
                                 ) : (
                                     applications?.map(application => (
                                         <ListItem key={application.id} disableGutters>
+                                            <AccountCircleIcon
+                                                sx={{
+                                                    color: application.avatar,
+                                                    fontSize: '35px',
+                                                    mr: 1
+                                                }}
+                                            />
                                             <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
                                             <Box display="flex" justifyContent="space-between" gap={1}>
                                                 <Button
@@ -583,27 +597,25 @@ function PeoplePage(props) {
                 </Grid>
             </Grid>
             {/* Confirmation dialog for role change */}
-            <Dialog open={confirmationDialogOpen} onClose={cancelRoleChange}>
-                <DialogTitle>Confirmation</DialogTitle>
-                <DialogContent>
-                    Are you sure you want to change?
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={confirmRoleChange}>Save Changes</Button>
-                    <Button onClick={cancelRoleChange}>Cancel</Button>
-                </DialogActions>
-            </Dialog>
+            <PeopleConfirmationDialog
+                open={confirmationDialogOpen}
+                onClose={cancelRoleChange}
+                onConfirm={confirmRoleChange}
+                onCancel={cancelRoleChange}
+                message={"Are you sure you want to change role?"}
+                onConfirmText={"Save"}
+                onCancelText={"Cancel"}
+            />
             {/* Confirmation dialog for delete */}
-            <Dialog open={deleteConfirmationDialogOpen} onClose={cancelDelete}>
-                <DialogTitle>Confirmation</DialogTitle>
-                <DialogContent>
-                    Are you sure you want to delete?
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={confirmDelete}>Yes</Button>
-                    <Button onClick={cancelDelete}>Cancel</Button>
-                </DialogActions>
-            </Dialog>
+            <PeopleConfirmationDialog
+                open={deleteConfirmationDialogOpen}
+                onClose={cancelDelete}
+                onConfirm={confirmDelete}
+                onCancel={cancelDelete}
+                message={"Are you sure you want to delete?"}
+                onConfirmText={"Delete"}
+                onCancelText={"Cancel"}
+            />
         </Container>
     );
 }
