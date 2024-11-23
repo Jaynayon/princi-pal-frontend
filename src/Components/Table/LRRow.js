@@ -174,7 +174,7 @@ const LRRow = memo((props) => {
                                             {
                                                 minWidth: column.minWidth,
                                                 maxWidth: column.maxWidth,
-                                                pointerEvents: !isEditable && 'none' // disallow editing
+                                                pointerEvents: !isEditable && column.id !== "actions" && 'none' // disallow editing
                                             }
                                         ]}
                                         onClick={() => handleCellClick(column.id, row.id)}
