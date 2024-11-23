@@ -19,20 +19,20 @@ import Avatar from '@mui/material/Avatar';
 import { blue } from '@mui/material/colors';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText, Skeleton } from '@mui/material';
+import { Menu, Dialog, DialogTitle, DialogContent, DialogActions, ListItemText, Skeleton, Typography } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import axios from 'axios'; // Import Axios for making HTTP requests
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
+import { useAppContext } from '../Context/AppProvider';
+import InviteMembersModal from '../Components/Modal/InviteMembersModal';
 
 function PeoplePage(props) {
-    const [member, setMember] = useState('Member');
     const [dropdownAnchorEl, setDropdownAnchorEl] = useState(null);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [searchValue, setSearchValue] = useState('');
-    const [inviteEmail, setInviteEmail] = useState('');
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false); // State for confirmation dialog
     const [selectedRole, setSelectedRole] = useState(''); // State for selected role
     const [deleteConfirmationDialogOpen, setDeleteConfirmationDialogOpen] = useState(false); // State for delete confirmation dialog
@@ -41,26 +41,31 @@ function PeoplePage(props) {
     const [schools, setSchools] = useState([]);
     const [rows, setRows] = useState([]);
 
+    const { fetchCurrentUser } = useAppContext();
     const { currentUser } = useNavigationContext();
     const [currentAssocation, setCurrentAssociation] = useState('');
 
     const [currentSchool, setCurrentSchool] = useState({ id: null });
     const [applications, setApplications] = useState([]);
-    const [invitationMessage, setInvitationMessage] = useState('');
+    const [openInvitation, setOpenInvitation] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchAssociation = useCallback(async () => {
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
-                userId: currentUser.id,
-                schoolId: selectedValue
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                }
-            });
-            setCurrentAssociation(response.data); // Update the state with the fetched data
+            if (selectedValue && currentUser) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/user`, {
+                    userId: currentUser.id,
+                    schoolId: selectedValue
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                setCurrentAssociation(response.data); // Update the state with the fetched data
+            } else {
+                setCurrentAssociation("");
+            }
         } catch (error) {
             console.error('Error fetching association:', error);
         }
@@ -72,14 +77,19 @@ function PeoplePage(props) {
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`,
-                { schoolId: selectedValue }, {
-                headers: {
-                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
-                }
-            });
-            setRows(response.data); // Update the state with the fetched data
+            if (selectedValue) {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL_SCHOOL}/users`,
+                    { schoolId: selectedValue }, {
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                    }
+                });
+                setRows(response.data); // Update the state with the fetched data
+            } else {
+                setRows([]);
+            }
         } catch (error) {
+            setRows([]);
             console.error('Error fetching users:', error);
         } finally {
             setIsLoading(false);
@@ -88,12 +98,11 @@ function PeoplePage(props) {
 
     useEffect(() => {
         // Fetch users when the component mounts or when the selected school changes
-        console.log(selectedValue)
         if (selectedValue) {
             fetchUsers();
             fetchAssociation();
         }
-    }, [selectedValue, fetchUsers, currentUser, fetchAssociation]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
+    }, [selectedValue, fetchUsers, fetchAssociation]); // Dependency on selectedValue ensures the effect runs whenever selectedValue changes
 
     // Fetch schools when component mounts
     useEffect(() => {
@@ -102,6 +111,8 @@ function PeoplePage(props) {
             //fetchAssociation();
             if (currentUser.schools.length > 0) {
                 setSelectedValue(currentUser.schools[0].id);
+            } else {
+                setSelectedValue('')
             }
         }
     }, [currentUser]); // Empty dependency array ensures the effect runs only once
@@ -125,6 +136,10 @@ function PeoplePage(props) {
         //setSelectedValue(value);
     };
 
+    const handleCloseInvitation = () => {
+        setOpenInvitation(false);
+    };
+
     /*const schoolAvatar = (
         <Avatar>
             <SchoolIcon />
@@ -132,9 +147,7 @@ function PeoplePage(props) {
     );*/
 
     const handleClickOpen = async () => {
-        console.log("Current School State:", currentSchool); // Debugging line
         if (currentSchool && currentSchool.id) {
-            console.log(`Fetching applications from: ${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`);
             setOpen(true);
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_URL_ASSOC}/applications/${currentSchool.id}`, {
@@ -142,7 +155,6 @@ function PeoplePage(props) {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                console.log("Applications fetched:", response.data); // Debugging line
                 setApplications(response.data);
             } catch (e) {
                 console.error(e);
@@ -152,18 +164,20 @@ function PeoplePage(props) {
         }
     };
 
+    const handleClickOpenInvitation = () => {
+        setOpenInvitation(true);
+    };
+
     const handleAccept = async (associationRequest) => {
         try {
             // Sending request to approve the association
-            const response = await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
+            await axios.post(`${process.env.REACT_APP_API_URL_ASSOC}/approve`, associationRequest, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
                 }
             });
-
-            console.log('Success:', response.data);
-
+            fetchUsers(); // Fetch new users after accepting
         } catch (error) {
             console.error("Error approving user:", error.response ? error.response.data : error.message);
         }
@@ -172,15 +186,13 @@ function PeoplePage(props) {
 
     const handleReject = async (application) => {
         try {
-            const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/reject`, {
+            await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/reject`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 },
                 data: application // Pass the application object as data in the DELETE request
             });
-
-            console.log('User rejected successfully:', response.data);
 
             // Update the UI by removing the rejected application from the list
             setApplications(applications.filter(app => app.id !== application.userId));
@@ -200,7 +212,6 @@ function PeoplePage(props) {
         // Also set the deleteAnchorEl and selectedIndex
         setDeleteAnchorEl(event.currentTarget);
         setSelectedIndex(index);
-        console.log(rows[index]);
     };
 
     const handleMenuClose = () => {
@@ -220,16 +231,15 @@ function PeoplePage(props) {
 
     const confirmDelete = async () => {
         try {
-            if (selectedIndex && rows[selectedIndex]) {
+            if (selectedIndex >= 0 && rows[selectedIndex]) {
                 const userId = rows[selectedIndex].id; // Get userId of the selected user
                 const schoolId = rows[selectedIndex].schoolId; // Get schoolId of the selected user
                 // Make an API call to delete the user association
-                const response = await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`, {
+                await axios.delete(`${process.env.REACT_APP_API_URL_ASSOC}/${userId}/${schoolId}`, {
                     headers: {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-                console.log("User deleted successfully. " + response.data);
                 // Remove the deleted row from the state
                 setRows(prevRows => prevRows.filter((_, index) => index !== selectedIndex));
             }
@@ -241,6 +251,10 @@ function PeoplePage(props) {
         } finally {
             // Close the delete menu and reset selectedIndex
             handleMenuClose();
+
+            if (rows[selectedIndex].id === currentUser.id) {
+                fetchCurrentUser();
+            }
         }
     };
 
@@ -269,7 +283,7 @@ function PeoplePage(props) {
                     newRole = true;
                 }
 
-                const response = await axios.patch(endpoint, {
+                await axios.patch(endpoint, {
                     userId: rows[selectedIndex].id,
                     schoolId: rows[selectedIndex].schoolId // changed to rows[selectedIndex].schoolId from selectedIndex
                 }, {
@@ -277,8 +291,6 @@ function PeoplePage(props) {
                         'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                     }
                 });
-
-                console.log(response)
 
                 // Update role in frontend state if successful
                 const updatedRows = [...rows];
@@ -302,39 +314,12 @@ function PeoplePage(props) {
         setDropdownAnchorEl(null);
     };
 
+
     /*const handleInvite = () => {
         if (inviteEmail.trim() === '') {
             setInvitationMessage('Please enter a valid email.');
             return;
         }
-    
-        console.log("Inviting email:", inviteEmail);
-    
-        const invitePayload = {
-            email: inviteEmail, // or another identifier
-            schoolId: currentSchool.id // Ensure you have the correct schoolId
-        };
-    
-        axios.post('http://localhost:4000/associations/invite', invitePayload)
-            .then(response => {
-                console.log("Invitation sent successfully:", response.data);
-                setInvitationMessage('Invitation sent successfully!');
-            })
-            .catch(error => {
-                console.error("Error inviting member:", error.response ? error.response.data : error.message);
-                setInvitationMessage('Failed to send invitation. Please try again.');
-            });
-    
-        setInviteEmail('');
-    };*/
-
-    const handleInvite = () => {
-        if (inviteEmail.trim() === '') {
-            setInvitationMessage('Please enter a valid email.');
-            return;
-        }
-
-        console.log("Inviting email:", inviteEmail);
 
         const invitePayload = {
             email: inviteEmail,
@@ -348,7 +333,6 @@ function PeoplePage(props) {
             }
         })
             .then(response => {
-                console.log("Invitation sent successfully:", response.data);
                 setInvitationMessage('Invitation sent successfully!');
             })
             .catch(error => {
@@ -357,8 +341,7 @@ function PeoplePage(props) {
             });
 
         setInviteEmail('');
-    };
-
+    };*/
 
     // Filtered rows based on search value
     const filteredRows = rows.filter(row =>
@@ -366,247 +349,119 @@ function PeoplePage(props) {
         (row && row.email && row.email.toLowerCase().includes(searchValue.toLowerCase()))
     );
 
-    const RenderPeopleRows = () => {
-        if (isLoading) {
-            return (
-                <>
-                    {Array.from({ length: 3 }).map((_, index) => (
-                        <TableRow key={index}>
-                            <TableCell colSpan={4} align="center">
-                                <Skeleton animation="wave" />
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </>
-            );
-        }
-
-        return (
-            filteredRows.map((row, index) => (
-                <TableRow key={index}>
-                    <TableCell>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                {row.name && (
-                                    <Avatar sx={{ bgcolor: blue[900] }}>
-                                        {row.name.charAt(0)}
-                                    </Avatar>
-                                )}
-                            </Grid>
-                            <Grid item>{`${row.fname} ${row.mname.charAt(0) + "."} ${row.lname}`}</Grid>
-                        </Grid>
-                    </TableCell>
-                    <TableCell>{row.email}</TableCell>
-                    <TableCell>
-                        {/* Role with dropdown arrow */}
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {row.admin === true ?
-                                row.position === "Principal" ?
-                                    <span>Principal</span>
-                                    :
-                                    <span>Admin</span>
-                                :
-                                <span>Member</span>
-                            }
-                            {row.position !== "Principal" &&
-                                currentAssocation.admin === true &&
-                                currentAssocation.position === "Principal" &&
-                                <ArrowDropDownIcon onClick={(event) => handleDropdownOpen(event, index)} />}
-                        </div>
-                        {/* Dropdown menu for role options */}
-                        {row.position !== "Principal" &&
-                            currentAssocation.admin === true &&
-                            currentAssocation.position === "Principal" &&
-                            <Menu
-                                id={`menu-dropdown-${index}`}
-                                anchorEl={dropdownAnchorEl}
-                                open={Boolean(dropdownAnchorEl && selectedIndex === index)}
-                                onClose={handleMenuClose}
-                            >
-                                {/* Role options */}
-                                <MenuItem onClick={() => handleRoleChange("Admin")}>Admin</MenuItem>
-                                <MenuItem onClick={() => handleRoleChange("Member")}>Member</MenuItem>
-                            </Menu>
-                        }
-                    </TableCell>
-                    {currentAssocation.admin === true && row.position !== "Principal" &&
-                        <TableCell>
-                            {/* Delete button */}
-                            <Button
-                                aria-controls={`menu-delete-${index}`}
-                                aria-haspopup="true"
-                                onClick={(event) => handleDeleteOpen(event, index)}
-                            >
-                                <MoreHorizIcon />
-                            </Button>
-                            {/* Delete menu */}
-                            <Menu
-                                id={`menu-delete-${index}`}
-                                anchorEl={deleteAnchorEl}
-                                open={Boolean(deleteAnchorEl && selectedIndex === index)}
-                                onClose={handleMenuClose}
-                            >
-                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                            </Menu>
-                        </TableCell>
-                    }
-                </TableRow>
-            ))
-        );
-    }
-
     return (
-        <Container className="test" maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
+        <Container className="test" maxWidth="lg" sx={{ mb: 2 }}>
             <Grid container spacing={2}>
-
-                {currentAssocation.admin === true ?
-                    <React.Fragment>
-                        <Grid item xs={12} md={6} lg={6}>
-                            <Box sx={{ height: '55px' }}>
-                                <TextField
-                                    sx={{ height: '20px', width: "100%" }}
-                                    id="search"
-                                    label="Search by name or email"
-                                    variant="outlined"
-                                    className="searchTextField"
-                                    value={searchValue}
-                                    onChange={(e) => setSearchValue(e.target.value)}
-                                />
-                            </Box>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={6}>
-                            <TextField
-                                sx={{ width: '50%' }}
-                                id="invite"
-                                label="Invite by email"
-                                variant="outlined"
-                                className="inviteTextField"
-                                value={inviteEmail}
-                                onChange={(e) => setInviteEmail(e.target.value)}
-                            />
-                            <FormControl sx={{ minWidth: 120 }} size="53px">
-                                <InputLabel id="demo-select-small-label">Role</InputLabel>
-                                <Select
-                                    labelId="demo-select-small-label"
-                                    id="demo-select-small"
-                                    value={member}
-                                    label="Role"
-                                    onChange={(event) => setMember(event.target.value)}
-                                >
-                                    <MenuItem value="Member">Member</MenuItem>
-                                    <MenuItem value="Admin">Admin</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <Button
-                                sx={{ width: "20%", height: "55px" }}
-                                variant="contained"
-                                className="inviteButton"
-                                onClick={handleInvite}
+                <Grid item xs={12} md={6} lg={6} sx={{ display: "flex", flexDirection: "row", minHeight: "55px" }}>
+                    <FormControl sx={{ minWidth: 150 }} >
+                        <InputLabel id="demo-select-small-label">School Filter</InputLabel>
+                        <Select
+                            labelId="demo-select-small-label"
+                            id="demo-select-small"
+                            value={selectedValue}
+                            label="Member"
+                            onChange={handleSchoolChange}
+                        >
+                            {schools?.map((school) => (
+                                <MenuItem key={school.id} value={school.id}>
+                                    {transformSchoolText(school.name)}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <TextField
+                        sx={{ height: '20px', width: "350px", ml: 2 }}
+                        id="search"
+                        label="Search by name or email"
+                        variant="outlined"
+                        className="searchTextField"
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                    />
+                </Grid>
+                {currentAssocation.admin === true &&
+                    <Grid
+                        item xs={12} md={6} lg={6}
+                        sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: {
+                                xs: "flex-start", // For small screens
+                                md: "flex-end",   // For medium screens and larger
+                            }
+                        }}
+                    >
+                        <Button variant="outlined" onClick={handleClickOpen}>
+                            <Typography
+                                variant='body2'
+                                style={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                }}
                             >
-                                Invite
-                            </Button>
-                        </Grid>
-                        <Grid item xs={6} md={6} lg={12} sx={{ display: 'flex', alignSelf: "center" }}>
-                            <FormControl sx={{ minWidth: 150 }} >
-                                <InputLabel id="demo-select-small-label">School Filter</InputLabel>
-                                <Select
-                                    labelId="demo-select-small-label"
-                                    id="demo-select-small"
-                                    value={selectedValue}
-                                    label="Member"
-                                    onChange={handleSchoolChange}
-                                >
-                                    {schools?.map((school) => (
-                                        <MenuItem key={school.id} value={school.id}>
-                                            {transformSchoolText(school.name)}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={6} md={6} lg={12} sx={{ display: 'flex', alignSelf: "center" }}>
-                            <FormControl sx={{ minWidth: 150 }} >
-                                {/* Application Dialog */}
-                                <Button variant="outlined" onClick={handleClickOpen}>
-                                    Open Application Dialog
-                                </Button>
-                                <Dialog onClose={handleClose} open={open} sx={{ margin: 2, '& .MuiDialog-paper': { minWidth: 400 } }}>
-                                    <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
-                                    <List sx={{ p: 3 }}>
-                                        {applications.length === 0 ? (
-                                            <ListItem>
-                                                <ListItemText primary="No applications found." />
-                                            </ListItem>
-                                        ) : (
-                                            applications?.map(application => (
-                                                <ListItem key={application.id} disableGutters>
-                                                    <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
-                                                    <Box display="flex" justifyContent="space-between" gap={1}>
-                                                        <Button
-                                                            onClick={() => {
-                                                                handleAccept({ userId: application.id, schoolId: application.schoolId });
-                                                                handleClose();  // Close the dialog after accepting
-                                                            }}
-                                                            variant="contained"
-                                                            color="primary"
-                                                        >
-                                                            Accept
-                                                        </Button>
-
-                                                        <Button
-                                                            onClick={() => {
-                                                                handleReject({ userId: application.id, schoolId: application.schoolId });
-                                                                handleClose();  // Close the dialog after rejecting
-                                                            }}
-                                                            variant="contained"
-                                                            color="secondary"
-                                                        >
-                                                            Reject
-                                                        </Button>
-                                                    </Box>
-                                                </ListItem>
-                                            ))
-                                        )}
-                                    </List>
-
-                                </Dialog>
-                            </FormControl>
-                        </Grid>
-                    </React.Fragment>
-                    :
-                    <React.Fragment>
-                        <Grid item xs={12} md={12} lg={12} sx={{ display: "flex", flexDirection: "row" }}>
-                            <Box sx={{ height: '55px' }}>
-                                <FormControl sx={{ minWidth: 150 }} >
-                                    <InputLabel id="demo-select-small-label">School Filter</InputLabel>
-                                    <Select
-                                        labelId="demo-select-small-label"
-                                        id="demo-select-small"
-                                        value={selectedValue}
-                                        label="Member"
-                                        onChange={handleSchoolChange}
-                                    >
-                                        {schools?.map((school) => (
-                                            <MenuItem key={school.id} value={school.id}>
-                                                {transformSchoolText(school.name)}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                            <TextField
-                                sx={{ height: '20px', width: "350px", ml: 2 }}
-                                id="search"
-                                label="Search by name or email"
-                                variant="outlined"
-                                className="searchTextField"
-                                value={searchValue}
-                                onChange={(e) => setSearchValue(e.target.value)}
-                            />
-                        </Grid>
-                    </React.Fragment>
+                                Open Application Dialog
+                            </Typography>
+                        </Button>
+                        <Button variant="outlined" onClick={handleClickOpenInvitation} sx={{ ml: 2 }}>
+                            <Typography
+                                variant='body2'
+                                style={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                Invite Members
+                            </Typography>
+                        </Button>
+                        <Dialog onClose={handleClose} open={open} sx={{ margin: 2, '& .MuiDialog-paper': { minWidth: 400 } }}>
+                            <DialogTitle sx={{ textAlign: 'center' }}>Application for School</DialogTitle>
+                            <List sx={{ p: 3 }}>
+                                {applications.length === 0 ? (
+                                    <ListItem>
+                                        <ListItemText primary="No applications found." />
+                                    </ListItem>
+                                ) : (
+                                    applications?.map(application => (
+                                        <ListItem key={application.id} disableGutters>
+                                            <ListItemText primary={`${application.fname} ${application.mname || ''} ${application.lname}`} />
+                                            <Box display="flex" justifyContent="space-between" gap={1}>
+                                                <Button
+                                                    onClick={() => {
+                                                        handleAccept({ userId: application.id, schoolId: application.schoolId });
+                                                        handleClose();  // Close the dialog after accepting
+                                                    }}
+                                                    variant="contained"
+                                                    color="primary"
+                                                >
+                                                    Accept
+                                                </Button>
+                                                <Button
+                                                    onClick={() => {
+                                                        handleReject({ userId: application.id, schoolId: application.schoolId });
+                                                        handleClose();  // Close the dialog after rejecting
+                                                    }}
+                                                    variant="contained"
+                                                    color="secondary"
+                                                >
+                                                    Reject
+                                                </Button>
+                                            </Box>
+                                        </ListItem>
+                                    ))
+                                )}
+                            </List>
+                        </Dialog>
+                        <InviteMembersModal
+                            open={openInvitation}
+                            onClose={handleCloseInvitation}
+                            currentSchool={currentSchool}
+                        />
+                    </Grid>
                 }
-                <Grid item xs={12} md={12} lg={12} sx={{}}>
+                <Grid item xs={12} md={12} lg={12}>
                     <TableContainer component={Paper} sx={{ padding: '10px', paddingBottom: '30px' }}>
                         <Table md={{ display: 'flex', height: '100%', width: '100%' }} aria-label="simple table">
                             <TableHead>

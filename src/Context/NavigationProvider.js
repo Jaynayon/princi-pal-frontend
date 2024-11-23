@@ -2,15 +2,24 @@ import React, { createContext, useState, useEffect, useRef, useContext } from 'r
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAppContext } from './AppProvider';
+import { useMemo } from 'react';
 
 const NavigationContext = createContext();
 
 export const useNavigationContext = () => useContext(NavigationContext);
 
+// Define a mapping between paths and the desired local storage values
+const pathToLocalStorageValue = {
+    "/": "Dashboard",
+    '/dashboard': 'Dashboard',
+    '/people': 'People',
+    '/settings': 'Settings'
+};
+
 export const NavigationProvider = ({ children }) => {
     const { currentUser } = useAppContext();
 
-    const list = ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'];
+    const list = useMemo(() => ['Dashboard', 'Schools', 'People', 'Settings', 'Logout'], []);
     const [selected, setSelected] = useState('Dashboard');
     const [open, setOpen] = useState(true);
     const [openSub, setOpenSub] = useState(false);
@@ -55,10 +64,6 @@ export const NavigationProvider = ({ children }) => {
                 }
             });
 
-            if (response) {
-                console.log(response.data)
-            }
-
             return response.status === 201;
         } catch (error) {
             console.error('Error creating user:', error);
@@ -78,11 +83,7 @@ export const NavigationProvider = ({ children }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            })
-
-            if (response) {
-                console.log(response.data);
-            }
+            });
 
             return response.data
         } catch (error) {
@@ -142,18 +143,10 @@ export const NavigationProvider = ({ children }) => {
         // Extract the root route if it's the /schools route
         const extractRoute = location.pathname.split('/').slice(0, 2).join('/');
 
-        // if current user is not null or undefined, or not in /schools, set default school
+        // if current user is not null or undefined, & not in /schools, set default school
         if (currentUser && !currentSchool && (extractRoute !== "/schools")) {
             setCurrentSchool(currentUser.schools[0]);
         }
-
-        // Define a mapping between paths and the desired local storage values
-        const pathToLocalStorageValue = {
-            "/": "Dashboard",
-            '/dashboard': 'Dashboard',
-            '/people': 'People',
-            '/settings': 'Settings',
-        };
 
         if (currentUser && currentUser.position !== "Super administrator") {
             // Get the local storage value based on the current path
@@ -177,17 +170,15 @@ export const NavigationProvider = ({ children }) => {
 
                     // Fetch selected school data by setting the current school state
                     if (matchedSchool) { setCurrentSchool(matchedSchool); }
-                } else {
+
+                    setSelected(localStorageValue); // Set the selected state for school
+                } else if (extractRoute === "/reset-password" || extractRoute === "/verify-email" || extractRoute === "/referral") {
+                    return; // Do nothing; load the page
+                }
+                else {
                     // If user is logged in, redirect to inner modules
                     navigate('/');
                 }
-            }
-            // Set the state with the current local storage value
-            if (localStorageValue !== null || localStorageValue !== undefined) {
-                setSelected(localStorageValue)
-            } else {
-                window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify("Dashboard"));
-                setSelected("Dashboard")
             }
         }
         // Call the function to set initial mobileMode state
@@ -208,9 +199,20 @@ export const NavigationProvider = ({ children }) => {
     }, [currentUser, currentSchool, location, navigate]);
 
     useEffect(() => {
-        window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
-    }, [selected]);
+        if (currentUser?.position !== "Super administrator") {
+            // Get the local storage value based on the current path and check if it's truthy
+            const localStorageValue = pathToLocalStorageValue[location.pathname];
 
+            if (localStorageValue && localStorageValue !== selected) { // Ensure setter not called !necessarily
+                setSelected(localStorageValue);
+            }
+        }
+    }, [currentUser, location.pathname, selected]);
+
+
+    // useEffect(() => {
+    //     window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
+    // }, [selected]);
 
     return (
         <NavigationContext.Provider value={{

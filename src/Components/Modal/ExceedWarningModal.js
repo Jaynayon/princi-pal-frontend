@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 
 // Custom component import
 import Dialog from '@mui/material/Dialog';
@@ -9,14 +9,15 @@ import Button from '@mui/material/Button';
 import { DialogContentText } from '@mui/material';
 import { useSchoolContext } from '../../Context/SchoolProvider';
 
-export default function ExceedWarningModal({ open, onClose, amountExceeded }) {
-    const { isEditingRef, updateLrById, createLrByDocId, fetchDocumentData } = useSchoolContext();
+const ExceedWarningModal = memo(({ open, onClose, amountExceeded }) => {
+    const { isEditingRef, updateLrById, createLrByDocId, fetchDocumentData, updateLr } = useSchoolContext();
 
     const handleNext = async () => {
         if (amountExceeded.rowId === 3) {
             // If the row is the add row
             await createLrByDocId(amountExceeded.docId, amountExceeded.newValue);
-            await fetchDocumentData();
+            await fetchDocumentData(); // Fetch document
+            await updateLr(); // Fetch LR
         } else {
             // Update the amount in the database
             await updateLrById(amountExceeded.colId, amountExceeded.rowId, amountExceeded.newValue);
@@ -79,5 +80,6 @@ export default function ExceedWarningModal({ open, onClose, amountExceeded }) {
             </Dialog>
         </React.Fragment>
     );
-}
+});
 
+export default ExceedWarningModal;

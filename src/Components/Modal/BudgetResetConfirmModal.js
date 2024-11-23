@@ -8,34 +8,35 @@ import {
     Typography,
     Button
 } from '@mui/material';
+import axios from 'axios';
 
-import { useSchoolContext } from '../../Context/SchoolProvider';
+// import { useSchoolContext } from '../../Context/SchoolProvider';
 // import { useNavigationContext } from '../Context/NavigationProvider';
 
 // Current document is passed by value to allow reusability for AnnualTab
-export default function ConfirmModal({ currentDocument, month, open, handleClose, handleCloseParent = null, value }) {
-    const { fetchDocumentData, createNewDocument, updateDocumentById, jev } = useSchoolContext();
+export default function BudgetResetConfirmModal({ open, handleClose, handleCloseParent = null, value, currentSchool, year }) {
+    const budgetPerMonth = Number((value / 12).toFixed(2));
 
-    const updateDocumentCashAdvById = async (newValue) => {
-        try {
-            await updateDocumentById(currentDocument?.id, "Cash Advance", newValue);
-        } catch (error) {
-            console.error('Error fetching document:', error);
-        }
-    }
+    const formattedPerMonth = new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(budgetPerMonth);
 
     const handleOnClick = async () => {
-        let obj = {}
-        obj = { cashAdvance: value }
-        // jev length upon initialization will always be > 2
         try {
-            if (currentDocument?.id === 0 || jev === null || jev === undefined || (Array.isArray(jev) && jev.length === 0)) {
-                await createNewDocument(obj, month, value);
-                await fetchDocumentData();
-            } else {
-                await updateDocumentCashAdvById(value);
-                await fetchDocumentData();
-            }
+            // await initializeDocuments(value);
+            // fetch updated document data
+            // await fetchDocumentData();
+            await axios.patch(`${process.env.REACT_APP_API_URL_DOC}/resetBudget`, {
+                schoolId: currentSchool.id,
+                year,
+                annualBudget: value
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
+                }
+            });
         } catch (error) {
             console.error('Error in handleOnClick:', error);
         } finally {
@@ -60,10 +61,13 @@ export default function ConfirmModal({ currentDocument, month, open, handleClose
                     <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
                         Are you sure you want to set the desired amount?
                     </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 1 }}>
-                        You can only set your budget
-                        <span style={{ fontWeight: 'bold' }}> once </span>
-                        per month for each school. This action cannot be undone.
+                    <Typography id="modal-modal-amount" sx={{ mt: 1 }}>
+                        The monthly budget for{' '}
+                        <span style={styles.grey_highlight}> {currentSchool?.name} </span>
+                        {' '}from January to December{' '}
+                        <span style={styles.grey_highlight}> {year} </span>
+                        {' '}will be{' '}
+                        <span style={styles.green_highlight}> ₱{formattedPerMonth} </span>
                     </Typography>
                     <Box sx={{
                         display: "flex",
@@ -95,7 +99,21 @@ const styles = {
         boxShadow: 24,
         p: 4.5,
         width: 400,
-        borderRadius: '15px',
-        //textAlign: 'center',
+        borderRadius: '15px'
+    },
+    grey_highlight: {
+        fontWeight: 'bold',
+        backgroundColor: '#e2e4e5',  // Soft green background
+        padding: '1px 6px',
+        borderRadius: '5px',
+        display: 'inline-block'
+    },
+    green_highlight: {
+        fontWeight: 'bold',
+        backgroundColor: '#32b14a',  // Soft green background
+        color: '#ffff',  // Dark green text for contrast
+        padding: '1px 6px',
+        borderRadius: '5px',
+        display: 'inline-block'
     }
 }

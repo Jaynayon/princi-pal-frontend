@@ -11,8 +11,6 @@ function JEVRow(props) {
 
     const handleCellClick = (colId, rowId, event) => {
         setEditingCell({ colId, rowId });
-        console.log(editingCell)
-        console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
 
     const formatNumberDisplay = (number, colId, rowId) => {

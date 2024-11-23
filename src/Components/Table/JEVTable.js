@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -6,8 +6,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { SchoolContext } from '../../Context/SchoolProvider';
+import { useSchoolContext } from '../../Context/SchoolProvider';
 import JEVRow from './JEVRow';
+import { useAppContext } from '../../Context/AppProvider';
+import { useNavigationContext } from '../../Context/NavigationProvider';
 
 const columns = [
     {
@@ -45,7 +47,17 @@ const columns = [
 ];
 
 export default function JEVTable() {
-    const { currentDocument, emptyDocument, jev } = useContext(SchoolContext);
+    const { currentUser } = useAppContext();
+    const { selected } = useNavigationContext();
+    const {
+        currentDocument,
+        emptyDocument,
+        jev,
+        updateJev,
+        isAdding,
+        isEditingRef,
+        isSearchingRef
+    } = useSchoolContext();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
 
@@ -63,6 +75,37 @@ export default function JEVTable() {
             setPage(0);
         }
     }, [currentDocument, emptyDocument]);
+
+    // Memoize dependencies to prevent unnecessary re-renders
+    const stableSchools = useMemo(() => currentUser.schools, [currentUser.schools]);
+    const stableSelected = useMemo(() => selected, [selected]);
+
+    useEffect(() => {
+        let intervalIdJev = null;
+
+        const updateJEVData = () => {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
+                updateJev().catch(error => console.error('Error fetching JEV data:', error));
+            }
+        };
+
+        // Check if user is in the school tab or dashboard
+        if (stableSchools.find(school => school.name === stableSelected) || stableSelected === "Dashboard") {
+            updateJEVData();  // Initial fetch
+            intervalIdJev = setInterval(updateJEVData, 10000);  // Set interval for every 10 seconds
+        }
+
+        // Cleanup function to clear interval
+        return () => {
+            if (intervalIdJev) {
+                clearInterval(intervalIdJev);
+                intervalIdJev = null;  // Ensure intervalId is reset to null
+            }
+        };
+
+    }, [updateJev, isAdding, isEditingRef, isSearchingRef, stableSchools, stableSelected]);
+
 
     return (
         <React.Fragment>

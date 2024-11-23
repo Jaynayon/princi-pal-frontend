@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Table from '@mui/material/Table';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -12,6 +12,8 @@ import TableRow from '@mui/material/TableRow';
 import LRRow from './LRRow';
 import Typography from '@mui/material/Typography';
 import { useSchoolContext } from '../../Context/SchoolProvider';
+import { useAppContext } from '../../Context/AppProvider';
+import { useNavigationContext } from '../../Context/NavigationProvider';
 
 const columns = [
     {
@@ -73,7 +75,26 @@ const columns = [
 ];
 
 export default function LRTable() {
-    const { currentDocument, emptyDocument, lr } = useSchoolContext();
+    const { currentUser } = useAppContext();
+    const { selected } = useNavigationContext();
+    const {
+        currentDocument,
+        emptyDocument,
+        lr,
+        addFields,
+        formatDate,
+        isAdding,
+        setIsAdding,
+        isEditingRef,
+        isEditable,
+        deleteLrByid,
+        setLr,
+        updateLr,
+        fetchDocumentData,
+        createLrByDocId,
+        value,
+        isSearchingRef
+    } = useSchoolContext();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(4);
 
@@ -91,6 +112,38 @@ export default function LRTable() {
             setPage(0);
         }
     }, [currentDocument, emptyDocument]);
+
+    // Memoize dependencies to prevent unnecessary re-renders
+    const stableSchools = useMemo(() => currentUser.schools, [currentUser.schools]);
+    const stableSelected = useMemo(() => selected, [selected]);
+
+    useEffect(() => {
+        let intervalIdLr = null;
+
+        const updateLRData = () => {
+            // Fetch data if user is not adding, editing, or searching
+            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
+                updateLr().catch(error => console.error('Error fetching LR data:', error));
+            }
+        };
+
+        // Check if user is in the school tab or dashboard
+        if (stableSchools.find(school => school.name === stableSelected) || stableSelected === "Dashboard") {
+            updateLRData();  // Initial fetch immediately
+            intervalIdLr = setInterval(updateLRData, 10000);  // Set interval for every 10 seconds
+        }
+
+        // Cleanup function to clear interval
+        return () => {
+            if (intervalIdLr) {
+                clearInterval(intervalIdLr);
+                intervalIdLr = null;  // Reset intervalId to null after clearing
+            }
+        };
+
+    }, [updateLr, isAdding, isEditingRef, isSearchingRef, stableSchools, stableSelected]);
+
+
 
     return (
         <React.Fragment>
@@ -120,6 +173,20 @@ export default function LRTable() {
                             page={page}
                             rowsPerPage={rowsPerPage}
                             columns={columns}
+                            addFields={addFields}
+                            formatDate={formatDate}
+                            isAdding={isAdding}
+                            setIsAdding={setIsAdding}
+                            isEditingRef={isEditingRef}
+                            isEditable={isEditable}
+                            deleteLrByid={deleteLrByid}
+                            lr={lr}
+                            updateLr={updateLr}
+                            setLr={setLr}
+                            currentDocument={currentDocument}
+                            createLrByDocId={createLrByDocId}
+                            fetchDocumentData={fetchDocumentData}
+                            value={value}
                         />
                     </TableBody>
                 </Table>
@@ -192,10 +259,8 @@ const DocumentTextFields = (props) => {
 
     const handleInputBlur = async () => {
         if (prevInput !== input) {
-            console.log("there are changes");
             await updateDocumentFooter(input); //update field in db
-        } else
-            console.log("no changes");
+        }
     }
 
     const handleInputOnClick = (event) => {
@@ -209,10 +274,7 @@ const DocumentTextFields = (props) => {
         try {
             const response = await updateDocumentById(id, description, input);
             if (response) {
-                console.log(`Document with id: ${id} is updated`);
                 setInput(newValue);
-            } else {
-                console.log("Document not updated");
             }
             fetchDocumentData(); //fetch data changes
         } catch (error) {

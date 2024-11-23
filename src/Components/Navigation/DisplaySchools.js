@@ -18,10 +18,22 @@ import { transformSchoolText } from './Navigation';
 // Custom imports
 import { VerticalLine } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import { useSchoolContext } from '../../Context/SchoolProvider';
 
 export default function DisplaySchools() {
     const theme = useTheme();
-    const { open, toggleDrawer, prevOpen, selected, setSelected, setCurrentSchool, currentUser, openSub, setOpenSub } = useNavigationContext();
+    const {
+        open,
+        toggleDrawer,
+        prevOpen,
+        selected,
+        setSelected,
+        setCurrentSchool,
+        currentUser,
+        openSub,
+        setOpenSub
+    } = useNavigationContext();
+    const { setIsAdding, isSearchingRef, isEditingRef } = useSchoolContext();
 
     useEffect(() => {
         if (!open) {
@@ -38,9 +50,13 @@ export default function DisplaySchools() {
             setSelected(currentUser.schools[index].name);
             setCurrentSchool(currentUser.schools[index]);
         } else {
-            setSelected(currentUser.schools[0].name)
+            setSelected(currentUser.schools[0].name);
             setCurrentSchool(currentUser.schools[0]);
         }
+
+        isEditingRef.current = false; // Close the search field 
+        isSearchingRef.current = false; // when a school is selected
+        setIsAdding(false); // Close the add field/form when a school is selected
     }
 
     const handleClick = () => {
@@ -68,8 +84,6 @@ export default function DisplaySchools() {
             fontSize: '19px',
         },
     }), [theme.navStyle.color, theme.navStyle.bold]);
-
-    console.log(currentUser);
 
     return (
         currentUser && currentUser.schools.length > 0 ? //Check if user has schools assigned
