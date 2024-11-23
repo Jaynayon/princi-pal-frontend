@@ -19,16 +19,16 @@ const columns = [
     {
         id: 'date',
         label: 'Date',
-        minWidth: 140,
-        maxWidth: 140,
+        minWidth: 130,
+        maxWidth: 130,
         align: 'left',
         format: (value) => value.toLocaleString('en-US'),
     },
     {
         id: 'orsBursNo',
         label: 'ORS/BURS No.',
-        minWidth: 150,
-        maxWidth: 150,
+        minWidth: 140,
+        maxWidth: 140,
         align: 'left',
         format: (value) => value.toLocaleString('en-US'),
     },
@@ -43,8 +43,8 @@ const columns = [
     {
         id: 'particulars',
         label: 'Particulars',
-        minWidth: 200,
-        maxWidth: 200,
+        minWidth: 190,
+        maxWidth: 190,
         align: 'left',
         format: (value) => value.toLocaleString('en-US'),
     },
@@ -67,8 +67,16 @@ const columns = [
     {
         id: 'amount',
         label: 'Amount',
-        minWidth: 140,
-        maxWidth: 140,
+        minWidth: 130,
+        maxWidth: 130,
+        align: 'left',
+        format: (value) => value.toLocaleString('en-US'),
+    },
+    {
+        id: 'actions',
+        label: 'Actions',
+        minWidth: 100,
+        maxWidth: 100,
         align: 'left',
         format: (value) => value.toLocaleString('en-US'),
     },
@@ -161,7 +169,7 @@ export default function LRTable() {
                                         maxWidth: column.maxWidth,
                                     }}
                                 >
-                                    <Typography variant="inherit" sx={{ ml: 1.5 }}>
+                                    <Typography variant="inherit" sx={column.id !== "actions" ? { ml: 1.5 } : undefined}>
                                         {column.label}
                                     </Typography>
                                 </TableCell>

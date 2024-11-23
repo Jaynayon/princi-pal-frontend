@@ -184,6 +184,7 @@ const LRRow = memo((props) => {
                                             const isNatureOfPayment = column.id === "natureOfPayment";
                                             const isObjectCodeColumn = column.id === "objectCode";
                                             const isDateColumn = column.id === "date";
+                                            const isActionsColumn = column.id === "actions";
                                             const isEditing = editingCell?.colId === column.id && editingCell?.rowId === row.id && row.id !== 3;
 
                                             if (isDateColumn) {
@@ -223,6 +224,65 @@ const LRRow = memo((props) => {
                                                 );
                                             }
 
+                                            if (isActionsColumn) {
+                                                return (
+                                                    <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+                                                        {/* // Conditional rendering based on row.id  */}
+                                                        {row.id === 3 ? (
+                                                            <Box sx={{
+                                                                display: "flex",
+                                                                flexDirection: "row",
+                                                                justifyContent: "center",
+                                                                width: 65
+                                                            }}>
+                                                                <IconButton onClick={() => handleNewRecordAccept(row.id)}>
+                                                                    <CheckCircleIcon sx={{
+                                                                        color: 'green'
+                                                                    }} />
+                                                                </IconButton>
+                                                                <IconButton onClick={() => handleNewRecordCancel()}>
+                                                                    <CancelIcon sx={{
+                                                                        color: 'red'
+                                                                    }} />
+                                                                </IconButton>
+                                                            </Box>
+                                                        ) : (
+                                                            <Box sx={{
+                                                                display: "flex",
+                                                                flexDirection: "row",
+                                                                justifyContent: "center",
+                                                                width: 40
+                                                            }}>
+                                                                {/* Delete button */}
+                                                                <Button
+                                                                    aria-controls={`menu-delete-${index}`}
+                                                                    aria-haspopup="true"
+                                                                    onClick={(event) => handleDeleteOpen(event, index)}
+                                                                >
+                                                                    <MoreHorizIcon />
+                                                                </Button>
+                                                                {/* Delete menu */}
+                                                                <Menu
+                                                                    id={`menu-delete-${index}`}
+                                                                    anchorEl={deleteAnchorEl}
+                                                                    open={Boolean(deleteAnchorEl && selectedIndex === index)}
+                                                                    onClose={handleMenuClose}
+                                                                >
+                                                                    <MenuItem onClick={() => handleOpen()}>History</MenuItem>
+                                                                    <MenuItem
+                                                                        disabled={!isEditable}
+                                                                        sx={{ color: "red" }}
+                                                                        onClick={() => handleDelete(row.id)}
+                                                                    >
+                                                                        Delete
+                                                                    </MenuItem>
+                                                                </Menu>
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+                                                );
+                                            }
+
                                             return (
                                                 <Box style={isEditing ? styles.divInput : null}>
                                                     <LRTextField
@@ -241,60 +301,7 @@ const LRRow = memo((props) => {
                                     </TableCell>
                                 );
                             })}
-                            <TableCell>
-                                {/* Conditional rendering based on row.id */}
-                                {row.id === 3 ? (
-                                    <Box sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        justifyContent: "center",
-                                        width: 65
-                                    }}>
-                                        <IconButton onClick={() => handleNewRecordAccept(row.id)}>
-                                            <CheckCircleIcon sx={{
-                                                color: 'green'
-                                            }} />
-                                        </IconButton>
-                                        <IconButton onClick={() => handleNewRecordCancel()}>
-                                            <CancelIcon sx={{
-                                                color: 'red'
-                                            }} />
-                                        </IconButton>
-                                    </Box>
-                                ) : (
-                                    <Box sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        justifyContent: "center",
-                                        width: 40
-                                    }}>
-                                        {/* Delete button */}
-                                        <Button
-                                            aria-controls={`menu-delete-${index}`}
-                                            aria-haspopup="true"
-                                            onClick={(event) => handleDeleteOpen(event, index)}
-                                        >
-                                            <MoreHorizIcon />
-                                        </Button>
-                                        {/* Delete menu */}
-                                        <Menu
-                                            id={`menu-delete-${index}`}
-                                            anchorEl={deleteAnchorEl}
-                                            open={Boolean(deleteAnchorEl && selectedIndex === index)}
-                                            onClose={handleMenuClose}
-                                        >
-                                            <MenuItem onClick={() => handleOpen()}>History</MenuItem>
-                                            <MenuItem
-                                                disabled={!isEditable}
-                                                sx={{ color: "red" }}
-                                                onClick={() => handleDelete(row.id)}
-                                            >
-                                                Delete
-                                            </MenuItem>
-                                        </Menu>
-                                    </Box>
-                                )}
-                            </TableCell>
+
                         </TableRow>
                     );
                 })}
