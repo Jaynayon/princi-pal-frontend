@@ -469,7 +469,7 @@ function PeoplePage(props) {
                                     <TableCell>Name</TableCell>
                                     <TableCell>Email</TableCell>
                                     <TableCell>Role</TableCell>
-                                    {currentAssocation.admin === "true" && <TableCell>Actions</TableCell>}
+                                    <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -502,7 +502,7 @@ function PeoplePage(props) {
                                             <TableCell>
                                                 {/* Role with dropdown arrow */}
                                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    {row.admin === true ?
+                                                    {row.admin ?
                                                         row.position === "Principal" ?
                                                             <span>Principal</span>
                                                             :
@@ -531,27 +531,49 @@ function PeoplePage(props) {
                                                     </Menu>
                                                 }
                                             </TableCell>
-                                            {currentAssocation.admin === true && row.position !== "Principal" &&
-                                                <TableCell>
-                                                    {/* Delete button */}
-                                                    <Button
-                                                        aria-controls={`menu-delete-${index}`}
-                                                        aria-haspopup="true"
-                                                        onClick={(event) => handleDeleteOpen(event, index)}
-                                                    >
-                                                        <MoreHorizIcon />
-                                                    </Button>
-                                                    {/* Delete menu */}
-                                                    <Menu
-                                                        id={`menu-delete-${index}`}
-                                                        anchorEl={deleteAnchorEl}
-                                                        open={Boolean(deleteAnchorEl && selectedIndex === index)}
-                                                        onClose={handleMenuClose}
-                                                    >
-                                                        <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                                                    </Menu>
-                                                </TableCell>
-                                            }
+                                            <TableCell>
+                                                {currentAssocation.admin ? (
+                                                    row.position !== "Principal" && (
+                                                        <React.Fragment>
+                                                            <Button
+                                                                aria-controls={`menu-delete-${index}`}
+                                                                aria-haspopup="true"
+                                                                onClick={(event) => handleDeleteOpen(event, index)}
+                                                            >
+                                                                <MoreHorizIcon />
+                                                            </Button>
+                                                            <Menu
+                                                                id={`menu-delete-${index}`}
+                                                                anchorEl={deleteAnchorEl}
+                                                                open={Boolean(deleteAnchorEl && selectedIndex === index)}
+                                                                onClose={handleMenuClose}
+                                                            >
+                                                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                                                            </Menu>
+                                                        </React.Fragment>
+                                                    )
+                                                ) : (
+                                                    row.id === currentUser.id && (
+                                                        <React.Fragment>
+                                                            <Button
+                                                                aria-controls={`menu-delete-${index}`}
+                                                                aria-haspopup="true"
+                                                                onClick={(event) => handleDeleteOpen(event, index)}
+                                                            >
+                                                                <MoreHorizIcon />
+                                                            </Button>
+                                                            <Menu
+                                                                id={`menu-delete-${index}`}
+                                                                anchorEl={deleteAnchorEl}
+                                                                open={Boolean(deleteAnchorEl && selectedIndex === index)}
+                                                                onClose={handleMenuClose}
+                                                            >
+                                                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                                                            </Menu>
+                                                        </React.Fragment>
+                                                    )
+                                                )}
+                                            </TableCell>
                                         </TableRow>
                                     ))
                                 )}
