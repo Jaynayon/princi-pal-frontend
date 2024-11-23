@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { memo, useCallback, useEffect, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
 import { useSchoolContext } from '../../Context/SchoolProvider';
@@ -8,7 +8,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-export default function SchoolSearchFilter() {
+const SchoolSearchFilter = () => {
     const { setLr, currentDocument, isEditingRef, isSearchingRef } = useSchoolContext();
     const [input, setInput] = useState('');
     const [lrCopy, setLrCopy] = useState([]);
@@ -54,10 +54,12 @@ export default function SchoolSearchFilter() {
         isSearchingRef.current = false;
     }
 
-    // Use effect on load: fetch lr copy and initialize input to empty
+    // Remove input and fetch new LR copy when the current document changes
+    // current document changes when an LR is inserted, updated, or deleted
     useEffect(() => {
         setInput(""); // Initialize input to empty string
-    }, [currentDocument]);
+        getCurrentLr(); // Fetch new LR copy
+    }, [getCurrentLr]);
 
     // Use effect: lookup keyword in LR if input is not empty
     useEffect(() => {
@@ -80,6 +82,8 @@ export default function SchoolSearchFilter() {
 
         if (input) { // Set lookup if there's input
             setLr(lookup(input));
+        } else {
+            setLr(lrCopy); // Set original copy if input is empty
         }
     }, [input, setLr, isEditingRef, isSearchingRef, lrCopy]);
 
@@ -116,6 +120,8 @@ export default function SchoolSearchFilter() {
         </React.Fragment>
     );
 }
+
+export default memo(SchoolSearchFilter);
 
 const styles = {
     icon: {
