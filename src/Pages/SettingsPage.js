@@ -227,7 +227,7 @@ function SettingsPage() {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="email-field"
+                                id="email-settings-field"
                                 label="Email"
                                 defaultValue={currentUser.email}
                                 margin="normal"
@@ -242,7 +242,7 @@ function SettingsPage() {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="username-field"
+                                id="username-settings-field"
                                 label="Username"
                                 defaultValue={currentUser.username}
                                 margin="normal"
@@ -257,7 +257,7 @@ function SettingsPage() {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="first-name-field"
+                                id="first-name-settings-field"
                                 label="First Name"
                                 defaultValue={currentUser.fname + " "}
                                 margin="normal"
@@ -272,7 +272,7 @@ function SettingsPage() {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="middle-name-field"
+                                id="middle-name-settings-field"
                                 label="Middle Name"
                                 defaultValue={currentUser.mname + " "}
                                 margin="normal"
@@ -287,7 +287,7 @@ function SettingsPage() {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="last-name-field"
+                                id="last-name-settings-field"
                                 label="Last Name"
                                 defaultValue={currentUser.lname}
                                 margin="normal"
@@ -302,6 +302,7 @@ function SettingsPage() {
                             <TextField
                                 sx={{ width: '100%' }}
                                 required
+                                id="new-password-settings-filed"
                                 type={showPassword ? "text" : "password"}
                                 label="New Password"
                                 margin="normal"
@@ -325,6 +326,7 @@ function SettingsPage() {
                             <TextField
                                 sx={{ width: '100%' }}
                                 required
+                                id="confirm-password-settings-filed"
                                 type={showPassword ? "text" : "password"}
                                 label="Confirm Password"
                                 margin="normal"
