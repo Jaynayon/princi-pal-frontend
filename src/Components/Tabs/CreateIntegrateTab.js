@@ -23,7 +23,6 @@ export default function CreateIntegrateTab() {
             ...integrateFormData,
             [key]: value
         });
-        console.log(integrateFormData.email)
     };
 
     const getSchoolName = async (name) => {
@@ -104,7 +103,6 @@ export default function CreateIntegrateTab() {
         // Check if school exists
         if (key === "name" && integrateFormData.name !== "") {
             nameExists = await getSchoolName(value);
-            console.log(nameExists)
 
             if (!nameExists) {
                 setIntegrateSchoolError(true)
@@ -112,7 +110,6 @@ export default function CreateIntegrateTab() {
             } else {
                 // Check if school already has a principal integrated
                 const principal = await getPrincipal(nameExists.id);
-                console.log(principal)
                 if (principal) {
                     setIntegrateSchoolError(true)
                     setErrorMessage("A principal already exists in this school");
@@ -120,7 +117,6 @@ export default function CreateIntegrateTab() {
                     setSchool(nameExists) //set school
                     setIntegrateSchoolError(false);
                 }
-                console.log(principal);
             }
 
             //Check if user exists
@@ -159,8 +155,6 @@ export default function CreateIntegrateTab() {
             try {
                 const response = await insertUserAssociation(user.id, school.id);
                 if (response) {
-                    console.log("Insert association creation successful");
-
                     // Clear form fields after successful registration
                     setIntegrateFormData({
                         name: '',
@@ -174,8 +168,6 @@ export default function CreateIntegrateTab() {
             } catch (error) {
                 console.error("Error:", error);
             }
-        } else {
-            console.log("Form contains errors");
         }
     };
     return (

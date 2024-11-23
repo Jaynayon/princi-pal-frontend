@@ -20,7 +20,6 @@ export default function CreateSchoolTab() {
             ...schoolFormData,
             [key]: value
         });
-        console.log(schoolFormData.fullName)
     };
 
     const getSchoolName = async (name) => {
@@ -49,7 +48,6 @@ export default function CreateSchoolTab() {
             nameExists ? setSchoolNameError(true) : setSchoolNameError(false);
         } else if (key === "fullName" && value !== "") {
             nameExists = await getSchoolName(value);
-            console.log(nameExists)
             nameExists ? setSchoolFullNameError(true) : setSchoolFullNameError(false);
         } else {
             if (key === "fullName") {
@@ -85,7 +83,6 @@ export default function CreateSchoolTab() {
         const { name, fullName } = schoolFormData;
 
         if (!name || !fullName) {
-            // console.log("All fields are required");
             // setFormValid(false); // Set form validity to false immediately
             return; // Exit the function
         }
@@ -94,8 +91,6 @@ export default function CreateSchoolTab() {
         try {
             const response = await createSchool(name, fullName);
             if (response) {
-                console.log("School creation successful");
-
                 // Clear form fields after successful registration
                 setSchoolFormData({
                     name: '',

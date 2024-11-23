@@ -63,8 +63,6 @@ export default function UACSTab() {
         setEditingCell({ colId, rowId });
         setInitialValue(event.target.value); // Save the initial value of the clicked cell
         setInputValue(event.target.value); // Set input value to the current value
-        console.log(editingCell)
-        console.log('row Id: ' + rowId + " and col Id: " + colId)
     };
 
 
@@ -96,21 +94,13 @@ export default function UACSTab() {
         isEditingRef.current = false;
         // Perform any action when input is blurred (e.g., save the value)
         if (inputValue !== initialValue) {
-            console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
             await updateJevBudgetById(colId, rowId, inputValue);
         }
-        console.log('Value saved:', inputValue);
     };
 
     const updateJevBudgetById = async (colId, rowId, value) => {
         try {
-            const response = await updateJevById(colId, rowId, value);
-            if (response) {
-                console.log(`LR with id: ${rowId} is updated`);
-            } else {
-                console.log("LR not updated");
-            }
-            // fetchDocumentData();
+            await updateJevById(colId, rowId, value);
         } catch (error) {
             console.error('Error fetching document:', error);
         }

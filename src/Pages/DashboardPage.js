@@ -64,13 +64,8 @@ const calculateWeeklyExpenses = (expensesData) => {
         if (weekIndex >= 0 && weekIndex < totalWeeks) {
             weeklyExpenses[objectCode][weekIndex] += amount;
         }
-
-
-        //console.log(`Date: ${date}, Object Code: ${objectCode}, Amount: ${amount}, Week Index: ${weekIndex}`);
-        //console.log(`Updated Weekly Expenses: ${JSON.stringify(weeklyExpenses)}`);
     });
 
-    //console.log('Final Weekly Expenses:', JSON.stringify(weeklyExpenses));
     return weeklyExpenses;
 };
 
@@ -365,25 +360,6 @@ function DashboardPage(props) {
         maximumFractionDigits: 2
     }).format(value);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Log the specific fields (date, objectCode, and amount) for each LR row
-                if (lr && lr.length > 0) {
-                    lr.forEach(row => {
-                        //console.log(`Date: ${row.date}, UACS Object Code: ${row.objectCode}, Amount: ${row.amount}`);
-                    });
-                } else {
-                    console.log('No LR data available');
-                }
-            } catch (error) {
-                console.error('Error fetching document data:', error);
-            }
-        };
-        fetchData();
-    }, [lr]);
-
-
     const initializeSelectedSchool = useCallback(() => {
         if (currentUser && currentUser.schools && currentUser.schools.length > 0) {
             if (currentSchool) {
@@ -479,7 +455,6 @@ function DashboardPage(props) {
     const handleSchoolSelect = async (schoolId) => {
         setSelectedSchool(schoolId);
         setCurrentSchool(currentUser.schools.find(s => s.id === schoolId));
-        console.log('Selected school:', schoolId);
     };
 
     const updateDocumentById = async (docId, value) => {
@@ -496,7 +471,6 @@ function DashboardPage(props) {
             const data = await response.json();
 
             if (response.ok) {
-                console.log('Budget limit updated successfully:', data);
                 return true;
             } else {
                 console.error('Failed to update budget limit:', data);
@@ -553,7 +527,6 @@ function DashboardPage(props) {
                 const isUpdated = await updateDocumentById(currentDocument.id, finalBudgetLimit);
 
                 if (isUpdated) {
-                    console.log('Budget limit saved successfully');
                     setCurrentDocument({
                         ...currentDocument,
                         budgetLimit: finalBudgetLimit // Save the adjusted value

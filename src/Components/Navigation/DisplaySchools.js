@@ -33,7 +33,7 @@ export default function DisplaySchools() {
         openSub,
         setOpenSub
     } = useNavigationContext();
-    const { setIsAdding } = useSchoolContext();
+    const { setIsAdding, isSearchingRef, isEditingRef } = useSchoolContext();
 
     useEffect(() => {
         if (!open) {
@@ -53,6 +53,9 @@ export default function DisplaySchools() {
             setSelected(currentUser.schools[0].name);
             setCurrentSchool(currentUser.schools[0]);
         }
+
+        isEditingRef.current = false; // Close the search field 
+        isSearchingRef.current = false; // when a school is selected
         setIsAdding(false); // Close the add field/form when a school is selected
     }
 
@@ -81,8 +84,6 @@ export default function DisplaySchools() {
             fontSize: '19px',
         },
     }), [theme.navStyle.color, theme.navStyle.bold]);
-
-    console.log(currentUser);
 
     return (
         currentUser && currentUser.schools.length > 0 ? //Check if user has schools assigned

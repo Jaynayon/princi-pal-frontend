@@ -1,7 +1,4 @@
-// React imports
-import React, { useEffect, useState } from "react";
-
-// Material-UI imports
+import React, { useState, useEffect, useCallback } from "react";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import MuiDrawer from "@mui/material/Drawer";
@@ -15,20 +12,22 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-
+import axios from "axios";
+import Button from "@mui/material/Button";
 
 // Custom imports
 import { styling } from "./styling";
-import DisplayItems from './DisplayItems'; // Correct import for the default export
+import DisplayItems from './DisplayItems';
 import ProfileTab from "../Modal/ProfileTab";
 import { useNavigationContext } from "../../Context/NavigationProvider";
 import CustomizedSwitches from "./CustomizedSwitches";
 import NavigationSearchBar from "./NavigationSearchBar";
 import NotificationTab from './NotificationTab';
-
+import EmailVerificationModal from "../Modal/EmailVerificationModal";
 
 const drawerWidth = 220;
 
+// Styled components for AppBar and Drawer
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
@@ -47,86 +46,68 @@ const AppBar = styled(MuiAppBar, {
 
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => {
-  const [mobileMode, setMobileMode] = useState(false);
-
-  const updateMobileMode = () => {
-    const { innerWidth } = window;
-    setMobileMode(innerWidth < 600);
-  };
-
-  useEffect(() => {
-    updateMobileMode();
-
-    const handleResize = () => {
-      updateMobileMode();
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  return {
-    "& .MuiDrawer-paper": {
-      position: mobileMode ? "absolute" : "relative",
-      whiteSpace: "nowrap",
-      width: drawerWidth,
-      transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      boxSizing: "border-box",
-      ...(!open && {
+})(({ theme, open }) => ({
+  "& .MuiDrawer-paper": {
+    position: "relative",
+    whiteSpace: "nowrap",
+    width: drawerWidth,
+    transition: theme.transitions.create("width", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    boxSizing: "border-box",
+    ...(open
+      ? {}
+      : {
         overflowX: "hidden",
         transition: theme.transitions.create("width", {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.leavingScreen,
         }),
         width: theme.spacing(7.7),
-        [theme.breakpoints.up("sm")]: {
-          width: theme.spacing(7.7),
-        },
       }),
-    },
-  };
-});
+  },
+}));
 
 export function transformSchoolText(input) {
-  let words = input.split(' ');
-  return words.map((word, index) => {
-    if (index === words.length - 1) {
-      return word.toUpperCase();
-    } else {
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    }
-  }).join(' ');
+  return input
+    .split(" ")
+    .map((word, index) => {
+      return index === input.split(" ").length - 1
+        ? word.toUpperCase()
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
 }
 
 const displayTitle = (selected) => {
-  if (
-    selected === "Dashboard" ||
-    selected === "Settings" ||
-    selected === "People" ||
-    selected === "Logout"
-  ) {
+  if (["Dashboard", "Settings", "People", "Logout"].includes(selected)) {
     return selected;
   }
-
   return (
     <span>
-      School {""}
-      <span style={{ color: "#20A0F0" }}>
-        ({transformSchoolText(selected || "None")})
-      </span>
+      School <span style={{ color: "#20A0F0" }}>({transformSchoolText(selected || "None")})</span>
     </span>
   );
 };
 
+// Function to send verification email
+const sendVerificationEmail = async (email) => {
+  try {
+    const response = await axios.post(`${process.env.REACT_APP_API_URL_BASE}/send-verification`, null, {
+      params: { email }
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default function Navigation({ children }) {
-  const { list, setSelected, selected, open, toggleDrawer, navStyle, mobileMode } = useNavigationContext();
+  const { list, setSelected, selected, open, toggleDrawer, navStyle, mobileMode, currentUser } = useNavigationContext();
+  const [loading, setLoading] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [, setIsVerified] = useState(false);
 
   const defaultTheme = createTheme({
     typography: {
@@ -134,6 +115,30 @@ export default function Navigation({ children }) {
     },
     navStyle: styling[navStyle],
   });
+
+  // Check if currentUser is verified
+  useEffect(() => {
+    if (currentUser) {
+      setIsVerified(currentUser.verified);
+    }
+  }, [currentUser]);
+
+  const handleVerifyClick = async () => {
+    setLoading(true);
+    try {
+      await sendVerificationEmail(currentUser.email);
+      setOpenModal(true);
+    } catch (error) {
+      console.error("Failed to send verification email:", error);
+      alert("Failed to send verification email. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseModal = useCallback(() => {
+    setOpenModal(false);
+  }, []);
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -147,79 +152,31 @@ export default function Navigation({ children }) {
               backgroundColor: (theme) => theme.navStyle.base,
               boxShadow: "none",
               borderRight: "none",
-              display: mobileMode && !open ? "none" : null
+              display: mobileMode && !open ? "none" : null,
             },
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Box
-              sx={{
-                height: "75px",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <Box sx={{ height: "75px", display: "flex", alignItems: "center" }}>
               <IconButton
                 aria-label="open drawer"
                 onClick={toggleDrawer}
-                sx={{
-                  color: (theme) => theme.navStyle.color,
-                  ...(open && { display: "none" }),
-                }}
+                sx={{ color: (theme) => theme.navStyle.color, ...(open && { display: "none" }) }}
               >
                 <MenuIcon />
               </IconButton>
             </Box>
-
-            <Toolbar
-              sx={{
-                px: [0.5],
-                width: "100%",
-                display: "flex",
-                ...(!open && { display: "none" }),
-              }}
-            >
+            <Toolbar sx={{ px: [0.5], width: "100%", display: !open && { display: "none" } }}>
               <ProfileTab />
-              <IconButton
-                onClick={toggleDrawer}
-                sx={{
-                  color: (theme) => theme.navStyle.color,
-                }}
-              >
-                <ChevronLeftIcon color="inherit" />
+              <IconButton onClick={toggleDrawer} sx={{ color: (theme) => theme.navStyle.color }}>
+                <ChevronLeftIcon />
               </IconButton>
             </Toolbar>
           </Box>
-          <List
-            component="nav"
-            sx={{
-              marginRight: "5px",
-              marginLeft: "5px",
-              paddingTop: "5px",
-              marginTop: "5px",
-            }}
-          >
-            <DisplayItems
-              list={list}
-              selected={selected}
-              setSelected={setSelected}
-            />
+          <List component="nav" sx={{ margin: "5px" }}>
+            <DisplayItems list={list} selected={selected} setSelected={setSelected} />
           </List>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              height: "100%",
-              marginBottom: "20px",
-            }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", mb: "20px" }}>
             <CustomizedSwitches />
           </Box>
         </Drawer>
@@ -227,9 +184,7 @@ export default function Navigation({ children }) {
           component="main"
           sx={{
             backgroundColor: (theme) =>
-              theme.palette.mode === "light"
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
+              theme.palette.mode === "light" ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: "100vh",
             overflow: "auto",
@@ -237,29 +192,12 @@ export default function Navigation({ children }) {
         >
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4, pl: 4 }}>
             <Grid container spacing={3}>
-              <AppBar
-                position="relative"
-                open={open}
-                sx={{
-                  boxShadow: "none",
-                  backgroundColor: "transparent",
-                  paddingTop: "5px",
-                }}
-              >
-                <Toolbar
-                  sx={{
-                    pr: "24px",
-                    color: "#C5C7CD",
-                    pl: 1
-                  }}
-                >
+              <AppBar position="relative" open={open} sx={{ boxShadow: "none", backgroundColor: "transparent", paddingTop: "5px" }}>
+                <Toolbar sx={{ pr: "24px", color: "#C5C7CD", pl: 1 }}>
                   <IconButton
                     aria-label="open drawer"
                     onClick={toggleDrawer}
-                    sx={{
-                      display: !mobileMode ? "none" : null,
-                      color: (theme) => theme.navStyle.color,
-                    }}
+                    sx={{ display: !mobileMode ? "none" : null, color: (theme) => theme.navStyle.color }}
                   >
                     <MenuIcon />
                   </IconButton>
@@ -273,23 +211,71 @@ export default function Navigation({ children }) {
                       textAlign: "left",
                       color: "#252733",
                       fontWeight: "bold",
-                      width: '400px'
+                      width: "400px",
                     }}
                   >
                     {displayTitle(selected)}
                   </Typography>
-
-                  {/* Search Bar */}
                   <NavigationSearchBar />
                   <NotificationTab />
-
                 </Toolbar>
               </AppBar>
+
+              {/* Email Verification Indicator */}
+              {currentUser && !currentUser.verified && (
+                <Box
+                  sx={{
+                    backgroundColor: "#f44336",
+                    padding: "10px",
+                    borderRadius: "4px",
+                    textAlign: "center",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mx: "25px",
+                    mb: "20px",
+                    width: "100%",
+                  }}
+                >
+                  <Typography variant="body2" color="white" sx={{ flexGrow: 1 }}>
+                    Please check your email to verify your account and keep your current username.
+                  </Typography>
+                  <Button
+                    onClick={handleVerifyClick}
+                    variant="outlined" // Change to outlined variant
+                    sx={{
+                      minWidth: "80px",
+                      minHeight: "30px",
+                      textTransform: "none", // Remove uppercase transformation
+                      borderColor: "white", // Set the border color to white
+                      color: "white", // Set the text color to white
+                      fontSize: "0.75rem", // Set the font size to 0.75rem
+                      "&:hover": {
+                        borderColor: "white", // Ensure the border stays white on hover
+                        backgroundColor: "rgba(255, 255, 255, 0.1)", // Optional: Add a light background on hover
+                      },
+                    }}
+                    disabled={loading}
+                  >
+                    <Typography variant="body2" color="white">
+                      {loading ? "Sending..." : "Resend Email"}
+                    </Typography>
+                  </Button>
+
+                </Box>
+              )}
               {children}
             </Grid>
           </Container>
         </Box>
       </Box>
+
+      {/* Modal for verification email status */}
+      <EmailVerificationModal
+        openModal={openModal}
+        handleCloseModal={handleCloseModal}
+        currentUser={currentUser}
+      />
     </ThemeProvider>
   );
 }

@@ -63,7 +63,6 @@ export default function LRTextField(props) {
 
             try {
                 if (rowId !== 3 && modifiedInput !== modifiedValue) {
-                    console.log(`Wow there is changes in col: ${colId} and row: ${rowId}`);
                     if (colId === "amount") {
                         const difference = Math.abs(modifiedInput - modifiedValue);
                         const newTotalExpenses = modifiedInput > modifiedValue
@@ -87,7 +86,6 @@ export default function LRTextField(props) {
                         await updateLrById(colId, rowId, input);
                     }
                 } else {
-                    console.log('Value saved:', value);
                     setInput(modifiedValue);
                 }
             } catch (e) {

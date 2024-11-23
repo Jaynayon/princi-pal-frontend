@@ -13,7 +13,7 @@ const pathToLocalStorageValue = {
     "/": "Dashboard",
     '/dashboard': 'Dashboard',
     '/people': 'People',
-    '/settings': 'Settings',
+    '/settings': 'Settings'
 };
 
 export const NavigationProvider = ({ children }) => {
@@ -64,10 +64,6 @@ export const NavigationProvider = ({ children }) => {
                 }
             });
 
-            if (response) {
-                console.log(response.data)
-            }
-
             return response.status === 201;
         } catch (error) {
             console.error('Error creating user:', error);
@@ -87,11 +83,7 @@ export const NavigationProvider = ({ children }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            })
-
-            if (response) {
-                console.log(response.data);
-            }
+            });
 
             return response.data
         } catch (error) {
@@ -180,7 +172,10 @@ export const NavigationProvider = ({ children }) => {
                     if (matchedSchool) { setCurrentSchool(matchedSchool); }
 
                     setSelected(localStorageValue); // Set the selected state for school
-                } else {
+                } else if (extractRoute === "/reset-password" || extractRoute === "/verify-email" || extractRoute === "/referral") {
+                    return; // Do nothing; load the page
+                }
+                else {
                     // If user is logged in, redirect to inner modules
                     navigate('/');
                 }
@@ -216,7 +211,6 @@ export const NavigationProvider = ({ children }) => {
 
 
     // useEffect(() => {
-    //     console.log("test navigation context")
     //     window.localStorage.setItem("LOCAL_STORAGE_SELECTED", JSON.stringify(selected));
     // }, [selected]);
 

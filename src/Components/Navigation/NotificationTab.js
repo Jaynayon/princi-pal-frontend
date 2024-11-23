@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigationContext } from '../../Context/NavigationProvider';
+import { useAppContext } from '../../Context/AppProvider';
 
 // Material-UI imports
 import { Box, IconButton, Badge, Menu, Typography, MenuItem, Button, Divider } from '@mui/material';
@@ -14,6 +15,7 @@ import Tab from '@mui/material/Tab';
 const ITEM_HEIGHT = 48;
 
 export default function NotificationTab() {
+    const { fetchCurrentUser } = useAppContext();
     const { currentUser } = useNavigationContext();
     const [notifications, setNotifications] = useState([]);
     const [error, setError] = useState(null);
@@ -112,6 +114,8 @@ export default function NotificationTab() {
             } else {
                 console.error('Error:', error.message);
             }
+        } finally {
+            fetchCurrentUser(); // Reload user to render new school/s
         }
     };
 
@@ -131,13 +135,12 @@ export default function NotificationTab() {
             const rejectInvitationUrl = `${process.env.REACT_APP_API_URL_NOTIF}/reject/${notificationId}`;
 
             // Send a PUT request with the Authorization header
-            const response = await axios.put(rejectInvitationUrl, null, {
+            await axios.put(rejectInvitationUrl, null, {
                 headers: {
                     'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`
                 }
             });
             fetchNotifications();
-            console.log('Invitation rejected and associated data updated successfully:', response.data);
         } catch (error) {
             if (error.response) {
                 console.error('Server Error:', error.response.data);
@@ -151,6 +154,11 @@ export default function NotificationTab() {
 
     const handleClearNotifications = async () => {
         try {
+            // Filter out notifications without `hasButtons` or with `hasButtons` set to false
+            const notificationsToKeep = notifications.filter(
+                (notif) => notif.hasButtons === true
+            );
+
             // Send a DELETE request to remove all notifications for the current user
             await axios.delete(`${process.env.REACT_APP_API_URL_NOTIF}/${currentUser.id}`, {
                 headers: {
@@ -158,10 +166,10 @@ export default function NotificationTab() {
                 }
             });
 
-            // Clear notifications in the state after successful deletion
-            setNotifications([]);
+            // Update the state with remaining notifications
+            setNotifications(notificationsToKeep);
+
             localStorage.removeItem("NOTIFICATIONS");
-            console.log('All notifications cleared successfully.');
         } catch (error) {
             if (error.response) {
                 console.error('Server Error:', error.response.data);

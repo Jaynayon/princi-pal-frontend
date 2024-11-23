@@ -48,11 +48,8 @@ const ForgotPasswordPage = () => {
     };
 
     const handleForgotPassword = async () => {
-        console.log("Submitting forgot password request...");
-
         if (!email) {
             setError("Email is required.");
-            console.log("Error: Email is required.");
             return;
         }
 
@@ -61,34 +58,26 @@ const ForgotPasswordPage = () => {
         }
 
         setLoading(true);
-        console.log("Email submitted:", email);
 
         try {
             const response = await forgotPassword(email);
-            console.log("Response from forgotPassword:", response);
 
             if (response.status === 200 && response.data === "Email sent") {
                 setSuccessMessage("Password reset link sent to your email!");
-                console.log("Success: Password reset link sent.");
                 setOpenSnackbar(true);
                 setEmail(''); // Clear email input after success
             } else {
                 setError("Failed to send password reset link. Please try again.");
-                console.log("Error: Failed to send password reset link.");
             }
         } catch (error) {
-            console.log("Error caught:", error);
             if (error.response) {
                 if (error.response.status === 404) {
                     setError("Email is not registered.");
-                    console.log("Error: Email is not registered.");
                 } else {
                     setError("An error occurred: " + (error.response.data || error.message));
-                    console.log("Error: An error occurred:", error.response.data || error.message);
                 }
             } else {
                 setError("An error occurred: " + error.message);
-                console.log("Error: An error occurred:", error.message);
             }
         } finally {
             setLoading(false);
@@ -111,22 +100,22 @@ const ForgotPasswordPage = () => {
     };
 
     return (
-        <Box 
-            sx={{ 
-                width: "100vw", 
-                height: "100vh", 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                backgroundImage: `url(/bg.png)`, 
+        <Box
+            sx={{
+                width: "100vw",
+                height: "100vh",
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundImage: `url(/bg.png)`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
             }}
         >
             <List sx={style}>
                 <ListItem>
-                    <ListItemText 
-                        primary="Forgot Password" 
+                    <ListItemText
+                        primary="Forgot Password"
                         primaryTypographyProps={{ variant: 'h5', fontWeight: 'bold', sx: { color: '#003366' } }}
                     />
                 </ListItem>
@@ -157,18 +146,18 @@ const ForgotPasswordPage = () => {
                 </ListItem>
                 <Divider component="li" />
                 <ListItem sx={{ justifyContent: 'flex-end' }}>
-                    <Button 
+                    <Button
                         variant="contained"
-                        onClick={() => navigate('/login')} 
-                        sx={{ 
-                            mr: 1, 
+                        onClick={() => navigate('/login')}
+                        sx={{
+                            mr: 1,
                             backgroundColor: '#E4E0E1',
                             color: '#3C3D37',
-                            fontWeight: 'bold', 
-                            '&:hover': { 
-                                backgroundColor: 'darkgray' 
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                backgroundColor: 'darkgray'
                             }
-                        }} 
+                        }}
                         size="small"
                     >
                         Cancel
@@ -176,12 +165,12 @@ const ForgotPasswordPage = () => {
                     <Button
                         variant="contained"
                         onClick={handleForgotPassword}
-                        sx={{ 
-                            backgroundColor: '#4a99d3', 
-                            color: 'white', 
-                            fontWeight: 'bold', 
-                            '&:hover': { 
-                                backgroundColor: '#3380a0' 
+                        sx={{
+                            backgroundColor: '#4a99d3',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                backgroundColor: '#3380a0'
                             }
                         }}
                         disabled={loading || !!emailError || !email} // Disable button if loading, emailError, or empty email
@@ -191,7 +180,7 @@ const ForgotPasswordPage = () => {
                     </Button>
                 </ListItem>
             </List>
-    
+
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}

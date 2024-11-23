@@ -69,10 +69,7 @@ export default function BudgetAllocationContent() {
             if (currentSchool) {
                 const response = await getDocumentBySchoolIdYear(currentSchool.id, year);
                 if (response) {
-                    console.log(response); //test
                     setDocumentsByYear(response);
-                } else {
-                    console.log("Documents not fetched");
                 }
             }
         } catch (error) {

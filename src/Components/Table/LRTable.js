@@ -259,10 +259,8 @@ const DocumentTextFields = (props) => {
 
     const handleInputBlur = async () => {
         if (prevInput !== input) {
-            console.log("there are changes");
             await updateDocumentFooter(input); //update field in db
-        } else
-            console.log("no changes");
+        }
     }
 
     const handleInputOnClick = (event) => {
@@ -276,10 +274,7 @@ const DocumentTextFields = (props) => {
         try {
             const response = await updateDocumentById(id, description, input);
             if (response) {
-                console.log(`Document with id: ${id} is updated`);
                 setInput(newValue);
-            } else {
-                console.log("Document not updated");
             }
             fetchDocumentData(); //fetch data changes
         } catch (error) {

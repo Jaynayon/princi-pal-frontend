@@ -126,10 +126,6 @@ function SchoolPage(props) {
 
                 // Use FileSaver.js to trigger file download
                 saveAs(blobData, `Documents-${month}-${year}.zip`);
-
-                if (blobData) {
-                    console.log("Successfully exported document")
-                }
             }
         } catch (error) {
             console.error('Error fetching document:', error);
@@ -141,8 +137,6 @@ function SchoolPage(props) {
     const exportDocumentOnClick = async () => {
         await exportDocument();
     }
-
-    console.log("Schools renders")
 
     // Remove add field when going to another tab
     React.useEffect(() => {

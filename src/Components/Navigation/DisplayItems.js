@@ -22,8 +22,6 @@ const DisplayItems = memo(({ list, selected, setSelected }) => {
     const theme = useTheme();
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // State to manage logout dialog
 
-    console.log("display items rendered");
-
     const styles = {
         icon: {
             fontSize: '19px',

@@ -16,7 +16,8 @@ import RegistrationPage from './Pages/RegistrationPage.js';
 import { useAppContext } from './Context/AppProvider.js';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage.js';
 import ResetPasswordPage from './Pages/ResetPasswordPage.js';
-import TokenExpiredPage from './Pages/TokenExpiredPage.js';
+import EmailVerificationPage from './Pages/EmailVerificationPage.js';
+import ReferralPage from './Pages/ReferralPage.js';
 
 function App() {
   const { isLoggedIn, isSuperAdmin } = useAppContext();
@@ -26,6 +27,13 @@ function App() {
       return <LoginPage />;
     }
     return isSuperAdmin ? <AdminPage /> : <PageWithNavigation page={<Component />} />;
+  };
+
+  const getElementWithoutNavigation = (Component) => {
+    if (!isLoggedIn) {
+      return <LoginPage />;
+    }
+    return isSuperAdmin ? <AdminPage /> : <PageWithoutNavigation page={<Component />} />;
   };
 
   const getWelcomeElement = (WelcomeModule, Component) => {
@@ -67,22 +75,26 @@ function App() {
           element={getElement(SettingsPage)}
         />
         <Route
+          path="/referral/*"
+          element={getElementWithoutNavigation(ReferralPage)}
+        />
+        <Route
           path="*"
           element={<NoMatchPage />}
         />
         {/* Bypass login check for ForgotPasswordPage */}
         <Route
           path="/forgot-password"
-          element={<ForgotPasswordPage />} 
+          element={<ForgotPasswordPage />}
         />
         <Route
           path="/reset-password/"
           element={
-            <ResetPasswordPage/>}
+            <ResetPasswordPage />}
         />
         <Route
-          path="/token-expired"
-          element={<TokenExpiredPage />} 
+          path="/verify-email"
+          element={<EmailVerificationPage />}
         />
       </Route>
     )
@@ -110,6 +122,16 @@ const PageWithNavigation = ({ page, setIsLoggedIn }) => {
         <Navigation>
           {page}
         </Navigation>
+      </SchoolProvider>
+    </NavigationProvider>
+  );
+};
+
+const PageWithoutNavigation = ({ page, setIsLoggedIn }) => {
+  return (
+    <NavigationProvider>
+      <SchoolProvider>
+        {page}
       </SchoolProvider>
     </NavigationProvider>
   );

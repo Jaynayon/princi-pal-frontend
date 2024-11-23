@@ -94,7 +94,6 @@ const LoginPage = () => {
                         justifyContent: 'flex-start'
                     }}>
                         <IconButton
-                            onClick={() => console.log('test')}
                             href="/"
                             sx={{ right: '20px' }}>
                             <ChevronLeftIcon color='inherit' sx={{ fontSize: '50px' }} />

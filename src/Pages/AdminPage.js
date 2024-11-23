@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { Container, Button, Tabs, Tab } from '@mui/material';
+import { Container, Button, Tabs, Tab, ThemeProvider, createTheme } from '@mui/material';
 
 import PropTypes from 'prop-types';
 import CreatePositionTab from '../Components/Tabs/CreatePositionTab';
 import CreateUacsTab from '../Components/Tabs/CreateUacsTab';
-import CreatePrincipalTab from '../Components/Tabs/CreatePrincipalTab';
-import CreateSchoolTab from '../Components/Tabs/CreateSchoolTab';
 import CreateIntegrateTab from '../Components/Tabs/CreateIntegrateTab';
 import LogoutDialog from '../Components/Modal/LogoutDialog';
+import PrincipalsTable from '../Components/Table/PrincipalsTable';
+import SchoolTable from '../Components/Table/SchoolTable';
 
 // TabPanel component for displaying content based on the active tab
 const TabPanel = ({ children, value, index }) => {
@@ -44,38 +44,56 @@ function AdminPage() {
         setTabValue(newValue);
     };
 
+    const defaultTheme = createTheme({
+        typography: {
+            fontFamily: "Mulish",
+        },
+    });
+
     return (
-        <Container
-            maxWidth={false}
-            style={styles.outer_container}
-        >
+        <ThemeProvider theme={defaultTheme}>
             <Container
-                maxWidth="md"
-                style={styles.inner_container}
+                maxWidth={false}
+                style={styles.container}
             >
-                <Typography
-                    variant="h4"
-                    style={styles.title}
-                >
-                    Admin Page
-                </Typography>
-                <Paper style={styles.paper} >
-                    <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                        <Tabs value={tabValue} onChange={handleTabChange} centered>
-                            <Tab label="Create Principal" />
-                            <Tab label="Create School" />
-                            <Tab label="Integrate Principal" />
-                            <Tab label="Create UACS" />
-                            <Tab label="Create Position" />
+                <Paper sx={styles.paper} >
+                    <Box sx={styles.header_container}>
+                        <Box sx={styles.header_title}>
+                            <img
+                                src="/logoremovebgpreview-1@2x-black.png"
+                                alt="logo"
+                                style={{ width: "70px", height: "auto" }}
+                            />
+                            <Typography variant="h5" style={styles.title}>
+                                Admin Panel
+                            </Typography>
+                        </Box>
+                        <Button
+                            variant="outlined"
+                            sx={{
+                                ...styles.button,
+                                fontWeight: logoutDialogOpen && "bold"
+                            }}
+                            onClick={() => setLogoutDialogOpen(true)}
+                        >
+                            Logout
+                        </Button>
+                    </Box>
+                    <Box sx={styles.tab_container}>
+                        <Tabs value={tabValue} onChange={handleTabChange} centered >
+                            <Tab label="Principals" sx={styles.tab} />
+                            <Tab label="Schools" sx={[styles.tab]} />
+                            <Tab label="Integration" sx={styles.tab} />
+                            <Tab label="UACS" sx={styles.tab} />
+                            <Tab label="Positions" sx={styles.tab} />
                         </Tabs>
-                        <Button onClick={() => setLogoutDialogOpen(true)}>Logout</Button>
                     </Box>
 
                     {/* Tab Content */}
                     <Box sx={styles.content}>
-                        {tabValue === 0 && (<CreatePrincipalTab />)}
+                        {tabValue === 0 && (<PrincipalsTable />)}
 
-                        {tabValue === 1 && (<CreateSchoolTab />)}
+                        {tabValue === 1 && (<SchoolTable />)}
 
                         {tabValue === 2 && (<CreateIntegrateTab />)}
 
@@ -84,66 +102,89 @@ function AdminPage() {
                         {tabValue === 4 && (<CreatePositionTab />)}
                     </Box>
                 </Paper>
-            </Container>
 
-            {/* Logout confirmation dialog */}
-            <LogoutDialog
-                open={logoutDialogOpen}
-                onClose={() => setLogoutDialogOpen(false)}
-            />
-        </Container>
+                {/* Logout confirmation dialog */}
+                <LogoutDialog
+                    open={logoutDialogOpen}
+                    onClose={() => setLogoutDialogOpen(false)}
+                />
+            </Container>
+        </ThemeProvider>
     );
 }
 
 const styles = {
-    outer_container: {
+    container: {
         width: "100vw",
         height: "100vh",
-        position: "relative",
         overflow: "auto",
         backgroundImage: `url(/bg.png)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center'
     },
-    inner_container: {
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
+    header_container: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        pl: 2,
+        pb: 1,
+        pr: 4
+    },
+    header_title: {
+        display: 'flex',
         justifyContent: "center",
         alignItems: "center",
-        position: "relative",
-        zIndex: 1,
-        paddingTop: "64px",
-        padding: "0 1rem",
+        marginTop: "0.5rem",
+        marginBottom: "0.60rem"
     },
     title: {
-        marginBottom: "2rem",
-        marginTop: "2rem",
         fontFamily: "Mulish",
-        color: "#000",
         textAlign: "center"
     },
     paper: {
-        width: '100%',
-        padding: '2rem',
+        // minWidth: '100%',
+        maxWidth: "1440px",
+        maxHeight: "900px",
+        paddingTop: '15px',
         borderRadius: '10px',
         margin: 'auto',
-        position: 'relative',
-        bottom: '20px',
-        left: '0',
-        right: '0',
-        zIndex: 1,
+        marginBottom: '20px',
+        marginTop: '20px',
     },
     content: {
-        minHeight: "60vh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: "3rem",
-        width: "100%",
-        maxWidth: "700px", // Adjust if needed
+        maxHeight: "900px",
         margin: "0 auto", // Center align horizontally
+        p: 5,
+        overflow: "auto"
+    },
+    tab_container: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        pl: 2,
+        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" // Bottom shadow
+    },
+    tab: {
+        textTransform: 'none',
+        '&.Mui-selected': {
+            color: 'black', // Color of selected tab
+            fontWeight: 'bold', // Font weight of selected tab
+        }
+    },
+    button: {
+        textTransform: 'none', // Remove uppercase transformation
+        borderRadius: '4px', // Slightly rounded corners
+        padding: '4px 12px', // Adjust padding to match the look
+        borderColor: '#ddd', // Light gray border color
+        color: 'red', // Dark text color
+        px: 3,
+        '&:hover': {
+            borderColor: '#bbb', // Slightly darker border on hover
+        },
     }
 }
 
