@@ -154,6 +154,11 @@ export default function NotificationTab() {
 
     const handleClearNotifications = async () => {
         try {
+            // Filter out notifications without `hasButtons` or with `hasButtons` set to false
+            const notificationsToKeep = notifications.filter(
+                (notif) => notif.hasButtons === true
+            );
+
             // Send a DELETE request to remove all notifications for the current user
             await axios.delete(`${process.env.REACT_APP_API_URL_NOTIF}/${currentUser.id}`, {
                 headers: {
@@ -161,8 +166,9 @@ export default function NotificationTab() {
                 }
             });
 
-            // Clear notifications in the state after successful deletion
-            setNotifications([]);
+            // Update the state with remaining notifications
+            setNotifications(notificationsToKeep);
+
             localStorage.removeItem("NOTIFICATIONS");
         } catch (error) {
             if (error.response) {
