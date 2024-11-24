@@ -10,6 +10,7 @@ import { useAppContext } from "../Context/AppProvider";
 const ReferralPage = () => {
     const { currentUser } = useAppContext();
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackStatus, setSnackStatus] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [school, setSchool] = useState(null);
     const [page, setPage] = useState('invalid');
@@ -78,11 +79,13 @@ const ReferralPage = () => {
             });
 
             if (response.status === 201) {
-                setOpenSnackbar(true);
+                setSnackStatus(true);
             }
         } catch (e) {
+            setSnackStatus(false);
             console.error(e);
         } finally {
+            setOpenSnackbar(true);
             setIsLoading(false);
         }
     };
@@ -248,8 +251,11 @@ const ReferralPage = () => {
                 autoHideDuration={4000}
                 onClose={handleSnackbarClose}
             >
-                <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
-                    You have successfully accepted the invitation. Redirecting to the dashboard...
+                <Alert onClose={handleSnackbarClose} severity={snackStatus ? "success" : "error"} sx={{ width: '100%' }}>
+                    {snackStatus ?
+                        "You have successfully accepted the invitation. Redirecting to the dashboard..." :
+                        "Failed to accept the invitation. Please try again or contact support for assistance."
+                    }
                 </Alert>
             </Snackbar>
         </Container >
