@@ -1,0 +1,15 @@
+/* Default setup for when the width is 1280px */
+.react-datepicker {
+    transform: scale(0.8);
+    margin-top: -26px;
+    margin-bottom: -26px;
+}
+
+/* Override styles for widths 1366px and above */
+@media (min-width: 1366px) {
+    .react-datepicker {
+        transform: scale(1);
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}
