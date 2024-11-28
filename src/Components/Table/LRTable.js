@@ -98,6 +98,7 @@ export default function LRTable() {
         deleteLrByid,
         setLr,
         updateLr,
+        removeLrStateById,
         fetchDocumentData,
         createLrByDocId,
         value,
@@ -191,6 +192,7 @@ export default function LRTable() {
                             lr={lr}
                             updateLr={updateLr}
                             setLr={setLr}
+                            removeLrStateById={removeLrStateById}
                             currentDocument={currentDocument}
                             createLrByDocId={createLrByDocId}
                             fetchDocumentData={fetchDocumentData}

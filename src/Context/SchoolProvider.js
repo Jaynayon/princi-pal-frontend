@@ -382,6 +382,10 @@ export const SchoolProvider = ({ children }) => {
         isAdding && (setLr(prevRows => [newLr, ...prevRows]))
     }, [objectCodes, formatDate]);
 
+    const removeLrStateById = useCallback((idToRemove) => {
+        setLr((prevState) => prevState.filter((item) => item.id !== idToRemove));
+    }, []);
+
     useEffect(() => {
         // Function to check if the document is editable
         const isDocumentEditable = (docYear, docMonth) => {
@@ -454,6 +458,7 @@ export const SchoolProvider = ({ children }) => {
             year, setYear,
             months, years,
             lr, setLr, updateLr,
+            removeLrStateById,
             jev, setJev, updateJev,
             currentDocument, setCurrentDocument,
             emptyDocument,

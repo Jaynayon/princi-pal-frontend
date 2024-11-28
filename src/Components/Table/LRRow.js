@@ -32,6 +32,7 @@ const LRRow = memo((props) => {
         deleteLrByid,
         setLr,
         updateLr,
+        removeLrStateById,
         createLrByDocId,
         currentDocument,
         fetchDocumentData,
@@ -92,8 +93,6 @@ const LRRow = memo((props) => {
     // Fetch document data to get Document and LR; reload
     const handleNewRecordCancel = async () => {
         setIsAdding(false); //reset state to allow addFields again
-        await updateLr();
-        await fetchDocumentData();
     }
 
     //Find the index of the lr row where id == 3 and push that value to db
@@ -150,8 +149,10 @@ const LRRow = memo((props) => {
         if (isAdding && value === 0) { // applies only to LR & RCD tab: value = 0
             setError(true); // set error to true by default per LR adding
             addFields(isAdding);
+        } else {
+            removeLrStateById(3);
         }
-    }, [isAdding, addFields, value]);
+    }, [isAdding, addFields, value, removeLrStateById]);
 
     return (
         <React.Fragment>

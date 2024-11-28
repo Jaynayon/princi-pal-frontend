@@ -70,6 +70,7 @@ function SchoolPage(props) {
         year,
         month,
         setIsAdding,
+        removeLrStateById,
         isEditingRef,
         currentDocument,
         currentSchool,
@@ -141,10 +142,12 @@ function SchoolPage(props) {
     // Remove add field when going to another tab
     React.useEffect(() => {
         setIsAdding(false); //reset state to allow addFields again
+        removeLrStateById(3); // Remove input field; input field has id = 3
     }, [
         value, // Listen to "value" when changing tabs; reset isAdding
         setIsAdding,
-        createLrByDocId // Reset isAding when an LR is added
+        createLrByDocId, // Reset isAding when an LR is added
+        removeLrStateById
     ]);
 
     return (
