@@ -188,7 +188,7 @@ const ResetBudgetModal = React.memo(({ open, handleClose, handleMenuClose, curre
                                             onChange={(e) => handleInputChange(e)}
                                         />
                                         <Button
-                                            disabled={input <= 0}
+                                            disabled={input === "" || input === null || input === undefined}
                                             sx={[styles.button, { fontSize: 13, ml: 2, mb: 2, maxHeight: 35 }]}
                                             onClick={handleConfirmOpen}
                                             variant="contained"

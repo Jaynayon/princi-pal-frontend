@@ -19,7 +19,6 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
 import { Typography } from '@mui/material';
 import { useAppContext } from '../../Context/AppProvider';
 
@@ -109,16 +108,25 @@ export const ProfileTab = () => {
                     />
                 </Typography>
             </ListItemButton>
-            <Dialog open={dialogOpen} onClose={handleDialogClose}>
-                <DialogTitle>My Profile</DialogTitle>
+            <Dialog
+                aria-labelledby="profile-dialog-title"
+                open={dialogOpen}
+                onClose={handleDialogClose}
+            >
+                <DialogTitle id="profile-dialog-title">My Profile</DialogTitle>
                 <DialogContent>
-                    <Stack spacing={2} margin={2} direction="row" alignItems="center">
-                        <Avatar sx={{ bgcolor: currentUser.avatar, width: 90, height: 90, bottom: 160 }} alt="User Avatar"> </Avatar>
+                    <Stack spacing={2} margin={2} direction="row">
+                        <AccountCircleIcon
+                            sx={{
+                                color: currentUser.avatar,
+                                width: 90, height: 90
+                            }}
+                        />
                         <Stack spacing={2}>
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="username-field"
+                                id="username-profile-field"
                                 label="Username"
                                 defaultValue={currentUser.username}
                                 margin="normal"
@@ -133,7 +141,7 @@ export const ProfileTab = () => {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="first-name-field"
+                                id="first-name-profile-field"
                                 label="First Name"
                                 defaultValue={currentUser.fname + " "}
                                 margin="normal"
@@ -148,7 +156,7 @@ export const ProfileTab = () => {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="middle-name-field"
+                                id="middle-name-profile-field"
                                 label="Middle Name"
                                 defaultValue={currentUser.mname + " "}
                                 margin="normal"
@@ -163,7 +171,7 @@ export const ProfileTab = () => {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="last-name-field"
+                                id="last-name-profile-field"
                                 label="Last Name"
                                 defaultValue={currentUser.lname}
                                 margin="normal"
@@ -178,7 +186,7 @@ export const ProfileTab = () => {
                             <TextField
                                 sx={{ width: '100%' }}
                                 disabled
-                                id="email-field"
+                                id="email-profile-field"
                                 label="Email"
                                 defaultValue={currentUser.email}
                                 margin="normal"
@@ -192,7 +200,7 @@ export const ProfileTab = () => {
                             />
                             <TextField
                                 disabled
-                                id="role-field"
+                                id="role-profile-field"
                                 label="Role"
                                 defaultValue={currentUser.position}
                                 margin="normal"

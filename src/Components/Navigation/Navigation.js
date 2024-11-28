@@ -24,6 +24,7 @@ import CustomizedSwitches from "./CustomizedSwitches";
 import NavigationSearchBar from "./NavigationSearchBar";
 import NotificationTab from './NotificationTab';
 import EmailVerificationModal from "../Modal/EmailVerificationModal";
+import { useAppContext } from "../../Context/AppProvider";
 
 const drawerWidth = 220;
 
@@ -104,7 +105,8 @@ const sendVerificationEmail = async (email) => {
 };
 
 export default function Navigation({ children }) {
-  const { list, setSelected, selected, open, toggleDrawer, navStyle, mobileMode, currentUser } = useNavigationContext();
+  const { currentUser, fetchCurrentUser } = useAppContext();
+  const { list, setSelected, selected, open, toggleDrawer, navStyle, mobileMode } = useNavigationContext();
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [, setIsVerified] = useState(false);
@@ -217,7 +219,10 @@ export default function Navigation({ children }) {
                     {displayTitle(selected)}
                   </Typography>
                   <NavigationSearchBar />
-                  <NotificationTab />
+                  <NotificationTab
+                    currentUser={currentUser}
+                    fetchCurrentUser={fetchCurrentUser}
+                  />
                 </Toolbar>
               </AppBar>
 

@@ -14,7 +14,7 @@ import { transformSchoolText } from '../Navigation/Navigation';
 // import { useNavigationContext } from '../Context/NavigationProvider';
 
 // Current document is passed by value to allow reusability for AnnualTab
-export default function BudgetConfirmModal({ open, handleClose, handleCloseParent = null, value }) {
+export default function BudgetConfirmModal({ open, handleClose, handleCloseParent, value }) {
     const { currentSchool, year, fetchDocumentData, initializeDocuments } = useSchoolContext();
 
     const budgetPerMonth = Number((value / 12).toFixed(2));
@@ -33,9 +33,7 @@ export default function BudgetConfirmModal({ open, handleClose, handleCloseParen
             console.error('Error in handleOnClick:', error);
         } finally {
             handleClose();
-            if (typeof handleCloseParent === 'function') {
-                handleCloseParent();
-            }
+            handleCloseParent();
         }
     }
 
