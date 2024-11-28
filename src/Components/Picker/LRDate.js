@@ -3,6 +3,7 @@ import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 import { useSchoolContext } from "../../Context/SchoolProvider";
+import "./LRDate.css";
 
 // Custom input component using forwardRef
 const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
@@ -68,7 +69,7 @@ export default function LRDate({ rowId, colId, selected, onChange }) {
                     style={{
                         margin: 10,
                         display: "flex",
-                        justifyContent: "center",
+                        justifyContent: "center"
                     }}
                 >
                     <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled}>

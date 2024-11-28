@@ -57,7 +57,7 @@ const emptyDocument = {
     headAccounting: ""
 }
 
-export default function BudgetAllocationContent() {
+export default function BudgetAllocationContent({ handleCloseParent }) {
     const { month, months, year, currentSchool, jev, getDocumentBySchoolIdYear } = useSchoolContext();
     const [documentsByYear, setDocumentsByYear] = React.useState([]);
     const [input, setInput] = React.useState(0);
@@ -285,6 +285,7 @@ export default function BudgetAllocationContent() {
             <BudgetConfirmModal
                 open={confirmOpen}
                 handleClose={handleConfirmClose}
+                handleCloseParent={handleCloseParent}
                 value={input || 0} />
         </React.Fragment >
     );

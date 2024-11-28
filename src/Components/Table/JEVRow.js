@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TableCell, TableRow } from "@mui/material";
 import { useSchoolContext } from '../../Context/SchoolProvider';
 import Box from '@mui/material/Box';
@@ -6,12 +6,7 @@ import Box from '@mui/material/Box';
 
 function JEVRow(props) {
     const { page, rowsPerPage, columns } = props;
-    const [editingCell, setEditingCell] = useState({ colId: null, rowId: null });
     const { jev } = useSchoolContext();
-
-    const handleCellClick = (colId, rowId, event) => {
-        setEditingCell({ colId, rowId });
-    };
 
     const formatNumberDisplay = (number, colId, rowId) => {
         //if (typeof number !== 'number') return ''; // Handle non-numeric values gracefully
@@ -40,7 +35,6 @@ function JEVRow(props) {
                                                 maxWidth: column.maxWidth,
                                             }
                                         ]}
-                                        onClick={(event) => handleCellClick(column.id, row.id, event)}
                                     >
                                         {/*Amount field*/}
                                         {column.id === "amount" ?
@@ -85,8 +79,6 @@ function JEVRow(props) {
 
 const styles = {
     cell: {
-        fontFamily: "Mulish",
-        //fontWeight: "bold",
         height: "35px",
     },
     inputStyling: {
