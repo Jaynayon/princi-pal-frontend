@@ -32,7 +32,7 @@ export default function BudgetAllocationModal({ open, handleClose }) {
                                 noWrap>
                                 Budget Allocation
                             </Typography>
-                            <BudgetAllocationContent />
+                            <BudgetAllocationContent handleCloseParent={handleClose} />
                         </Box>
                     </Paper>
                 </Fade>
