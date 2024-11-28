@@ -83,17 +83,10 @@ export default function JEVTable() {
     useEffect(() => {
         let intervalIdJev = null;
 
-        const updateJEVData = () => {
-            // Fetch data if user is not adding, editing, or searching
-            if (!isAdding && !isEditingRef.current && !isSearchingRef.current) {
-                updateJev().catch(error => console.error('Error fetching JEV data:', error));
-            }
-        };
-
         // Check if user is in the school tab or dashboard
         if (stableSchools.find(school => school.name === stableSelected) || stableSelected === "Dashboard") {
-            updateJEVData();  // Initial fetch
-            intervalIdJev = setInterval(updateJEVData, 10000);  // Set interval for every 10 seconds
+            updateJev();  // Initial fetch
+            intervalIdJev = setInterval(updateJev, 10000);  // Set interval for every 10 seconds
         }
 
         // Cleanup function to clear interval
