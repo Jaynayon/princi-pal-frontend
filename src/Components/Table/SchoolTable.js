@@ -50,7 +50,7 @@ export default function SchoolTable(props) {
     const [rowsPerPage, setRowsPerPage] = useState(4);
     const [schools, setSchools] = useState([]);
     const [deleteAnchorEl, setDeleteAnchorEl] = useState(null);
-    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [selectedId, setSelectedId] = useState(null);
     const [input, setInput] = useState('');
 
     const handleModalOpen = () => {
@@ -67,12 +67,12 @@ export default function SchoolTable(props) {
 
     const handleMenuClose = useCallback(() => {
         setDeleteAnchorEl(null);
-        setSelectedIndex(null);
+        setSelectedId(null);
     }, []);
 
-    const handleDeleteOpen = (event, index) => {
+    const handleDeleteOpen = (event, id) => {
         setDeleteAnchorEl(event.currentTarget);
-        setSelectedIndex(index);
+        setSelectedId(id);
     };
 
     const handleInputChange = (event) => {
@@ -220,14 +220,14 @@ export default function SchoolTable(props) {
                                                     <Button
                                                         aria-controls={`principal-button-delete-${rowIndex}`}
                                                         aria-haspopup="true"
-                                                        onClick={(event) => handleDeleteOpen(event, rowIndex)}
+                                                        onClick={(event) => handleDeleteOpen(event, row.id)}
                                                     >
                                                         <MoreHorizIcon />
                                                     </Button>
                                                     <Menu
                                                         id={`principal-menu-delete-${rowIndex}`}
                                                         anchorEl={deleteAnchorEl}
-                                                        open={Boolean(deleteAnchorEl && selectedIndex === rowIndex)}
+                                                        open={Boolean(deleteAnchorEl && selectedId === row.id)}
                                                         onClose={handleMenuClose}
                                                     >
                                                         <MenuItem onClick={() => setOpenReset(true)}>Reset</MenuItem>
@@ -248,7 +248,7 @@ export default function SchoolTable(props) {
             />
             <ResetBudgetModal
                 open={openReset}
-                currentSchool={filteredRows[selectedIndex]}
+                currentSchool={filteredRows.find(row => row.id === selectedId)}
                 handleClose={handleModalResetClose}
                 handleMenuClose={handleMenuClose}
             />
