@@ -71,9 +71,7 @@ export default function JEVTable() {
     };
 
     useEffect(() => {
-        if (currentDocument === emptyDocument) {
-            setPage(0);
-        }
+        setPage(0);
     }, [currentDocument, emptyDocument]);
 
     // Memoize dependencies to prevent unnecessary re-renders
