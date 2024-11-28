@@ -40,8 +40,6 @@ const NotificationTab = ({ currentUser, fetchCurrentUser }) => {
         }
     }, [currentUser, notifications]);
 
-    console.log(notifications)
-
     useEffect(() => {
         let timeoutId;
 
