@@ -1,8 +1,6 @@
 // React imports
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import axios from 'axios';
-import { useNavigationContext } from '../../Context/NavigationProvider';
-import { useAppContext } from '../../Context/AppProvider';
 
 // Material-UI imports
 import { Box, IconButton, Badge, Menu, Typography, MenuItem, Button, Divider } from '@mui/material';
@@ -14,9 +12,7 @@ import Tab from '@mui/material/Tab';
 
 const ITEM_HEIGHT = 48;
 
-export default function NotificationTab() {
-    const { fetchCurrentUser } = useAppContext();
-    const { currentUser } = useNavigationContext();
+const NotificationTab = ({ currentUser, fetchCurrentUser }) => {
     const [notifications, setNotifications] = useState([]);
     const [error, setError] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -33,12 +29,18 @@ export default function NotificationTab() {
             const response = await axios.get(`${process.env.REACT_APP_API_URL_NOTIF}/user/${currentUser.id}/associations`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            setNotifications(response.data || []); // Ensure data or fallback to empty array
+
+            if (JSON.stringify(response.data) !== JSON.stringify(notifications)) {
+                setNotifications(response.data);
+            }
         } catch (err) {
-            console.error('Error fetching notifications:', err);
             setError('Failed to fetch notifications.');
+            setNotifications([]);
+            console.error('Error fetching notifications:', err);
         }
-    }, [currentUser]);
+    }, [currentUser, notifications]);
+
+    console.log(notifications)
 
     useEffect(() => {
         let timeoutId;
@@ -156,7 +158,7 @@ export default function NotificationTab() {
         try {
             // Filter out notifications without `hasButtons` or with `hasButtons` set to false
             const notificationsToKeep = notifications.filter(
-                (notif) => notif.hasButtons === true
+                (notif) => notif.hasButtons
             );
 
             // Send a DELETE request to remove all notifications for the current user
@@ -271,3 +273,5 @@ export default function NotificationTab() {
         </Box>
     );
 }
+
+export default memo(NotificationTab);
