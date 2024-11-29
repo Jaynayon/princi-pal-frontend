@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 
 // Material-UI imports
 import { Link } from 'react-router-dom';
@@ -61,23 +61,27 @@ const DisplayItems = memo(({ list, selected, setSelected }) => {
         return null;
     };
 
+    const handleLogoutDialogClose = useCallback(() => {
+        setLogoutDialogOpen(false);
+    }, []);
+
     return (
         <>
             {list.map((item, index) => (
                 <React.Fragment key={index}>
-                    {index > 3 && <Divider sx={styles.divider} /> /*Render divider after the Testing tab*/}
+                    {index > 3 && <Divider sx={styles.divider} /> /*Render divider after the Settings tab*/}
 
                     {index === 1 ? (
                         <DisplaySchools />
                     ) : (
                         <ListItemButton
                             key={index}
-                            component={Link}
-                            to={index < 4 && `/${item.toLowerCase()}`} // Logout modal will handle the logout route
+                            component={index < 4 ? Link : undefined} // Use undefined instead of false
+                            to={index < 4 ? `/${item.toLowerCase()}` : undefined} // Use undefined to omit the 'to' prop
                             selected={selected === item}
                             value={item}
                             onClick={() => {
-                                if (index < 4) {
+                                if (index < 4 && selected !== item) { // Only update if selection changes
                                     setSelected(item); // Only update if it's not the same value
                                 } else {
                                     setLogoutDialogOpen(true); // Open logout dialog on logout button click
@@ -103,7 +107,7 @@ const DisplayItems = memo(({ list, selected, setSelected }) => {
             {/* Logout confirmation dialog */}
             <LogoutDialog
                 open={logoutDialogOpen}
-                onClose={() => setLogoutDialogOpen(false)}
+                onClose={handleLogoutDialogClose}
             />
         </>
     );

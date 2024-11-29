@@ -9,7 +9,6 @@ import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import axios from "axios";
@@ -142,46 +141,75 @@ export default function Navigation({ children }) {
     setOpenModal(false);
   }, []);
 
+  const drawerContent = () => {
+    return (
+      <React.Fragment>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <Box sx={{ height: "75px", display: "flex", alignItems: "center" }}>
+            <IconButton
+              aria-label="open drawer"
+              onClick={toggleDrawer}
+              sx={{ color: (theme) => theme.navStyle.color, ...(open && { display: "none" }) }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+          <Toolbar sx={{ px: [0.5], width: "100%", display: !open && { display: "none" } }}>
+            <ProfileTab />
+            <IconButton onClick={toggleDrawer} sx={{ color: (theme) => theme.navStyle.color }}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </Toolbar>
+        </Box>
+        <List component="nav" sx={{ margin: "5px" }}>
+          <DisplayItems list={list} selected={selected} setSelected={setSelected} />
+        </List>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", mb: "20px" }}>
+          <CustomizedSwitches />
+        </Box>
+      </React.Fragment>
+    )
+  }
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-        <Drawer
-          variant="permanent"
-          open={open}
-          sx={{
-            "& .MuiDrawer-paper": {
-              backgroundColor: (theme) => theme.navStyle.base,
-              boxShadow: "none",
-              borderRight: "none",
-              display: mobileMode && !open ? "none" : null,
-            },
-          }}
-        >
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <Box sx={{ height: "75px", display: "flex", alignItems: "center" }}>
-              <IconButton
-                aria-label="open drawer"
-                onClick={toggleDrawer}
-                sx={{ color: (theme) => theme.navStyle.color, ...(open && { display: "none" }) }}
-              >
-                <MenuIcon />
-              </IconButton>
-            </Box>
-            <Toolbar sx={{ px: [0.5], width: "100%", display: !open && { display: "none" } }}>
-              <ProfileTab />
-              <IconButton onClick={toggleDrawer} sx={{ color: (theme) => theme.navStyle.color }}>
-                <ChevronLeftIcon />
-              </IconButton>
-            </Toolbar>
-          </Box>
-          <List component="nav" sx={{ margin: "5px" }}>
-            <DisplayItems list={list} selected={selected} setSelected={setSelected} />
-          </List>
-          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", mb: "20px" }}>
-            <CustomizedSwitches />
-          </Box>
-        </Drawer>
+        {/* Mobile or Desktop Drawer */}
+        {mobileMode ?
+          <MuiDrawer
+            anchor="left"
+            open={open}
+            onClose={toggleDrawer}
+            sx={{
+              "& .MuiDrawer-paper": {
+                backgroundColor: (theme) => theme.navStyle.base,
+                boxShadow: "none",
+                borderRight: "none"
+              },
+            }}
+          >
+            {drawerContent()}
+          </MuiDrawer>
+          :
+          <Drawer
+            variant="permanent"
+            open={open}
+            onClose={toggleDrawer}
+            sx={{
+              "& .MuiDrawer-paper": {
+                backgroundColor: (theme) => theme.navStyle.base,
+                boxShadow: "none",
+                borderRight: "none"
+              },
+            }}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile.
+            }}
+          >
+            {drawerContent()}
+          </Drawer>
+        }
         <Box
           component="main"
           sx={{
@@ -192,42 +220,49 @@ export default function Navigation({ children }) {
             overflow: "auto",
           }}
         >
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4, pl: 4 }}>
-            <Grid container spacing={3}>
-              <AppBar position="relative" open={open} sx={{ boxShadow: "none", backgroundColor: "transparent", paddingTop: "5px" }}>
-                <Toolbar sx={{ pr: "24px", color: "#C5C7CD", pl: 1 }}>
-                  <IconButton
-                    aria-label="open drawer"
-                    onClick={toggleDrawer}
-                    sx={{ display: !mobileMode ? "none" : null, color: (theme) => theme.navStyle.color }}
-                  >
-                    <MenuIcon />
-                  </IconButton>
-                  <Typography
-                    component="h1"
-                    variant="h6"
-                    color="inherit"
-                    noWrap
-                    sx={{
-                      flexGrow: 1,
-                      textAlign: "left",
-                      color: "#252733",
-                      fontWeight: "bold",
-                      width: "400px",
-                    }}
-                  >
-                    {displayTitle(selected)}
-                  </Typography>
-                  <NavigationSearchBar />
-                  <NotificationTab
-                    currentUser={currentUser}
-                    fetchCurrentUser={fetchCurrentUser}
-                  />
-                </Toolbar>
-              </AppBar>
+          <Container maxWidth={false} disableGutters>
+            <AppBar
+              position="relative"
+              open={open}
+              sx={{ boxShadow: "none", backgroundColor: "transparent", paddingTop: "5px" }}
+            >
+              <Toolbar sx={{ color: "#C5C7CD" }}>
+                <IconButton
+                  aria-label="open drawer"
+                  onClick={toggleDrawer}
+                  sx={{
+                    display: !mobileMode ? "none" : null,
+                    color: '#252733'
+                  }}
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Typography
+                  component="h1"
+                  variant="h6"
+                  color="inherit"
+                  noWrap
+                  sx={{
+                    flexGrow: 1,
+                    textAlign: "left",
+                    color: "#252733",
+                    fontWeight: "bold",
+                    width: "400px",
+                  }}
+                >
+                  {displayTitle(selected)}
+                </Typography>
+                <NavigationSearchBar />
+                <NotificationTab
+                  currentUser={currentUser}
+                  fetchCurrentUser={fetchCurrentUser}
+                />
+              </Toolbar>
+            </AppBar>
 
-              {/* Email Verification Indicator */}
-              {currentUser && !currentUser.verified && (
+            {/* Email Verification Indicator */}
+            {currentUser && !currentUser.verified && (
+              <Container>
                 <Box
                   sx={{
                     backgroundColor: "#f44336",
@@ -237,9 +272,7 @@ export default function Navigation({ children }) {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    mx: "25px",
                     mb: "20px",
-                    width: "100%",
                   }}
                 >
                   <Typography variant="body2" color="white" sx={{ flexGrow: 1 }}>
@@ -266,11 +299,11 @@ export default function Navigation({ children }) {
                       {loading ? "Sending..." : "Resend Email"}
                     </Typography>
                   </Button>
-
                 </Box>
-              )}
-              {children}
-            </Grid>
+              </Container>
+
+            )}
+            {children}
           </Container>
         </Box>
       </Box>

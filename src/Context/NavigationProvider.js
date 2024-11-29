@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
+import React, { createContext, useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAppContext } from './AppProvider';
@@ -30,13 +30,12 @@ export const NavigationProvider = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
 
-
-    const toggleDrawer = () => {
+    const toggleDrawer = useCallback(() => {
         setOpen(prevOpen => {
             prevOpenRef.current = prevOpen;
             return !prevOpen;
         });
-    };
+    }, []);
 
     const updateMobileMode = () => {
         const { innerWidth } = window;
