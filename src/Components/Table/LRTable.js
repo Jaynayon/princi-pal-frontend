@@ -199,8 +199,8 @@ export default function LRTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Grid container sx={{ mt: 1, pb: 1, overflowX: 'auto' }}>
-                <Grid item xs={12} sm={12} md={8} lg={8} >
+            <Grid container sx={{ mt: 1, pb: 1 }}>
+                <Grid item xs={12} sm={12} md={7} lg={7} >
                     <Grid container sx={{ pl: 2, pb: 1 }}>
                         <Grid item xs={6} sm={6} md={6} lg={6}>
                             <DocumentTextFields
@@ -220,7 +220,16 @@ export default function LRTable() {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={12} md={4} lg={4} sx={{ pt: 1 }}>
+                <Grid item xs={12} sm={12} md={5} lg={5} sx={{
+                    pr: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: {
+                        xs: "flex-start",
+                        sm: "flex-start",
+                        md: "flex-end"
+                    }
+                }}>
                     <TablePagination
                         name={"testtest"}
                         rowsPerPageOptions={[4, 10, 25, 100]}
