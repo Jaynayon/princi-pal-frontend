@@ -1,11 +1,16 @@
 import { TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useSchoolContext } from '../../Context/SchoolProvider';
+import { debounce } from '../../Utility/debounce';
 
 export default function LRTextField(props) {
     const { column, row, editingCell, value, setEditingCell, handleWarningOpen, setError, setAmountExceeded } = props
     const { lr, currentDocument, setLr, updateLrById } = useSchoolContext();
     const [input, setInput] = useState(value || ""); // Pass the data by value
+
+    const debouncedUpdateLrById = debounce((colId, rowId, input) => {
+        updateLrById(colId, rowId, input);
+    }, 1000);
 
     const updateRowState = (rowIndex, colId, modifiedValue) => {
         if (rowIndex !== -1) {
@@ -47,7 +52,8 @@ export default function LRTextField(props) {
         setInput(modifiedValue);
     };
 
-    const handleBlur = async (colId, rowId) => {
+
+    const handleBlur = (colId, rowId) => {
         setEditingCell(null); // Remove blue outline
 
         // Find the index of the object with matching id
@@ -80,10 +86,10 @@ export default function LRTextField(props) {
                         if (newTotalExpenses > monthlyBudget) {
                             handleWarningOpen();
                         } else {
-                            await updateLrById(colId, rowId, input);
+                            debouncedUpdateLrById(colId, rowId, input);
                         }
                     } else {
-                        await updateLrById(colId, rowId, input);
+                        debouncedUpdateLrById(colId, rowId, input);
                     }
                 } else {
                     setInput(modifiedValue);
