@@ -105,6 +105,26 @@ export default function SchoolTable(props) {
         }
     }, []);
 
+    const removePrincipal = async (schoolId) => {
+        try {
+            const response = await axios.delete(
+                `${process.env.REACT_APP_API_URL_SCHOOL}/users/principal`,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("LOCAL_STORAGE_TOKEN"))}`,
+                    },
+                    data: { schoolId }, // Include schoolId in the request body
+                }
+            );
+
+            return response?.data || null;
+        } catch (error) {
+            console.error('Error removing principal:', error);
+            return null;
+        }
+    };
+
     useEffect(() => {
         fetchSchools();
     }, [fetchSchools]);
@@ -231,6 +251,7 @@ export default function SchoolTable(props) {
                                                         onClose={handleMenuClose}
                                                     >
                                                         <MenuItem onClick={() => setOpenReset(true)}>Reset</MenuItem>
+                                                        <MenuItem onClick={() => removePrincipal(selectedId)} sx={{ color: "red" }}>Remove Principal</MenuItem>
                                                     </Menu>
                                                 </Box>
                                             </TableCell>
