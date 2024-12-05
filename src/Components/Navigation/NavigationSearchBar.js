@@ -13,6 +13,7 @@ import Avatar from "@mui/material/Avatar";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { useNavigationContext } from "../../Context/NavigationProvider";
+import { Tooltip } from "@mui/material";
 
 const NavigationSearchBar = () => {
   const { currentUser } = useNavigationContext();
@@ -31,8 +32,8 @@ const NavigationSearchBar = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        searchBoxRef.current && 
-        !searchBoxRef.current.contains(event.target) && 
+        searchBoxRef.current &&
+        !searchBoxRef.current.contains(event.target) &&
         !isDialogOpen
       ) {
         setQuery(""); // Close the search results box
@@ -191,41 +192,43 @@ const NavigationSearchBar = () => {
 
   return (
     <Box style={{ width: "400px", position: "relative" }} ref={searchBoxRef}>
-<Box
-  component="form"
-  sx={{
-    display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        gap: 2,
-        p: 1,
-  }}
->
-  {/* Search input, conditionally rendered */}
-  {isInputVisible && (
-    <InputBase
-      sx={{
-        ml: 1, // Consistent margin for spacing
-        flex: 1,
-        textAlign: "right",
-      }}
-      placeholder="Search..."
-      value={query}
-      onChange={handleInputChange}
-      inputProps={{ style: { textAlign: "right" } }}
-    />
-  )}
+      <Box
+        component="form"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 2,
+          p: 1,
+        }}
+      >
+        {/* Search input, conditionally rendered */}
+        {isInputVisible && (
+          <InputBase
+            sx={{
+              ml: 1, // Consistent margin for spacing
+              flex: 1,
+              textAlign: "right",
+            }}
+            placeholder="Search..."
+            value={query}
+            onChange={handleInputChange}
+            inputProps={{ style: { textAlign: "right" } }}
+          />
+        )}
 
-  {/* Search icon, always in the same position */}
-  <IconButton
-    color="inherit"
-    type="button"
-    sx={{ p: "10px" }}
-    onClick={handleSearchIconClick} // Toggle input field visibility
-  >
-    <SearchIcon />
-  </IconButton>
-</Box>
+        {/* Search icon, always in the same position */}
+        <Tooltip title={"Search Schools"}>
+          <IconButton
+            color="inherit"
+            type="button"
+            sx={{ p: "10px" }}
+            onClick={handleSearchIconClick} // Toggle input field visibility
+          >
+            <SearchIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
 
       {isInputVisible && query && (
         <ul

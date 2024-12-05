@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, memo } from 'react';
 import axios from 'axios';
 
 // Material-UI imports
-import { Box, IconButton, Badge, Menu, Typography, MenuItem, Button, Divider } from '@mui/material';
+import { Box, IconButton, Badge, Menu, Typography, MenuItem, Button, Divider, Tooltip } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -183,11 +183,13 @@ const NotificationTab = ({ currentUser, fetchCurrentUser }) => {
 
     return (
         <Box>
-            <IconButton color="inherit" onClick={handleMenuOpen}>
-                <Badge badgeContent={notifications.length} color="secondary">
-                    <NotificationsIcon />
-                </Badge>
-            </IconButton>
+            <Tooltip title={"Notifications"}>
+                <IconButton color="inherit" onClick={handleMenuOpen}>
+                    <Badge badgeContent={notifications.length} color="secondary">
+                        <NotificationsIcon />
+                    </Badge>
+                </IconButton>
+            </Tooltip>
             <Menu
                 id="notification-menu"
                 anchorEl={anchorEl}

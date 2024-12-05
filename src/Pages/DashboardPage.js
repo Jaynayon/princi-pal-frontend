@@ -11,7 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import Typography from '@mui/material/Typography';
 import FilterDate from '../Components/Filters/FilterDate';
 import Select from '@mui/material/Select';
-import { Box, Button, MenuItem } from '@mui/material';
+import { Box, Button, MenuItem, Tooltip } from '@mui/material';
 import { useNavigationContext } from '../Context/NavigationProvider';
 import { useSchoolContext } from '../Context/SchoolProvider';
 import { transformSchoolText } from '../Components/Navigation/Navigation';
@@ -591,21 +591,23 @@ function DashboardPage(props) {
                 {displayTitle === 'Budget Limit' && (
                     <React.Fragment>
                         <DisplayAnalytics amount={currentDocument.budgetLimit ? currentDocument.budgetLimit : '0.00'} />
-                        <Button
-                            sx={{ display: currentUser.position !== "Principal" && "none" }}
-                            onClick={() => handleOpen(title)}
-                            className={clickedButton === title ? 'clicked' : ''}
-                            style={{
-                                position: 'absolute',
-                                top: '10px',
-                                right: '10px',
-                                background: 'none',
-                                border: 'none',
-                                padding: 0
-                            }}
-                        >
-                            <EditIcon sx={{ width: '30px', height: '30px' }} />
-                        </Button>
+                        <Tooltip title={"Set Budget Limit"}>
+                            <Button
+                                sx={{ display: currentUser.position !== "Principal" && "none" }}
+                                onClick={() => handleOpen(title)}
+                                className={clickedButton === title ? 'clicked' : ''}
+                                style={{
+                                    position: 'absolute',
+                                    top: '10px',
+                                    right: '10px',
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: 0
+                                }}
+                            >
+                                <EditIcon sx={{ width: '30px', height: '30px' }} />
+                            </Button>
+                        </Tooltip>
                     </React.Fragment>
                 )}
                 {displayTitle === 'Total Balance' && (
@@ -631,7 +633,7 @@ function DashboardPage(props) {
                         textAlign: 'center',
                     }}>
                         <Button onClick={handleClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#757575', fontSize: '1.5rem', cursor: 'pointer' }}>×</Button>
-                        <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Edit {displayTitle}</h2>
+                        <h2 id="modal-modal-title" style={{ fontSize: '30px', marginBottom: '20px' }}>Set {displayTitle}</h2>
                         <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
                             <TextField
                                 type="text"
@@ -736,23 +738,25 @@ function DashboardPage(props) {
                         >
                             <FilterDate />
                             <Box style={{ paddingRight: '10px' }}>
-                                <Select
-                                    value={selectedSchool}
-                                    onChange={(event) => handleSchoolSelect(event.target.value)}
-                                    displayEmpty
-                                    inputProps={{ 'aria-label': 'Select School' }}
-                                    style={{ width: '100%', height: '40px' }}
-                                >
-                                    {loadingSchools ? (
-                                        <MenuItem disabled>Loading...</MenuItem>
-                                    ) : (
-                                        currentUser.schools.map((school) => (
-                                            <MenuItem key={school.id} value={school.id}>
-                                                {transformSchoolText(school.name)}
-                                            </MenuItem>
-                                        ))
-                                    )}
-                                </Select>
+                                <Tooltip title={"School Filter"} placement='left'>
+                                    <Select
+                                        value={selectedSchool}
+                                        onChange={(event) => handleSchoolSelect(event.target.value)}
+                                        displayEmpty
+                                        inputProps={{ 'aria-label': 'Select School' }}
+                                        style={{ width: '100%', height: '40px' }}
+                                    >
+                                        {loadingSchools ? (
+                                            <MenuItem disabled>Loading...</MenuItem>
+                                        ) : (
+                                            currentUser.schools.map((school) => (
+                                                <MenuItem key={school.id} value={school.id}>
+                                                    {transformSchoolText(school.name)}
+                                                </MenuItem>
+                                            ))
+                                        )}
+                                    </Select>
+                                </Tooltip>
                             </Box>
                         </Paper>
                     </Grid>

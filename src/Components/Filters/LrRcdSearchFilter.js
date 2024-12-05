@@ -7,8 +7,9 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { Tooltip } from '@mui/material';
 
-const SchoolSearchFilter = () => {
+const LrRcdSearchFilter = () => {
     const { setLr, currentDocument, isEditingRef, isSearchingRef } = useSchoolContext();
     const [input, setInput] = useState('');
     const [lrCopy, setLrCopy] = useState([]);
@@ -95,7 +96,9 @@ const SchoolSearchFilter = () => {
                     display: 'flex',
                 }}
             >
-                <SearchIcon sx={styles.icon} />
+                <Tooltip title={"Search LR & RCD"}>
+                    <SearchIcon sx={styles.icon} />
+                </Tooltip>
                 <TextField
                     sx={styles.input}
                     variant='standard'
@@ -121,7 +124,7 @@ const SchoolSearchFilter = () => {
     );
 }
 
-export default memo(SchoolSearchFilter);
+export default memo(LrRcdSearchFilter);
 
 const styles = {
     icon: {

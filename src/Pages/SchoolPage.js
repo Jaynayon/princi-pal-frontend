@@ -9,14 +9,15 @@ import {
     Grid,
     Box,
     Button,
-    Typography
+    Typography,
+    Tooltip
 } from '@mui/material';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import IconButton from "@mui/material/IconButton";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 import FilterDate from '../Components/Filters/FilterDate';
-import SchoolSearchFilter from '../Components/Filters/SchoolSearchFilter';
+import LrRcdSearchFilter from '../Components/Filters/LrRcdSearchFilter';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 
@@ -167,7 +168,7 @@ function SchoolPage(props) {
                         variant='outlined'>
                         <Box style={styles.header.buttons}>
                             <FilterDate />
-                            <SchoolSearchFilter />
+                            <LrRcdSearchFilter />
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: "center" }}>
                             <Typography
@@ -257,7 +258,9 @@ function SchoolPage(props) {
                                             mr: 2
                                         }}
                                     >
-                                        <SummarizeIcon />
+                                        <Tooltip title={"Summary"}>
+                                            <SummarizeIcon />
+                                        </Tooltip>
                                     </IconButton>
                                 </Box>
                             </Grid>
