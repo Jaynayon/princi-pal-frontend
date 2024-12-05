@@ -216,9 +216,11 @@ const NotificationTab = ({ currentUser, fetchCurrentUser }) => {
                     }}
                 >
                     Notifications
-                    <IconButton onClick={handleClearNotifications}>
-                        <DeleteOutlineIcon />
-                    </IconButton>
+                    <Tooltip title={"Clear Notifications"}>
+                        <IconButton onClick={handleClearNotifications}>
+                            <DeleteOutlineIcon />
+                        </IconButton>
+                    </Tooltip>
                 </Typography>
                 <Tabs
                     value={0}
