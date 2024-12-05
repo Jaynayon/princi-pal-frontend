@@ -98,7 +98,20 @@ const LRRow = memo((props) => {
     //Find the index of the lr row where id == 3 and push that value to db
     const handleNewRecordAccept = async (rowId) => {
         const rowIndex = lr.findIndex(row => row.id === rowId);
+        const newRow = lr[rowIndex]?.amount || 0;
         const newTotalExpenses = Number(lr[rowIndex].amount) + Number(currentDocument.budget);
+
+        // Validate the new row amount value
+        if (
+            Number(newRow) === 0 ||
+            newRow === "" ||
+            !newRow ||
+            Number(newRow) <= 0
+        ) {
+            setError(true);
+            return;
+        }
+
         if (!error) {
             if (newTotalExpenses > currentDocument.cashAdvance) {
                 setAmountExceeded({
@@ -120,16 +133,6 @@ const LRRow = memo((props) => {
 
         // Find the index of the object with matching id
         const rowIndex = lr.findIndex(row => row.id === rowId);
-
-        if (colId === "amount") {
-            // Replace any characters that are not digits or periods
-            modifiedValue = modifiedValue.replace(/[^0-9.]/g, '');
-            if (modifiedValue === 0 || modifiedValue === "" || !modifiedValue) {
-                setError(true);
-            } else {
-                setError(false);
-            }
-        }
 
         if (rowIndex !== -1) {
             // Copy the array to avoid mutating state directly

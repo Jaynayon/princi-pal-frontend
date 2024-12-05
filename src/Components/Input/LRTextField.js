@@ -39,7 +39,7 @@ export default function LRTextField(props) {
         if (column.id === "amount") {
             // Replace any characters that are not digits or periods
             modifiedValue = modifiedValue.replace(/[^0-9.]/g, '');
-            setError(!modifiedValue || modifiedValue === "0");
+            setError(Number(modifiedValue) === 0 || modifiedValue === "" || !modifiedValue || Number(modifiedValue) <= 0);
         } else {
             setError(false);
         }
