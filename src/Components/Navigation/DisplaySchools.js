@@ -19,6 +19,7 @@ import { transformSchoolText } from './Navigation';
 import { VerticalLine } from './DisplayItems';
 import { useNavigationContext } from '../../Context/NavigationProvider';
 import { useSchoolContext } from '../../Context/SchoolProvider';
+import { Tooltip } from '@mui/material';
 
 export default function DisplaySchools() {
     const theme = useTheme();
@@ -140,19 +141,26 @@ export default function DisplaySchools() {
                                             component={Link}
                                             to={'/schools/' + transformSchoolNameText(item.name)}
                                             selected={selected === item.name}
-                                            onClick={/*() => { setSelected(item.name) }*/() => handleSelection(index)}
-                                            sx={theme.navStyle.button}
+                                            onClick={() => handleSelection(index)}
+                                            sx={[theme.navStyle.button, { maxWidth: "140px" }]}
                                         >
-                                            <ListItemText
-                                                primary={transformSchoolText(item.name)}
-                                                primaryTypographyProps={{
-                                                    ...styles.text,
-                                                    ...(selected === item.name
-                                                        ? { color: theme.navStyle.bold, fontWeight: 'bold' }
-                                                        : { color: theme.navStyle.color }
-                                                    )
-                                                }}
-                                            />
+                                            <Tooltip title={transformSchoolText(item.name)} placement="right-end">
+                                                <ListItemText
+                                                    primary={transformSchoolText(item.name)}
+                                                    primaryTypographyProps={{
+                                                        ...styles.text,
+                                                        ...(selected === item.name
+                                                            ? { color: theme.navStyle.bold, fontWeight: 'bold' }
+                                                            : { color: theme.navStyle.color }
+                                                        ),
+                                                        sx: {
+                                                            overflow: 'hidden',
+                                                            whiteSpace: 'nowrap',
+                                                            textOverflow: 'ellipsis',
+                                                        },
+                                                    }}
+                                                />
+                                            </Tooltip>
                                         </ListItemButton>
                                     )
                                 })}
