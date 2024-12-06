@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import CustomizedTooltips from '../Tooltip/CustomizedTooltips';
 import BudgetSummary from './BudgetSummary';
+import { Tooltip } from '@mui/material';
 
 function DocumentSummary({ setOpen }) {
     const { currentDocument, setIsAdding, value, isEditable, isAdding } = useSchoolContext();
@@ -53,11 +54,13 @@ function DocumentSummary({ setOpen }) {
                     sx={{ alignSelf: "center" }}
                     onClick={handleAddButtonClick}
                 >
-                    <AddBoxIcon
-                        sx={{
-                            fontSize: 25,
-                            color: '#00ee60'
-                        }} />
+                    <Tooltip title="Add row">
+                        <AddBoxIcon
+                            sx={{
+                                fontSize: 25,
+                                color: '#00ee60'
+                            }} />
+                    </Tooltip>
                 </IconButton>
             )}
             <Grid container pb={1} >

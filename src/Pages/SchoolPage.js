@@ -214,13 +214,16 @@ function SchoolPage(props) {
                                             pr: 2
                                         }}
                                     >
-                                        <Button
-                                            disabled={exportIsLoading || currentDocument.id === 0 || !currentDocument}
-                                            variant="contained"
-                                            sx={{ backgroundColor: '#4A99D3' }}
-                                            onClick={() => exportDocumentOnClick()}
-                                        >Export
-                                        </Button>
+                                        <Tooltip title={"Export Automated Reports (LR, RCD, CDR, JEV)"}>
+                                            <Button
+                                                disabled={exportIsLoading || currentDocument.id === 0 || !currentDocument}
+                                                variant="contained"
+                                                sx={{ backgroundColor: '#4A99D3' }}
+                                                onClick={() => exportDocumentOnClick()}
+                                            >
+                                                Export
+                                            </Button>
+                                        </Tooltip>
                                     </Box>
                                 </Grid>
                             </Grid>
