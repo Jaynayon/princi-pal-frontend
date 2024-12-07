@@ -568,6 +568,17 @@ function DashboardPage(props) {
             );
         }
 
+        const getTitleColor = (title, totalBalance) => {
+            switch (title) {
+                case 'Total Expenses':
+                    return "orange";
+                case 'Budget Limit':
+                    return "#20A0F0";
+                default:
+                    return totalBalance.toFixed(2) >= 0 ? "#32b14a" : "red";
+            }
+        }
+
         if (!currentDocument) {
             return null;
         }
@@ -581,7 +592,9 @@ function DashboardPage(props) {
                     flexDirection: 'column',
                     height: 160,
                     textAlign: 'left',
-                    paddingLeft: (displayTitle === 'Total Expenses' || displayTitle === 'Budget Limit' || displayTitle === 'Total Balance') ? '30px' : '0',
+                    borderLeft: 5,
+                    borderLeftColor: getTitleColor(displayTitle, totalBalance),
+                    paddingLeft: '30px',
                 }}
             >
                 <span style={{ fontSize: 17 }}>{displayTitle}</span>
@@ -605,7 +618,7 @@ function DashboardPage(props) {
                                     padding: 0
                                 }}
                             >
-                                <EditIcon sx={{ width: '30px', height: '30px' }} />
+                                <EditIcon sx={{ color: "#20A0F0", width: '30px', height: '30px' }} />
                             </Button>
                         </Tooltip>
                     </React.Fragment>
@@ -643,7 +656,7 @@ function DashboardPage(props) {
                             />
                         </form>
                         <div style={{ marginBottom: '20px' }}>
-                            <Button onClick={handleSubmit} style={{ backgroundColor: '#19B4E5', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Save</Button>
+                            <Button onClick={handleSubmit} style={{ backgroundColor: '#20A0F0', borderRadius: '10px', color: '#fff', width: '160px', padding: '10px 0' }}>Save</Button>
                         </div>
                     </Box>
                 </Modal>
