@@ -7,7 +7,7 @@ const DashboardSummaryDetails = ({ currentDocument, month, year, type = "Monthly
     const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
 
     if (type === "Annual") {
-        totalBalance = Number(currentDocument.annualBudget - currentDocument.annualExpense);
+        totalBalance = Number(currentDocument.annualBudget - currentDocument.annualExpense) || 0;
         summaryMonth = `January to December ${year}`;
     } else {
         totalBalance = (currentDocument?.cashAdvance || 0) - (currentDocument?.budget || 0);

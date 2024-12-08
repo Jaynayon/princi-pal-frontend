@@ -105,7 +105,7 @@ const AnalyticsCardSummary = ({ title, currentDocument, month, currentUser, setC
     else if (title === 'totalBalance') displayTitle = 'Total Balance';
     else if (title === 'annualBalance') displayTitle = 'Annual Balance';
 
-    const annualBalance = Number(currentDocument.annualBudget - currentDocument.annualExpense);
+    const annualBalance = Number(currentDocument.annualBudget - currentDocument.annualExpense) || 0;
     const totalBalance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
     const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
 
