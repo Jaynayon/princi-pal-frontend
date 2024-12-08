@@ -161,7 +161,9 @@ function SchoolPage(props) {
                                 p: 2,
                                 display: 'flex',
                                 flexDirection: 'row',
-                                justifyContent: 'space-between'
+                                justifyContent: 'space-between',
+                                borderRight: 5,
+                                borderRightColor: "#803df5"
                             }
                         ]}
                         elevation={0}
