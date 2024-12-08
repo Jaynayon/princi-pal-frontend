@@ -69,7 +69,7 @@ const calculateWeeklyExpenses = (expensesData) => {
     return weeklyExpenses;
 };
 
-const ApexAnnualReport = memo(({ currentSchool, year, type }) => {
+const ApexAnnualReport = memo(({ currentSchool, currentDocument, month, year, type }) => {
     const [data, setData] = useState([]);
 
     useEffect(() => {
@@ -142,13 +142,15 @@ const ApexAnnualReport = memo(({ currentSchool, year, type }) => {
         return (
             <React.Fragment>
                 {/* Stacked bar chart Paper */}
-                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
-                    <Typography variant="h6" align="center">Annual UACS Expenditure by Month</Typography>
+                <Paper elevation={1} style={{ padding: '20px', height: 520, width: '100%' }}>
+                    <Tooltip title={"Annual Unified Accounts Code Structure Expenditure by Month"} placement='top'>
+                        <Typography variant="h6" align="center">Annual UACS Expenditure by Month</Typography>
+                    </Tooltip>
                     <ReactApexChart
                         options={stackedOptions}
                         series={data}
                         type="bar"
-                        height={350} // Adjusted height for the chart
+                        height={430} // Adjusted height for the chart
                         style={{ width: '100%' }}
                     />
                 </Paper>
@@ -157,18 +159,61 @@ const ApexAnnualReport = memo(({ currentSchool, year, type }) => {
     }
 
     if (type === "Pie Chart" && data.length > 0) {
+        const totalBalance = Number(currentDocument.annualBudget - currentDocument.annualExpense);
+        const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
+
+        const formatAmount = (value) => new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value);
+
+        const SummaryDetails = ({ description, amount, type }) => {
+            return (
+                <Typography align="left" sx={{
+                    borderBottom: '1px solid #ccc',
+                    paddingBottom: '5px',
+                    paddingTop: '5px',
+                    marginTop: '0',
+                    width: "100%",
+                    color: type === 'balance' && totalBalanceColor
+                }}>
+                    {description}: <strong>Php {formatAmount(amount)}</strong>
+                </Typography>
+            );
+        }
+
         return (
             <React.Fragment>
                 {/* Pie chart Paper, wider */}
-                <Paper elevation={1} style={{ padding: '20px', height: '420px', width: '100%' }}>
-                    <Typography variant="h6" align="center">Total Annual UACS Expenditure</Typography>
+                <Paper elevation={1} style={{ padding: '20px', height: 520, width: '100%' }}>
+                    <Tooltip title={"Total Annual Unified Accounts Code Structure Expenditure"} placement='top'>
+                        <Typography variant="h6" align="center">Total Annual UACS Expenditure</Typography>
+                    </Tooltip>
                     <ReactApexChart
                         options={pieOptions}
                         series={pieSeries}
                         type="pie"
-                        height={280}
+                        height={300}
                         style={{ width: '100%' }}
                     />
+                    <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "flex-start", px: 2, mt: 1, maxHeight: 210, overflowY: "auto", }}>
+                        <p style={{ fontWeight: 'bold', marginBottom: '5px', marginTop: '5px', fontSize: '20px' }}>Summary</p>
+                        <p style={{ paddingBottom: '5px', fontSize: '12px', marginTop: '0' }}>{`January to December ${year}`}</p>
+                        <SummaryDetails
+                            description="Annual Budget"
+                            amount={currentDocument?.annualBudget ? currentDocument.annualBudget : '0.00'}
+                        />
+                        <SummaryDetails
+                            description="Total Annual Expenses"
+                            amount={currentDocument?.annualExpense ? currentDocument.annualExpense : '0.00'}
+                        />
+                        <SummaryDetails
+                            type={"balance"}
+                            description="Total Annual Balance"
+                            amount={totalBalance.toFixed(2)}
+                        />
+                    </Box>
+
                 </Paper>
             </React.Fragment>
         );
@@ -556,13 +601,15 @@ function DashboardPage(props) {
         if (title === 'totalExpenses') displayTitle = 'Total Expenses';
         else if (title === 'budgetLimit') displayTitle = 'Budget Limit';
         else if (title === 'totalBalance') displayTitle = 'Total Balance';
+        else if (title === 'annualBalance') displayTitle = 'Annual Balance';
 
+        const annualBalance = Number(currentDocument.annualBudget - currentDocument.annualExpense);
         const totalBalance = (currentDocument.cashAdvance || 0) - (currentDocument.budget || 0);
         const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
 
         const DisplayAnalytics = ({ amount, type }) => {
             return (
-                <p style={{ fontSize: '2.0rem', fontWeight: 'bold', color: type === "balance" && totalBalanceColor }}>
+                <p style={{ fontSize: 'clamp(1.5rem, 2vw, 1.9rem)', fontWeight: 'bold', color: type === "balance" && totalBalanceColor }}>
                     Php {formatAmount(amount)}
                 </p>
             );
@@ -574,8 +621,23 @@ function DashboardPage(props) {
                     return "orange";
                 case 'Budget Limit':
                     return "#20A0F0";
+                case 'Annual Balance':
+                    return totalBalance.toFixed(2) >= 0 ? "#803df5" : "red";
                 default:
                     return totalBalance.toFixed(2) >= 0 ? "#32b14a" : "red";
+            }
+        }
+
+        const getTooltipContent = (title) => {
+            switch (title) {
+                case 'Total Expenses':
+                    return `Total LR & RCD expenses for the month of ${month}.`;
+                case 'Budget Limit':
+                    return `Threshold to notify users when Total Expenses for ${month} exceed this limit.`;
+                case 'Annual Balance':
+                    return "Remaining balance for the entire year after expenses.";
+                default:
+                    return "Remaining balance from your monthly cash advance after expenses.";
             }
         }
 
@@ -597,7 +659,9 @@ function DashboardPage(props) {
                     paddingLeft: '30px',
                 }}
             >
-                <span style={{ fontSize: 17 }}>{displayTitle}</span>
+                <Tooltip title={getTooltipContent(displayTitle)} placement='top'>
+                    <span style={{ fontSize: 17 }}>{displayTitle}</span>
+                </Tooltip>
                 {displayTitle === 'Total Expenses' && (
                     <DisplayAnalytics amount={currentDocument.budget ? currentDocument.budget : '0.00'} />
                 )}
@@ -626,7 +690,9 @@ function DashboardPage(props) {
                 {displayTitle === 'Total Balance' && (
                     <DisplayAnalytics amount={totalBalance.toFixed(2)} type="balance" />
                 )}
-
+                {displayTitle === 'Annual Balance' && (
+                    <DisplayAnalytics amount={annualBalance.toFixed(2)} type="balance" />
+                )}
                 <Modal
                     open={open && clickedButton === title}
                     onClose={handleClose}
@@ -804,19 +870,28 @@ function DashboardPage(props) {
                             marginTop: "-15px",
                         }}>
                         <Grid container >
-                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                            <Grid item xs={12} md={6} lg={3} sx={{ padding: '5px' }}>
                                 {renderEditableCard('totalExpenses')}
                             </Grid>
-                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                            <Grid item xs={12} md={6} lg={3} sx={{ padding: '5px' }}>
                                 {renderEditableCard('budgetLimit')}
                             </Grid>
-                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                            <Grid item xs={12} md={6} lg={3} sx={{ padding: '5px' }}>
                                 {renderEditableCard('totalBalance')}
+                            </Grid>
+                            <Grid item xs={12} md={6} lg={3} sx={{ padding: '5px' }}>
+                                {renderEditableCard('annualBalance')}
                             </Grid>
                         </Grid>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
                         <Grid container >
+                            <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
+                                <ApexAnnualReport type="Stacked Bar" currentSchool={currentSchool} year={year} />
+                            </Grid>
+                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
+                                <ApexAnnualReport type="Pie Chart" currentSchool={currentSchool} currentDocument={currentDocument} month={month} year={year} />
+                            </Grid>
                             <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
                                 <Paper
                                     sx={{
@@ -833,12 +908,7 @@ function DashboardPage(props) {
                             <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
                                 {renderSummaryCard()}
                             </Grid>
-                            <Grid item xs={12} md={8} lg={8} sx={{ padding: '5px' }}>
-                                <ApexAnnualReport type="Stacked Bar" currentSchool={currentSchool} year={year} />
-                            </Grid>
-                            <Grid item xs={12} md={4} lg={4} sx={{ padding: '5px' }}>
-                                <ApexAnnualReport type="Pie Chart" currentSchool={currentSchool} year={year} />
-                            </Grid>
+
                         </Grid>
                     </Grid>
                 </Grid>
