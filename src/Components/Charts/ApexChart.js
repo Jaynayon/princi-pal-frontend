@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 
@@ -132,12 +132,16 @@ const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
         uacsData.length === 0 ? (
             <Typography variant="body1">No data available.</Typography>
         ) : (
-            <div>
+            <Box>
+                <Tooltip title={"Total Monthly Unified Accounts Code Structure Expenditure"} placement='top'>
+                    <Typography variant="h6" align="center">Total Monthly UACS Expenditure</Typography>
+                </Tooltip>
                 <ReactApexChart
                     options={generateOptions(budgetToUse, maxExpense, chartType, categories)}
                     series={generateSeries()}
                     type={chartType}
                     height={350}
+                    style={{ width: '100%' }}
                 />
 
                 {/* Container for x-axis labels and dropdown */}
@@ -163,7 +167,7 @@ const ApexChart = ({ uacsData = [], budgetLimit, type }) => {
                         ))}
                     </select>
                 </div>
-            </div>
+            </Box>
         )
     );
 };
