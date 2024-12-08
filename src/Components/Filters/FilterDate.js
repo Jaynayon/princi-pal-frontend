@@ -13,6 +13,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import IconButton from '@mui/material/IconButton';
 import Popover from '@mui/material/Popover';
 import { useSchoolContext } from '../../Context/SchoolProvider';
+import { Tooltip } from '@mui/material';
 
 export default function FilterDate() {
     const theme = useTheme();
@@ -105,12 +106,14 @@ export default function FilterDate() {
     return (
         <React.Fragment>
             <Box>
-                <Button onClick={handleClick}>
-                    <SortIcon sx={styles.icon} />
-                    <Typography noWrap style={styles.description}>
-                        Sort by Date
-                    </Typography>
-                </Button>
+                <Tooltip title="Navigate documents by month">
+                    <Button onClick={handleClick}>
+                        <SortIcon sx={styles.icon} />
+                        <Typography noWrap style={styles.description}>
+                            Sort by Date
+                        </Typography>
+                    </Button>
+                </Tooltip>
                 <Popover
                     id={id}
                     open={open}
