@@ -562,7 +562,7 @@ function PeoplePage(props) {
                                                                 open={Boolean(deleteAnchorEl && selectedIndex === index)}
                                                                 onClose={handleMenuClose}
                                                             >
-                                                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                                                                <MenuItem sx={{ color: "red" }} onClick={handleDelete}>Remove</MenuItem>
                                                             </Menu>
                                                         </React.Fragment>
                                                     )
@@ -582,7 +582,7 @@ function PeoplePage(props) {
                                                                 open={Boolean(deleteAnchorEl && selectedIndex === index)}
                                                                 onClose={handleMenuClose}
                                                             >
-                                                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                                                                <MenuItem sx={{ color: "red" }} onClick={handleDelete}>Remove</MenuItem>
                                                             </Menu>
                                                         </React.Fragment>
                                                     )
@@ -612,8 +612,8 @@ function PeoplePage(props) {
                 onClose={cancelDelete}
                 onConfirm={confirmDelete}
                 onCancel={cancelDelete}
-                message={"Are you sure you want to delete?"}
-                onConfirmText={"Delete"}
+                message={"Are you sure you want to remove user?"}
+                onConfirmText={"Remove"}
                 onCancelText={"Cancel"}
             />
         </Container>
