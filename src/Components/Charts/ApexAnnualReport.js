@@ -95,7 +95,7 @@ const ApexAnnualReport = memo(({ currentSchool, currentDocument, month, year, ty
     if (type === "Pie Chart" && data.length > 0) {
         return (
             <React.Fragment>
-                <Paper elevation={1} style={{ padding: '20px', height: 520, width: '100%' }}>
+                <Paper elevation={1} style={{ padding: '20px', height: 520, width: '100%', overflow: 'hidden' }}>
                     <Tooltip title={"Total Annual Unified Accounts Code Structure Expenditure"} placement='top'>
                         <Typography variant="h6" align="center">Total Annual UACS Expenditure</Typography>
                     </Tooltip>
