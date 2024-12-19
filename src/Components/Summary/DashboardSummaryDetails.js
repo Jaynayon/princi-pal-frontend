@@ -5,6 +5,12 @@ const DashboardSummaryDetails = ({ currentDocument, month, year, type = "Monthly
     let totalBalance;
     let summaryMonth;
     const totalBalanceColor = totalBalance < 0 ? 'red' : 'black';
+    const budget = type === "Annual"
+        ? currentDocument?.annualBudget || '0.00'
+        : currentDocument?.budget || '0.00';
+    const expenses = type === "Annual"
+        ? currentDocument?.annualExpense || '0.00'
+        : currentDocument?.budgetLimit || '0.00'
 
     if (type === "Annual") {
         totalBalance = Number(currentDocument.annualBudget - currentDocument.annualExpense) || 0;
@@ -41,11 +47,11 @@ const DashboardSummaryDetails = ({ currentDocument, month, year, type = "Monthly
             <Typography align="left" sx={{ px: '20px', pb: '10px', marginTop: '0', fontSize: '12px' }}>{summaryMonth}</Typography>
             <SummaryDetails
                 description={type === "Annual" ? "Annual Budget" : "Total Monthly Budget"}
-                amount={currentDocument?.budget ? currentDocument.budget : '0.00'}
+                amount={budget}
             />
             <SummaryDetails
                 description={type === "Annual" ? "Total Annual Expenses" : "Total Budget Limit"}
-                amount={currentDocument?.budgetLimit ? currentDocument.budgetLimit : '0.00'}
+                amount={expenses}
             />
             <SummaryDetails
                 type="balance"

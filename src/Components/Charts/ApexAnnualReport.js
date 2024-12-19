@@ -106,7 +106,7 @@ const ApexAnnualReport = memo(({ currentSchool, currentDocument, month, year, ty
                         height={300}
                         style={{ width: '100%' }}
                     />
-                    <Box sx={{ height: 210, overflowY: "auto" }}>
+                    <Box sx={{ height: 180, overflowY: "auto" }}>
                         <DashboardSummaryDetails
                             type={"Annual"}
                             currentDocument={currentDocument}
